@@ -31,6 +31,10 @@ function crestHtml(v,size=48){
 function arm(img){if(!img||img.dataset.c54==='1')return;img.dataset.c54='1';img.onerror=()=>{const s=img.nextElementSibling;if(s){img.style.display='none';s.style.display='grid'}}}
 function hydrate(root=document){
  root.querySelectorAll?.('.c54-crest img').forEach(arm);
+ root.querySelectorAll?.('#clubPreview .club-badge').forEach(el=>{
+   const sel=document.getElementById('clubSelect'),c=sel?window.clubByName?.(sel.value):null;
+   if(c)el.outerHTML=crestHtml(c,60);
+ });
  root.querySelectorAll?.('.v3-logo-fallback[data-club-id],.c52-crest[data-club-id]').forEach(el=>{
    const id=el.dataset.clubId,size=parseInt(el.style.width)||48;
    if(id&&CRESTS[id]){const c=window.CAREER24_CANONICAL_DB?.clubs?.find(x=>x.id===id)||{id,canonicalId:id,name:el.getAttribute('title')||el.textContent};el.outerHTML=crestHtml(c,size)}
