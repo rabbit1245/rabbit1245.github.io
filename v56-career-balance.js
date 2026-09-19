@@ -259,8 +259,9 @@ window.calcAwards=function(result,c,r){
   else if(pos==='GK')ballonGate=apps>=28&&rating>=7.60&&clean>=Math.max(13,apps*.32);
   const ballonContext=contFinal||natFinal||(leagueWin&&prestige>=84)||ga>=35;
   const titlePts=(leagueWin?8:0)+(cupWin?3:0)+(contWin?14:0)+(natWin?16:0);
-  const ballonScore=rating*10+Math.min(40,ga*1.25)+titlePts+prestige*.10+N(game.ovr)*.12;
-  if(ballonGate&&ballonContext&&ballonScore>=128)add('발롱도르',100);
+  const ballonImpact=(attack||mid)?Math.min(40,ga*1.25):(pos==='DM'||defender)?Math.min(38,(def/Math.max(1,apps))*16+clean*.3):pos==='GK'?Math.min(38,clean*2+N(s.savePct)*.08):0;
+  const ballonScore=rating*10+ballonImpact+titlePts+prestige*.10+N(game.ovr)*.12;
+  if(ballonGate&&ballonContext&&ballonScore>=132)add('발롱도르',100);
   return out;
 };
 try{calcAwards=window.calcAwards}catch(_){}
@@ -321,6 +322,13 @@ window.generateOffers=function(){
   return offers;
 };
 try{generateOffers=window.generateOffers}catch(_){}
+
+// ---------- keep V5.6 stamp after every legacy render ----------
+const prevRenderGame56=window.renderGame;
+if(typeof prevRenderGame56==='function'){
+  window.renderGame=function(){const out=prevRenderGame56.apply(this,arguments);stamp56();return out};
+  try{renderGame=window.renderGame}catch(_){}
+}
 
 // ---------- visible version stamp and diagnostics ----------
 function stamp56(){
