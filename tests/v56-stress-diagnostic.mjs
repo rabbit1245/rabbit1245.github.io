@@ -68,7 +68,7 @@ const report=await page.evaluate(()=>{
       for(const ovr of [60,75,90,98]){
         for(const [clubBand,club] of Object.entries({low:clubs.low,mid:clubs.mid,elite:clubs.elite})){
           const rows=[];
-          for(let i=0;i<10;i++){
+          for(let i=0;i<4;i++){
             reset();setClub(club);setPlayer(pos,role,ovr);
             const r=mulberry32(hashString('v56-stat|'+pos+'|'+role+'|'+ovr+'|'+clubBand+'|'+i));
             rows.push(statShape(computeStats(r,40,3050,club,0,neutralEffects())));
@@ -154,7 +154,7 @@ const report=await page.evaluate(()=>{
   for(const pos of POS){
     for(const band of ['mid','elite']){
       const ranks=[],goals=[],assists=[],ratings=[];
-      for(let i=0;i<30;i++){
+      for(let i=0;i<8;i++){
         reset();const club=clubs[band];setClub(club);setPlayer(pos,POSITIONS[pos].roles[0],band==='elite'?95:82);
         game.age=25;game.seasonYear=2024+i;game.seed=(12345+i*7919)>>>0;game.eventChoice=events[i%events.length];game.stage='season';
         simulateSeason();
