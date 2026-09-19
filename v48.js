@@ -15,7 +15,7 @@ function safeUrl(u){
   try{
     const x=new URL(u,location.href);
     if(x.origin===location.origin && /\.(png|webp|svg)(\?|$)/i.test(x.pathname))return x.href;
-    if(/^https:\/\/cdn\.sofifa\.(net|com)\/teams\/\d+\/\d+\.png(?:\?.*)?$/i.test(u))return u;
+    if(/^https:\/\/cdn\.sofifa\.(net|com)\/(?:teams\/\d+|meta\/team\/\d+)\/\d+\.png(?:\?.*)?$/i.test(u))return u;
   }catch(_){}
   return'';
 }
