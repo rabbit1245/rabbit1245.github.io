@@ -22,52 +22,136 @@ jobs:
             "https://raw.githubusercontent.com/inboxpraveen/FIFA-Player-Recomendation/main/new-data/male_players.csv" \
             -o data/male_players.csv
 
-      - name: Build deterministic football crest index
+      - name: Build local canonical club crests
         run: |
-          rm -rf /tmp/football-logos
+          rm -rf /tmp/football-logos assets/crests
           git clone --depth 1 https://github.com/JoseArroyave/football-logos.git /tmp/football-logos
+          mkdir -p assets/crests
           python - <<'PY'
-          import json, unicodedata, re
+          import json, re, shutil, unicodedata
+          from difflib import SequenceMatcher
           from pathlib import Path
 
+          html = Path("index.html").read_text(encoding="utf-8")
           root = Path("/tmp/football-logos/logos")
-          out = Path("data/logos.json")
-          entries = {}
-          plain = {}
+          out = Path("data/canonical-logos.json")
+          diag = Path("data/crest-diagnostics.json")
 
-          def norm(s):
+          country_map = {
+              "대한민국":"south-korea","일본":"japan","중국":"china","미국":"united-states",
+              "브라질":"brazil","이탈리아":"italy","프랑스":"france","스페인":"spain",
+              "독일":"germany","영국":"england","포르투갈":"portugal","벨기에":"belgium",
+              "네덜란드":"netherlands","튀르키예":"turkey"
+          }
+
+          manual = {
+              "Ulsan HD":"Ulsan_HD_FC",
+              "Gimcheon Sangmu":"Gimcheon_Sangmu_FC",
+              "Jeju United":"Jeju_SK_FC",
+              "Jeonbuk Hyundai Motors":"Jeonbuk",
+              "Urawa Red Diamonds":"Urawa_Reds",
+              "Brighton & Hove Albion":"Brighton",
+              "Wolverhampton Wanderers":"Wolverhampton_Wanderers",
+              "Athletic Bilbao":"Athletic_Club_Bilbao",
+              "Celta Vigo":"Celta",
+              "Real Valladolid":"Valladolid",
+              "Paris Saint-Germain":"Paris_Saint-Germain",
+              "Bayern Munich":"Bayern_München",
+              "Bayer Leverkusen":"Bayer_Leverkusen",
+              "Borussia Monchengladbach":"Borussia_Mönchengladbach",
+              "Koln":"Köln",
+              "Sporting CP":"Sporting_CP",
+              "PSV Eindhoven":"PSV",
+              "AZ Alkmaar":"AZ",
+              "Istanbul Basaksehir":"İstanbul_Başakşehir"
+          }
+
+          generic = {
+              "fc","cf","afc","sc","ac","as","fk","sk","sv","club","football","futbol",
+              "calcio","soccer","city","town"
+          }
+
+          def ascii_text(s):
               s = unicodedata.normalize("NFD", s)
-              s = "".join(ch for ch in s if unicodedata.category(ch) != "Mn")
-              s = s.lower().replace("&", "and")
-              return re.sub(r"[^a-z0-9]+", "", s)
+              return "".join(ch for ch in s if unicodedata.category(ch) != "Mn")
 
-          for country_dir in root.iterdir():
-              if not country_dir.is_dir():
-                  continue
-              country = country_dir.name
-              for p in country_dir.glob("*.svg"):
-                  stem = p.stem
-                  url = f"https://cdn.jsdelivr.net/gh/JoseArroyave/football-logos@main/logos/{country}/{p.name}"
-                  entries[f"{country}|{stem}"] = url
-                  k = norm(stem)
-                  plain.setdefault(k, []).append(url)
+          def tokens(s):
+              s = ascii_text(s).lower().replace("&"," and ")
+              s = re.sub(r"[_./-]+"," ",s)
+              s = re.sub(r"\b(18|19|20)\d{2}\b"," ",s)
+              parts = [x for x in re.findall(r"[a-z0-9]+", s) if x not in generic]
+              return parts
 
-          # Globally-unique filename aliases are safe fallbacks.
-          for k, urls in plain.items():
-              if len(urls) == 1:
-                  entries[f"*|{k}"] = urls[0]
+          def compact(s):
+              return "".join(tokens(s))
 
-          out.write_text(json.dumps(entries, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
-          print("crest index entries:", len(entries))
-          if len(entries) < 2000:
-              raise SystemExit("crest index unexpectedly small")
+          def score(a,b):
+              ta,tb=tokens(a),tokens(b)
+              ca,cb="".join(ta),"".join(tb)
+              if not ca or not cb: return 0
+              if ca==cb: return 1.0
+              seq=SequenceMatcher(None,ca,cb).ratio()
+              sa,sb=set(ta),set(tb)
+              jac=len(sa&sb)/max(1,len(sa|sb))
+              contain = 0.93 if (ca in cb or cb in ca) and min(len(ca),len(cb))>=5 else 0
+              return max(seq*0.78+jac*0.22,contain)
+
+          clubs=[]
+          pat=re.compile(r'\{"native":"([^"]+)","display":"([^"]+)","id":"([^"]+)","leagueId":"([^"]+)","country":"([^"]+)","tier":(\d+)')
+          for m in pat.finditer(html):
+              clubs.append({"native":m.group(1),"display":m.group(2),"id":m.group(3),"country":m.group(5),"tier":int(m.group(6))})
+
+          result={}
+          diagnostics=[]
+          for c in clubs:
+              folder=country_map.get(c["country"])
+              if not folder: continue
+              d=root/folder
+              if not d.exists(): continue
+              files=list(d.glob("*.svg"))
+              if not files: continue
+              chosen=None; method=""; conf=0.0
+
+              alias=manual.get(c["native"])
+              if alias:
+                  p=d/(alias+".svg")
+                  if p.exists():
+                      chosen=p;method="manual";conf=1.0
+
+              if not chosen:
+                  exact=[p for p in files if compact(p.stem)==compact(c["native"])]
+                  if len(exact)==1:
+                      chosen=exact[0];method="exact";conf=1.0
+
+              if not chosen:
+                  ranked=sorted(((score(c["native"],p.stem),p) for p in files), key=lambda x:x[0], reverse=True)
+                  if ranked:
+                      best,p1=ranked[0]
+                      second=ranked[1][0] if len(ranked)>1 else 0
+                      # Country-constrained and conservative: no ambiguous guesses.
+                      if best>=0.88 and best-second>=0.055:
+                          chosen=p1;method="fuzzy-safe";conf=best
+
+              if chosen:
+                  target=Path("assets/crests")/(c["id"]+".svg")
+                  shutil.copyfile(chosen,target)
+                  result[c["id"]]=f"assets/crests/{c['id']}.svg"
+                  diagnostics.append({**c,"source":chosen.name,"method":method,"confidence":round(conf,3)})
+              else:
+                  diagnostics.append({**c,"source":None,"method":"missing","confidence":0})
+
+          out.write_text(json.dumps(result,ensure_ascii=False,separators=(",",":")),encoding="utf-8")
+          diag.write_text(json.dumps(diagnostics,ensure_ascii=False,separators=(",",":")),encoding="utf-8")
+          print("canonical clubs:",len(clubs),"local crests:",len(result))
+          if len(result)<400:
+              raise SystemExit("local crest coverage unexpectedly low")
           PY
 
-      - name: Commit local DB and crest index
+      - name: Commit local player DB and crests
         run: |
           git config user.name "career24-data-bot"
           git config user.email "actions@users.noreply.github.com"
-          git add data/male_players.csv data/logos.json
+          git add data/male_players.csv data/canonical-logos.json data/crest-diagnostics.json assets/crests
           git diff --cached --quiet && exit 0
-          git commit -m "Sync FC25 player DB and deterministic club crest index"
+          git commit -m "Sync FC25 DB and local canonical club crests"
           git push
