@@ -151,11 +151,47 @@ jobs:
               raise SystemExit("local crest coverage unexpectedly low")
           PY
 
+      - name: Build synchronous game data bundles
+        run: |
+          python - <<'PY'
+          import json, re
+          from pathlib import Path
+
+          players = Path("data/players.min.json").read_text(encoding="utf-8")
+          logos = json.loads(Path("data/canonical-logos.json").read_text(encoding="utf-8"))
+          html = Path("index.html").read_text(encoding="utf-8")
+
+          Path("data/player-db.js").write_text(
+              "window.CAREER24_BUNDLED_DB="+players+";\n",
+              encoding="utf-8"
+          )
+
+          m = re.search(r"const V27_DB=(\\{.*?\\});\\s*window\\.CAREER24_CANONICAL_DB=V27_DB", html, re.S)
+          if not m:
+              raise SystemExit("canonical DB not found")
+          db = json.loads(m.group(1))
+          aliases = {}
+          for c in db["clubs"]:
+              for name in (c.get("native"), c.get("display")):
+                  if name:
+                      aliases[name] = c["id"]
+          for name, cid in (db.get("clubAliases") or {}).items():
+              aliases[name] = cid
+
+          crest_payload = {"logos":logos,"aliases":aliases}
+          Path("data/crest-db.js").write_text(
+              "window.CAREER24_BUNDLED_CRESTS="+json.dumps(crest_payload,ensure_ascii=False,separators=(",",":"))+";\n",
+              encoding="utf-8"
+          )
+          print("player bundle bytes", Path("data/player-db.js").stat().st_size)
+          print("crest bundle bytes", Path("data/crest-db.js").stat().st_size)
+          PY
+
       - name: Commit local player DB and crests
         run: |
           git config user.name "career24-data-bot"
           git config user.email "actions@users.noreply.github.com"
-          git add data/male_players.csv data/players.min.json data/canonical-logos.json data/crest-diagnostics.json assets/crests
+          git add data/male_players.csv data/players.min.json data/player-db.js data/crest-db.js data/canonical-logos.json data/crest-diagnostics.json assets/crests
           git diff --cached --quiet && exit 0
           git commit -m "Sync FC25 DB and local canonical club crests"
           git push
