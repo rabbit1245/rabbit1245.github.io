@@ -1,0 +1,43 @@
+name: CAREER24 integrated QA
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'index.html'
+      - 'v54-integrated.js'
+      - 'data/player-db.js'
+      - 'data/crest-db.js'
+      - '.github/workflows/qa-integrated.yml'
+
+jobs:
+  qa:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: JavaScript syntax
+        run: |
+          node --check v54-integrated.js
+          node --check data/player-db.js
+          node --check data/crest-db.js
+      - name: Integrated data checks
+        run: |
+          node <<'NODE'
+          global.window=global;
+          require('./data/player-db.js');
+          require('./data/crest-db.js');
+          if (!CAREER24_BUNDLED_DB || CAREER24_BUNDLED_DB.count < 15000) throw new Error('player bundle missing');
+          if (!Array.isArray(CAREER24_BUNDLED_DB.rows) || CAREER24_BUNDLED_DB.rows.length !== CAREER24_BUNDLED_DB.count) throw new Error('player rows mismatch');
+          for (const id of ['KR1_07','EN1_01','ES1_01']) if (!CAREER24_BUNDLED_CRESTS[id]) throw new Error('missing crest '+id);
+          console.log('players',CAREER24_BUNDLED_DB.count,'crests',Object.keys(CAREER24_BUNDLED_CRESTS).length);
+          NODE
+      - name: Index wiring checks
+        run: |
+          grep -q 'data/player-db.js?v=54' index.html
+          grep -q 'data/crest-db.js?v=54' index.html
+          grep -q 'v54-integrated.js?v=1' index.html
+          ! grep -q 'v50-cache.js' index.html
+          ! grep -q 'v51-worker.js' index.html
+          ! grep -q 'v52-local-crests.js' index.html
+          ! grep -q 'v53-prebuilt-db.js' index.html
