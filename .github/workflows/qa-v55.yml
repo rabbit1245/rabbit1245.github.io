@@ -1,0 +1,58 @@
+name: CAREER24 V5.5 stable QA
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'index.html'
+      - 'v55-core.js'
+      - 'v55-data.js'
+      - 'v55-stability.js'
+      - 'tests/v55-core.test.js'
+      - '.github/workflows/qa-v55.yml'
+
+jobs:
+  qa:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: External JavaScript syntax
+        run: |
+          node --check v55-core.js
+          node --check v55-data.js
+          node --check v55-stability.js
+          node --check data/player-db.js
+      - name: Inline JavaScript syntax
+        run: |
+          python - <<'PY'
+          import re, pathlib, subprocess, tempfile
+          html=pathlib.Path('index.html').read_text(encoding='utf-8')
+          blocks=re.findall(r'<script(?![^>]*\bsrc=)[^>]*>(.*?)</script>',html,re.S|re.I)
+          print('inline scripts',len(blocks))
+          for i,src in enumerate(blocks):
+              p=pathlib.Path(f'/tmp/career24_inline_{i}.js')
+              p.write_text(src,encoding='utf-8')
+              subprocess.run(['node','--check',str(p)],check=True)
+          PY
+      - name: Turn state-machine tests
+        run: node tests/v55-core.test.js
+      - name: Built-in data tests
+        run: |
+          node <<'NODE'
+          global.window=global;
+          require('./data/player-db.js');
+          if(!CAREER24_BUNDLED_DB||CAREER24_BUNDLED_DB.count!==16161)throw new Error('built-in player count mismatch');
+          if(CAREER24_BUNDLED_DB.rows.length!==16161)throw new Error('built-in rows mismatch');
+          console.log('built-in players',CAREER24_BUNDLED_DB.count);
+          NODE
+      - name: Deployment wiring tests
+        run: |
+          grep -q 'data/player-db.js?v=54' index.html
+          grep -q 'v55-core.js?v=1' index.html
+          grep -q 'v55-data.js?v=1' index.html
+          grep -q 'v55-stability.js?v=1' index.html
+          ! grep -q 'data/crest-db.js' index.html
+          ! grep -q 'v54-integrated.js' index.html
+          ! grep -q 'v52-local-crests.js' index.html
+          ! grep -q 'v53-prebuilt-db.js' index.html
