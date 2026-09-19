@@ -94,6 +94,11 @@ try{refreshClubPreview=window.refreshClubPreview}catch(_){}
 window.ClubLogo=()=>'';try{ClubLogo=window.ClubLogo}catch(_){}
 try{clubLogoHtml=()=>''}catch(_){}
 window.CAREER24_REAL_LOGO={url:()=>'',html:()=>'',hydrate:()=>{},wiki:async()=>''};
+try{
+ const XO=XMLHttpRequest.prototype.open,XS=XMLHttpRequest.prototype.send;
+ XMLHttpRequest.prototype.open=function(method,u){this.__v55NoLogo=/wikipedia\.org\/w\/api\.php|football-logos|sofifa\.(net|com)/i.test(String(u||''));return XO.apply(this,arguments)};
+ XMLHttpRequest.prototype.send=function(){if(this.__v55NoLogo){try{this.abort()}catch(_){};return}return XS.apply(this,arguments)};
+}catch(_){}
 
 const style=document.createElement('style');
 style.textContent='.c54-crest,.c52-crest,.c49-crest,.c48-crest,.c45-real-crest,.c24-logo,.v3-logo-fallback,.club-badge-logo,.club-badge{display:none!important}.club-preview{grid-template-columns:1fr!important}.offer-club-head{display:block!important}';
