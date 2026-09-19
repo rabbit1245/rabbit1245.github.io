@@ -32,13 +32,17 @@ async function snapshotAfterNetwork(){
 }
 let saving=false;
 window.addEventListener('career24-live-db-ready',()=>{if(saving)return;const LIVE=window.CAREER24_LIVE_DB;if(LIVE?.source==='indexeddb://fc25-processed')return;saving=true;snapshotAfterNetwork().finally(()=>saving=false)});
+window.CAREER24_TRY_DB_CACHE=async function(){
+ try{
+   const payload=await get(KEY);
+   if(readyFromCache(payload)){console.log('CAREER24 fast DB cache hit',payload.players.length);return true}
+ }catch(e){console.warn('player cache read failed',e)}
+ return false;
+};
 window.CAREER24_FAST_DB_BOOT=async function(){
  const LIVE=window.CAREER24_LIVE_DB;
  if(!LIVE)return;
- try{
-   const payload=await get(KEY);
-   if(readyFromCache(payload)){console.log('CAREER24 fast DB cache hit',payload.players.length);return}
- }catch(e){console.warn('player cache read failed',e)}
+ if(await window.CAREER24_TRY_DB_CACHE())return;
  try{await window.CAREER24_RECONNECT_REAL_DB?.()}catch(e){console.error('network DB fallback failed',e)}
 };
 window.CAREER24_CLEAR_DB_CACHE=async function(){await del(KEY);setStamp('');location.reload()};
