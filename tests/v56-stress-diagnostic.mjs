@@ -15,6 +15,18 @@ await page.click('#careerStartBtn');
 await page.waitForSelector('#gameScreen.active',{timeout:10000});
 
 const report=await page.evaluate(()=>{
+  // UI itself is covered by the preceding real-browser E2E. Disable only expensive
+  // rendering/storage during bulk engine simulation so thousands of season calculations
+  // exercise the same state/stat/award/transfer logic without DOM/16k-player redraw cost.
+  window.renderGame=()=>{};try{renderGame=window.renderGame}catch(_){}
+  window.renderDevelopment=()=>{};try{renderDevelopment=window.renderDevelopment}catch(_){}
+  window.renderResultPane=()=>{};try{renderResultPane=window.renderResultPane}catch(_){}
+  window.renderTransfer=()=>{};try{renderTransfer=window.renderTransfer}catch(_){}
+  window.renderCareerPane=()=>{};try{renderCareerPane=window.renderCareerPane}catch(_){}
+  window.renderSettings=()=>{};try{renderSettings=window.renderSettings}catch(_){}
+  window.openPane=()=>{};try{openPane=window.openPane}catch(_){}
+  window.autoSave=()=>{};try{autoSave=window.autoSave}catch(_){}
+  window.toast=()=>{};try{toast=window.toast}catch(_){}
   const clone=v=>JSON.parse(JSON.stringify(v));
   const base=clone(game);
   const FIELD=['골 결정력','슈팅','드리블','볼 컨트롤','패스','크로스','스피드','피지컬','체력','헤더','태클','수비력','위치선정','판단력','시야'];
