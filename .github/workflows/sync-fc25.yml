@@ -1,0 +1,65 @@
+name: Sync FC25 local data
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/sync-fc25.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download FC25 male player database
+        run: |
+          mkdir -p data
+          curl -L --fail --retry 3 --retry-delay 2 \
+            "https://raw.githubusercontent.com/inboxpraveen/FIFA-Player-Recomendation/main/new-data/male_players.csv" \
+            -o data/male_players.csv
+
+      - name: Build exact club logo map
+        run: |
+          python - <<'PY'
+          import csv, json, re
+          from pathlib import Path
+
+          src = Path("data/male_players.csv")
+          out = Path("data/logos.json")
+          logos = {}
+
+          def pick(row, *names):
+              for name in names:
+                  value = row.get(name)
+                  if value is not None and str(value).strip():
+                      return str(value).strip()
+              return ""
+
+          pat = re.compile(r"^https://cdn\.sofifa\.(?:net|com)/teams/\d+/\d+\.png(?:\?.*)?$", re.I)
+
+          with src.open("r", encoding="utf-8-sig", newline="") as f:
+              reader = csv.DictReader(f)
+              for row in reader:
+                  club = pick(row, "club_name", "Team", "team", "Club", "club", "team_name")
+                  logo = pick(row, "club_logo_url", "club_logo", "Club Logo", "clubLogo")
+                  if club and logo and pat.match(logo):
+                      logos.setdefault(club, logo)
+
+          out.write_text(json.dumps(logos, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
+          print(f"exact logos: {len(logos)}")
+          if len(logos) < 100:
+              raise SystemExit("logo map unexpectedly small")
+          PY
+
+      - name: Commit local DB and logo map
+        run: |
+          git config user.name "career24-data-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add data/male_players.csv data/logos.json
+          git diff --cached --quiet && exit 0
+          git commit -m "Sync FC25 local player DB and exact club logos"
+          git push
