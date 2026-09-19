@@ -27,6 +27,7 @@ const report=await page.evaluate(()=>{
   window.openPane=()=>{};try{openPane=window.openPane}catch(_){}
   window.autoSave=()=>{};try{autoSave=window.autoSave}catch(_){}
   window.toast=()=>{};try{toast=window.toast}catch(_){}
+  window.simulateNpcWorld=()=>{};try{simulateNpcWorld=window.simulateNpcWorld}catch(_){}
   const clone=v=>JSON.parse(JSON.stringify(v));
   const base=clone(game);
   const FIELD=['골 결정력','슈팅','드리블','볼 컨트롤','패스','크로스','스피드','피지컬','체력','헤더','태클','수비력','위치선정','판단력','시야'];
