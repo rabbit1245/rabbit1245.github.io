@@ -12,8 +12,8 @@ function rec(v){
 }
 function url(v){const {id}=rec(v);return id&&MAP.get(id)||''}
 function html(v,size=48){
- const {c,name,r}=rec(v),label=r?.display||c?.name||c?.display||name||'CLUB',u=url(v),ini=initials(label);
- return '<div class="c52-crest" title="'+esc(label)+'" style="width:'+size+'px;height:'+size+'px">'+(u?'<img src="'+esc(u)+'?v=52" alt="'+esc(label)+' crest" loading="eager" decoding="async"><span style="display:none">'+esc(ini)+'</span>':'<span>'+esc(ini)+'</span>')+'</div>';
+ const {c,name,r,id}=rec(v),label=r?.display||c?.name||c?.display||name||'CLUB',u=url(v),ini=initials(label);
+ return '<div class="c52-crest" data-club-id="'+esc(id||'')+'" title="'+esc(label)+'" style="width:'+size+'px;height:'+size+'px">'+(u?'<img src="'+esc(u)+'?v=52" alt="'+esc(label)+' crest" loading="eager" decoding="async"><span style="display:none">'+esc(ini)+'</span>':'<span>'+esc(ini)+'</span>')+'</div>';
 }
 function arm(img){if(!img||img.dataset.c52==='1')return;img.dataset.c52='1';img.onerror=()=>{const s=img.nextElementSibling;if(s){img.style.display='none';s.style.display='grid'}}}
 function replace(el){
@@ -27,10 +27,12 @@ function fix(root=document){
  root.querySelectorAll?.('.c52-crest').forEach(el=>{
    const img=el.querySelector('img');
    if(img){arm(img);return}
+   const id=el.dataset.clubId||'';
    const name=el.getAttribute('title')||el.textContent.trim()||'CLUB';
    const size=parseInt(el.style.width)||parseInt(getComputedStyle(el).width)||48;
-   const u=url(name);
-   if(u)el.outerHTML=html(name,size);
+   const target=id?{id,canonicalId:id,name}:name;
+   const u=url(target);
+   if(u)el.outerHTML=html(target,size);
  });
  root.querySelectorAll?.('.c52-crest img').forEach(arm);
 }
