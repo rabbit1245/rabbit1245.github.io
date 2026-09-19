@@ -36,6 +36,7 @@ function markReady(players){
 }
 window.CAREER24_FAST_DB_BOOT=async function(){
  if(!LIVE)return;
+ try{if(await window.CAREER24_TRY_DB_CACHE?.())return}catch(_){}
  LIVE.state='loading';LIVE.startedAt=Date.now();
  const w=makeWorker();
  w.onmessage=async e=>{const d=e.data||{};if(!d.ok){LIVE.state='error';LIVE.error=d.error||'worker error';w.terminate();return}const players=await canonicalize(d.players||[]);markReady(players);w.terminate()};
