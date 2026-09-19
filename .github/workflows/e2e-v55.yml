@@ -11,6 +11,7 @@ on:
       - 'v55-stability.js'
       - 'v56-career-balance.js'
       - 'tests/v55-browser.test.mjs'
+      - 'tests/v56-stress-diagnostic.mjs'
       - '.github/workflows/e2e-v55.yml'
 
 jobs:
@@ -34,3 +35,12 @@ jobs:
           sleep 2
       - name: Run real browser flow
         run: node tests/v55-browser.test.mjs
+      - name: Run all-position stress diagnostics
+        run: node tests/v56-stress-diagnostic.mjs
+      - name: Upload stress report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v56-stress-report
+          path: tests/v56-stress-report.json
+          if-no-files-found: ignore
