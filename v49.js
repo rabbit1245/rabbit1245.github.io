@@ -3,6 +3,8 @@
 const VERSION='V4.9 DETERMINISTIC CRESTS';
 const INDEX=new Map();
 const UNIQUE=new Map();
+const COUNTRY_EXACT=new Map();
+const COUNTRY_SIMPLE=new Map();
 const COUNTRY={
  '대한민국':'south-korea','일본':'japan','중국':'china','미국':'united-states','브라질':'brazil',
  '이탈리아':'italy','프랑스':'france','스페인':'spain','독일':'germany','영국':'england',
@@ -13,7 +15,7 @@ const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&
 const initials=s=>String(s||'FC').replace(/\b(fc|cf|afc|sc|ac|as|fk|sk|sv|club|united|city)\b/gi,' ').trim().split(/\s+/).filter(Boolean).slice(0,3).map(x=>x[0]).join('').toUpperCase()||'FC';
 function safe(u){
  u=String(u||'').trim();
- return /^https:\/\/raw\.githubusercontent\.com\/JoseArroyave\/football-logos\/(?:refs\/heads\/)?main\/logos\/[a-z0-9-]+\/[^?#]+\.svg$/i.test(u)?u:'';
+ return /^(?:https:\/\/raw\.githubusercontent\.com\/JoseArroyave\/football-logos\/(?:refs\/heads\/)?main|https:\/\/cdn\.jsdelivr\.net\/gh\/JoseArroyave\/football-logos@main)\/logos\/[a-z0-9-]+\/[^?#]+\.svg$/i.test(u)?u:'';
 }
 function canonical(v){
  let c=typeof v==='object'&&v?v:null,name=typeof v==='string'?v:(c?.name||c?.display||c?.nativeName||'');
@@ -30,7 +32,8 @@ function lookup(v){
  for(const n of candidates){
    const n1=norm(n),n2=simplified(n);
    if(country){
-     for(const [key,url] of INDEX){if(!key.startsWith(country+'|'))continue;const stem=key.slice(country.length+1),sn=norm(stem),ss=simplified(stem);if(sn===n1||ss&&n2&&ss===n2)return safe(url)}
+     const ex=COUNTRY_EXACT.get(country),si=COUNTRY_SIMPLE.get(country);
+     const u=(ex&&ex.get(n1))||(si&&n2&&si.get(n2));if(u)return safe(u);
    }
    const u=UNIQUE.get(n1)||UNIQUE.get(n2);if(u)return safe(u);
  }
@@ -54,10 +57,16 @@ async function load(){
  try{
    const r=await fetch('data/logos.json?v=49',{cache:'force-cache'});if(!r.ok)throw new Error('HTTP '+r.status);
    const j=await r.json();
+   const simpleCandidates=new Map();
    for(const [k,u] of Object.entries(j||{})){
      if(!safe(u))continue;
-     if(k.startsWith('*|'))UNIQUE.set(k.slice(2),u);else INDEX.set(k,u);
+     if(k.startsWith('*|')){UNIQUE.set(k.slice(2),u);continue}
+     INDEX.set(k,u);
+     const cut=k.indexOf('|');if(cut<1)continue;const country=k.slice(0,cut),stem=k.slice(cut+1),n=norm(stem),sp=simplified(stem);
+     if(!COUNTRY_EXACT.has(country))COUNTRY_EXACT.set(country,new Map());COUNTRY_EXACT.get(country).set(n,u);
+     const ck=country+'|'+sp;if(sp){if(!simpleCandidates.has(ck))simpleCandidates.set(ck,[]);simpleCandidates.get(ck).push(u)}
    }
+   for(const [ck,urls] of simpleCandidates){if(urls.length!==1)continue;const cut=ck.indexOf('|'),country=ck.slice(0,cut),sp=ck.slice(cut+1);if(!COUNTRY_SIMPLE.has(country))COUNTRY_SIMPLE.set(country,new Map());COUNTRY_SIMPLE.get(country).set(sp,urls[0])}
    window.CAREER24_LOGO_V49.ready=true;window.CAREER24_LOGO_V49.count=INDEX.size+UNIQUE.size;fix(document);
    try{window.renderGame?.()}catch(_){}
  }catch(e){window.CAREER24_LOGO_V49.error=String(e?.message||e);fix(document)}
