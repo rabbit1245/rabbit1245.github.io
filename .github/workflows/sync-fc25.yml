@@ -47,7 +47,7 @@ jobs:
               country = country_dir.name
               for p in country_dir.glob("*.svg"):
                   stem = p.stem
-                  url = f"https://raw.githubusercontent.com/JoseArroyave/football-logos/main/logos/{country}/{p.name}"
+                  url = f"https://cdn.jsdelivr.net/gh/JoseArroyave/football-logos@main/logos/{country}/{p.name}"
                   entries[f"{country}|{stem}"] = url
                   k = norm(stem)
                   plain.setdefault(k, []).append(url)
