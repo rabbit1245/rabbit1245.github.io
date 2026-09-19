@@ -2,14 +2,6 @@ name: CAREER24 integrated QA
 
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths:
-      - 'index.html'
-      - 'v54-integrated.js'
-      - 'data/player-db.js'
-      - 'data/crest-db.js'
-      - '.github/workflows/qa-integrated.yml'
 
 jobs:
   qa:
