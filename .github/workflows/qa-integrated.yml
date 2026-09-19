@@ -36,7 +36,7 @@ jobs:
         run: |
           grep -q 'data/player-db.js?v=54' index.html
           grep -q 'data/crest-db.js?v=54' index.html
-          grep -q 'v54-integrated.js?v=1' index.html
+          grep -q 'v54-integrated.js?v=3' index.html
           ! grep -q 'v50-cache.js' index.html
           ! grep -q 'v51-worker.js' index.html
           ! grep -q 'v52-local-crests.js' index.html
