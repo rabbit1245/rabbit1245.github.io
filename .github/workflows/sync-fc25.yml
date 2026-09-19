@@ -22,10 +22,10 @@ jobs:
             "https://raw.githubusercontent.com/inboxpraveen/FIFA-Player-Recomendation/main/new-data/male_players.csv" \
             -o data/male_players.csv
 
-      - name: Build exact club logo map
+      - name: Build exact club logo map from club_team_id
         run: |
           python - <<'PY'
-          import csv, json, re
+          import csv, json
           from pathlib import Path
 
           src = Path("data/male_players.csv")
@@ -39,15 +39,17 @@ jobs:
                       return str(value).strip()
               return ""
 
-          pat = re.compile(r"^https://cdn\.sofifa\.(?:net|com)/teams/\d+/\d+\.png(?:\?.*)?$", re.I)
-
           with src.open("r", encoding="utf-8-sig", newline="") as f:
               reader = csv.DictReader(f)
               for row in reader:
                   club = pick(row, "club_name", "Team", "team", "Club", "club", "team_name")
-                  logo = pick(row, "club_logo_url", "club_logo", "Club Logo", "clubLogo")
-                  if club and logo and pat.match(logo):
-                      logos.setdefault(club, logo)
+                  team_id = pick(row, "club_team_id", "team_id", "Team ID")
+                  if club and team_id:
+                      try:
+                          tid = str(int(float(team_id)))
+                      except Exception:
+                          continue
+                      logos.setdefault(club, f"https://cdn.sofifa.net/meta/team/{tid}/120.png")
 
           out.write_text(json.dumps(logos, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
           print(f"exact logos: {len(logos)}")
