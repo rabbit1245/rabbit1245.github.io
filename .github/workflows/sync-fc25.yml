@@ -1,4 +1,4 @@
-name: Sync FC25 local data
+name: Sync CAREER24 data
 
 on:
   workflow_dispatch:
@@ -15,59 +15,59 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Download FC25 male player database
+      - name: Download FC25 player database
         run: |
           mkdir -p data
           curl -L --fail --retry 3 --retry-delay 2 \
             "https://raw.githubusercontent.com/inboxpraveen/FIFA-Player-Recomendation/main/new-data/male_players.csv" \
             -o data/male_players.csv
 
-      - name: Inspect FC25 headers and build exact club logo map
+      - name: Build deterministic football crest index
         run: |
+          rm -rf /tmp/football-logos
+          git clone --depth 1 https://github.com/JoseArroyave/football-logos.git /tmp/football-logos
           python - <<'PY'
-          import csv, json
+          import json, unicodedata, re
           from pathlib import Path
 
-          src = Path("data/male_players.csv")
+          root = Path("/tmp/football-logos/logos")
           out = Path("data/logos.json")
-          logos = {}
+          entries = {}
+          plain = {}
 
-          with src.open("r", encoding="utf-8-sig", newline="") as f0:
-              r0 = csv.reader(f0)
-              headers = next(r0, [])
-              print("HEADERS:", headers)
-              print("CLUB/TEAM HEADERS:", [h for h in headers if "club" in h.lower() or "team" in h.lower()])
+          def norm(s):
+              s = unicodedata.normalize("NFD", s)
+              s = "".join(ch for ch in s if unicodedata.category(ch) != "Mn")
+              s = s.lower().replace("&", "and")
+              return re.sub(r"[^a-z0-9]+", "", s)
 
-          def pick(row, *names):
-              for name in names:
-                  value = row.get(name)
-                  if value is not None and str(value).strip():
-                      return str(value).strip()
-              return ""
+          for country_dir in root.iterdir():
+              if not country_dir.is_dir():
+                  continue
+              country = country_dir.name
+              for p in country_dir.glob("*.svg"):
+                  stem = p.stem
+                  url = f"https://raw.githubusercontent.com/JoseArroyave/football-logos/main/logos/{country}/{p.name}"
+                  entries[f"{country}|{stem}"] = url
+                  k = norm(stem)
+                  plain.setdefault(k, []).append(url)
 
-          with src.open("r", encoding="utf-8-sig", newline="") as f:
-              reader = csv.DictReader(f)
-              for row in reader:
-                  club = pick(row, "club_name", "Team", "team", "Club", "club", "team_name", "teamname", "clubname")
-                  team_id = pick(row, "club_team_id", "team_id", "Team ID", "teamid", "club_id", "clubid")
-                  if club and team_id:
-                      try:
-                          tid = str(int(float(team_id)))
-                      except Exception:
-                          continue
-                      logos.setdefault(club, f"https://cdn.sofifa.net/meta/team/{tid}/120.png")
+          # Globally-unique filename aliases are safe fallbacks.
+          for k, urls in plain.items():
+              if len(urls) == 1:
+                  entries[f"*|{k}"] = urls[0]
 
-          out.write_text(json.dumps(logos, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
-          print(f"exact logos: {len(logos)}")
-          if len(logos) < 1:
-              raise SystemExit("logo map empty")
+          out.write_text(json.dumps(entries, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
+          print("crest index entries:", len(entries))
+          if len(entries) < 2000:
+              raise SystemExit("crest index unexpectedly small")
           PY
 
-      - name: Commit local DB and logo map
+      - name: Commit local DB and crest index
         run: |
           git config user.name "career24-data-bot"
           git config user.email "actions@users.noreply.github.com"
           git add data/male_players.csv data/logos.json
           git diff --cached --quiet && exit 0
-          git commit -m "Sync FC25 local player DB and exact club logos"
+          git commit -m "Sync FC25 player DB and deterministic club crest index"
           git push
