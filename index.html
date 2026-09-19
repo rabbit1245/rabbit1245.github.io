@@ -44,6 +44,8 @@ body{background:#111214;font-size:16px}.app{max-width:1440px}.hero{background:#1
 window.CAREER24_NETWORK_DISABLED=true;
 window.fetch=function(){return Promise.reject(new Error("CAREER24 OFFLINE BUILD: network disabled"));};
 </script>
+<link rel="preload" href="data/players.min.json?v=2" as="fetch" crossorigin="anonymous">
+<link rel="preload" href="data/canonical-logos.json?v=52" as="fetch" crossorigin="anonymous">
 </head>
 <body>
 <div class="app">
@@ -3200,8 +3202,7 @@ console.log('CAREER24 V4.7 direct interaction patch loaded');
 })();
 </script>
 
-<script src="v50-cache.js?v=2"></script>
-<script src="v51-worker.js?v=2"></script>
-<script src="v52-local-crests.js?v=2"></script>
+<script src="v52-local-crests.js?v=4"></script>
+<script src="v53-prebuilt-db.js?v=1"></script>
 </body>
 </html>
