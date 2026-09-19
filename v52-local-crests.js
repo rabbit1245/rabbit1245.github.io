@@ -24,6 +24,14 @@ function replace(el){
 }
 function fix(root=document){
  root.querySelectorAll?.('.c45-real-crest,.c48-crest,.c49-crest,.c24-final-crest[title],.v41-game-crest[title],.c24-logo').forEach(replace);
+ root.querySelectorAll?.('.c52-crest').forEach(el=>{
+   const img=el.querySelector('img');
+   if(img){arm(img);return}
+   const name=el.getAttribute('title')||el.textContent.trim()||'CLUB';
+   const size=parseInt(el.style.width)||parseInt(getComputedStyle(el).width)||48;
+   const u=url(name);
+   if(u)el.outerHTML=html(name,size);
+ });
  root.querySelectorAll?.('.c52-crest img').forEach(arm);
 }
 async function load(){
