@@ -100,6 +100,11 @@ XMLHttpRequest.prototype.send=function(){if(this.__c54Block){try{this.abort()}ca
 
 const mo=new MutationObserver(ms=>{for(const m of ms)for(const n of m.addedNodes)if(n.nodeType===1)hydrate(n)});mo.observe(document.documentElement,{childList:true,subtree:true});
 integrate();hydrate(document);
-const brand=document.querySelector('.brand');if(brand)brand.innerHTML='CAREER<b>24</b> <span>V5.4 INTEGRATED</span>';
+function stampUI(){
+ const brand=document.querySelector('.brand');if(brand)brand.innerHTML='CAREER<b>24</b> <span>V5.4 INTEGRATED</span>';
+ const foot=document.querySelector('.footer');if(foot)foot.textContent='CAREER24 V5.4 INTEGRATED · 16,161 BUILT-IN PLAYERS · LOCAL CLUB CRESTS';
+ const snap=document.querySelector('.snapshot');if(snap)snap.textContent='2024 DATA · 16,161 PLAYERS · BUILT-IN';
+}
+stampUI();setTimeout(stampUI,420);
 console.log('CAREER24 V5.4 integrated game data loaded');
 })();
