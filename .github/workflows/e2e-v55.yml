@@ -1,0 +1,35 @@
+name: CAREER24 V5.5 browser E2E
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'index.html'
+      - 'v55-core.js'
+      - 'v55-data.js'
+      - 'v55-stability.js'
+      - 'tests/v55-browser.test.mjs'
+      - '.github/workflows/e2e-v55.yml'
+
+jobs:
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install browser test runtime
+        run: |
+          npm init -y
+          npm install playwright@1.55.0
+          npx playwright install --with-deps chromium
+      - name: Start local game server
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 >/tmp/career24-server.log 2>&1 &
+          echo $! > /tmp/career24-server.pid
+          sleep 2
+      - name: Run real browser flow
+        run: node tests/v55-browser.test.mjs
