@@ -154,37 +154,40 @@ jobs:
       - name: Build synchronous game data bundles
         run: |
           python - <<'PY'
-          import json, re
+          import json
           from pathlib import Path
 
-          players = Path("data/players.min.json").read_text(encoding="utf-8")
-          logos = json.loads(Path("data/canonical-logos.json").read_text(encoding="utf-8"))
-          html = Path("index.html").read_text(encoding="utf-8")
-
+          src = json.loads(Path("data/players.min.json").read_text(encoding="utf-8"))
+          rows = []
+          for p in src.get("players", []):
+              r = p.get("ratings") or {}
+              rows.append([
+                  p.get("id"), p.get("name"), p.get("club"), p.get("clubNative"),
+                  p.get("league"), p.get("pos"), p.get("positions") or [],
+                  p.get("ovr",50), p.get("potential",p.get("ovr",50)),
+                  p.get("age",0), p.get("nation",""), p.get("canonicalClubId"),
+                  p.get("preferredFoot",""), p.get("weakFoot",0), p.get("skillMoves",0),
+                  p.get("heightCm",""), p.get("weightKg",""),
+                  r.get("pace",0), r.get("shooting",0), r.get("passing",0),
+                  r.get("dribbling",0), r.get("defending",0), r.get("physical",0)
+              ])
+          packed = {"v":1,"count":len(rows),"rows":rows}
           Path("data/player-db.js").write_text(
-              "window.CAREER24_BUNDLED_DB="+players+";\n",
+              "window.CAREER24_BUNDLED_DB="+json.dumps(packed,ensure_ascii=False,separators=(",",":"))+";\n",
               encoding="utf-8"
           )
 
-          m = re.search(r"const V27_DB=(\\{.*?\\});\\s*window\\.CAREER24_CANONICAL_DB=V27_DB", html, re.S)
-          if not m:
-              raise SystemExit("canonical DB not found")
-          db = json.loads(m.group(1))
-          aliases = {}
-          for c in db["clubs"]:
-              for name in (c.get("native"), c.get("display")):
-                  if name:
-                      aliases[name] = c["id"]
-          for name, cid in (db.get("clubAliases") or {}).items():
-              aliases[name] = cid
-
-          crest_payload = {"logos":logos,"aliases":aliases}
+          logos = json.loads(Path("data/canonical-logos.json").read_text(encoding="utf-8"))
           Path("data/crest-db.js").write_text(
-              "window.CAREER24_BUNDLED_CRESTS="+json.dumps(crest_payload,ensure_ascii=False,separators=(",",":"))+";\n",
+              "window.CAREER24_BUNDLED_CRESTS="+json.dumps(logos,ensure_ascii=False,separators=(",",":"))+";\n",
               encoding="utf-8"
           )
-          print("player bundle bytes", Path("data/player-db.js").stat().st_size)
-          print("crest bundle bytes", Path("data/crest-db.js").stat().st_size)
+
+          print("bundled players:",len(rows))
+          print("player bundle bytes:",Path("data/player-db.js").stat().st_size)
+          print("crest bundle bytes:",Path("data/crest-db.js").stat().st_size)
+          if len(rows)<5000:
+              raise SystemExit("bundled player DB unexpectedly small")
           PY
 
       - name: Commit local player DB and crests
