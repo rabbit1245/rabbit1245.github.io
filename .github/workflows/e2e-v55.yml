@@ -1,4 +1,4 @@
-name: CAREER24 V5.5 browser E2E
+name: CAREER24 V5.6 browser E2E
 
 on:
   workflow_dispatch:
@@ -9,6 +9,7 @@ on:
       - 'v55-core.js'
       - 'v55-data.js'
       - 'v55-stability.js'
+      - 'v56-career-balance.js'
       - 'tests/v55-browser.test.mjs'
       - '.github/workflows/e2e-v55.yml'
 
