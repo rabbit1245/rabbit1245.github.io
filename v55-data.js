@@ -15,13 +15,19 @@ function unpack(){
 function integrate(){
   if(done)return window.CAREER24_LIVE_DB;
   const LIVE=window.CAREER24_LIVE_DB;
-  if(!LIVE||!Array.isArray(PACK.rows)||PACK.rows.length<5000)return LIVE;
+  if(!LIVE)return LIVE;
+  if(!Array.isArray(PACK.rows)||PACK.rows.length<5000){
+    LIVE.state='error';LIVE.error='내장 선수 데이터를 불러오지 못했습니다. 새로고침 후 다시 시도해 주세요.';
+    if(window.REAL_DB_STATE)Object.assign(window.REAL_DB_STATE,{loaded:false,loading:false,error:LIVE.error});
+    return LIVE;
+  }
+  LIVE.startedAt=Date.now();
   const players=unpack();
-  LIVE.players=players;LIVE.rows=players.length;LIVE.state='ready';LIVE.error=null;LIVE.source='bundle://player-db.js';LIVE.startedAt=Date.now();LIVE.finishedAt=Date.now();
+  LIVE.players=players;LIVE.rows=players.length;LIVE.state='loading';LIVE.error=null;LIVE.source='bundle://player-db.js';
   try{window.CAREER24_REBUILD_LIVE_INDEXES?.()}catch(e){console.error('v55 index rebuild',e)}
   try{if(window.CAREER24_V46_DATA){window.CAREER24_V46_DATA.ready=true;window.CAREER24_V46_DATA.players=players}}catch(_){}
   try{if(window.REAL_DB_STATE){window.REAL_DB_STATE.loaded=true;window.REAL_DB_STATE.loading=false;window.REAL_DB_STATE.error=null;window.REAL_DB_STATE.players=players.length}}catch(_){}
-  done=true;
+  done=true;LIVE.state='ready';LIVE.finishedAt=Date.now();
   try{window.dispatchEvent(new CustomEvent('career24-db-state'))}catch(_){}
   try{window.dispatchEvent(new CustomEvent('career24-live-db-ready',{detail:{players:players.length,bundled:true}}))}catch(_){}
   return LIVE;

@@ -44,7 +44,7 @@ body{background:#111214;font-size:16px}.app{max-width:1440px}.hero{background:#1
 window.CAREER24_NETWORK_DISABLED=true;
 window.fetch=function(){return Promise.reject(new Error("CAREER24 OFFLINE BUILD: network disabled"));};
 </script>
-<script src="data/player-db.js?v=54"></script>
+<script defer src="data/player-db.js?v=54"></script>
 </head>
 <body>
 <div class="app">
@@ -935,7 +935,7 @@ function boot(){
  document.getElementById('playerDbSearch')?.addEventListener('input',()=>{editorPage=0;renderEditor(0)});
  document.getElementById('playerDbPos')?.addEventListener('change',()=>{editorPage=0;renderEditor(0)});
  document.getElementById('reloadRealDbBtn')?.addEventListener('click',()=>{try{if(window.REAL_DB_STATE){window.REAL_DB_STATE.loaded=false;window.REAL_DB_STATE.loading=false;window.REAL_DB_STATE.error=null}window.loadRealDb();toast('현실 DB 재연결 시도')}catch(e){alert('DB 재연결 오류: '+e.message)}});
- paintRuntime();setInterval(()=>{paintRuntime();if(document.getElementById('editorScreen')?.classList.contains('active')){const s=window.REAL_DB_STATE||{};const marker=String(s.loaded)+'|'+String(s.players)+'|'+String(s.error);if(window.__v23LastDbMarker!==marker){window.__v23LastDbMarker=marker;renderEditor(editorPage)}}},1000);
+  // The bundled DB owns readiness; the legacy status panel is hidden by V4.6.
  console.log('CAREER24',V23,'boot OK');
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
@@ -1385,7 +1385,7 @@ function remapPlayersV27(){
     window.CAREER24_PLAYER_CLUB_MAPPED=mapped; return true;
   }catch(e){console.warn('V2.8 player mapping',e);return false}
 }
-let tries=0;const mapTimer=setInterval(()=>{tries++;if(remapPlayersV27()||tries>120)clearInterval(mapTimer)},500);
+window.addEventListener('career24-db-state',remapPlayersV27);
 
 
 // Update visible version label and force canonical selectors after every previous patch has initialized.
@@ -1493,10 +1493,9 @@ function reconcile(){
    if(typeof REAL_PLAYER_DB!=='undefined'&&Array.isArray(REAL_PLAYER_DB)){for(const p of REAL_PLAYER_DB){const id=clubIdOfName(p.club);if(id){p.canonicalClubId=id;p.club=FRESH.get(id).name}}}
    const ext=[...CLUBS].filter(c=>!FRESH.has(c.id)&&c.realData);for(const e of ext){const id=clubIdOfName(e.name);const c=id&&FRESH.get(id);if(c&&Number.isFinite(+e.basePower)){c.basePower=Math.max(c.basePower,+e.basePower);c.power=c.basePower;c.realData=true}}
    CLUBS.splice(0,CLUBS.length,...FRESH.values());
-   if(document.getElementById('createScreen')?.classList.contains('active'))refreshClubPreview();
  }catch(e){console.warn('V2.9.1 reconcile',e)}
 }
-reconcile();let tries=0;const timer=setInterval(()=>{reconcile();tries++;if((window.REAL_DB_STATE?.loaded||window.REAL_DB_STATE?.error)&&tries>4||tries>60)clearInterval(timer)},500);
+reconcile();
 window.addEventListener('career24-db-state',reconcile);
 const small=document.querySelector('.brand small');if(small)small.textContent='V2.9.1 CANONICAL REBUILD';
 })();
@@ -1579,8 +1578,13 @@ for(const [a,id] of Object.entries(MANUAL_CLUB_ALIASES)){directAlias.set(strip(a
 const leagueAlias=new Map();
 for(const l of DB.leagues){leagueAlias.set(strip(l.name),l.id)}
 for(const [a,id] of Object.entries(DB.leagueAliases||{}))leagueAlias.set(strip(a),id);
-function resolveLeagueId(raw){const k=strip(raw);if(leagueAlias.has(k))return leagueAlias.get(k);let best=null,bestS=0;for(const l of DB.leagues){const s=Math.max(tokenScore(raw,l.name),editSim(raw,l.name));if(s>bestS){bestS=s;best=l.id}}return bestS>=.72?best:null}
-function resolveClubId(team,league){if(!team)return null;const k=strip(team),tk=teamKey(team);if(directAlias.has(k))return directAlias.get(k);if(directAlias.has(tk))return directAlias.get(tk);const lid=resolveLeagueId(league);let rows=lid?DB.clubs.filter(c=>c.leagueId===lid):DB.clubs;let best=null,bestS=0;for(const c of rows){const s=Math.max(tokenScore(team,c.native),editSim(team,c.native),tokenScore(team,c.display)*.96,editSim(team,c.display)*.96);if(s>bestS){bestS=s;best=c.id}}return bestS>=.66?best:null}
+function findLeagueId(raw){const k=strip(raw);if(leagueAlias.has(k))return leagueAlias.get(k);let best=null,bestS=0;for(const l of DB.leagues){const s=Math.max(tokenScore(raw,l.name),editSim(raw,l.name));if(s>bestS){bestS=s;best=l.id}}return bestS>=.72?best:null}
+function findClubId(team,league){if(!team)return null;const k=strip(team),tk=teamKey(team);if(directAlias.has(k))return directAlias.get(k);if(directAlias.has(tk))return directAlias.get(tk);const lid=resolveLeagueId(league);let rows=lid?DB.clubs.filter(c=>c.leagueId===lid):DB.clubs;let best=null,bestS=0;for(const c of rows){const s=Math.max(tokenScore(team,c.native),editSim(team,c.native),tokenScore(team,c.display)*.96,editSim(team,c.display)*.96);if(s>bestS){bestS=s;best=c.id}}return bestS>=.66?best:null}
+// Canonical aliases are fixed for this page. Cache misses as well as matches so
+// every player at the same club does not repeat the fuzzy-name scan.
+const resolvedLeagues=new Map(),resolvedClubs=new Map();
+function resolveLeagueId(raw){const key=String(raw||'');if(!resolvedLeagues.has(key))resolvedLeagues.set(key,findLeagueId(raw));return resolvedLeagues.get(key)}
+function resolveClubId(team,league){const key=JSON.stringify([team||'',league||'']);if(!resolvedClubs.has(key))resolvedClubs.set(key,findClubId(team,league));return resolvedClubs.get(key)}
 window.CAREER24_RESOLVE_CLUB=resolveClubId;
 
 
@@ -1702,10 +1706,15 @@ function dbStatus(){const s=window.REAL_DB_STATE||{},world=worldPlayers(),mapped
 window.CAREER24_V30_QA={resolveClubId,dbStatus,manUtdST(){return rosterInfo('EN1_14','ST').rivals.map(p=>p.name)},manCityST(){return rosterInfo('EN1_13','ST').rivals.map(p=>p.name)},duplicateEnglish(){const a=worldPlayers();const m=new Map();for(const p of a){const k=personKey(p.name);m.set(k,(m.get(k)||0)+1)}return [...m.entries()].filter(x=>x[1]>1).slice(0,20)}};
 
 
-function refreshRuntimeStatus(){const s=dbStatus();let e=document.getElementById('v30WorldStatus');if(!e){e=document.createElement('div');e.id='v30WorldStatus';e.className='data-status';document.querySelector('#mainScreen .hero')?.appendChild(e)}const state=s.realOnline?'ONLINE':(s.sourceLoaded?'PARTIAL':'OFFLINE');if(e)e.innerHTML=`<b>WORLD DB ${state}</b> · source real ${s.sourcePlayers.toLocaleString()} · active real-world rows ${s.worldPlayers.toLocaleString()} · canonical club mapped ${s.mappedReal.toLocaleString()} · unmapped ${s.unmappedReal.toLocaleString()} · duplicate ID ${s.duplicates} · duplicate identity ${s.duplicatePersons}<br><span style="color:${s.realOnline?'#8de0ad':'#e7bd68'}">완료 조건: 실제 선수 5,000명 이상이 canonical club_id에 정상 매핑되어야 함. 생성 선수로 기준을 채우지 않습니다.</span>`;document.getElementById('v23Runtime')?.setAttribute('style','display:none!important');document.getElementById('v22DbStatus')?.setAttribute('style','display:none!important');if(document.getElementById('createScreen')?.classList.contains('active'))window.refreshClubPreview()}
-window.addEventListener('career24-db-state',()=>{cachedWorldBase=null;refreshRuntimeStatus();try{renderEditor?.()}catch(_){}});setTimeout(refreshRuntimeStatus,250);setTimeout(refreshRuntimeStatus,2500);
+window.addEventListener('career24-db-state',()=>{
+ cachedWorldBase=null;
+ // Refresh only the screen that can use the newly available players.
+ if(document.getElementById('editorScreen')?.classList.contains('active'))renderEditor();
+ else if(document.getElementById('createScreen')?.classList.contains('active'))window.refreshClubPreview();
+ else if(document.getElementById('gameScreen')?.classList.contains('active')&&game)renderGame();
+});
 const small=document.querySelector('.brand small')||document.querySelector('.brand span');if(small)small.textContent='V3.3.2 REAL DB INTEGRITY FIX';
-console.log('CAREER24 V3.3.2 real DB integrity fix loaded',window.CAREER24_V30_QA.dbStatus());
+console.log('CAREER24 V3.3.2 real DB integrity fix loaded');
 })();
 </script>
 <style id="v32UnifiedWorldCss">
@@ -3131,7 +3140,7 @@ window.renderTransfer=function(){if(typeof fallbackRenderTransfer45==='function'
 window.renderCareerPane=function(){if(typeof fallbackRenderCareer45==='function')fallbackRenderCareer45();const root=Q('careerPane');if(root)replaceFake45(root)};try{renderCareerPane=window.renderCareerPane}catch(_){ }
 window.renderMiniTimeline=function(){if(typeof fallbackMini45==='function')fallbackMini45();const root=Q('v41CareerMini');if(root)replaceFake45(root)};try{renderMiniTimeline=window.renderMiniTimeline}catch(_){ }
 
-function status45(){let el=Q('c45LiveStatus');if(!el){el=document.createElement('div');el.id='c45LiveStatus';el.className='c45-live-status';document.querySelector('#mainScreen .hero')?.appendChild(el)}if(!el)return;const fallbackCount=(()=>{try{return fallbackPlayerDb45?.().length||0}catch(_){return 0}})();if(LIVE.state==='ready')el.innerHTML=`<b>LOCAL PLAYER DB CONNECTED</b> · FC25 남자 선수 <strong>${LIVE.players.length.toLocaleString()}명</strong> · canonical club 매핑 <strong>${LIVE.mapped.toLocaleString()}명</strong> · 실제 로고 <strong>${LIVE.logos.toLocaleString()}팀</strong><br><span>선수 경쟁·편집·클럽 화면·이적 화면이 로컬 DB를 직접 사용합니다. 준비된 실제 로고는 로컬 파일에서 불러옵니다.</span>`;else if(LIVE.state==='loading')el.innerHTML=`<b>LOCAL PLAYER DB LOADING</b> · data/male_players.csv를 읽는 중입니다.<br><span>DB를 읽는 동안에도 게임 본체는 멈추지 않습니다. 현재 내장 ${fallbackCount.toLocaleString()}명 데이터가 준비되어 있습니다.</span>`;else if(LIVE.state==='error')el.innerHTML=`<b>LOCAL DB FILE MISSING</b> · ${esc(LIVE.error||'unknown error')}<br><span>게임은 내장 DB로 계속 실행됩니다. 전체 FC25 DB를 쓰려면 START_GAME.bat으로 실행한 뒤 <button class="mini-btn" onclick="CAREER24_RECONNECT_REAL_DB()">DB 다시 읽기</button>를 누르세요.</span>`;else el.innerHTML='<b>LOCAL PLAYER DB READY</b> · data/male_players.csv 확인 대기';const old=Q('c24OfflineBanner');if(old)old.style.display='none';document.querySelectorAll('#v30WorldStatus,#v23Runtime,#v22DbStatus').forEach(x=>x.style.display='none')}
+function status45(){let el=Q('c45LiveStatus');if(!el){el=document.createElement('div');el.id='c45LiveStatus';el.className='c45-live-status';document.querySelector('#mainScreen .hero')?.appendChild(el)}if(!el)return;const fallbackCount=LIVE.state==='ready'?0:(()=>{try{return fallbackPlayerDb45?.().length||0}catch(_){return 0}})();if(LIVE.state==='ready')el.innerHTML=`<b>LOCAL PLAYER DB CONNECTED</b> · FC25 남자 선수 <strong>${LIVE.players.length.toLocaleString()}명</strong> · canonical club 매핑 <strong>${LIVE.mapped.toLocaleString()}명</strong> · 실제 로고 <strong>${LIVE.logos.toLocaleString()}팀</strong><br><span>선수 경쟁·편집·클럽 화면·이적 화면이 로컬 DB를 직접 사용합니다. 준비된 실제 로고는 로컬 파일에서 불러옵니다.</span>`;else if(LIVE.state==='loading')el.innerHTML=`<b>LOCAL PLAYER DB LOADING</b> · data/male_players.csv를 읽는 중입니다.<br><span>DB를 읽는 동안에도 게임 본체는 멈추지 않습니다. 현재 내장 ${fallbackCount.toLocaleString()}명 데이터가 준비되어 있습니다.</span>`;else if(LIVE.state==='error')el.innerHTML=`<b>LOCAL DB FILE MISSING</b> · ${esc(LIVE.error||'unknown error')}<br><span>게임은 내장 DB로 계속 실행됩니다. 전체 FC25 DB를 쓰려면 START_GAME.bat으로 실행한 뒤 <button class="mini-btn" onclick="CAREER24_RECONNECT_REAL_DB()">DB 다시 읽기</button>를 누르세요.</span>`;else el.innerHTML='<b>LOCAL PLAYER DB READY</b> · data/male_players.csv 확인 대기';const old=Q('c24OfflineBanner');if(old)old.style.display='none';document.querySelectorAll('#v30WorldStatus,#v23Runtime,#v22DbStatus').forEach(x=>x.style.display='none')}
 async function connect45(force=false){if(LIVE.state==='loading'||LIVE.state==='ready'&&!force)return LIVE;LIVE.state='loading';LIVE.error=null;LIVE.startedAt=Date.now();status45();try{await loadLocalLogos46();const {url,text}=await firstText(PLAYER_URLS);const rows=csvRows(text);if(rows.length<5000)throw new Error('parsed players '+rows.length+' < 5000');const idx=keyIndex(rows[0]);const players=[];let serial=0;for(const row of rows){serial++;const p=buildPlayer45(row,idx,serial);if(p)players.push(p)}if(players.length<5000)throw new Error('valid players '+players.length+' < 5000');const seen=new Set();LIVE.players=players.filter(p=>{if(seen.has(p.id))return false;seen.add(p.id);return true});LIVE.rows=rows.length;LIVE.source=url;LIVE.state='ready';LIVE.finishedAt=Date.now();rebuildIndexes45();if(window.CAREER24_V46_DATA){window.CAREER24_V46_DATA.ready=true;window.CAREER24_V46_DATA.players=LIVE.players}try{if(window.REAL_DB_STATE){window.REAL_DB_STATE.loaded=true;window.REAL_DB_STATE.loading=false;window.REAL_DB_STATE.error=null;window.REAL_DB_STATE.players=LIVE.players.length}}catch(_){}try{window.dispatchEvent(new CustomEvent('career24-db-state'))}catch(_){}status45();try{renderEditor?.()}catch(_){ }try{if(Q('createScreen')?.classList.contains('active'))refreshClubPreview()}catch(_){ }try{if(game)renderGame()}catch(_){ }try{window.dispatchEvent(new CustomEvent('career24-live-db-ready',{detail:{players:LIVE.players.length,mapped:LIVE.mapped,logos:LIVE.logos}}))}catch(_){ }return LIVE}catch(e){LIVE.state='error';LIVE.error=String(e?.message||e);LIVE.finishedAt=Date.now();if(window.CAREER24_V46_DATA){window.CAREER24_V46_DATA.ready=false;window.CAREER24_V46_DATA.players=[]}status45();console.error('CAREER24 V4.5 live DB failed',e);return LIVE}}
 window.CAREER24_RECONNECT_REAL_DB=()=>connect45(true);
 window.loadRealDb=()=>connect45(true);
@@ -3202,7 +3211,7 @@ console.log('CAREER24 V4.7 direct interaction patch loaded');
 </script>
 
 <script src="v55-core.js?v=1"></script>
-<script src="v55-data.js?v=1"></script>
+<script defer src="v55-data.js?v=2"></script>
 <script src="v55-stability.js?v=2"></script>
 <script src="v56-career-balance.js?v=1"></script>
 </body>

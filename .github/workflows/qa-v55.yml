@@ -50,7 +50,7 @@ jobs:
         run: |
           grep -q 'data/player-db.js?v=54' index.html
           grep -q 'v55-core.js?v=1' index.html
-          grep -q 'v55-data.js?v=1' index.html
+          grep -q 'defer src="v55-data.js?v=2"' index.html
           grep -q 'v55-stability.js?v=2' index.html
           ! grep -q 'data/crest-db.js' index.html
           ! grep -q 'v54-integrated.js' index.html

@@ -6,11 +6,26 @@ const page=await browser.newPage({viewport:{width:1440,height:1000}});
 const pageErrors=[];
 page.on('pageerror',e=>pageErrors.push(String(e)));
 
-await page.goto('http://127.0.0.1:4173/',{waitUntil:'domcontentloaded',timeout:120000});
-await page.waitForFunction(()=>window.CAREER24_V55_STABLE&&window.CAREER24_V55_DATA?.count()===16161&&window.CAREER24_V56_QA?.version==='V5.6 CAREER BALANCE',{timeout:30000});
-
+// A slow player download must not hold the menu or player creation screen hostage.
+let releasePlayers;
+const playerDownload=new Promise(resolve=>{releasePlayers=resolve});
+await page.route('**/data/player-db.js*',async route=>{await playerDownload;await route.continue()});
+await page.addInitScript(()=>{window.__dbReadyEvents=0;window.addEventListener('career24-db-state',()=>window.__dbReadyEvents++)});
+await page.goto('http://127.0.0.1:4173/',{waitUntil:'commit',timeout:30000});
+await page.waitForFunction(()=>window.CAREER24_V55_STABLE&&window.CAREER24_V56_QA?.version==='V5.6 CAREER BALANCE',null,{timeout:10000});
+assert.equal(await page.locator('#mainScreen').isVisible(),true,'menu must show before the player download finishes');
+assert.equal(await page.evaluate(()=>window.CAREER24_LIVE_DB.state==='ready'),false);
 await page.click('#newGameBtn');
 await page.waitForSelector('#createScreen.active',{timeout:10000});
+releasePlayers();
+await page.waitForFunction(()=>window.CAREER24_LIVE_DB?.state==='ready'&&window.CAREER24_V55_DATA?.count()===16161,null,{timeout:30000});
+const boot=await page.evaluate(()=>{
+  const live=window.CAREER24_LIVE_DB,players=live.players,finishedAt=live.finishedAt;
+  window.CAREER24_FAST_DB_BOOT();window.CAREER24_RECONNECT_REAL_DB();
+  return{count:playerDb().length,samePlayers:players===live.players,sameFinish:finishedAt===live.finishedAt,events:window.__dbReadyEvents};
+});
+assert.deepEqual(boot,{count:16161,samePlayers:true,sameFinish:true,events:1},'repeat boot must reuse the initialized DB');
+assert.equal(await page.locator('#editorRows .editor-row').count(),0,'hidden editor must stay unrendered at startup');
 await page.waitForFunction(()=>document.querySelector('#clubPreview')?.textContent?.trim().length>0,{timeout:10000});
 assert.equal(await page.locator('#clubPreview img').count(),0,'logos must be disabled in club preview');
 const talentOptions=await page.locator('#v3Talent option').allTextContents();
@@ -100,4 +115,16 @@ assert.equal(afterSecond,post.year,'second endTurn call must not advance another
 
 if(pageErrors.length)throw new Error('Page errors: '+pageErrors.join(' | '));
 console.log('Browser E2E passed',initial,'=>',post);
+
+// A missing optional bundle leaves the shell usable and must not retry a large CSV.
+const missing=await browser.newPage();
+const requests=[];
+missing.on('request',r=>requests.push(r.url()));
+await missing.route('**/data/player-db.js*',route=>route.abort());
+await missing.goto('http://127.0.0.1:4173/',{waitUntil:'load'});
+assert.equal(await missing.evaluate(()=>window.CAREER24_LIVE_DB.state),'error');
+assert.equal(requests.some(u=>/male_players\.csv|logos\.json/.test(u)),false);
+await missing.click('#newGameBtn');
+await missing.waitForSelector('#createScreen.active');
+await missing.close();
 await browser.close();
