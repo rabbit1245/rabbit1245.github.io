@@ -1,0 +1,29 @@
+.player-workspace .captain-workspace { display:grid; gap:10px; min-width:0; }
+.player-workspace .captain-view-heading { display:flex; align-items:center; justify-content:space-between; gap:8px 12px; flex-wrap:wrap; margin-bottom:12px; }
+.player-workspace .captain-view-heading .segmented button { min-height:36px; font-size:17px; }
+.player-workspace .captain-offer { display:grid; gap:10px; padding:12px; margin-bottom:12px; background:var(--teal-soft); border:1px solid var(--control-border); border-radius:8px; }
+.player-workspace .captain-offer h3 { margin:4px 0 8px; font-size:20px; }
+.player-workspace .captain-offer p { font-size:17px; }
+.player-workspace .captain-offer .muted { font-size:15px; }
+.player-workspace .captain-offer-state { padding:10px 12px; background:var(--warm); border:1px solid var(--border); border-radius:6px; font-size:17px; margin-bottom:12px; }
+.player-workspace .captain-assessment > .muted { margin-bottom:8px; }
+.player-workspace .captain-basis-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px 12px; margin:0; }
+.player-workspace .captain-basis-grid > div { min-width:0; padding:12px; background:var(--warm); border:1px solid var(--border); border-radius:7px; }
+.player-workspace .captain-basis-grid dt { font-size:15px; color:var(--muted); line-height:1.4; }
+.player-workspace .captain-basis-grid dd { font-size:20px; font-weight:700; line-height:1.4; margin:6px 0 4px; overflow-wrap:anywhere; }
+.player-workspace .captain-basis-grid p { font-size:15px; color:var(--muted); line-height:1.5; }
+.player-workspace .captain-reasons { display:grid; gap:6px; padding-left:22px; margin:12px 0 0; font-size:17px; line-height:1.5; }
+.player-workspace .captain-workspace .captain-terms { margin-top:0; }
+.player-workspace .captain-offer-history { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px 12px; }
+.player-workspace .captain-offer-history article { padding:10px 0; border-bottom:1px solid var(--border); min-width:0; }
+.player-workspace .captain-offer-history article > div { display:flex; align-items:center; justify-content:space-between; gap:8px; }
+.player-workspace .captain-offer-history strong { font-size:17px; overflow-wrap:anywhere; }
+.player-workspace .captain-offer-history p { margin-top:6px; color:var(--muted); font-size:15px; line-height:1.5; }
+@media(max-width:899px) {
+  .player-workspace .captain-basis-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+}
+@media(max-width:599px) {
+  .player-workspace .captain-basis-grid,.player-workspace .captain-offer-history { grid-template-columns:minmax(0,1fr); }
+  .player-workspace .captain-offer .action-inline .button { flex:1; }
+  .player-workspace .captain-workspace .panel-head { flex-wrap:wrap; }
+}

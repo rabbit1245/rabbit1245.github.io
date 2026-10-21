@@ -5,14 +5,14 @@ import { simulateMatch } from './match-engine';
 import { getClubWorldPower, getSeasonClubIds, getWorldClubPlayers, getYouthClubPlayers, processWorldRound, transitionWorldSeason } from './world';
 import { getLeagueRule } from './league-rules';
 import { archiveNationalSeason, getNationalTotals, processDueNationalWindows } from './national';
-import { applyContract, evaluateAwards, makeContractOffers, payBonus, paySalary, updateLeadership, updateMarketValue, ensureEconomicHistory, beginEconomicSeason } from './career-systems';
+import { applyContract, evaluateAwards, makeContractOffers, payBonus, paySalary, updateLeadership, updateMarketValue, ensureEconomicHistory, beginEconomicSeason, answerCaptainOffer, expireCaptainOffers } from './career-systems';
 import { initializeSystems } from './systems';
 import { fixtureDate, nextCalendarYear, seasonDate, seasonHalfEndDate } from './calendar';
 import { applyMatchExperience, beginGrowthSeason, ensureGrowthTracking, trainRound } from './growth';
 import type { AttributeKey, Attributes, Career, CreateOptions, Fixture, Intensity, MatchRecord, Player, PlayerStats, SeasonState, SeasonSummary, Standing, Talent, TransferOffer } from './types';
 import type { PresentationEvent } from './revision-types';
 
-export const ENGINE_VERSION = '2.1.0';
+export const ENGINE_VERSION = '2.2.0';
 export const overall = calculateOverall;
 export { addStats, emptyStats, hashSeed, seededRandom } from './math';
 const TALENT_ORDER: Talent[] = ['D','C','B','A','S','SS','SSS'];
@@ -30,6 +30,8 @@ function editable(career:Career):Career {
   ensureEconomicHistory(next);
   ensureGrowthTracking(next);
   if(!next.systems!.trainingPlan)next.systems!.trainingPlan={forYear:next.season.year+(next.stage==='offseason'?1:0),confirmed:true,confirmedAtRound:next.season.week,source:'legacy'};
+  // Old midseason contract prompts are retired on the first command, after their original hash was checked.
+  if(next.stage==='season'){next.systems!.pendingChoice=undefined;next.offers=[];}
   return next;
 }
 function touch(career:Career) {
@@ -151,11 +153,7 @@ function halfway(career:Career) {
   growthReport(career,'first');
   systems.firstHalfSnapshot={attributes:{...career.player.attributes},stats:{...career.season.playerStats},ovr:career.player.ovr,value:systems.economics.marketValue,round:career.season.week};
   systems.phase='midseason';
-  career.offers=makeContractOffers(career,'midseason');
-  if(career.offers.length) {
-    systems.pendingChoice={kind:'renewal',offerIds:career.offers.map(o=>o.id),deadlineRound:career.season.week+2,reason:'구단의 재계약 제안입니다. 수락하거나 이번 제안을 넘기면 후반기를 진행할 수 있습니다.'};
-    present(career,'renewal','재계약 제안 도착',systems.pendingChoice.reason,'decision');
-  }
+  career.offers=[];systems.pendingChoice=undefined;
 }
 function archive(career:Career,completed:boolean) {
   if(career.history.some(row=>row.year===career.season.year))return;
@@ -233,15 +231,12 @@ export function advanceCareer(career:Career,weeks=1):Career {
   if(!Number.isInteger(weeks)||weeks<1||weeks>156)throw new Error('진행할 기간은 1~156주입니다.');
   const next=editable(career);
   for(let i=0;i<weeks&&next.stage==='season';i++) {
-    if(next.systems!.pendingChoice&&next.season.week>=next.systems!.pendingChoice.deadlineRound)break;
     playRound(next);
   }
   return next;
 }
 export function advanceHalf(career:Career):Career {
   if(career.stage!=='season')return career;
-  // Deliberate choices are handled before starting another compressed timeline.
-  if(career.systems?.pendingChoice)throw new Error('계약 제안을 수락하거나 이번 제안을 넘겨 주세요.');
   const half=career.systems?.halfRound??Math.ceil(career.season.totalWeeks/2);
   const target=career.season.week<half?half:career.season.totalWeeks;
   return advanceCareer(career,Math.max(1,target-career.season.week));
@@ -265,18 +260,22 @@ export function setTraining(career:Career,keys:AttributeKey[],intensity:Intensit
 }
 export function acceptTransfer(career:Career,offerId:string):Career {
   if(career.stage==='retired')throw new Error('은퇴한 선수는 계약을 체결할 수 없습니다.');
+  if(career.stage!=='offseason')throw new Error('이적과 재계약은 시즌 종료 후에만 결정할 수 있습니다.');
   if(career.stage==='offseason'&&career.transferDecision)throw new Error('이번 이적시장의 선택은 이미 확정되었습니다.');
   const offer=career.offers.find(o=>o.id===offerId);
   if(!offer)throw new Error('유효한 계약 제안을 선택해 주세요.');
-  if(career.stage==='season'&&(!career.systems?.pendingChoice?.offerIds.includes(offerId)||offer.type!=='renew'||offer.effective!=='now'))throw new Error('현재 응답할 수 있는 재계약 제안이 아닙니다.');
-  if(career.stage==='season'&&offer.expiresRound!==undefined&&career.season.week>offer.expiresRound)throw new Error('제안의 응답 기한이 지났습니다.');
   const next=editable(career),from=next.player.clubId;
   applyContract(next,offer);
   if(next.stage==='offseason')next.transferDecision='signed';
   next.systems!.pendingChoice=undefined;next.offers=[];
   present(next,offer.type==='renew'?'renewal':'transfer',offer.type==='renew'?'재계약 체결':`${getClub(offer.clubId).name} 이적`,`${offer.years}년 · 주급 €${offer.wage.toLocaleString()} · 구단 간 이적료 €${offer.fee.toLocaleString()}`,'milestone');
-  if(from!==next.player.clubId)updateMarketValue(next,'새 구단의 리그와 출전 역할');
+  if(from!==next.player.clubId){expireCaptainOffers(next,'club');updateMarketValue(next,'새 구단의 리그와 출전 역할');}
   touch(next);return next;
+}
+export function respondToCaptainOffer(career:Career,offerId:string,accept:boolean):Career {
+  if(career.stage==='retired')throw new Error('은퇴한 선수는 주장 제의에 응답할 수 없습니다.');
+  if(typeof offerId!=='string'||!offerId||typeof accept!=='boolean')throw new Error('유효한 주장 제의를 선택해 주세요.');
+  const next=editable(career);answerCaptainOffer(next,offerId,accept);touch(next);return next;
 }
 export function dismissChoice(career:Career):Career {
   if(!career.systems?.pendingChoice)return career;
@@ -325,6 +324,7 @@ export function startNextSeason(career:Career):Career {
   const calendarYear=nextCalendarYear(previousSeason,next.season.leagueId);
   if(calendarYear!==next.season.year)next.season.calendarYear=calendarYear;
   next.stage='season';next.offers=[];next.transferDecision=undefined;next.lastMatchId=undefined;
+  expireCaptainOffers(next);
   const systems=next.systems!;
   systems.phase='preseason';systems.halfRound=Math.ceil(next.season.totalWeeks/2);systems.trainingLocked=true;systems.pendingChoice=undefined;
   const agingChanges:Attributes={};for(const key of Object.keys(afterAging) as AttributeKey[])agingChanges[key]=round((afterAging[key]??0)-(beforeAging[key]??0));
@@ -346,6 +346,7 @@ export function retireCareer(career:Career):Career {
   archiveNationalSeason(next);
   next.stage='retired';next.retiredYear=next.season.year;next.offers=[];
   next.systems!.phase='retired';next.systems!.pendingChoice=undefined;next.systems!.national.status='retired';
+  expireCaptainOffers(next);
   for(const term of next.systems!.leadership.terms)if(term.endYear===undefined){term.endYear=next.season.year;term.endRound=next.season.week;}
   const total=getCareerTotals(next);
   present(next,'retirement',`${next.player.name}의 마지막 휘슬`,`${total.apps}경기 · ${total.minutes}분 · ${total.goals}골 · ${total.assists}도움. 모든 시즌과 대표팀 기록을 보관했습니다.`,'milestone');

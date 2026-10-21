@@ -6,6 +6,8 @@ import { getLeagueRule } from './league-rules';
 import { nextCalendarYear, seasonDate } from './calendar';
 import { evaluateTournamentAwards } from './tournament-awards';
 import { normalizeNationality } from './national-data';
+import { getCaptainAssessment,proposeCaptainOffer,expireCaptainOffers } from './captain';
+export { getCaptainAssessment,answerCaptainOffer,expireCaptainOffers } from './captain';
 import type { Award, Career, PlayerStats, Position, TransferOffer } from './types';
 import type { BallonDorYear, CompetitorSeason, ContractSnapshot, ContractTermsSnapshot, Economics, Leadership, RankingCandidate } from './revision-types';
 
@@ -123,13 +125,13 @@ function individualWageLimit(career: Career, clubId: string): number {
   return club ? Math.max(0, Math.floor(club.wageBudget / 52 * .14)) : 0;
 }
 export function makeContractOffers(career: Career, timing: 'midseason'|'offseason'): TransferOffer[] {
-  if (!career.systems || career.stage === 'retired') return [];
+  if (!career.systems || career.stage !== 'offseason' || timing !== 'offseason') return [];
   const { economics: e, world } = career.systems;
   const p = career.player;
   const random = seededRandom(`${career.seed}:offers:${career.season.year}:${timing}`);
-  const effectiveYear=career.season.year+(timing==='offseason'?1:0);
+  const effectiveYear=career.season.year+1;
   const remaining = Math.max(0, e.contract.expiresYear - effectiveYear);
-  const deadline = timing === 'midseason' ? Math.min(career.season.totalWeeks, career.season.week + 2) : career.season.totalWeeks;
+  const deadline=career.season.totalWeeks;
   const offerFor = (clubId: string, renew: boolean): TransferOffer | null => {
     const club = world.clubs[clubId];
     if (!club) return null;
@@ -144,12 +146,11 @@ export function makeContractOffers(career: Career, timing: 'midseason'|'offseaso
     if (fee > club.budget || Math.abs(p.ovr - power) > 26) return null;
     const role = roleFor(career, power);
     return { id: `${career.season.year}:${timing}:${renew ? 'renew' : 'transfer'}:${clubId}`, clubId, wage, years, role, fee,
-      reason: `${getClub(clubId).name} · 팀 전력 ${Math.round(power)} · ${role}. 현재 주급 €${p.wage.toLocaleString()} → €${wage.toLocaleString()} · ${years}년. ${renew ? '시즌 중에도 재계약 협상이 가능합니다.' : `잔여 ${remaining}년 계약과 구단 예산을 반영한 구단 간 이적료입니다.`}`,
-      type: renew ? 'renew' : 'transfer', expiresRound: deadline, effective: timing === 'midseason' ? 'now' : 'nextSeason', currentWage: p.wage, budgetLimit: club.budget };
+      reason: `${getClub(clubId).name} · 팀 전력 ${Math.round(power)} · ${role}. 현재 주급 €${p.wage.toLocaleString()} → €${wage.toLocaleString()} · ${years}년. ${renew ? '시즌 종료 후 새 계약을 검토합니다.' : `잔여 ${remaining}년 계약과 구단 예산을 반영한 구단 간 이적료입니다.`}`,
+      type: renew ? 'renew' : 'transfer', expiresRound: deadline, effective:'nextSeason', currentWage: p.wage, budgetLimit: club.budget };
   };
   const renew = offerFor(p.clubId, true);
   const offers = renew ? [renew] : [];
-  if (timing === 'midseason') return offers;
   const viable = CLUBS.filter(c => c.id !== p.clubId && world.clubs[c.id] && Math.abs(world.clubs[c.id].power - p.ovr) <= 24)
     .map(c => ({ id: c.id, appeal: -Math.abs(world.clubs[c.id].power - p.ovr) + random() * 22 }))
     .sort((a,b) => b.appeal - a.appeal || a.id.localeCompare(b.id));
@@ -235,6 +236,7 @@ export function updateLeadership(career: Career, scope: 'club'|'national', appoi
   }
   if (l.clubId !== p.clubId) {
     for (const term of l.terms) if (term.scope === 'club' && term.endYear === undefined) { term.endYear = career.season.year; term.endRound = career.season.week; }
+    expireCaptainOffers(career,'club');
     l.clubId = p.clubId; l.clubSinceYear = career.season.year; l.clubRole = 'none';
   }
   const records = scope === 'club' ? [...career.history.flatMap(h => h.matches), ...career.season.matches] : nationalMatches(career);
@@ -245,25 +247,10 @@ export function updateLeadership(career: Career, scope: 'club'|'national', appoi
   const roleKey = scope === 'club' ? 'clubRole' : 'nationalRole';
   if (scope === 'national' && l.terms.some(t => t.scope === scope && t.teamId !== teamId && t.endYear === undefined)) {
     for (const t of l.terms) if (t.scope === scope && t.teamId !== teamId && t.endYear === undefined) { t.endYear = career.season.year; t.endRound = 0; }
-    l.nationalRole = 'none';
+    l.nationalRole = 'none';expireCaptainOffers(career,'national');
   }
-  const tenure = scope === 'club' ? career.season.year - l.clubSinceYear : new Set(matches.map(m => m.seasonYear)).size;
-  const trust = scope === 'club' ? career.managerTrust : national.reputation;
-  const eligible = p.age >= 22 && l.trait >= 60 && tenure >= 1 && matches.length >= (scope === 'club' ? 15 : 8) && trust >= 60;
-  const captainEligible = eligible && p.age >= 24 && tenure >= 2 && matches.length >= (scope === 'club' ? 40 : 16) && l.trait >= 70;
-  const teammates = Object.values(world.players).filter(w => w.id !== p.id && (scope === 'club' ? w.clubId === p.clubId : normalizeNationality(w.nationality) === normalizeNationality(national.country)));
-  const score = l.trait + Math.min(16, tenure * 4) + Math.min(8, p.age - 20) + (trust - 50) * .15 + Math.max(0, avgRating(career.season.playerStats) - 6.5) * 3;
-  const above = teammates.filter(w => w.leadership + Math.min(8, Math.max(0, w.age - 20)) + 8 > score).length;
-  if (appointment) {
-    const role = captainEligible && above === 0 ? 'captain' : eligible && above <= 1 ? 'vice' : 'none';
-    if (role !== l[roleKey]) {
-      for (const t of l.terms) if (t.scope === scope && t.role !== 'match' && t.endYear === undefined) { t.endYear = career.season.year; t.endRound = appointmentRound; }
-      l[roleKey] = role;
-      const reason=`리더십 ${l.trait} · 근속 ${tenure}시즌 · 출전 ${matches.length}경기 · 신뢰 ${Math.round(trust)}. 주장단 후보 ${above + 1}위.`;
-      if (role !== 'none') l.terms.push({ scope, teamId, role, startYear: career.season.year, startRound: appointmentRound, apps: 0, reason });
-      career.systems.events.push({id:`captain:${scope}:${teamId}:${career.season.year}:${appointmentRound}:${role}`,year:career.season.year,round:career.season.week,type:'captain',title:`${scope==='club'?'소속팀':'대표팀'} ${role==='captain'?'주장 임명':role==='vice'?'부주장 임명':'주장단 변경'}`,body:reason,importance:role==='none'?'brief':'milestone'});
-    }
-  }
+  const assessment=getCaptainAssessment(career,scope);
+  if(appointment)proposeCaptainOffer(career,scope);
   for (const t of l.terms.filter(t => t.scope === scope && t.teamId === teamId)) {
     if (t.role !== 'match') t.apps = matches.filter((m, index) => {
       const playedRound = scope === 'club' ? m.round : matches.slice(0, index + 1).filter(previous => previous.seasonYear === m.seasonYear).length;
@@ -277,7 +264,7 @@ export function updateLeadership(career: Career, scope: 'club'|'national', appoi
   if (latest?.performers?.find(r => r.id === p.id)?.captain && l[roleKey] !== 'captain' && !l.terms.some(t => t.role === 'match' && t.reason.includes(latest.id))) {
     l.terms.push({ scope, teamId, role: 'match', startYear: career.season.year, endYear: career.season.year, startRound: latest.round, endRound: latest.round, apps: 1, reason: `정규 주장 부재 시 임시 주장 · 경기 ${latest.id}` });
   }
-  l.reason = `${scope === 'club' ? '소속팀' : '대표팀'} ${l[roleKey] === 'captain' ? '주장' : l[roleKey] === 'vice' ? '부주장' : '일반 선수'} · 리더십 ${l.trait}, 근속 ${tenure}시즌, 출전 ${matches.length}경기, 신뢰 ${Math.round(trust)}. ${!eligible ? '지속적인 출전과 근속이 필요합니다.' : `주장단 후보 ${above + 1}위입니다.`}`;
+  l.reason=assessment.reasons.join(' ');
 }
 
 function competitors(career: Career): CompetitorSeason[] {

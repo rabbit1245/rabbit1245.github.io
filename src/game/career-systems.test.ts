@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { CLUBS } from './data';
 import { emptyStats } from './math';
-import { applyContract, awardPositionGroup, createEconomics, createLeadership, beginEconomicSeason, ensureEconomicHistory, getPreviousContractWage, evaluateAwards, getClubTopScorer, makeContractOffers, payBonus, paySalary, performanceScore, updateLeadership, updateMarketValue } from './career-systems';
+import { applyContract, awardPositionGroup, createEconomics, createLeadership, beginEconomicSeason, ensureEconomicHistory, getPreviousContractWage, answerCaptainOffer, evaluateAwards, getClubTopScorer, makeContractOffers, payBonus, paySalary, performanceScore, updateLeadership, updateMarketValue } from './career-systems';
 import type { Career, MatchRecord, PlayerStats, Position } from './types';
 import type { CompetitorSeason } from './revision-types';
 
@@ -68,15 +68,15 @@ test('52 weeks of fixed salary are paid across a 38-round season; club transfer 
   assert.equal(c.systems!.leadership.clubRole, 'none');
 });
 
-test('midseason offers allow renewal, not external transfers, and obey actual club budgets', () => {
-  const c = makeCareer(); c.season.week = 19; c.stage = 'season';
-  const renewal = makeContractOffers(c, 'midseason');
-  assert.equal(renewal.length, 1); assert.equal(renewal[0].type, 'renew');
-  assert.equal(renewal[0].currentWage, 2_000); assert.equal(renewal[0].expiresRound, 21);
-  for (const club of Object.values(c.systems!.world.clubs)) if (club.id !== c.player.clubId) club.budget = 1;
-  assert.equal(makeContractOffers(c, 'offseason').filter(o => o.type === 'transfer').length, 0);
-  const bad = { ...renewal[0], wage: 1_000_000_000 };
-  assert.throws(() => applyContract(c, bad), /예산/);
+test('contracts are offered only after the full season and obey actual club budgets', () => {
+  const c=makeCareer();c.season.week=19;c.stage='season';
+  assert.deepEqual(makeContractOffers(c,'midseason'),[]);assert.deepEqual(makeContractOffers(c,'offseason'),[]);
+  c.stage='offseason';c.season.week=c.season.totalWeeks;
+  const renewal=makeContractOffers(c,'offseason').find(o=>o.type==='renew')!;
+  assert.ok(renewal);assert.equal(renewal.effective,'nextSeason');
+  for(const club of Object.values(c.systems!.world.clubs))if(club.id!==c.player.clubId)club.budget=1;
+  assert.equal(makeContractOffers(c,'offseason').filter(o=>o.type==='transfer').length,0);
+  assert.throws(()=>applyContract(c,{...renewal,wage:1_000_000_000}),/예산/);
 });
 
 test('an expired expensive legacy contract can renew on the actual affordable wage', () => {
@@ -97,7 +97,9 @@ test('a highly rated new signing does not become captain; tenure and actual appe
   c.season.year = 2028; c.season.matches.forEach(m => m.seasonYear = 2028);
   c.season.week = 42;
   updateLeadership(c, 'club', true);
-  assert.equal(c.systems!.leadership.clubRole, 'captain');
+  assert.equal(c.systems!.leadership.clubRole, 'none','a proposal is not an automatic appointment');
+  const proposal=c.systems!.leadership.offers!.find(o=>o.status==='pending')!;assert.equal(proposal.role,'captain');answerCaptainOffer(c,proposal.id,true);
+  assert.equal(c.systems!.leadership.clubRole,'captain');
   assert.equal(c.systems!.leadership.clubMatches, 42);
   assert.equal(c.systems!.leadership.terms[0].apps, 0, 'new appointment does not count earlier appearances as captain');
   c.season.matches.push(match(c,43)); c.season.week = 43;
@@ -156,15 +158,16 @@ test('offseason expiration uses the next-season effective year for free transfer
   assert.ok(offers.filter(o=>o.type==='transfer').every(o=>o.fee===0),'expired contracts have no club transfer fee');
 });
 
-test('captain appointment emits one reasoned event and repeated evaluation is idempotent',()=>{
+test('captain proposals emit one reasoned event and acceptance records the term exactly once',()=>{
   const c=makeCareer();c.player.age=29;c.systems!.leadership.trait=95;
   c.season.year=2028;c.season.week=42;c.season.matches=Array.from({length:42},(_,i)=>match(c,i+1));
-  updateLeadership(c,'club',true);
-  const appointments=c.systems!.events.filter(e=>e.type==='captain');
-  assert.equal(appointments.length,1);assert.match(appointments[0].title,/주장 임명/);assert.match(appointments[0].body,/근속.*출전.*신뢰/);
-  updateLeadership(c,'club',true);
-  assert.equal(c.systems!.events.filter(e=>e.type==='captain').length,1);
-  assert.equal(c.systems!.leadership.terms.length,1);
+  updateLeadership(c,'club',true);updateLeadership(c,'club',true);
+  const proposals=c.systems!.events.filter(e=>e.type==='captain');
+  assert.equal(proposals.length,1);assert.match(proposals[0].title,/주장 제의/);
+  assert.match(proposals[0].body,/리더십.*근속/);assert.equal(c.systems!.leadership.terms.length,0);
+  answerCaptainOffer(c,c.systems!.leadership.offers![0].id,true);
+  assert.equal(c.systems!.leadership.terms.length,1);assert.equal(c.systems!.leadership.clubRole,'captain');
+  updateLeadership(c,'club',true);assert.equal(c.systems!.leadership.offers!.length,1);
 });
 
 test('youth development goals are excluded from the senior club top-scorer record',()=>{
@@ -195,6 +198,7 @@ test('a youth starter develops leadership through mental ability, age and actual
       c.history.push({year:c.season.year,clubId:c.player.clubId,clubName:'test',leagueId:'EN1',competitionName:'test',age:c.player.age,position:c.player.position,squad:'senior',rank:3,ovrStart:60,ovrEnd:60,stats:c.season.playerStats,matches:c.season.matches,awards:[],attributeGrowth:{},income:0,completed:true});
       c.season.year++;c.season.index++;c.player.age++;c.season.week=0;c.season.matches=[];c.season.playerStats=emptyStats();
       updateLeadership(c,'club',true);
+      const offer=c.systems!.leadership.offers?.find(o=>o.status==='pending');if(offer)answerCaptainOffer(c,offer.id,true);
     }
     for(let command=0;command<36;command++)updateLeadership(weekly,'club');
     assert.equal(weekly.systems!.leadership.trait,annual.systems!.leadership.trait,'command count must not train leadership');
@@ -205,7 +209,7 @@ test('a youth starter develops leadership through mental ability, age and actual
   assert.ok(eligibleByThirty,'established good performers should compete for leadership between age25 and30');
   assert.ok(annual.systems!.leadership.trait>=70);
   assert.equal(annual.systems!.leadership.baseTrait,base,'original temperament is retained');
-  assert.equal(annual.systems!.leadership.clubRole,'captain');
+  assert.equal(annual.systems!.leadership.clubRole,'vice','the more experienced teammate with leadership 80 still wins the captain comparison');
   const newSigning=structuredClone(annual);newSigning.systems!.leadership.clubSinceYear=newSigning.season.year;newSigning.systems!.leadership.clubRole='none';newSigning.player.ovr=99;
   updateLeadership(newSigning,'club',true);assert.equal(newSigning.systems!.leadership.clubRole,'none');
 });
@@ -228,7 +232,7 @@ test('initial contracts and every renewal preserve previous terms and actual sig
   assert.equal(initial.current.signedDate,'2026-07-01');assert.equal(initial.current.expiresDate,'2028-06-30');
   assert.equal(getPreviousContractWage(c),undefined);
   c.season.week=12;
-  const renewal=makeContractOffers(c,'midseason')[0];
+  const renewal={id:'known-old-renewal',clubId:c.player.clubId,type:'renew' as const,wage:c.player.wage+100,years:3,role:'주전',fee:0,reason:'기존 재계약 원장 검증',effective:'now' as const};
   assert.ok(renewal&&renewal.type==='renew');
   const oldWage=c.player.wage,oldIncome=c.careerIncome;
   applyContract(c,renewal);
@@ -249,7 +253,7 @@ test('initial contracts and every renewal preserve previous terms and actual sig
 
 test('successive contracts retain renewal and transfer changes while fees remain club transactions',()=>{
   const c=makeCareer();c.stage='season';c.season.week=10;
-  const renewal=makeContractOffers(c,'midseason')[0];applyContract(c,renewal);
+  const renewal={id:'known-old-renewal',clubId:c.player.clubId,type:'renew' as const,wage:c.player.wage+100,years:3,role:'주전',fee:0,reason:'기존 재계약 원장 검증',effective:'now' as const};applyContract(c,renewal);
   const e=c.systems!.economics,renewed=structuredClone(e.contractHistory!.at(-1)!.current);
   c.stage='offseason';c.season.week=c.season.totalWeeks;
   const offer=makeContractOffers(c,'offseason').find(row=>row.type==='transfer')!;

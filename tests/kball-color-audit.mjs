@@ -142,10 +142,8 @@ try{
       await page.locator('.match-row').first().click();await sample(page,`${prefix}-match-detail`);await closeDialog(page);
     }
     await page.getByRole('button',{name:'전체 순위',exact:true}).click();await sample(page,`${prefix}-full-standings-pagination`);
-    for(const view of['training','growth','team']){
-      await page.getByTestId(view==='training'?'training-plan':`locker-view-${view}`).click();await sample(page,`${prefix}-locker-${view}`);
-      if(view==='growth'&&viewport.width<900)await mobileGrowthScroll(page,`${prefix}-locker-growth-scrolled-right`);
-    }
+    assert.equal(await page.getByText('팀 현황',{exact:true}).count(),0);
+    await page.getByTestId('locker-season-details').scrollIntoViewIfNeeded();await sample(page,`${prefix}-locker-combined-details`);await page.evaluate(()=>scrollTo(0,0));
     await page.getByTestId('transfer-window').click();await sample(page,`${prefix}-contract-modal`);
     const accept=page.getByRole('button',{name:'제안 수락',exact:true}).first();if(await accept.count())await sample(page,`${prefix}-contract-hover`,{hover:accept});await closeDialog(page);
     await nav(page,'player');

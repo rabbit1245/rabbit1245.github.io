@@ -580,6 +580,31 @@ function validateSystems(career: Record<string, unknown>, player: Record<string,
   for (const key of ['clubRole', 'nationalRole']) choice(leadership[key], ['none', 'captain', 'vice'], `leadership.${key}`);
   for (const key of ['clubMatches', 'nationalMatches']) number(leadership[key], `leadership.${key}`, 0, 100_000, true);
   text(leadership.reason, 'leadership.reason', 4_000);
+  if(leadership.offers!==undefined){
+    const offers=list(leadership.offers,'leadership.offers',10_000).map(raw=>object(raw,'captainOffer'));
+    unique(offers.map(row=>text(row.id,'captainOffer.id')),'주장 제의');
+    for(const row of offers){
+      const scope=choice(row.scope,['club','national'],'captainOffer.scope');teamId(row.teamId,'captainOffer.teamId',scope==='national');
+      const role=choice(row.role,['captain','vice'],'captainOffer.role'),year=number(row.year,'captainOffer.year',1900,currentYear,true);
+      number(row.round,'captainOffer.round',0,150,true);text(row.reason,'captainOffer.reason',8000);
+      const status=choice(row.status,['pending','accepted','declined','expired'],'captainOffer.status');
+      if(row.answeredYear!==undefined)number(row.answeredYear,'captainOffer.answeredYear',year,currentYear,true);
+      if(row.answeredRound!==undefined)number(row.answeredRound,'captainOffer.answeredRound',0,150,true);
+      assert(status==='pending'?(row.answeredYear===undefined&&row.answeredRound===undefined):row.answeredYear!==undefined&&row.answeredRound!==undefined,'주장 제의 응답 시점이 올바르지 않습니다.');
+      assert(status!=='pending'||career.stage!=='retired','은퇴한 선수의 주장 제의가 아직 열려 있습니다.');
+      const a=object(row.assessment,'captainOffer.assessment');
+      assert(a.scope===scope&&a.teamId===row.teamId&&a.eligibleRole===role,'주장 제의와 평가 대상·역할이 다릅니다.');
+      for(const key of ['teamPower','squadOvr','playerOvr'])number(a[key],`captainAssessment.${key}`,1,100);
+      for(const key of ['leadership','trust'])number(a[key],`captainAssessment.${key}`,0,100);
+      number(a.age,'captainAssessment.age',14,100,true);number(a.tenure,'captainAssessment.tenure',0,200,true);
+      for(const key of ['abilityRank','candidateRank'])number(a[key],`captainAssessment.${key}`,1,100_000,true);
+      for(const key of ['apps','recentApps','recentMinutes'])number(a[key],`captainAssessment.${key}`,0,10_000_000,true);
+      assert(Number(a.recentApps)<=Number(a.apps)&&Number(a.recentMinutes)<=Number(a.recentApps)*90,'주장 평가의 최근 출전 기록이 올바르지 않습니다.');
+      number(a.rating,'captainAssessment.rating',0,10);number(a.score,'captainAssessment.score',0,200);
+      for(const reason of list(a.reasons,'captainAssessment.reasons',50))text(reason,'captainAssessment.reason',4000);
+      if(status==='accepted')assert((leadership.terms as Record<string,unknown>[]).some(t=>t.scope===scope&&t.teamId===row.teamId&&t.role===role&&t.startYear===row.answeredYear),'수락한 주장 제의의 임기 기록이 없습니다.');
+    }
+  }
   for (const raw of list(leadership.terms, 'leadership.terms', 10_000)) {
     const row = object(raw, 'leadership.term'); const scope = choice(row.scope, ['club', 'national'], 'term.scope'); teamId(row.teamId, 'term.teamId', scope === 'national');
     choice(row.role, ['captain', 'vice', 'match'], 'term.role'); const start = number(row.startYear, 'term.startYear', 1900, 2500, true);

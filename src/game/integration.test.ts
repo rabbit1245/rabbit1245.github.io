@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { createCareer, advanceCareer, advanceHalf, dismissChoice, setTraining, startNextSeason, retireCareer, getCareerTotals, calculateTable, overall } from './engine';
+import { acceptTransfer, createCareer, advanceCareer, advanceHalf, dismissChoice, setTraining, startNextSeason, retireCareer, getCareerTotals, calculateTable, overall } from './engine';
 import { PLAY_STYLES, FIELD_ATTRIBUTES } from './attributes';
 import { getClub, CLUBS } from './data';
 import { ALL_STATS } from './math';
@@ -13,7 +13,7 @@ import type { Career, CreateOptions } from './types';
 const options=(extra:Partial<CreateOptions>={}):CreateOptions=>({name:'연결 검증',nationality:'대한민국',age:24,height:180,weight:75,foot:'right',position:'CM',talent:'S',style:PLAY_STYLES.CM[0],clubId:'KR1_01',squad:'senior',difficulty:'realistic',seed:'systems-integration',training:['passing','vision'],...extra});
 const equalTotals=(a:ReturnType<typeof getCareerTotals>,b:ReturnType<typeof getCareerTotals>)=>{for(const key of ALL_STATS)assert.ok(Math.abs((a[key]??0)-(b[key]??0))<.001,key);};
 
-test('half-season flow freezes annual training, pauses only contract choices and pays a full fixed-wage season',()=>{
+test('half-season flow fixes annual training and wage, reserving all contract choices for the end of the season',()=>{
   const initial=createCareer(options());
   const original=JSON.stringify(initial),wage=initial.player.wage;
   const first=advanceHalf(initial);
@@ -25,8 +25,8 @@ test('half-season flow freezes annual training, pauses only contract choices and
   assert.equal(first.player.wage,wage,'valuation never rewrites a contract');
   assert.throws(()=>setTraining(first,['shooting'],'intense'),/시즌 중/);
   for(const key of FIELD_ATTRIBUTES)if(!initial.training.includes(key))assert.ok(first.player.attributes[key]!-initial.player.attributes[key]!<=.47,key);
-  if(first.systems!.pendingChoice)assert.throws(()=>advanceHalf(first),/계약 제안/);
-  const second=advanceHalf(dismissChoice(first));
+  assert.equal(first.systems!.pendingChoice,undefined);assert.deepEqual(first.offers,[]);
+  const second=advanceHalf(first);
   assert.equal(second.stage,'offseason');
   assert.equal(second.systems!.growthReports.length,2);
   assert.ok(second.season.fixtures.every(f=>f.played));
@@ -34,6 +34,7 @@ test('half-season flow freezes annual training, pauses only contract choices and
   assert.ok(Math.abs(second.systems!.economics.salaryIncome-wage*52)<.01);
   assert.equal(second.careerIncome,Math.round((second.systems!.economics.salaryIncome+second.systems!.economics.bonusIncome)*100)/100);
   assert.equal(second.systems!.economics.totalTransferFees,0);
+  assert.ok(second.offers.length>0,'annual transfer and renewal choices arrive after the full season');
   validateCareer(second);
 });
 
@@ -89,4 +90,13 @@ test('league calendars split seasons locally and cross-calendar transfers never 
   const shifted={...korean.season,year:2027,calendarYear:2028};
   assert.equal(nextCalendarYear(shifted,'KR1'),2029);
   assert.ok(new Date(seasonDate({...shifted,year:2028,calendarYear:2029},0)).getTime()>new Date(seasonDate(shifted,shifted.totalWeeks)).getTime());
+});
+
+
+test('an old midseason prompt clears on a command without changing wages or blocking progress',()=>{
+  const c=createCareer(options());
+  c.offers=[{id:'old-renewal',clubId:c.player.clubId,type:'renew',wage:c.player.wage+100,years:3,role:'주전',fee:0,reason:'이전 버전 제안',effective:'now'}];
+  c.systems!.pendingChoice={kind:'renewal',offerIds:['old-renewal'],deadlineRound:0,reason:'이전 버전 응답 대기'};
+  const before=JSON.stringify(c);assert.throws(()=>acceptTransfer(c,'old-renewal'),/시즌 종료/);
+  const next=advanceCareer(c,1);assert.equal(next.season.week,1);assert.equal(next.systems!.pendingChoice,undefined);assert.deepEqual(next.offers,[]);assert.equal(next.player.wage,c.player.wage);assert.equal(JSON.stringify(c),before);
 });

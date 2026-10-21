@@ -144,8 +144,13 @@ try {
   await page.getByTestId('advance-half').click();career=await waitState(page,c=>c.id===replicaId&&c.season.week===c.systems.halfRound,'reduced-motion replay');await ready(page);
   assert.equal(await worldDigest(page,replicaId),firstWorld,'presentation choice must not change the persistent world');assert.deepEqual(career.player,firstHalf.player);assert.deepEqual(career.season,firstHalf.season);assert.deepEqual(career.systems.economics,firstHalf.systems.economics);assert.deepEqual(career.systems.national,firstHalf.systems.national);assert.equal(await page.locator('.presentation').count(),0);
   completed.push('creation training, three menus, one-command half progression and identical skipped/reduced-motion results');
-  career=await dismissRenewal(page,replicaId);
-  await page.getByTestId('training-plan').click();assert.equal(await page.locator('.training-row:enabled').count(),0);assert.equal(await page.getByTestId('confirm-training').count(),0);await page.getByTestId('locker-view-overview').click();
+  assert.equal(career.systems.pendingChoice,undefined);assert.deepEqual(career.offers,[]);assert.equal(await page.getByTestId('transfer-window').count(),0);assert.equal(await page.getByTestId('training-plan').count(),0);assert.equal(await page.getByText('팀 현황',{exact:true}).count(),0);
+  const details=page.getByTestId('locker-season-details');assert.equal(await details.locator('.stat-detail').count(),9);
+  const currentNational=[...new Map([...career.systems.national.history.flatMap(h=>h.matches),...career.systems.national.matches].filter(m=>m.seasonYear===career.season.year).map(m=>[m.id,m])).values()];
+  const combinedMinutes=career.season.playerStats.minutes+currentNational.reduce((sum,m)=>sum+m.playerStats.minutes,0);
+  assert.equal(await details.locator('.shared-stats > span').nth(2).textContent(),`시간 ${combinedMinutes.toLocaleString()}′`,'locker details combine actual club and national minutes');
+  assert.equal(await page.getByTestId('season-competitions').count(),1);assert.ok((await page.getByTestId('club-competition').textContent()).includes(career.season.competitionName));
+  await navigate(page,'player');await page.getByTestId('player-view-training').click();assert.equal(await page.locator('.training-row:enabled').count(),0);assert.equal(await page.getByTestId('confirm-training').count(),0);await navigate(page,'locker');
   await page.locator('.match-row').first().click();assert.equal(await page.getByRole('dialog').locator('[data-testid="role-metrics"] .stat-detail').count(),9);await closeDialog(page);
   await page.getByRole('button',{name:'전체 순위',exact:true}).click();
   while(await page.getByRole('button',{name:'순위 이전 페이지',exact:true}).isEnabled())await page.getByRole('button',{name:'순위 이전 페이지',exact:true}).click();
@@ -157,7 +162,7 @@ try {
   await page.getByTestId('records-scope-national').click();assert.equal(await page.getByTestId('role-metrics').locator('.stat-detail').count(),9);await navigate(page,'locker');
   await page.getByTestId('advance-half').click();career=await waitState(page,c=>c.id===replicaId&&c.stage==='offseason','second half and season archive');await ready(page);
   assert.equal(career.history.length,1);assert.ok(career.season.fixtures.every(f=>f.played));assert.equal(career.history[0].stats.goals,career.history[0].matches.reduce((s,m)=>s+m.playerStats.goals,0));assert.equal(career.systems.growthReports.filter(r=>r.year===initialYear).length,2);
-  completed.push('deadline choice, locked in-season training, full standings, nine metrics and reconciled club/national records');
+  completed.push('annual-only contracts, one training route, current competitions, locker combined details and reconciled records');
   // An annual training choice creates a new normal snapshot, then backup restore returns to the old plan.
   assert.equal(await page.getByTestId('advance-half').isDisabled(),true,'offseason requires both contract and training choices');
   await page.getByTestId('training-plan').click();
@@ -179,7 +184,7 @@ try {
   const incomeBefore=career.careerIncome;await page.locator('.offer').nth(offerIndex>=0?offerIndex:0).getByRole('button',{name:'제안 수락'}).click();career=await waitState(page,c=>c.id===replicaId&&c.transferDecision==='signed','contract signing');await ready(page);
   assert.equal(career.player.clubId,selectedOffer.clubId);assert.equal(career.player.wage,selectedOffer.wage);assert.equal(career.careerIncome,incomeBefore);assert.equal(career.history[0].clubId,initialClub);await closeDialog(page);
   assert.equal(await page.getByTestId('advance-half').isDisabled(),true,'a signed contract still waits for the restored, unconfirmed training plan');
-  await page.getByTestId('training-plan').click();await page.getByTestId('confirm-training').click();career=await waitState(page,c=>c.id===replicaId&&c.systems.trainingPlan.confirmed,'next-season training confirmed after backup restore');await ready(page);assert.equal(await page.getByTestId('advance-half').isEnabled(),true);
+  await page.getByTestId('training-plan').click();await page.getByTestId('confirm-training').click();career=await waitState(page,c=>c.id===replicaId&&c.systems.trainingPlan.confirmed,'next-season training confirmed after backup restore');await ready(page);await navigate(page,'locker');assert.equal(await page.getByTestId('advance-half').isEnabled(),true);
   await page.getByTestId('advance-half').click();career=await waitState(page,c=>c.id===replicaId&&c.season.year>initialYear&&c.season.week===0&&c.stage==='season','next season');await ready(page);assert.equal(career.player.age,21);assert.equal(career.history.length,1);
   await page.reload({waitUntil:'networkidle'});await page.getByRole('button',{name:'이어서 플레이',exact:true}).click();await page.getByRole('heading',{level:1,name:'라커룸',exact:true}).waitFor();await ready(page);assert.equal(await page.evaluate(()=>localStorage.getItem('career24-legacy-test-sentinel')),'preserve-existing-save');
   await navigate(page,'career');await page.getByRole('button',{name:'통산',exact:true}).click();const before=totals(career),summaryBefore=await page.getByTestId('records-scope-all').textContent();

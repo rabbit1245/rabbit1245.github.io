@@ -1,0 +1,16 @@
+.locker-workspace .locker-overview-heading { display:flex; align-items:center; justify-content:space-between; gap:8px 12px; }
+.locker-workspace .locker-overview-heading h2 { font-size:20px; line-height:1.3; }
+.locker-workspace .locker-season-details { margin-top:2px; }
+.locker-workspace .locker-season-details .panel-head { flex-wrap:wrap; }
+.locker-workspace .locker-season-details .shared-stats { margin:0; padding-top:0; padding-bottom:10px; }
+.locker-workspace .locker-season-details .stats-nine { grid-template-columns:repeat(5,minmax(0,1fr)); gap:8px; }
+.locker-workspace .locker-season-details .stat-detail { min-width:0; }
+.locker-workspace .locker-season-details .stat-detail > span { color:var(--text); font-size:17px; }
+.locker-workspace .locker-season-details .stat-detail > strong { font-size:24px; }
+.locker-workspace .locker-season-details .stat-detail > strong > small { font-size:15px; color:var(--muted); }
+@media(max-width:1199px) { .locker-workspace .locker-season-details .stats-nine { grid-template-columns:repeat(3,minmax(0,1fr)); } }
+@media(max-width:599px) {
+  .locker-workspace .locker-overview-heading { align-items:flex-start; flex-wrap:wrap; }
+  .locker-workspace .locker-controls > .action-inline { width:100%; margin-left:0; }
+  .locker-workspace .locker-season-details .stats-nine { grid-template-columns:repeat(2,minmax(0,1fr)); }
+}

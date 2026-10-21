@@ -1,5 +1,5 @@
 import type { Career, GameCommand } from './types';
-import { advanceCareer, advanceHalf, dismissChoice, setTraining, acceptTransfer, stayAtClub, startNextSeason, retireCareer } from './engine';
+import { advanceCareer, advanceHalf, dismissChoice, setTraining, acceptTransfer, stayAtClub, startNextSeason, retireCareer, respondToCaptainOffer } from './engine';
 
 export function executeCommand(career: Career, command: GameCommand, commandId: string): Career {
   if (!commandId || commandId.length > 160) throw new Error('잘못된 진행 요청입니다.');
@@ -14,6 +14,7 @@ export function executeCommand(career: Career, command: GameCommand, commandId: 
     case 'dismissChoice': next = dismissChoice(career); break;
     case 'training': next = setTraining(career, command.keys, command.intensity); break;
     case 'transfer': next = acceptTransfer(career, command.offerId); break;
+    case 'captainDecision':next=respondToCaptainOffer(career,command.offerId,command.accept);break;
     case 'stay': next = stayAtClub(career); break;
     case 'nextSeason': next = startNextSeason(career); break;
     case 'retire': next = retireCareer(career); break;
