@@ -1,10 +1,12 @@
-# K볼 2.1 바로 플레이
+# K볼 2.1 · 화이트·연두 배경
 
-[Kball.zip 다운로드](https://github.com/rabbit1245/rabbit1245.github.io/raw/refs/heads/kball-playable/Kball.zip?download=1&v=2.1)
+[Kball.zip 다운로드](https://github.com/rabbit1245/rabbit1245.github.io/raw/refs/heads/kball-playable/Kball.zip?download=1&v=2.1-green)
 
 압축을 풀고 `Kball.html`을 최신 Chrome 또는 Edge로 열어 주세요. 설치나 로그인은 필요하지 않습니다.
 
-- 큰 글씨와 회색 화면, 라커룸·선수·커리어 세 메뉴
+- 화이트 카드와 연두 배경, 진한 글자, 라커룸·선수·커리어 세 메뉴
+- 비활성 버튼·선택 항목·보조 수치의 대비 보강, 하단을 가리지 않는 알림
+- 훈련을 모두 해제해도 수치 목록을 유지하고 다시 선택 가능
 - 실제 수치를 보며 첫 훈련과 오프시즌 계획 선택·확정
 - 훈련·경험·발달·부상·노화 변화, 이전/새 계약 조건과 이력
 - 리그 사이 날짜별 국대 경기·통합 기록, 지속 세계·승강·수상·은퇴
