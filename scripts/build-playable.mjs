@@ -59,7 +59,7 @@ if (!javascript || !css) throw new Error('Missing portable application outputs.'
 const compressed = gzipSync(javascript.contents, { level: 9 }).toString('base64');
 const fontLicense = await readFile('public/FONT-LICENSE.txt','utf8');
 const html = `<!doctype html>
-<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>K볼 — 바로 플레이</title><meta name="theme-color" content="#13221d"><style>${css.text}</style></head>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>K볼 — 바로 플레이</title><meta name="theme-color" content="#f4fbea"><style>${css.text}</style></head>
 <body><div id="root"><div style="padding:12vh 8vw;font-family:system-ui,sans-serif;color:#13221d"><h1>K볼</h1><p id="boot-status">당신의 축구 인생을 준비하고 있습니다…</p></div></div>
 <script>
 (async () => {

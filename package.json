@@ -11,7 +11,8 @@
     "test:legacy": "node tests/v55-core.test.js",
     "test:e2e": "node tests/kball-browser.test.mjs",
     "data:extract": "python3 scripts/extract_kball_data.py",
-    "build:playable": "node scripts/build-playable.mjs"
+    "build:playable": "node scripts/build-playable.mjs",
+    "test:colors": "node tests/kball-color-audit.mjs"
   },
   "engines": {
     "node": ">=20.19"

@@ -15,7 +15,7 @@ export default function Creation({ busy, onCreate, onClose }: { busy:boolean; on
   const first = CLUBS.find(c => /아약스/.test(c.name) || /^Ajax$/i.test(c.nativeName)) || CLUBS[0];
   const [options,setOptions] = useState<CreateOptions>(()=>({name:'김도윤',nationality:'대한민국',age:17,height:178,weight:72,foot:'right',position:'CAM',secondaryPositions:[],talent:'A',style:PLAY_STYLES.CAM[0],clubId:first.id,squad:'youth',difficulty:'realistic',seed:crypto.randomUUID(),training:POSITION_ATTRIBUTES.CAM.slice(0,3),intensity:'balanced'}));
   const [step,setStep]=useState(0),[country,setCountry]=useState(first.country),[league,setLeague]=useState(first.leagueId),[error,setError]=useState('');
-  const preview=useMemo(()=>{try{return previewPlayer({...options,name:options.name.trim()||'새 선수'});}catch{return null;}},[options]);
+  const preview=useMemo(()=>{try{return previewPlayer({...options,name:options.name.trim()||'새 선수',training:POSITION_ATTRIBUTES[options.position].slice(0,3)});}catch{return null;}},[options]);
   const all=options.position==='GK'?GK_ATTRIBUTES:FIELD_ATTRIBUTES;
   const set=<K extends keyof CreateOptions>(key:K,value:CreateOptions[K])=>setOptions(o=>({...o,[key]:value}));
   function choosePosition(position:Position){setOptions(o=>({...o,position,style:PLAY_STYLES[position][0],training:POSITION_ATTRIBUTES[position].slice(0,3),secondaryPositions:(o.secondaryPositions||[]).filter(p=>p!==position)}));}
