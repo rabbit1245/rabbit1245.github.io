@@ -1,12 +1,12 @@
 import { chromium } from 'playwright';
 import fs from 'node:fs';
 
-const browser=await chromium.launch({headless:true});
+const browser=await chromium.launch({headless:true,...(process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE?{executablePath:process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE}:{})});
 const page=await browser.newPage({viewport:{width:1440,height:1000}});
 const pageErrors=[];
 page.on('pageerror',e=>pageErrors.push(String(e)));
 
-await page.goto('http://127.0.0.1:4173/',{waitUntil:'domcontentloaded',timeout:120000});
+await page.goto((process.env.CAREER24_TEST_URL || 'http://127.0.0.1:4173/legacy.html'),{waitUntil:'domcontentloaded',timeout:120000});
 await page.waitForFunction(()=>window.CAREER24_V55_STABLE&&window.CAREER24_V56_QA?.version==='V5.6 CAREER BALANCE',{timeout:30000});
 await page.click('#newGameBtn');
 await page.waitForSelector('#createScreen.active',{timeout:10000});

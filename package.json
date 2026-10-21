@@ -1,0 +1,36 @@
+{
+  "name": "kball-career",
+  "private": true,
+  "version": "2.1.0",
+  "scripts": {
+    "dev": "vite --host 0.0.0.0 --port 5173",
+    "build": "tsc --noEmit && vite build && node scripts/copy-static.mjs",
+    "preview": "vite preview --host 0.0.0.0 --port 4173",
+    "typecheck": "tsc --noEmit",
+    "test": "tsx --test src/game/*.test.ts",
+    "test:legacy": "node tests/v55-core.test.js",
+    "test:e2e": "node tests/kball-browser.test.mjs",
+    "data:extract": "python3 scripts/extract_kball_data.py",
+    "build:playable": "node scripts/build-playable.mjs"
+  },
+  "engines": {
+    "node": ">=20.19"
+  },
+  "dependencies": {
+    "lucide-react": "0.468.0",
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "22.10.5",
+    "@types/react": "18.3.18",
+    "@types/react-dom": "18.3.5",
+    "@vitejs/plugin-react": "4.7.0",
+    "esbuild": "0.25.12",
+    "fake-indexeddb": "6.2.6",
+    "playwright": "1.55.0",
+    "tsx": "4.20.6",
+    "typescript": "5.9.3",
+    "vite": "6.4.4"
+  }
+}

@@ -5,7 +5,7 @@ on:
   push:
     branches: [main]
     paths:
-      - 'index.html'
+      - 'legacy.html'
       - 'v55-core.js'
       - 'v55-data.js'
       - 'v55-stability.js'
@@ -27,7 +27,7 @@ jobs:
         run: |
           python - <<'PY'
           import re, pathlib, subprocess, tempfile
-          html=pathlib.Path('index.html').read_text(encoding='utf-8')
+          html=pathlib.Path('legacy.html').read_text(encoding='utf-8')
           blocks=re.findall(r'<script(?![^>]*\bsrc=)[^>]*>(.*?)</script>',html,re.S|re.I)
           print('inline scripts',len(blocks))
           for i,src in enumerate(blocks):
@@ -48,11 +48,11 @@ jobs:
           NODE
       - name: Deployment wiring tests
         run: |
-          grep -q 'data/player-db.js?v=54' index.html
-          grep -q 'v55-core.js?v=1' index.html
-          grep -q 'defer src="v55-data.js?v=2"' index.html
-          grep -q 'v55-stability.js?v=2' index.html
-          ! grep -q 'data/crest-db.js' index.html
-          ! grep -q 'v54-integrated.js' index.html
-          ! grep -q 'v52-local-crests.js' index.html
-          ! grep -q 'v53-prebuilt-db.js' index.html
+          grep -q 'data/player-db.js?v=54' legacy.html
+          grep -q 'v55-core.js?v=1' legacy.html
+          grep -q 'defer src="v55-data.js?v=2"' legacy.html
+          grep -q 'v55-stability.js?v=2' legacy.html
+          ! grep -q 'data/crest-db.js' legacy.html
+          ! grep -q 'v54-integrated.js' legacy.html
+          ! grep -q 'v52-local-crests.js' legacy.html
+          ! grep -q 'v53-prebuilt-db.js' legacy.html

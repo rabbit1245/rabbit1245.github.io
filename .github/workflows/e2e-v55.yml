@@ -1,46 +1,50 @@
-name: CAREER24 V5.6 browser E2E
+name: Kball build and career tests
 
 on:
   workflow_dispatch:
   push:
     branches: [main]
-    paths:
-      - 'index.html'
-      - 'v55-core.js'
-      - 'v55-data.js'
-      - 'v55-stability.js'
-      - 'v56-career-balance.js'
-      - 'tests/v55-browser.test.mjs'
-      - 'tests/v56-stress-diagnostic.mjs'
-      - '.github/workflows/e2e-v55.yml'
+  pull_request:
+
+permissions:
+  contents: read
 
 jobs:
-  browser:
+  game:
     runs-on: ubuntu-latest
     timeout-minutes: 12
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
-      - name: Install browser test runtime
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - name: Engine, save, and legacy regressions
         run: |
-          npm init -y
-          npm install playwright@1.55.0
-          npx playwright install --with-deps chromium
-      - name: Start local game server
+          npm test
+          npm run test:legacy
+      - name: Production build
+        run: npm run build
+      - name: Browser runtime
+        run: npx playwright install --with-deps chromium
+      - name: Start built application
         run: |
-          python3 -m http.server 4173 --bind 127.0.0.1 >/tmp/career24-server.log 2>&1 &
-          echo $! > /tmp/career24-server.pid
-          sleep 2
-      - name: Run real browser flow
+          npm run preview > /tmp/kball-preview.log 2>&1 &
+          for attempt in $(seq 1 30); do
+            if curl --fail --silent http://127.0.0.1:4173/ > /dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/kball-preview.log
+          exit 1
+      - name: Career and persistence browser flow
+        run: npm run test:e2e
+      - name: Preserved legacy browser flow
         run: node tests/v55-browser.test.mjs
-      - name: Run all-position stress diagnostics
-        run: node tests/v56-stress-diagnostic.mjs
-      - name: Upload stress report
-        if: always()
+      - name: Browser diagnostics
+        if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: v56-stress-report
-          path: tests/v56-stress-report.json
+          name: kball-browser-diagnostics
+          path: test-results
           if-no-files-found: ignore

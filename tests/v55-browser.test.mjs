@@ -1,7 +1,7 @@
 import { chromium } from 'playwright';
 import assert from 'node:assert/strict';
 
-const browser=await chromium.launch({headless:true});
+const browser=await chromium.launch({headless:true,...(process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE?{executablePath:process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE}:{})});
 const page=await browser.newPage({viewport:{width:1440,height:1000}});
 const pageErrors=[];
 page.on('pageerror',e=>pageErrors.push(String(e)));
@@ -11,7 +11,7 @@ let releasePlayers;
 const playerDownload=new Promise(resolve=>{releasePlayers=resolve});
 await page.route('**/data/player-db.js*',async route=>{await playerDownload;await route.continue()});
 await page.addInitScript(()=>{window.__dbReadyEvents=0;window.addEventListener('career24-db-state',()=>window.__dbReadyEvents++)});
-await page.goto('http://127.0.0.1:4173/',{waitUntil:'commit',timeout:30000});
+await page.goto((process.env.CAREER24_TEST_URL || 'http://127.0.0.1:4173/legacy.html'),{waitUntil:'commit',timeout:30000});
 await page.waitForFunction(()=>window.CAREER24_V55_STABLE&&window.CAREER24_V56_QA?.version==='V5.6 CAREER BALANCE',null,{timeout:10000});
 assert.equal(await page.locator('#mainScreen').isVisible(),true,'menu must show before the player download finishes');
 assert.equal(await page.evaluate(()=>window.CAREER24_LIVE_DB.state==='ready'),false);
@@ -121,7 +121,7 @@ const missing=await browser.newPage();
 const requests=[];
 missing.on('request',r=>requests.push(r.url()));
 await missing.route('**/data/player-db.js*',route=>route.abort());
-await missing.goto('http://127.0.0.1:4173/',{waitUntil:'load'});
+await missing.goto((process.env.CAREER24_TEST_URL || 'http://127.0.0.1:4173/legacy.html'),{waitUntil:'load'});
 assert.equal(await missing.evaluate(()=>window.CAREER24_LIVE_DB.state),'error');
 assert.equal(requests.some(u=>/male_players\.csv|logos\.json/.test(u)),false);
 await missing.click('#newGameBtn');

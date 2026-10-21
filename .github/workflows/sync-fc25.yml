@@ -36,7 +36,7 @@ jobs:
           from difflib import SequenceMatcher
           from pathlib import Path
 
-          html = Path("index.html").read_text(encoding="utf-8")
+          html = Path("legacy.html").read_text(encoding="utf-8")
           root = Path("/tmp/football-logos/logos")
           out = Path("data/canonical-logos.json")
           diag = Path("data/crest-diagnostics.json")
@@ -190,11 +190,14 @@ jobs:
               raise SystemExit("bundled player DB unexpectedly small")
           PY
 
+      - name: Refresh Kball catalogue
+        run: python3 scripts/extract_kball_data.py
+
       - name: Commit local player DB and crests
         run: |
           git config user.name "career24-data-bot"
           git config user.email "actions@users.noreply.github.com"
-          git add data/male_players.csv data/players.min.json data/player-db.js data/crest-db.js data/canonical-logos.json data/crest-diagnostics.json assets/crests
+          git add src/game/catalog.json data/male_players.csv data/players.min.json data/player-db.js data/crest-db.js data/canonical-logos.json data/crest-diagnostics.json assets/crests
           git diff --cached --quiet && exit 0
           git commit -m "Sync FC25 DB and local canonical club crests"
           git push

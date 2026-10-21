@@ -3,7 +3,7 @@ from pathlib import Path
 
 ROOT = Path(".")
 CSV = ROOT / "data" / "male_players.csv"
-HTML = ROOT / "index.html"
+HTML = ROOT / "legacy.html"
 OUT = ROOT / "data" / "players.min.json"
 
 def norm(s):
