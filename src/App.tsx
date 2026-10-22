@@ -8,12 +8,12 @@ import { runGameCommand } from './game/client';
 import { deleteSlot, exportCareer, importCareer, listSlots, loadCareer, restoreBackup, saveCareer } from './game/storage';
 import { sumStats } from './game/math';
 import { careerTextChunks,careerTextFilename } from './game/career-text';
-import { getSeasonCompetitions } from './game/season-competitions';
 import Creation from './components/Creation';
 import LockerRoom, { phaseLabel } from './components/LockerRoom';
 import PlayerPanel, { type PlayerView } from './components/PlayerPanel';
 import SeasonCompetitions from './components/SeasonCompetitions';
-import CareerPanel from './components/CareerPanel';
+import CareerPanel, { type CareerView } from './components/CareerPanel';
+import PlayerStrip from './components/PlayerStrip';
 import StatsNine from './components/StatsNine';
 import CheatSettings from './components/CheatSettings';
 import { average, calendarLabel, Brand, clubTotal, compactMoney, Delta, money, Modal, nationalTotal, seasonLabel, shortDate, TeamBadge, teamName, visibleAwards } from './components/Shared';
@@ -36,17 +36,12 @@ function Presentation({matches,events,onClose,reduced}:{matches:MatchRecord[];ev
   useEffect(()=>{if(reduced||!items.length){onClose();return;}const timer=window.setTimeout(()=>{if(index>=items.length-1)onClose();else setIndex(i=>i+1);},items[index]?.important?850:200);return()=>clearTimeout(timer);},[index,reduced]);
   return <div className="presentation" role="status" aria-live="polite"><span className="eyebrow">시즌의 장면 · 결과 계산 완료</span><div className="presentation-rail">{items.map((r,i)=><i key={r.id} className={i<=index?'done':''}/>)}</div><strong>{items[index]?.title}</strong><p>{items[index]?.body}</p><button className="button secondary small" onClick={onClose}><SkipForward size={15}/>연출 건너뛰기</button></div>;
 }
-function PlayerStrip({career}:{career:Career}) {
-  const p=career.player,e=career.systems?.economics,role=career.systems?.leadership.clubRole;
-  const nationalRows=getSeasonCompetitions(career).filter(row=>row.scope==='national');
-  const n=nationalRows.find(row=>row.status==='called')??nationalRows.find(row=>row.competitionId)??nationalRows[0];
-  const nationalStatus=n.status==='called'?'소집':n.status==='played'?'이번 시즌 출전':n.status==='completed'?'시즌 기록':n.statusLabel;
-  return <section className="player-strip" data-testid="player-strip" aria-label="선수 요약"><div className="strip-identity"><TeamBadge id={p.clubId}/><div><strong>{p.name}{role&&role!=='none'&&<span className="armband">{role==='captain'?'C':'VC'}</span>}</strong><span>{p.age}세 · {p.position} · {p.squad==='youth'?'U19':'1군'} · {teamName(p.clubId)}</span></div></div><div className="strip-ovr"><span>OVR</span><strong>{p.ovr}</strong><Delta value={p.ovr-career.season.ovrStart}/></div><div className="strip-economics"><span>몸값 <b>{e?compactMoney(e.marketValue):'미집계'}</b></span><span>주급 <b>{money(p.wage)}</b></span><small>{e?.contract.role||'계약 역할 미집계'}</small></div><div className="strip-national"><span>국가대표 <b>{nationalStatus}</b></span><small>{n.teamName}</small></div><div className="strip-condition"><span>체력 <b>{Math.round(p.fitness)}%</b> · 신뢰 <b>{Math.round(career.managerTrust)}%</b></span><small>{p.injuryWeeks>0?`부상 회복 ${p.injuryWeeks}주`:'경기 출전 가능'}</small></div></section>;
-}
 export default function App() {
   const [career, setCareer] = useState<Career | null>(null);
   const [page, setPage] = useState<Page>('locker');
   const [playerView,setPlayerView]=useState<PlayerView>('attributes');
+  const [playerViewRequest,setPlayerViewRequest]=useState(0);
+  const [careerView,setCareerView]=useState<CareerView>('records');
   const [slots, setSlots] = useState<SaveSlot[]>([]);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
@@ -92,8 +87,10 @@ export default function App() {
   }
   const closeCreation = () => { if (!locked.current) setCreation(false); };
   const closeMatch = () => setSelectedMatch(null);
-  function navigate(next: Page) { if(next==='player')setPlayerView('attributes');setPage(next); setMobileOpen(false); window.scrollTo({ top: 0, behavior: 'instant' }); }
-  function openTraining(){navigate('player');setPlayerView('training');}
+  function navigate(next: Page) { if(next==='player')setPlayerView('attributes');if(next==='career')setCareerView('records');setPage(next); setMobileOpen(false); window.scrollTo({ top: 0, behavior: 'instant' }); }
+  function openPlayer(view:PlayerView){navigate('player');setPlayerView(view);setPlayerViewRequest(value=>value+1);}
+  function openTraining(){openPlayer('training');}
+  function openCareer(view:CareerView){navigate('career');setCareerView(view);}
   async function refresh() { setSlots(await listSlots()); }
   function display(next: Career) { careerRef.current = next; setCareer(next); }
   async function commit(next: Career): Promise<boolean> {
@@ -178,13 +175,13 @@ export default function App() {
       <main className="game-main"><PlayerStrip career={career}/><SeasonCompetitions career={career}/><div className="page-title"><h1>{page==='locker'?'라커룸':page==='player'?'선수':'커리어'}</h1><span className="page-context">{calendarLabel(career)} · {phaseLabel(career)} · {career.season.competitionName}</span></div>
         {error&&<div className="error-banner" role="alert"><AlertCircle size={18}/><span>{error}</span><button className="icon-button" aria-label="오류 알림 닫기" onClick={()=>setError('')}><X size={16}/></button></div>}
         {busy&&<div className="processing" role="status"><Loader2 className="spinner" size={17}/>경기와 성장 기록을 계산하고 있습니다.</div>}
-        {page==='locker'&&<LockerRoom career={career} busy={busy} command={command} onMatch={setSelectedMatch} presenting={Boolean(presentation)} onTraining={openTraining}/>}{page==='player'&&<PlayerPanel career={career} busy={busy} command={command} requestedView={playerView}/>} {page==='career'&&<CareerPanel career={career} busy={busy} command={command} onExport={exportFile} onCopy={copyCareer} onMatch={setSelectedMatch}/>}
+        {page==='locker'&&<LockerRoom career={career} busy={busy} command={command} onMatch={setSelectedMatch} presenting={Boolean(presentation)} onTraining={openTraining} onCareer={openCareer}/>}{page==='player'&&<PlayerPanel career={career} busy={busy} command={command} requestedView={playerView} viewRequest={playerViewRequest}/>} {page==='career'&&<CareerPanel career={career} busy={busy} command={command} onExport={exportFile} onCopy={copyCareer} onMatch={setSelectedMatch} requestedView={careerView}/>}
         <footer className="game-footer"><span>K볼 · A FOOTBALL LIFE</span><span>이 브라우저에 자동 저장</span></footer>
       </main></div>}
     {!career&&error&&<div className="landing-error error-banner" role="alert"><AlertCircle size={17}/>{error}<button className="icon-button" aria-label="오류 알림 닫기" onClick={()=>setError('')}><X size={15}/></button></div>}
     {creation&&<Creation busy={busy} onCreate={newCareer} onClose={closeCreation}/>}
     {selectedMatch&&career&&<MatchDialog match={selectedMatch} career={career} onClose={closeMatch}/>}
-    {common&&<Modal title="커리어 보관함과 설정" onClose={()=>setCommon(false)} wide><p className="muted">이 브라우저에 자동 저장됩니다. 기기를 바꾸거나 브라우저 데이터를 지우기 전에 JSON으로 보관하세요.</p><div className="common-actions">{career&&<><button className="button primary" disabled={busy} onClick={saveNow}><Save size={16}/>지금 저장</button><button className="button secondary" disabled={busy} onClick={exportFile}><Download size={16}/>JSON 내보내기</button></>}<button className="button secondary" disabled={busy} onClick={()=>fileRef.current?.click()}><Upload size={16}/>파일 가져오기</button><button className="button secondary" disabled={busy} onClick={requestNewCareer}><Plus size={16}/>새 커리어</button></div><h3 className="form-section">저장된 커리어</h3><div className="save-list">{slots.map(s=><div className="save-item" key={s.id}><div className="save-item-info"><span className="slot-ovr">{s.ovr}<small>OVR</small></span><div><strong>{s.playerName}{s.id===career?.id&&<span className="pill">현재</span>}</strong><span>{s.clubName} · {seasonLabel(s.year)} · {shortDate(s.updatedAt)}</span></div></div><div className="save-item-actions"><button className="button secondary small" disabled={busy} onClick={()=>load(s.id)}><FolderOpen size={14}/>불러오기</button><button className="text-button" disabled={busy} onClick={()=>restore(s.id)}><RotateCcw size={14}/>이전 저장 복원</button><button className="icon-button danger-text" aria-label={`${s.playerName} 커리어 삭제`} disabled={busy} onClick={()=>remove(s.id)}><Trash2 size={16}/></button></div></div>)}</div>{career&&<CheatSettings career={career} busy={busy} command={command} onEdit={()=>{setCommon(false);navigate('player');setPlayerView('attributes');}}/>}<h3 className="form-section"><Settings2 size={17}/>화면 설정</h3><label className="setting-row"><span><strong>연출 줄이기</strong><small>경기 결과와 성장 수치는 동일하며, 결과 장면을 바로 넘깁니다.</small></span><input type="checkbox" checked={reduced} onChange={e=>changeReduced(e.target.checked)}/></label><p className="fine-print">자동 저장은 이전 정상 저장본을 백업합니다. 가져온 파일은 새 슬롯에 보관합니다.</p><details className="data-provenance"><summary>데이터와 규정 안내</summary><p className="muted">{DATA_PROVENANCE}</p></details>{career&&<div className="modal-actions"><button className="button secondary" disabled={busy} onClick={mainMenu}>시작 화면으로</button></div>}</Modal>}
+    {common&&<Modal title="커리어 보관함과 설정" onClose={()=>setCommon(false)} wide><p className="muted">이 브라우저에 자동 저장됩니다. 기기를 바꾸거나 브라우저 데이터를 지우기 전에 JSON으로 보관하세요.</p><div className="common-actions">{career&&<><button className="button primary" disabled={busy} onClick={saveNow}><Save size={16}/>지금 저장</button><button className="button secondary" disabled={busy} onClick={exportFile}><Download size={16}/>JSON 내보내기</button></>}<button className="button secondary" disabled={busy} onClick={()=>fileRef.current?.click()}><Upload size={16}/>파일 가져오기</button><button className="button secondary" disabled={busy} onClick={requestNewCareer}><Plus size={16}/>새 커리어</button></div><h3 className="form-section">저장된 커리어</h3><div className="save-list">{slots.map(s=><div className="save-item" key={s.id}><div className="save-item-info"><span className="slot-ovr">{s.ovr}<small>OVR</small></span><div><strong>{s.playerName}{s.id===career?.id&&<span className="pill">현재</span>}</strong><span>{s.clubName} · {seasonLabel(s.year)} · {shortDate(s.updatedAt)}</span></div></div><div className="save-item-actions"><button className="button secondary small" disabled={busy} onClick={()=>load(s.id)}><FolderOpen size={14}/>불러오기</button><button className="text-button" disabled={busy} onClick={()=>restore(s.id)}><RotateCcw size={14}/>이전 저장 복원</button><button className="icon-button danger-text" aria-label={`${s.playerName} 커리어 삭제`} disabled={busy} onClick={()=>remove(s.id)}><Trash2 size={16}/></button></div></div>)}</div>{career&&<CheatSettings career={career} busy={busy} command={command} onEdit={()=>{setCommon(false);openPlayer('attributes');}}/>}<h3 className="form-section"><Settings2 size={17}/>화면 설정</h3><label className="setting-row"><span><strong>연출 줄이기</strong><small>경기 결과와 성장 수치는 동일하며, 결과 장면을 바로 넘깁니다.</small></span><input type="checkbox" checked={reduced} onChange={e=>changeReduced(e.target.checked)}/></label><p className="fine-print">자동 저장은 이전 정상 저장본을 백업합니다. 가져온 파일은 새 슬롯에 보관합니다.</p><details className="data-provenance"><summary>데이터와 규정 안내</summary><p className="muted">{DATA_PROVENANCE}</p></details>{career&&<div className="modal-actions"><button className="button secondary" disabled={busy} onClick={mainMenu}>시작 화면으로</button></div>}</Modal>}
     {presentation&&<Presentation {...presentation} reduced={reduced} onClose={()=>setPresentation(null)}/>}{!career&&toast&&<div className="toast" role="status"><CheckCircle2 size={17}/>{toast}</div>}
   </div>;
 }

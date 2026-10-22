@@ -42,9 +42,9 @@ function CaptainPanel({career,busy,command}:{career:Career;busy:boolean;command:
 
 export type PlayerView='attributes'|'training'|'growth'|'contract'|'leadership';
 const VIEWS=[['attributes','능력치'],['training','훈련'],['growth','성장 리포트'],['contract','계약 · 몸값'],['leadership','주장']] as const;
-export default function PlayerPanel({career,busy,command,requestedView}:{career:Career;busy:boolean;command:(c:GameCommand)=>void;requestedView?:PlayerView}) {
+export default function PlayerPanel({career,busy,command,requestedView,viewRequest=0}:{career:Career;busy:boolean;command:(c:GameCommand)=>void;requestedView?:PlayerView;viewRequest?:number}) {
   const [view,setView]=useState<PlayerView>(requestedView??'attributes'),p=career.player,e=career.systems?.economics;
-  useEffect(()=>{if(requestedView)setView(requestedView);},[career.id,requestedView]);
+  useEffect(()=>{if(requestedView)setView(requestedView);},[career.id,requestedView,viewRequest]);
   const keys=p.position==='GK'?GK_ATTRIBUTES:FIELD_ATTRIBUTES,core=POSITION_ATTRIBUTES[p.position],start=career.season.attributeStart;
   const [cheatStep,setCheatStep]=useState(1),cheating=career.systems?.cheats?.enabled??false,profile=TALENT_PROFILES[p.talent];
   const reports=career.systems?.growthReports||[],[reportIndex,setReportIndex]=useState<number|null>(null),report=reportIndex===null?reports.at(-1):reports[reportIndex];

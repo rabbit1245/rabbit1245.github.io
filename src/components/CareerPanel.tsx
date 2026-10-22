@@ -1,8 +1,9 @@
 import SeasonHonours from './SeasonHonours';
-import { useMemo, useState, type ReactNode } from 'react';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { ArrowRight, ChevronLeft, ChevronRight, Copy, Download, Trophy } from 'lucide-react';
 import type { Career, GameCommand, MatchRecord, PlayerStats, SeasonSummary } from '../game/types';
 import { sumStats } from '../game/math';
+import { nationalMatchLedger, newestMatchFirst } from '../game/season-overview';
 import { ATTRIBUTE_LABELS } from '../game/attributes';
 import type { AttributeKey } from '../game/types';
 import { average, calendarLabel, clubTotal, compactMoney, Empty, MatchRow, Metric, money, nationalTotal, Panel, TeamBadge, teamName, visibleAwards } from './Shared';
@@ -10,7 +11,7 @@ import StatsNine from './StatsNine';
 import './CareerPanel.css';
 
 type Scope = 'all'|'club'|'national';
-type CareerView = 'records'|'seasons'|'national'|'awards'|'ledger'|'retirement';
+export type CareerView = 'records'|'seasons'|'national'|'awards'|'ledger'|'retirement';
 type RecordRow = {year:number;clubId:string;squad:string;competitionId:string;competitionName:string;stats:PlayerStats;matches:MatchRecord[]};
 const PAGE_SIZE = 6;
 
@@ -23,8 +24,7 @@ function PageMatches({matches,onMatch,label='경기'}:{matches:MatchRecord[];onM
   return <>{matches.length?<div className="match-list">{matches.slice(current*PAGE_SIZE,(current+1)*PAGE_SIZE).map(m=><MatchRow key={m.id} match={m} onClick={()=>onMatch(m)}/>)}</div>:<Empty title="선택한 범위의 경기가 없습니다"/>}<Pager page={current} total={matches.length} onChange={setPage} label={label}/></>;
 }
 function nationalMatches(career:Career) {
-  const n=career.systems?.national,seen=new Set<string>();
-  return [...(n?.history.flatMap(h=>h.matches)??[]),...(n?.matches??[])].filter(m=>{const key=m.fixtureId||m.id;if(seen.has(key))return false;seen.add(key);return true;});
+  return nationalMatchLedger(career);
 }
 function nationalCompetition(career:Career,id:string) {
   if(id.startsWith('FRIENDLIES:'))return `${id.split(':')[1]} 국제친선`;
@@ -39,7 +39,7 @@ export function RecordBook({career,onMatch}:{career:Career;onMatch:(m:MatchRecor
   const competitions=[...new Map([...clubRows,...natRows].map(r=>[r.competitionId,r.competitionName])).entries()];
   const included=(r:RecordRow,kind:'club'|'national')=>(period==='career'||r.year===year)&&(competition==='all'||r.competitionId===competition)&&(kind==='national'||club==='all'||r.clubId===club)&&(age==='all'||age==='youth'&&(r.squad==='youth'||r.squad==='U20')||age==='senior'&&r.squad==='senior');
   const filteredClub=clubRows.filter(r=>included(r,'club')),filteredNat=natRows.filter(r=>included(r,'national')),cs=sumStats(filteredClub.map(r=>r.stats)),ns=sumStats(filteredNat.map(r=>r.stats)),combined=sumStats([cs,ns]),selected=scope==='all'?combined:scope==='club'?cs:ns;
-  const selectedMatches=(scope==='all'?[...filteredClub,...filteredNat]:scope==='club'?filteredClub:filteredNat).flatMap(r=>r.matches).sort((a,b)=>b.seasonYear-a.seasonYear||b.round-a.round);
+  const selectedMatches=(scope==='all'?[...filteredClub,...filteredNat]:scope==='club'?filteredClub:filteredNat).flatMap(r=>r.matches).sort(newestMatchFirst);
   const years=[...new Set([...clubRows,...natRows].map(r=>r.year).concat(career.season.year))].sort((a,b)=>b-a);
   return <Panel title="통합 · 클럽 · 국가대표 기록" className="record-book"><div className="record-filters"><div className="segmented" aria-label="기록 기간"><button aria-pressed={period==='season'} className={period==='season'?'active':''} onClick={()=>setPeriod('season')}>시즌</button><button aria-pressed={period==='career'} className={period==='career'?'active':''} onClick={()=>setPeriod('career')}>통산</button></div>{period==='season'&&<label><span>시즌</span><select aria-label="기록 시즌" value={year} onChange={e=>setYear(Number(e.target.value))}>{years.map(y=><option key={y} value={y}>{calendarLabel(career,y)}</option>)}</select></label>}<label><span>대회</span><select aria-label="기록 대회" value={competition} onChange={e=>setCompetition(e.target.value)}><option value="all">모든 대회</option>{competitions.map(([id,name])=><option key={id} value={id}>{name}</option>)}</select></label><label><span>클럽</span><select aria-label="기록 클럽" value={club} onChange={e=>setClub(e.target.value)}><option value="all">모든 클럽</option>{[...new Set(clubRows.map(r=>r.clubId))].map(id=><option key={id} value={id}>{teamName(id)}</option>)}</select></label><label><span>연령</span><select aria-label="기록 연령대" value={age} onChange={e=>setAge(e.target.value)}><option value="all">전체 연령</option><option value="senior">성인 1군 · A대표</option><option value="youth">유소년 · U20</option></select></label></div>
     <div className="record-summary" role="group" aria-label="기록 범위"><div className="record-summary-labels"><span>기록 범위</span><span>경기</span><span>시간</span><span>득점</span><span>도움</span><span>평점</span></div>{([{id:'all',label:'통합',stats:combined},{id:'club',label:'클럽',stats:cs},{id:'national',label:'국대',stats:ns}] as const).map(r=><button key={r.id} data-testid={`records-scope-${r.id}`} className={scope===r.id?'selected':''} aria-pressed={scope===r.id} onClick={()=>setScope(r.id)}><strong>{r.label}<ArrowRight size={16}/></strong><span>{r.stats.apps}</span><span>{r.stats.minutes.toLocaleString()}′</span><span>{r.stats.goals}</span><span>{r.stats.assists}</span><span>{average(r.stats)}</span></button>)}</div>
@@ -92,8 +92,9 @@ function Retirement({career}:{career:Career}) {
   return <section className="retirement"><span className="eyebrow">THE FINAL WHISTLE · {career.season.calendarYear??career.retiredYear??career.season.year}</span><h2>{career.player.name}의 축구 인생</h2><p>{character}</p>{strengths.length>0&&<p className="career-character">기록이 보여준 특징: {strengths.map(r=>`${r.label} · 90분당 ${r.value.toFixed(2)}회`).join(' / ')}. <small>세부 행동은 해당 지표가 기록된 경기 시간으로 계산합니다.</small></p>}<div className="metric-row"><Metric label="통합 통산 출전" value={all.apps} note={`클럽 ${c.apps} · 국대 ${n.apps}`}/><Metric label="최고 OVR" value={highOvr}/><Metric label="최고 몸값" value={e?compactMoney(e.peakValue):'—'}/><Metric label="최고 주급" value={e?money(e.highestWage):'—'}/></div><div className="career-landmarks">{longest&&<div><span>가장 오래 뛴 팀</span><strong>{teamName(longest[0])}</strong><small>{longest[1]}경기 · 전체 이적 {career.transfers.length}회</small></div>}{prime&&<div><span>능력치 전성기</span><strong>{displayYear(prime.year)}</strong><small>{prime.clubName} · OVR {prime.ovrEnd}</small></div>}{nationalPeak&&<div><span>국대 최다 출전 시간</span><strong>{displayYear(nationalPeak[0])}</strong><small>{nationalPeak[1].apps}경기 · {nationalPeak[1].minutes}분</small></div>}</div><div className="retirement-facts"><span>주장·부주장 이력 <b>{l?.terms.length||0}회</b></span><span>개인·팀 수상 <b>{visibleAwards(career.awards).length}회</b></span><span>이적 <b>{career.transfers.length}회</b></span><span>누적 주급 <b>{e?money(e.salaryIncome):'—'}</b></span><span>보너스 <b>{e?money(e.bonusIncome):'—'}</b></span><span>실제 이적료 총액 <b>{e?money(e.totalTransferFees):money(career.transfers.reduce((s,t)=>s+t.fee,0))}</b></span></div><p className="fine-print">아래의 시즌·대회·클럽·국가대표 경기 원장이 이 결산의 기준입니다. 은퇴 전후 같은 기록을 사용합니다.</p></section>;
 }
 
-export default function CareerPanel({career,busy,command,onExport,onCopy,onMatch}:{career:Career;busy:boolean;command:(c:GameCommand)=>void;onExport:()=>void;onCopy:()=>void;onMatch:(m:MatchRecord)=>void}) {
-  const [view,setView]=useState<CareerView>('records');
+export default function CareerPanel({career,busy,command,onExport,onCopy,onMatch,requestedView}:{career:Career;busy:boolean;command:(c:GameCommand)=>void;onExport:()=>void;onCopy:()=>void;onMatch:(m:MatchRecord)=>void;requestedView?:CareerView}) {
+  const [view,setView]=useState<CareerView>(requestedView??'records');
+  useEffect(()=>{if(requestedView)setView(requestedView);},[requestedView]);
   const tabs:{id:CareerView;label:string}[]=[{id:'records',label:'기록'},{id:'seasons',label:'시즌 이력'},{id:'national',label:'국가대표'},{id:'awards',label:'수상 · 우승'},{id:'ledger',label:'이적 · 주장'},{id:'retirement',label:career.stage==='retired'?'은퇴 결산':'선수 생활 마무리'}];
   let content:ReactNode;
   if(view==='records')content=<RecordBook career={career} onMatch={onMatch}/>;

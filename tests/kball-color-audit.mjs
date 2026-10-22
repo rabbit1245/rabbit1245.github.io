@@ -94,7 +94,7 @@ async function sample(page,label,{hover}={}){
 async function closeDialog(page){const dialog=page.getByRole('dialog');if(await dialog.isVisible())await dialog.getByRole('button',{name:'닫기',exact:true}).first().click();}
 async function imported(page,file){
   await page.getByLabel('K볼 저장 파일 가져오기').setInputFiles(file);
-  await page.getByRole('heading',{name:'라커룸',exact:true,level:1}).waitFor();
+  await page.getByRole('heading',{name:'라커룸',exact:true,level:1}).waitFor({timeout:180_000}).catch(async error=>{throw new Error(`저장 가져오기: ${await page.getByRole('alert').allTextContents()} / ${error}`);});
   await page.getByTestId('save-status').filter({hasText:'자동 저장됨'}).waitFor({state:'attached'});
   await page.locator('.processing').waitFor({state:'hidden'});
 }
@@ -147,7 +147,7 @@ try{
     await page.getByTestId('league-leaders-more').click();await sample(page,`${prefix}-league-leaders`);await closeDialog(page);
     await page.getByTestId('club-development').locator('summary').click();await page.getByTestId('club-development').scrollIntoViewIfNeeded();await sample(page,`${prefix}-club-growth`);
     assert.equal(await page.getByText('팀 현황',{exact:true}).count(),0);
-    await page.getByTestId('locker-season-details').scrollIntoViewIfNeeded();await sample(page,`${prefix}-locker-combined-details`);await page.evaluate(()=>scrollTo(0,0));
+    await page.getByTestId('season-details-disclosure').locator('summary').click();await page.getByTestId('locker-season-details').scrollIntoViewIfNeeded();await sample(page,`${prefix}-locker-combined-details`);await page.evaluate(()=>scrollTo(0,0));
     await page.getByTestId('transfer-window').click();await sample(page,`${prefix}-contract-modal`);
     const accept=page.getByRole('button',{name:'제안 수락',exact:true}).first();if(await accept.count())await sample(page,`${prefix}-contract-hover`,{hover:accept});await closeDialog(page);
     await nav(page,'player');

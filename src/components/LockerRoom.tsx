@@ -3,7 +3,7 @@ import { ArrowLeftRight, ArrowRight, Check, ChevronLeft, ChevronRight, Dumbbell,
 import type { AttributeKey, Career, GameCommand, MatchRecord, Standing } from '../game/types';
 import { ATTRIBUTE_LABELS } from '../game/attributes';
 import { getLeagueRule } from '../game/league-rules';
-import { sumStats } from '../game/math';
+import { seasonOverview, seasonClubId } from '../game/season-overview';
 import { average, calendarLabel, compactMoney, Delta, Empty, MatchRow, Modal, money, Panel, seasonLabel, TeamBadge, teamName } from './Shared';
 import StatsNine from './StatsNine';
 import './LockerRoom.css';
@@ -37,7 +37,7 @@ function Transfers({career,busy,command,onClose}:Props&{onClose:()=>void}) {
 }
 function NearbyTable({career}:{career:Career}) {
   const [expanded,setExpanded]=useState(false),table=career.season.table;
-  const ownId=career.stage==='season'?career.player.clubId:career.history.at(-1)?.clubId||career.player.clubId;
+  const ownId=seasonClubId(career);
   const own=Math.max(0,table.findIndex(t=>t.clubId===ownId)),rule=getLeagueRule(career.season.leagueId);
   const promotion=career.player.squad==='youth'?0:rule.promotion,relegation=career.player.squad==='youth'?0:rule.relegation;
   const start=Math.min(Math.max(0,own-2),Math.max(0,table.length-5));
@@ -64,34 +64,36 @@ function NearbyTable({career}:{career:Career}) {
     </Modal>}
   </>;
 }
-export default function LockerRoom({career,busy,command,onMatch,onTraining}:Props&{onMatch:(m:MatchRecord)=>void;onTraining?:()=>void;presenting?:boolean}) {
+export default function LockerRoom({career,busy,command,onMatch,onTraining,onCareer}:Props&{onMatch:(m:MatchRecord)=>void;onTraining?:()=>void;onCareer?:(view:'national'|'awards'|'seasons'|'records')=>void;presenting?:boolean}) {
   const [transfers,setTransfers]=useState(false),[matchPage,setMatchPage]=useState(0),[allMatches,setAllMatches]=useState(false);
   const p=career.player,s=career.season,phase=career.systems?.phase||'preseason';
   useEffect(()=>{setTransfers(false);setMatchPage(0);setAllMatches(false);},[career.id,s.year,career.stage]);
-  const recent=[...s.matches].reverse(),n=career.systems?.national,seen=new Set<string>();
-  const natMatches=[...(n?.history.filter(h=>h.year===s.year).flatMap(h=>h.matches)||[]),...(n?.matches||[])].filter(m=>m.seasonYear===s.year&&!seen.has(m.id)&&Boolean(seen.add(m.id)));
-  const national=sumStats(natMatches.map(m=>m.playerStats)),club=s.playerStats,combined=sumStats([club,national]);
-  const detailed=sumStats([...s.matches,...natMatches].filter(m=>m.metricsVersion===2).map(m=>m.playerStats));
+  const recent=[...s.matches].reverse(),{national,club,combined,detailed}=seasonOverview(career);
   const summaries=[['통합',combined],['클럽',club],['국대',national]] as const;
   const next=career.stage==='offseason'?{label:'다음 시즌 시작',command:{type:'nextSeason'} as GameCommand}:phase==='midseason'?{label:'후반기 진행',command:{type:'continueHalf'} as GameCommand}:{label:phase==='second'?'후반기 계속 진행':'전반기 진행',command:{type:'advanceHalf'} as GameCommand};
   const trainingConfirmed=career.systems?.trainingPlan?.forYear===s.year+1&&career.systems.trainingPlan.confirmed;
   const nextBlocked=career.stage==='offseason'&&(!career.transferDecision||!trainingConfirmed);
   return <section className="locker-workspace" aria-label="시즌 현황" data-testid="locker-season-overview">
-    <div className="locker-overview-heading"><h2>시즌 현황</h2>{career.stage==='offseason'&&<span className="preparation-status">계약 {career.transferDecision?'✓':'선택 필요'} · 훈련 {trainingConfirmed?'✓':'선택 필요'}</span>}</div>
+    <div className="locker-overview-heading"><h2>시즌 현황</h2><nav className="locker-shortcuts" aria-label="시즌 빠른 이동">
+      {onTraining&&(career.stage!=='offseason'||trainingConfirmed)&&<button className="text-button" data-testid="quick-training" onClick={onTraining}>훈련 계획</button>}
+      {onCareer&&<><button className="text-button" data-testid="quick-national" onClick={()=>onCareer('national')}>국가대표</button><button className="text-button" data-testid="quick-awards" onClick={()=>onCareer('awards')}>수상 · 우승</button><button className="text-button" data-testid="quick-seasons" onClick={()=>onCareer('seasons')}>시즌 이력</button></>}
+    </nav>{career.stage==='offseason'&&<span className="preparation-status">계약 {career.transferDecision?'✓':'선택 필요'} · 훈련 {trainingConfirmed?'✓':'선택 필요'}</span>}</div>
     <div className="locker-controls"><div className="season-progress"><div><strong>{phaseLabel(career)}</strong><span>{s.week} / {s.totalWeeks}라운드</span></div><div className="season-track"><span style={{width:`${Math.min(100,s.week/Math.max(1,s.totalWeeks)*100)}%`}}/></div></div><div className="action-inline">
       {career.stage!=='retired'&&<button data-testid="advance-half" className="button primary" disabled={busy||nextBlocked} onClick={()=>command(next.command)}><Play size={18}/>{next.label}<ArrowRight size={18}/></button>}
       {career.stage==='offseason'&&<><button className="button secondary" data-testid="transfer-window" disabled={busy} onClick={()=>setTransfers(true)}><ArrowLeftRight size={18}/>이적 · 재계약{career.transferDecision&&<Check size={18}/>}</button>{!trainingConfirmed&&onTraining&&<button className="button secondary" data-testid="training-plan" disabled={busy} onClick={onTraining}><Dumbbell size={17}/>훈련 선택</button>}</>}
     </div></div>
     <div className="locker-core" data-testid="locker-core"><div className="locker-records">
       <Panel title="이번 시즌 기록" action={<LeagueLeaders career={career}/>} className="season-summary-panel"><table className="season-summary"><thead><tr><th>범위</th><th>출전</th><th>분</th><th>{p.position==='GK'?'선방':'골'}</th><th>{p.position==='GK'?'무실점':'도움'}</th><th>평점</th></tr></thead><tbody>{summaries.map(([label,stats])=><tr key={label}><th>{label}</th><td>{stats.apps}</td><td>{stats.minutes}</td><td>{p.position==='GK'?stats.saves:stats.goals}</td><td>{p.position==='GK'?stats.cleanSheets:stats.assists}</td><td>{average(stats)}</td></tr>)}</tbody></table></Panel>
+      <SeasonHonours career={career} compact/>
       <Panel title={allMatches?'시즌 경기':'최근 경기'} action={recent.length>3?<button className="text-button" onClick={()=>{setAllMatches(v=>!v);setMatchPage(0);}}>{allMatches?'최근 경기':'전체 경기'}</button>:undefined} className="recent-panel">
-        {recent.length?<><div className="match-list">{recent.slice(allMatches?matchPage*3:0,allMatches?matchPage*3+3:3).map(m=><MatchRow key={m.id} match={m} onClick={()=>onMatch(m)}/>)}</div>{allMatches&&<div className="pagination"><button aria-label="라커룸 경기 이전 페이지" disabled={matchPage===0} onClick={()=>setMatchPage(page=>page-1)}><ChevronLeft size={18}/></button><span>{matchPage+1} / {Math.ceil(recent.length/3)}</span><button aria-label="라커룸 경기 다음 페이지" disabled={(matchPage+1)*3>=recent.length} onClick={()=>setMatchPage(page=>page+1)}><ChevronRight size={18}/></button></div>}</>:<Empty title="첫 경기를 기다립니다">전반기 진행을 누르면 경기가 시작됩니다.</Empty>}
+        {recent.length?<><div className="match-list">{recent.slice(allMatches?matchPage*3:0,allMatches?matchPage*3+3:3).map(m=><MatchRow key={m.id} match={m} onClick={()=>onMatch(m)}/>)}</div>{allMatches&&<div className="pagination"><button aria-label="라커룸 경기 이전 페이지" disabled={matchPage===0} onClick={()=>setMatchPage(page=>page-1)}><ChevronLeft size={18}/></button><span>{matchPage+1} / {Math.ceil(recent.length/3)}</span><button aria-label="라커룸 경기 다음 페이지" disabled={(matchPage+1)*3>=recent.length} onClick={()=>setMatchPage(page=>page+1)}><ChevronRight size={18}/></button></div>}</>:<p className="first-match-note">첫 경기 전입니다. 전반기를 진행하면 결과가 여기에 표시됩니다.</p>}
       </Panel>
     </div><NearbyTable career={career}/></div>
-    <SeasonHonours career={career}/><ClubDevelopment career={career}/>
-    <Panel title="이번 시즌 통합 세부 기록" action={<span className="pill">{calendarLabel(career)} · 클럽 + 국대</span>} className="locker-season-details">
-      <div className="panel-body" data-testid="locker-season-details"><StatsNine stats={combined} detailedStats={detailed} position={p.position}/></div>
-    </Panel>
+    <details className="locker-detail locker-season-details" data-testid="season-details-disclosure" key={`${career.id}:${s.year}`}>
+      <summary><strong>이번 시즌 통합 세부 기록</strong><span>{combined.apps}경기 · {combined.minutes.toLocaleString()}분 · 평점 {average(combined)}</span><span className="disclosure-cue">9개 지표 <ChevronRight size={17}/></span></summary>
+      <div className="panel-body" data-testid="locker-season-details"><StatsNine stats={combined} detailedStats={detailed} position={p.position}/>{onCareer&&<button className="text-button" onClick={()=>onCareer('records')}>대회별 · 경기별 전체 기록<ArrowRight size={16}/></button>}</div>
+    </details>
+    <ClubDevelopment career={career}/>
     {transfers&&career.stage==='offseason'&&<Transfers career={career} busy={busy} command={command} onClose={()=>setTransfers(false)}/>}
   </section>;
 }

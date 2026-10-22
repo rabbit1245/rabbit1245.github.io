@@ -45,3 +45,39 @@
 .season-honours li p,.season-honours li small { line-height:1.6; margin-top:5px; }
 .season-honours section+section { margin-top:20px; border-top:1px solid var(--border); padding-top:14px; }
 @media(max-width:650px) { .season-honours-grid { grid-template-columns:1fr; gap:10px; } }
+
+.strip-identity strong { flex-wrap:wrap; overflow-wrap:anywhere; }
+.strip-talent { color:var(--text); background:var(--warm); border:1px solid var(--border); border-radius:4px; padding:2px 6px; font-size:15px; font-weight:600; white-space:nowrap; }
+.locker-shortcuts { display:flex; flex-wrap:wrap; gap:4px 14px; margin-left:auto; }
+.locker-shortcuts .text-button { font-size:17px; min-height:32px; padding:3px 0; }
+.locker-overview-heading:has(.preparation-status) { flex-wrap:wrap; }
+.locker-overview-heading .preparation-status { flex-basis:100%; text-align:right; }
+.first-match-note { color:var(--muted); font-size:17px; line-height:1.6; padding:14px; }
+.locker-detail { min-width:0; border:1px solid var(--border); border-radius:6px; background:var(--surface); }
+.locker-detail > summary { display:flex; align-items:center; gap:8px 16px; padding:12px 14px; cursor:pointer; list-style:none; }
+.locker-detail > summary::-webkit-details-marker { display:none; }
+.locker-detail > summary > strong { color:var(--text); font-size:17px; line-height:1.5; }
+.locker-detail > summary > span { font-size:15px; line-height:1.5; color:var(--muted); }
+.locker-detail > summary:focus-visible { outline:2px solid var(--teal-dark); outline-offset:2px; }
+.locker-detail .disclosure-cue { display:flex; align-items:center; gap:4px; margin-left:auto; white-space:nowrap; color:var(--text); }
+.locker-detail .disclosure-cue svg { transition:transform .15s; }
+.locker-detail[open] > summary { border-bottom:1px solid var(--border); }
+.locker-detail[open] > summary .disclosure-cue svg { transform:rotate(90deg); }
+.honours-preview { display:grid; grid-template-columns:1fr 1fr; flex:1; gap:6px 18px; font-size:15px; line-height:1.5; }
+.honours-preview > span { color:var(--muted); overflow-wrap:anywhere; }
+.honours-preview b { display:block; color:var(--text); font-size:17px; font-weight:600; }
+.league-own-rank { margin:12px 0; display:flex; align-items:center; gap:8px 14px; flex-wrap:wrap; padding:10px 12px; border:1px solid var(--accent-border); border-radius:6px; background:var(--teal-soft); font-size:17px; color:var(--text); }
+.league-own-rank small { color:var(--muted); font-size:15px; }
+@media(max-width:900px) {
+ .season-honours > summary { flex-wrap:wrap; }
+ .season-honours .honours-preview { order:3; flex-basis:100%; }
+}
+@media(max-width:599px) {
+ .locker-overview-heading .locker-shortcuts { width:100%; margin-left:0; justify-content:space-between; gap:4px 8px; }
+ .locker-shortcuts .text-button { font-size:17px; }
+ .locker-overview-heading .preparation-status { text-align:left; }
+ .locker-detail > summary { flex-wrap:wrap; gap:6px 10px; }
+ .locker-detail > summary > strong { flex-basis:calc(100% - 85px); }
+ .locker-season-details > summary > span:not(.disclosure-cue) { order:3; flex-basis:100%; }
+ .honours-preview { grid-template-columns:1fr; }
+}
