@@ -1,7 +1,7 @@
 .player-workspace .captain-workspace { display:grid; gap:10px; min-width:0; }
 .player-workspace .captain-view-heading { display:flex; align-items:center; justify-content:space-between; gap:8px 12px; flex-wrap:wrap; margin-bottom:12px; }
 .player-workspace .captain-view-heading .segmented button { min-height:36px; font-size:17px; }
-.player-workspace .captain-offer { display:grid; gap:10px; padding:12px; margin-bottom:12px; background:var(--teal-soft); border:1px solid var(--control-border); border-radius:8px; }
+.player-workspace .captain-offer { display:grid; gap:10px; padding:12px; margin-bottom:12px; background:var(--warm); border:1px solid var(--control-border); border-radius:8px; }
 .player-workspace .captain-offer h3 { margin:4px 0 8px; font-size:20px; }
 .player-workspace .captain-offer p { font-size:17px; }
 .player-workspace .captain-offer .muted { font-size:15px; }
