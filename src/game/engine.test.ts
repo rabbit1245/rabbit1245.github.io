@@ -6,6 +6,7 @@ import { CLUBS, getClub } from './data';
 import { FIELD_ATTRIBUTES, GK_ATTRIBUTES, PLAY_STYLES, POSITION_LABELS } from './attributes';
 import { acceptTransfer, addStats, advanceCareer, calculateTable, createCareer, dismissChoice, emptyStats, getCareerTotals, makeFixtures, overall, retireCareer, setTraining, startNextSeason, stayAtClub } from './engine';
 import { simulateMatch } from './match-engine';
+import { buildCareerText,careerMatchLedger } from './career-text';
 import type { Career, CreateOptions, MatchRecord, PlayerStats, Position, Talent } from './types';
 
 function options(overrides: Partial<CreateOptions> = {}): CreateOptions {
@@ -88,9 +89,13 @@ test('selected training dominates bounded experience and development; rest recov
   const career=createCareer(options({age:15,squad:'youth',talent:'SSS',training:['shooting','passing']}));
   const prior={...career.player.attributes};
   const after=advanceCareer(career,4);
+  const ledger=after.systems!.growthLedger!;
   for(const key of FIELD_ATTRIBUTES) {
-    if(['shooting','passing'].includes(key))assert.ok(after.player.attributes[key]!>prior[key]!);
-    else assert.ok(after.player.attributes[key]!-prior[key]!<=.1,key);
+    if(['shooting','passing'].includes(key))assert.ok((ledger.byCause.training[key]??0)>0,key);
+    else assert.equal(ledger.byCause.training[key]??0,0,`${key}: unselected skills receive no selected training`);
+    const recorded=Object.values(ledger.byCause).reduce((sum,cause)=>sum+(cause[key]??0),0);
+    assert.ok(Math.abs(after.player.attributes[key]!-prior[key]!-recorded)<.011,`${key}: actual learning reconciles`);
+    assert.ok(after.player.attributes[key]!-prior[key]!<5,`${key}: no immediate ability jump`);
   }
   assert.throws(()=>setTraining(career,['passing'],'balanced'),/시즌 중/);
   assert.throws(()=>createCareer(options({training:['gkHandling']})));
@@ -110,6 +115,8 @@ test('match goal events, personal statistics and full league standings reconcile
   for(const match of career.season.matches)verifyMatch(match);
   assertStatsEqual(career.season.playerStats,sumStats(career.season.matches));
   assertStatsEqual(career.history[0].stats,sumStats(career.history[0].matches));
+  assert.deepEqual(career.history[0].details!.table,career.season.table);
+  assert.deepEqual(career.history[0].details!.attributes,career.player.attributes);
   assertStatsEqual(getCareerTotals(career,'club'),career.history[0].stats);
   assert.ok(career.season.fixtures.every(f=>f.played));
   const table=calculateTable(career.season.fixtures,career.season.table.map(r=>r.clubId));
@@ -176,7 +183,7 @@ test('30 seasons preserve history, finite stats, youth promotion, aging and reti
     assert.equal(career.history.length,year+1);
     assertStatsEqual(career.history[year].stats,sumStats(career.history[year].matches));
     highestOvr=Math.max(highestOvr,career.player.ovr);
-    if(year>=27)await writeFile('test-results/long-career-checkpoint.json',JSON.stringify({career,highestOvr}));
+    await writeFile('test-results/long-career-checkpoint.json',JSON.stringify({career,highestOvr}));
     validateCareer(career);
     console.log(`Long career verified: ${year+1}/30 seasons, ${career.player.age} years old`);
     if(year<29)career=startNextSeason(setTraining(stayAtClub(career),career.training,career.intensity));
@@ -190,6 +197,13 @@ test('30 seasons preserve history, finite stats, youth promotion, aging and reti
   const file=await exportCareer(retired);
   await mkdir('test-results',{recursive:true});
   await writeFile('test-results/long-career-30-seasons.json',file);
+  const text=buildCareerText(retired),ledger=careerMatchLedger(retired);
+  await writeFile('test-results/long-career-30-seasons.txt',text,'utf8');
+  assert.equal(text.charCodeAt(0),0xfeff);assert.ok(!/(?<!\r)\n/.test(text));
+  assert.equal((text.match(/\[\d{4}시즌\]/g)??[]).length,30);
+  for(const season of retired.history){assert.ok(text.includes(`[${season.year}시즌]`));if(!checkpoint||checkpoint.career.history.every((h:Career['history'][number])=>h.details))assert.ok(season.details,`${season.year}: new seasons preserve standings and contract snapshots`);}
+  assert.equal(ledger.club.length,retired.history.reduce((sum,h)=>sum+h.matches.length,0));
+  console.log(`Long TXT verified: ${Buffer.byteLength(text)} bytes, ${ledger.club.length} club and ${ledger.national.length} national matches`);
   const imported=await importCareer(file);
   assert.deepEqual(imported.history,JSON.parse(JSON.stringify(retired.history)));
   assert.deepEqual(imported.systems,JSON.parse(JSON.stringify(retired.systems)));

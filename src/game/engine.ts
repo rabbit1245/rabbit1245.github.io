@@ -8,11 +8,12 @@ import { archiveNationalSeason, getNationalTotals, processDueNationalWindows } f
 import { applyContract, evaluateAwards, makeContractOffers, payBonus, paySalary, updateLeadership, updateMarketValue, ensureEconomicHistory, beginEconomicSeason, answerCaptainOffer, expireCaptainOffers } from './career-systems';
 import { initializeSystems } from './systems';
 import { fixtureDate, nextCalendarYear, seasonDate, seasonHalfEndDate } from './calendar';
+import { captureSeasonDetails } from './season-details';
 import { applyMatchExperience, beginGrowthSeason, ensureGrowthTracking, trainRound } from './growth';
 import type { AttributeKey, Attributes, Career, CreateOptions, Fixture, Intensity, MatchRecord, Player, PlayerStats, SeasonState, SeasonSummary, Standing, Talent, TransferOffer } from './types';
 import type { PresentationEvent } from './revision-types';
 
-export const ENGINE_VERSION = '2.2.0';
+export const ENGINE_VERSION = '2.3.0';
 export const overall = calculateOverall;
 export { addStats, emptyStats, hashSeed, seededRandom } from './math';
 const TALENT_ORDER: Talent[] = ['D','C','B','A','S','SS','SSS'];
@@ -162,7 +163,7 @@ function archive(career:Career,completed:boolean) {
   const changes:Attributes={};
   for(const key of Object.keys(player.attributes) as AttributeKey[])changes[key]=round((player.attributes[key]??0)-(season.attributeStart[key]??0));
   const priorIncome=career.history.reduce((s,h)=>s+h.income,0);
-  const summary:SeasonSummary={year:season.year,...(season.calendarYear?{calendarYear:season.calendarYear}:{}),clubId:season.matches[0]?.playerClubId??player.clubId,clubName:getClub(season.matches[0]?.playerClubId??player.clubId).name,leagueId:season.leagueId,competitionName:season.competitionName,age:player.age,position:player.position,squad:player.squad,rank:season.table.findIndex(r=>r.clubId===(season.matches[0]?.playerClubId??player.clubId))+1,ovrStart:season.ovrStart,ovrEnd:player.ovr,stats:{...season.playerStats},awards:[...awards],matches:[...season.matches],attributeGrowth:changes,income:round(Math.max(0,career.careerIncome-priorIncome)),completed};
+  const summary:SeasonSummary={year:season.year,...(season.calendarYear?{calendarYear:season.calendarYear}:{}),clubId:season.matches[0]?.playerClubId??player.clubId,clubName:getClub(season.matches[0]?.playerClubId??player.clubId).name,leagueId:season.leagueId,competitionName:season.competitionName,age:player.age,position:player.position,squad:player.squad,rank:season.table.findIndex(r=>r.clubId===(season.matches[0]?.playerClubId??player.clubId))+1,ovrStart:season.ovrStart,ovrEnd:player.ovr,stats:{...season.playerStats},awards:[...awards],matches:[...season.matches],attributeGrowth:changes,income:round(Math.max(0,career.careerIncome-priorIncome)),completed,details:captureSeasonDetails(career)};
   career.history.push(summary);
   for(const award of awards){news(career,'award',award.name,award.description);present(career,'award',award.name,award.description,'milestone');}
 }
@@ -314,6 +315,7 @@ export function startNextSeason(career:Career):Career {
   const decided=career.transferDecision?career:stayAtClub(career),next=editable(decided);
   const previousSeason=next.season,lastYear=next.season.year,previousOvr=next.player.ovr;
   transitionWorldSeason(next);
+  for(const h of next.history){const report=next.systems!.world.clubs[h.clubId]?.development?.history.find(r=>r.year===h.year);if(h.details&&report)h.details.clubDevelopment=structuredClone(report);}
   const beforeAging={...next.player.attributes};
   next.player.age++;aging(next);
   const afterAging={...next.player.attributes};

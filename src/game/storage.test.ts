@@ -25,6 +25,15 @@ function career(seed: string): Career {
   return value;
 }
 
+test('career-long national team results exceed one-season limits while every score still validates',()=>{
+  const c=createCareer({name:'국대 보존',nationality:'대한민국',age:24,height:180,weight:75,foot:'right',position:'ST',talent:'S',style:PLAY_STYLES.ST[0],clubId:'KR1_01',squad:'senior',difficulty:'realistic',seed:'national-retention-limit'});
+  processNationalWindow(c,'first');const n=c.systems!.national,source=n.teamResults![0];assert.ok(source);
+  n.teamResults=Array.from({length:160},(_,i)=>({...structuredClone(source),id:`${source.id}-retained-${i}`,fixtureId:`${source.fixtureId}-retained-${i}`}));
+  validateCareer(c);
+  const bad=structuredClone(c);bad.systems!.national.teamResults![159].homeGoals++;
+  assert.throws(()=>validateCareer(bad),'raising the career count limit never bypasses actual score validation');
+});
+
 // Persistence tests compare independent, valid revisions of an actual old save.
 // Full-world multi-season simulation is exercised once by the engine suite.
 function snapshot(previous: Career, steps = 1): Career {

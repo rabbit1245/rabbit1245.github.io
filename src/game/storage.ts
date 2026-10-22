@@ -1,3 +1,4 @@
+import { validateCareerExtensions } from './extension-validation';
 import { CLUBS, LEAGUES } from './data';
 import { CORE_STATS, DETAIL_STATS } from './math';
 import type { Career, MatchRecord, PlayerStats, SaveEnvelope, SaveSlot } from './types';
@@ -217,8 +218,8 @@ function temporaryReserve(id: string, row: Record<string, unknown>): boolean {
   return row.name === `${club.name} 예비 선수 ${Number(suffix) + 1} (가상)`;
 }
 
-function matches(value: unknown, label: string, playerId: string, national = false): MatchRecord[] {
-  const records = list(value, label, 150);
+function matches(value: unknown, label: string, playerId: string, national = false, maxRecords = 150): MatchRecord[] {
+  const records = list(value, label, maxRecords);
   const ids: string[] = [];
   const fixtureIds: string[] = [];
   for (const [index, raw] of records.entries()) {
@@ -494,7 +495,9 @@ function validateSystems(career: Record<string, unknown>, player: Record<string,
   number(national.points, 'national.points', 0, 1_000, true); number(national.rank, 'national.rank', 0, 1_000, true);
   bool(national.qualified, 'national.qualified'); number(national.fatigue, 'national.fatigue', 0, 100); number(national.reputation, 'national.reputation', 0, 100);
   const nationalMatches = matches(national.matches, 'national.matches', playerId, true);
-  if (national.teamResults !== undefined) matches(national.teamResults, 'national.teamResults', playerId, true);
+  // Other countries' qualifiers and finals are a career-long ledger, unlike
+  // the player's current-season match list. Keep every per-match invariant.
+  if (national.teamResults !== undefined) matches(national.teamResults, 'national.teamResults', playerId, true, 10_000);
   assert(nationalMatches.every(row => row.playerClubId.startsWith(`NAT:${national.country}:`)), '국가대표 경기와 선수 국적이 다릅니다.');
   const processedWindows = list(national.processedWindows, 'national.processedWindows', 10_000).map(raw => text(raw, 'national.processedWindow'));
   unique(processedWindows, '국가대표 소집 기간');
@@ -845,6 +848,7 @@ export function validateCareer(value: unknown): Career {
     number(item.wage, 'transfer.wage', 0, 1e12);
   }
   validateSystems(career, player, playerId);
+  validateCareerExtensions(parsed as Career);
   return parsed as Career;
 }
 

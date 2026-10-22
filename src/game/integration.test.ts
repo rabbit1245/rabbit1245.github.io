@@ -24,7 +24,10 @@ test('half-season flow fixes annual training and wage, reserving all contract ch
   assert.equal(first.systems!.growthReports.length,1);
   assert.equal(first.player.wage,wage,'valuation never rewrites a contract');
   assert.throws(()=>setTraining(first,['shooting'],'intense'),/시즌 중/);
-  for(const key of FIELD_ATTRIBUTES)if(!initial.training.includes(key))assert.ok(first.player.attributes[key]!-initial.player.attributes[key]!<=.47,key);
+  for(const key of FIELD_ATTRIBUTES)if(!initial.training.includes(key)){
+    assert.equal(first.systems!.growthLedger!.byCause.training[key]??0,0,`${key}: selected training never spreads to unrelated skills`);
+    assert.ok(first.player.attributes[key]!-initial.player.attributes[key]!<=3,`${key}: actual position/action learning stays bounded`);
+  }
   assert.equal(first.systems!.pendingChoice,undefined);assert.deepEqual(first.offers,[]);
   const second=advanceHalf(first);
   assert.equal(second.stage,'offseason');

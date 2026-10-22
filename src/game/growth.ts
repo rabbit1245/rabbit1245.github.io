@@ -53,17 +53,23 @@ export function trainRound(career:Career):void {
 }
 export function applyMatchExperience(career:Career,stats:PlayerStats):void {
   if(!stats.apps||!stats.minutes||career.player.age>30)return;
-  const p=career.player,keys=new Set<AttributeKey>();
-  if(stats.passesCompleted>=10)keys.add(p.position==='GK'?'gkDistribution':'passing');
-  if((stats.keyPasses??0)>0)keys.add('vision');
-  if(stats.tackles+stats.interceptions>=2){keys.add('positioning');keys.add('anticipation');}
-  if((stats.dribblesCompleted??0)>=2)keys.add('ballControl');
-  if(stats.shotsOnTarget>0)keys.add('composure');
-  if(stats.saves>0){keys.add('gkPositioning');keys.add('concentration');}
-  keys.add('decisions');
-  const allowed=p.position==='GK'?GK_ATTRIBUTES:FIELD_ATTRIBUTES;
-  const ceiling=clamp((p.potential-p.ovr)/20,.05,1),age=p.age<=21?1.2:p.age<=26?1:.45;
-  for(const key of [...keys].filter(k=>allowed.includes(k)).slice(0,4))cappedGain(career,key,.015*stats.minutes/90*ceiling*age,'experience',.35);
+  const p=career.player,allowed=p.position==='GK'?GK_ATTRIBUTES:FIELD_ATTRIBUTES,weights=new Map<AttributeKey,number>();
+  // Match learning follows position and actions, not a blanket boost to every skill.
+  for(const [index,key] of POSITION_ATTRIBUTES[p.position].entries())weights.set(key,.72-index*.045);
+  const add=(key:AttributeKey,value:number)=>{if(allowed.includes(key))weights.set(key,Math.min(1.4,(weights.get(key)??.15)+value));};
+  if(stats.passesCompleted>=10)add(p.position==='GK'?'gkDistribution':'passing',.45);
+  if((stats.keyPasses??0)>0)add('vision',.5);
+  if(stats.tackles+stats.interceptions>=2){add('defending',.5);add('anticipation',.35);}
+  if((stats.dribblesCompleted??0)>=2){add('ballControl',.4);add('dribbling',.45);}
+  if(stats.shotsOnTarget>0){add('shooting',.45);add('composure',.35);}
+  if(stats.saves>0){add('gkShotStopping',.45);add('gkReflexes',.35);add('gkPositioning',.3);}
+  if(stats.minutes>=60){add('stamina',.2);add('decisions',.25);}
+  const talent:Record<Talent,number>={D:.45,C:.58,B:.74,A:.9,S:1.05,SS:1.16,SSS:1.25};
+  const ceiling=clamp((p.potential-p.ovr)/20,.025,1.1),age=p.age<=18?1.25:p.age<=22?1.1:p.age<=26?.8:.35;
+  const rating=stats.ratingCount?stats.ratingSum/stats.ratingCount:6.5,form=clamp(.85+(rating-6.5)*.16,.55,1.25);
+  const base=.14*(38/career.season.totalWeeks)*Math.min(1,stats.minutes/90)*ceiling*age*talent[p.talent]*trainingQuality(career)*form;
+  const cap=(p.age<=18?4:p.age<=22?3.2:p.age<=26?2:.7)*talent[p.talent];
+  for(const [key,weight] of weights)cappedGain(career,key,base*weight,'experience',cap*weight);
   p.ovr=overall(p);
 }
 export function roleGrowthDescription(career:Career):string {

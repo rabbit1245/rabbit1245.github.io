@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { FIELD_ATTRIBUTES, GK_ATTRIBUTES } from './attributes';
 import { CLUBS, ROSTERS } from './data';
 import { emptyStats, sumStats } from './math';
-import { archiveNationalSeason, createNational, getNationalTotals, getTeamLabel, processDueNationalWindows, processNationalWindow, resolveNationalShootout, scheduledInternationalWindows } from './national';
+import { archiveNationalSeason, createNational, getNationalTotals, getTeamLabel, processDueNationalWindows, processNationalWindow, resolveNationalShootout, scheduledInternationalWindows, nationalRosterPower } from './national';
 import { fixtureDate } from './calendar';
 import { simulateMatch } from './match-engine';
 import { nationalityForPlayer } from './national-data';
@@ -94,10 +94,10 @@ test('U20 and senior match ledgers remain separate across season changes',()=>{
 
 test('qualification uses played group scores and knockout titles use the actual final winner',()=>{
   let sawFinal=false, sawShootout=false, sawElimination=false;
-  for(let seed=0;seed<16;seed++){
+  for(let seed=0;seed<64;seed++){
     const career=fixture({seed:`bracket-${seed}`});processNationalWindow(career,'first');archiveNationalSeason(career);
     const n=career.systems!.national;
-    const groupMatches=[...n.matches,...(n.teamResults??[])].filter(match=>match.fixtureId.includes('|qualifying|'));
+    const groupMatches=[...n.matches,...(n.teamResults??[])].filter(match=>match.fixtureId.includes('|qualifying|')&&!match.fixtureId.includes('finalist-group:'));
     assert.equal(groupMatches.length,3);
     const id='NAT:대한민국:senior';
     const points=n.matches.filter(match=>match.fixtureId.includes('|qualifying|')).reduce((total,match)=>{
@@ -105,6 +105,10 @@ test('qualification uses played group scores and knockout titles use the actual 
       return total+(goals[0]>goals[1]?3:goals[0]===goals[1]?1:0);
     },0);
     assert.equal(n.points,points);
+    const qualifiers=(n.teamResults??[]).filter(m=>m.fixtureId.includes('finalist-group:'));
+    if(n.qualified)assert.equal(qualifiers.length,9,'other finalists play three actual qualifying groups');
+    const semi=n.matches.find(m=>m.fixtureId.includes('|semifinal|'));
+    if(semi){const opponent=semi.awayId,group=qualifiers.filter(m=>m.homeId===opponent||m.awayId===opponent);assert.equal(group.length,2,'the semifinal opponent actually participated in qualification');}
     if(!n.qualified){sawElimination=true;assert.equal(n.phase,'eliminated');assert.ok(n.matches.every(match=>match.fixtureId.includes('|qualifying|')));}
     for(const match of n.matches)if(match.shootout){sawShootout=true;assert.equal(match.homeGoals,match.awayGoals);assert.notEqual(match.shootout.home,match.shootout.away);assert.ok(match.shootout.attempts.length>=6);}
     const final=n.matches.find(match=>match.fixtureId.includes('|final|'));
@@ -114,7 +118,55 @@ test('qualification uses played group scores and knockout titles use the actual 
       assert.equal(n.history[0].result,won?'우승':'준우승');
     }
   }
-  assert.ok(sawFinal);assert.ok(sawShootout);assert.ok(sawElimination);
+  assert.ok(sawFinal,'some qualified squads reach a final');assert.ok(sawShootout,'drawn knockout matches resolve with a shootout');assert.ok(sawElimination,'qualification is never guaranteed');
+});
+
+test('a single star does not erase whole-country strength over repeated tournaments',t=>{
+  const results=[];
+  for(const country of ['프랑스','베트남']){
+    let titles=0,qualified=0,finals=0;
+    for(let seed=0;seed<64;seed++){
+      const c=fixture({seed:`bracket-${seed}`,nationality:country});processNationalWindow(c,'first');archiveNationalSeason(c);
+      const n=c.systems!.national;titles+=+(n.history[0]?.result==='우승');qualified+=+n.qualified;finals+=+n.matches.some(m=>m.fixtureId.includes('|final|'));
+      assert.ok(nationalRosterPower(c,country,'senior')<c.player.ovr,'the team is not assigned its star’s OVR');
+    }
+    results.push({country,titles,qualified,finals});
+  }
+  assert.ok(results[0].titles>results[1].titles+5,JSON.stringify(results));assert.ok(results[1].titles<8&&results[1].qualified<64,JSON.stringify(results));t.diagnostic(JSON.stringify({same92OVRStar64WorldCups:results}));
+});
+
+test('a small continental field uses earned finalists and never invents a semifinal opponent',()=>{
+  let finals=0;
+  for(let seed=0;seed<8;seed++){
+    const c=fixture({seed:`small-field-${seed}`,nationality:'피지'});c.season.year=2028;c.systems!.national=createNational(c);
+    processNationalWindow(c,'first');const n=c.systems!.national;
+    assert.equal(n.competitionId,'OFC:2028');assert.ok(n.matches.every(m=>!m.fixtureId.includes('|semifinal|')));
+    const final=n.matches.find(m=>m.fixtureId.includes('|final|'));
+    if(final){finals++;assert.ok(n.qualified);assert.ok(n.matches.some(m=>m.fixtureId.includes('|qualifying|')&&(m.homeId===final.awayId||m.awayId===final.awayId)));}
+  }
+  assert.ok(finals>0);
+});
+
+test('an older in-progress semifinal bracket keeps its recorded opponents without fabricated earlier qualifiers',()=>{
+  const c=fixture({seed:'bracket-0'});processDueNationalWindows(c,'2026-06-18');
+  const n=c.systems!.national;assert.ok(n.qualified);assert.ok(n.matches.some(m=>m.fixtureId.includes('|semifinal|')));
+  n.teamResults=n.teamResults!.filter(m=>!m.fixtureId.includes('finalist-group:'));
+  const oldSemis=structuredClone([...n.matches,...n.teamResults].filter(m=>m.fixtureId.includes('|semifinal|')));assert.equal(oldSemis.length,2);
+  processDueNationalWindows(c,'2026-06-25');
+  assert.ok(!n.teamResults!.some(m=>m.fixtureId.includes('finalist-group:')));
+  assert.deepEqual([...n.matches,...n.teamResults!].filter(m=>m.fixtureId.includes('|semifinal|')),oldSemis);
+});
+
+test('played qualifying groups stay fixed when another country’s squad changes before the semifinal',()=>{
+  const c=fixture({seed:'bracket-0'});processDueNationalWindows(c,'2026-06-12');const n=c.systems!.national;
+  const qualifiers=structuredClone(n.teamResults!.filter(m=>m.fixtureId.includes('finalist-group:')));assert.equal(qualifiers.length,9);
+  const group=qualifiers.filter(m=>m.fixtureId.includes('finalist-group:0:')),rows=new Map<string,{points:number;gd:number;gf:number}>();
+  for(const m of group){for(const id of [m.homeId,m.awayId])if(!rows.has(id))rows.set(id,{points:0,gd:0,gf:0});const h=rows.get(m.homeId)!,a=rows.get(m.awayId)!;h.points+=m.homeGoals>m.awayGoals?3:m.homeGoals===m.awayGoals?1:0;a.points+=m.awayGoals>m.homeGoals?3:m.awayGoals===m.homeGoals?1:0;h.gd+=m.homeGoals-m.awayGoals;a.gd-=m.homeGoals-m.awayGoals;h.gf+=m.homeGoals;a.gf+=m.awayGoals;}
+  const winner=[...rows].sort(([ai,a],[bi,b])=>b.points-a.points||b.gd-a.gd||b.gf-a.gf||ai.localeCompare(bi))[0][0];
+  const positions:Position[]=['GK','LB','CB','CB','RB','CDM','CM','CAM','LW','RW','ST'];
+  for(const [i,position] of positions.entries())c.systems!.world.players[`changed-${i}`]={id:`changed-${i}`,clubId:c.player.clubId,name:'명단 변경 실험',position,age:25,ovr:99,potential:99,injuryWeeks:0,nationality:'일본',leadership:70};
+  processDueNationalWindows(c,'2026-06-18');assert.deepEqual(n.teamResults!.filter(m=>m.fixtureId.includes('finalist-group:')),qualifiers);
+  assert.equal(n.matches.find(m=>m.fixtureId.includes('|semifinal|'))!.awayId,winner);
 });
 
 test('goalkeepers retain keeper metrics and competitors receive exactly their national match ledger',()=>{

@@ -7,9 +7,12 @@ export interface MatchOptions {
   home?: Club; away?: Club; homePlayers?: MatchParticipant[]; awayPlayers?: MatchParticipant[];
   scope?: 'club'|'national'; competitionId?: string; date?: string; userParticipates?: boolean; detailed?: boolean;
   forceSelection?: { from: number; to: number; started: boolean };
+  neutralVenue?:boolean;
 }
 export interface WorldPlayer { id: string; clubId: string; name: string; position: Position; age: number; ovr: number; potential: number; injuryWeeks: number; nationality: string; leadership: number }
-export interface ClubWorld { id: string; leagueId: string; power: number; depth: number; averageAge: number; injuryImpact: number; budget: number; wageBudget: number; revenue: number; rosterIds: string[]; changes: string[] }
+export interface ClubSeasonDevelopment {year:number;leagueId:string;rank:number;expectedRank:number|null;points:number;teams:number;bonus:number;reinvestment:number;beforePower:number;afterPower:number;prestigeBefore:number;prestigeAfter:number;improvedPlayers:number;recruits:number;userContribution?:{apps:number;minutes:number;goals:number;assists:number;rating:number};}
+export interface ClubDevelopment {basePower:number;prestige:number;baselineYear:number;baselinePower:number;expectedRank:number|null;history:ClubSeasonDevelopment[];}
+export interface ClubWorld { id: string; leagueId: string; power: number; depth: number; averageAge: number; injuryImpact: number; budget: number; wageBudget: number; revenue: number; rosterIds: string[]; changes: string[];development?:ClubDevelopment; }
 export interface CompetitionState { leagueId: string; fixtures: Fixture[]; table: Standing[]; round: number; totalRounds: number }
 export interface CompetitorSeason { playerId: string; name: string; clubId: string; leagueId: string; position: Position; nationality: string; ovr: number; stats: PlayerStats; rank?: number; nationalStats?: PlayerStats }
 export interface LeagueMovement { year: number; clubId: string; fromLeagueId: string; toLeagueId: string; kind: 'promotion'|'relegation'; reason: string }

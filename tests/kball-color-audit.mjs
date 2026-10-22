@@ -141,7 +141,11 @@ try{
       await sample(page,`${prefix}-match-row-hover`,{hover:page.locator('.match-row').first()});
       await page.locator('.match-row').first().click();await sample(page,`${prefix}-match-detail`);await closeDialog(page);
     }
-    await page.getByRole('button',{name:'전체 순위',exact:true}).click();await sample(page,`${prefix}-full-standings-pagination`);
+    await page.getByTestId('standings-more').click();await sample(page,`${prefix}-full-standings-modal`);
+    if(viewport.width<900){await page.getByTestId('full-standings-scroll').evaluate(el=>el.scrollLeft=el.scrollWidth);await sample(page,`${prefix}-full-standings-right`);}
+    await closeDialog(page);
+    await page.getByTestId('league-leaders-more').click();await sample(page,`${prefix}-league-leaders`);await closeDialog(page);
+    await page.getByTestId('club-development').locator('summary').click();await page.getByTestId('club-development').scrollIntoViewIfNeeded();await sample(page,`${prefix}-club-growth`);
     assert.equal(await page.getByText('팀 현황',{exact:true}).count(),0);
     await page.getByTestId('locker-season-details').scrollIntoViewIfNeeded();await sample(page,`${prefix}-locker-combined-details`);await page.evaluate(()=>scrollTo(0,0));
     await page.getByTestId('transfer-window').click();await sample(page,`${prefix}-contract-modal`);
@@ -153,7 +157,7 @@ try{
     await page.getByTestId('career-view-records').click();
     for(const scope of['all','club','national']){await page.getByTestId(`records-scope-${scope}`).click();await sample(page,`${prefix}-record-${scope}`);}
     await page.getByTestId('career-view-awards').click();
-    for(const name of['발롱도르 후보 · 순위','FIFPRO 월드 11']){await page.getByRole('button',{name,exact:true}).click();await sample(page,`${prefix}-awards-${name.startsWith('FIFPRO')?'eleven':'ballon'}`);}
+    for(const name of['발롱도르 순위','FIFPRO 월드 11']){await page.getByRole('button',{name,exact:true}).click();await sample(page,`${prefix}-awards-${name.startsWith('FIFPRO')?'eleven':'ballon'}`);}
     await page.getByTestId('career-view-ledger').click();
     for(const name of['주장 이력','선수 수입']){await page.getByRole('button',{name,exact:true}).click();await sample(page,`${prefix}-ledger-${name==='선수 수입'?'income':'captain'}`);}
     await page.getByTestId('common-menu').click();await sample(page,`${prefix}-settings`);

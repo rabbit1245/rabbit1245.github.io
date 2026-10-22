@@ -201,7 +201,7 @@ small { font-size:15px; }
 .league-table .my-team .table-club > strong { font-weight:750; color:var(--teal-dark); }
 .rank-marker { display:grid; place-items:center; width:22px; height:22px; }
 .promotion .rank-marker { color:#3e7358; background:#e7efdf; border-radius:4px; }
-.relegation .rank-marker { color:#a05c4c; background:#f5e9e1; border-radius:4px; }
+.relegation .rank-marker { color:#894b3d; background:#f5e9e1; border-radius:4px; }
 .table-gap td { border-top:5px solid var(--disabled-bg); }
 .mini-label { font-size:15px; color:var(--teal-dark); white-space:nowrap; }
 .table-note { display:flex; gap:13px; flex-wrap:wrap; align-items:center; padding:16px 19px; color:var(--muted); font-size:15px; line-height:1.85; }

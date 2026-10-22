@@ -6,6 +6,7 @@ import { getLeagueRule } from './league-rules';
 import { nextCalendarYear, seasonDate } from './calendar';
 import { evaluateTournamentAwards } from './tournament-awards';
 import { normalizeNationality } from './national-data';
+import { scoutingReports } from './scouting';
 import { getCaptainAssessment,proposeCaptainOffer,expireCaptainOffers } from './captain';
 export { getCaptainAssessment,answerCaptainOffer,expireCaptainOffers } from './captain';
 import type { Award, Career, PlayerStats, Position, TransferOffer } from './types';
@@ -132,6 +133,7 @@ export function makeContractOffers(career: Career, timing: 'midseason'|'offseaso
   const effectiveYear=career.season.year+1;
   const remaining = Math.max(0, e.contract.expiresYear - effectiveYear);
   const deadline=career.season.totalWeeks;
+  const reports=scoutingReports(career),scouts=new Map(reports.map(row=>[row.clubId,row]));
   const offerFor = (clubId: string, renew: boolean): TransferOffer | null => {
     const club = world.clubs[clubId];
     if (!club) return null;
@@ -143,17 +145,15 @@ export function makeContractOffers(career: Career, timing: 'midseason'|'offseaso
     if (wageLimit < 150 || (renew && wage < p.wage && remaining > 0)) return null;
     const years = p.age >= 32 ? 1 : p.age >= 29 ? 2 : 3 + Math.floor(random() * 2);
     const fee = renew || remaining === 0 ? 0 : Math.round(e.marketValue * clamp(.45 + remaining * .18 + random() * .12, .45, 1.35));
-    if (fee > club.budget || Math.abs(p.ovr - power) > 26) return null;
+    if (fee > club.budget || (renew?Math.abs(p.ovr-power)>26:!scouts.get(clubId)?.offerEligible)) return null;
     const role = roleFor(career, power);
     return { id: `${career.season.year}:${timing}:${renew ? 'renew' : 'transfer'}:${clubId}`, clubId, wage, years, role, fee,
-      reason: `${getClub(clubId).name} · 팀 전력 ${Math.round(power)} · ${role}. 현재 주급 €${p.wage.toLocaleString()} → €${wage.toLocaleString()} · ${years}년. ${renew ? '시즌 종료 후 새 계약을 검토합니다.' : `잔여 ${remaining}년 계약과 구단 예산을 반영한 구단 간 이적료입니다.`}`,
+      reason: `${renew?'':`${scouts.get(clubId)?.reason} `}${getClub(clubId).name} · 팀 전력 ${Math.round(power)} · ${role}. 현재 주급 €${p.wage.toLocaleString()} → €${wage.toLocaleString()} · ${years}년. ${renew ? '시즌 종료 후 새 계약을 검토합니다.' : `잔여 ${remaining}년 계약과 구단 예산을 반영한 구단 간 이적료입니다.`}`,
       type: renew ? 'renew' : 'transfer', expiresRound: deadline, effective:'nextSeason', currentWage: p.wage, budgetLimit: club.budget };
   };
   const renew = offerFor(p.clubId, true);
   const offers = renew ? [renew] : [];
-  const viable = CLUBS.filter(c => c.id !== p.clubId && world.clubs[c.id] && Math.abs(world.clubs[c.id].power - p.ovr) <= 24)
-    .map(c => ({ id: c.id, appeal: -Math.abs(world.clubs[c.id].power - p.ovr) + random() * 22 }))
-    .sort((a,b) => b.appeal - a.appeal || a.id.localeCompare(b.id));
+  const viable=reports.filter(row=>row.offerEligible).map(row=>({id:row.clubId,appeal:row.score+random()*1.5})).sort((a,b)=>b.appeal-a.appeal||a.id.localeCompare(b.id));
   for (const club of viable) {
     const offer = offerFor(club.id, false);
     if (offer) offers.push(offer);

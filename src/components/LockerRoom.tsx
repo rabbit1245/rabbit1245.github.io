@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react';
 import { ArrowLeftRight, ArrowRight, Check, ChevronLeft, ChevronRight, Dumbbell, Play } from 'lucide-react';
-import type { AttributeKey, Career, GameCommand, MatchRecord } from '../game/types';
+import type { AttributeKey, Career, GameCommand, MatchRecord, Standing } from '../game/types';
 import { ATTRIBUTE_LABELS } from '../game/attributes';
 import { getLeagueRule } from '../game/league-rules';
 import { sumStats } from '../game/math';
 import { average, calendarLabel, compactMoney, Delta, Empty, MatchRow, Modal, money, Panel, seasonLabel, TeamBadge, teamName } from './Shared';
 import StatsNine from './StatsNine';
 import './LockerRoom.css';
+import LeagueLeaders from './LeagueLeaders';
+import ClubDevelopment from './ClubDevelopment';
 import type { GrowthReport } from '../game/revision-types';
 
 type Props = {career:Career;busy:boolean;command:(command:GameCommand)=>void};
@@ -31,10 +33,33 @@ function Transfers({career,busy,command,onClose}:Props&{onClose:()=>void}) {
   </Modal>;
 }
 function NearbyTable({career}:{career:Career}) {
-  const [expanded,setExpanded]=useState(false),[page,setPage]=useState(0),table=career.season.table,ownId=career.stage==='season'?career.player.clubId:career.history.at(-1)?.clubId||career.player.clubId;
-  const own=Math.max(0,table.findIndex(t=>t.clubId===ownId)),rule=getLeagueRule(career.season.leagueId),promotion=career.player.squad==='youth'?0:rule.promotion,relegation=career.player.squad==='youth'?0:rule.relegation;
-  const start=expanded?page*6:Math.min(Math.max(0,own-2),Math.max(0,table.length-5)),visible=table.slice(start,start+(expanded?6:5)),pages=Math.max(1,Math.ceil(table.length/6));
-  return <Panel title={career.season.competitionName} action={<button className="text-button" onClick={()=>{setExpanded(v=>!v);setPage(Math.floor(own/6));}} aria-expanded={expanded}>{expanded?'주변 순위':'전체 순위'}</button>} className="nearby-panel"><table className="league-table"><thead><tr><th>#</th><th>구단</th><th>경기</th><th>득실</th><th>승점</th></tr></thead><tbody>{visible.map((r,index)=>{const rank=start+index+1;return <tr key={r.clubId} className={`${r.clubId===ownId?'my-team ':''}${rank<=promotion?'promotion ':rank>table.length-relegation?'relegation ':''}`}><td><span className="rank-marker">{rank}</span></td><td><span className="table-club"><TeamBadge id={r.clubId} small/><strong>{teamName(r.clubId)}</strong></span></td><td>{r.played}</td><td>{r.goalsFor-r.goalsAgainst>0?'+':''}{r.goalsFor-r.goalsAgainst}</td><td><b>{r.points}</b></td></tr>;})}</tbody></table><div className="table-note"><div className="table-boundaries">{promotion>0&&<span><i className="promotion-dot"/>승격 1–{promotion}위</span>}{relegation>0&&<span><i className="relegation-dot"/>강등 {table.length-relegation+1}–{table.length}위</span>}{!promotion&&!relegation&&<span>이 대회는 승강을 적용하지 않습니다.</span>}</div>{expanded&&<div className="pagination"><button aria-label="순위 이전 페이지" disabled={page===0} onClick={()=>setPage(p=>p-1)}><ChevronLeft size={18}/></button><span>{page+1} / {pages}</span><button aria-label="순위 다음 페이지" disabled={page+1>=pages} onClick={()=>setPage(p=>p+1)}><ChevronRight size={18}/></button></div>}</div></Panel>;
+  const [expanded,setExpanded]=useState(false),table=career.season.table;
+  const ownId=career.stage==='season'?career.player.clubId:career.history.at(-1)?.clubId||career.player.clubId;
+  const own=Math.max(0,table.findIndex(t=>t.clubId===ownId)),rule=getLeagueRule(career.season.leagueId);
+  const promotion=career.player.squad==='youth'?0:rule.promotion,relegation=career.player.squad==='youth'?0:rule.relegation;
+  const start=Math.min(Math.max(0,own-2),Math.max(0,table.length-5));
+  useEffect(()=>setExpanded(false),[career.id,career.season.year,career.stage]);
+  const boundaries=<div className="table-boundaries">{promotion>0&&<span><i className="promotion-dot"/>승격 1–{promotion}위</span>}{relegation>0&&<span><i className="relegation-dot"/>강등 {table.length-relegation+1}–{table.length}위</span>}{!promotion&&!relegation&&<span>이 대회는 승강을 적용하지 않습니다.</span>}</div>;
+  const rows=(standings:Standing[],offset:number,full:boolean)=>standings.map((r,index)=>{
+    const rank=offset+index+1,difference=r.goalsFor-r.goalsAgainst;
+    return <tr key={r.clubId} data-club-id={r.clubId} className={`${r.clubId===ownId?'my-team ':''}${rank<=promotion?'promotion ':rank>table.length-relegation?'relegation ':''}`}>
+      <td><span className="rank-marker">{rank}</span></td><td><span className="table-club"><TeamBadge id={r.clubId} small/><strong>{teamName(r.clubId)}</strong></span></td>
+      <td>{r.played}</td><td data-stat="won">{r.won}</td><td data-stat="drawn">{r.drawn}</td><td data-stat="lost">{r.lost}</td>
+      {full&&<><td>{r.goalsFor}</td><td>{r.goalsAgainst}</td></>}<td>{difference>0?'+':''}{difference}</td><td><b>{r.points}</b></td>
+    </tr>;
+  });
+  const heading=(full:boolean)=><thead><tr><th scope="col">#</th><th scope="col">구단</th><th scope="col">경기</th><th scope="col">승</th><th scope="col">무</th><th scope="col">패</th>{full&&<><th scope="col">득점</th><th scope="col">실점</th></>}<th scope="col">득실</th><th scope="col">승점</th></tr></thead>;
+  return <>
+    <Panel title={career.season.competitionName} action={<button className="text-button" data-testid="standings-more" aria-haspopup="dialog" aria-expanded={expanded} onClick={()=>setExpanded(true)}>전체 순위 더보기<ChevronRight size={17}/></button>} className="nearby-panel">
+      <div className="nearby-standings-scroll" role="region" aria-label="내 팀 주변 순위 · 승무패 포함, 좌우로 스크롤" tabIndex={0}><table className="league-table nearby-standings" aria-label="내 팀 주변 순위" data-testid="nearby-standings">{heading(false)}<tbody>{rows(table.slice(start,start+5),start,false)}</tbody></table></div>
+      <div className="table-note">{boundaries}</div>
+    </Panel>
+    {expanded&&<Modal title={`전체 순위 · ${career.season.competitionName}`} onClose={()=>setExpanded(false)} wide>
+      <div className="full-standings-intro"><p>{calendarLabel(career)} · {table.length}개 구단 전체 순위</p><span className="pill">승 3점 · 무 1점 · 패 0점</span></div>
+      <div className="full-standings-scroll" role="region" aria-label="전체 순위표 · 상하와 좌우로 스크롤" tabIndex={0} data-testid="full-standings-scroll"><table className="league-table full-standings" aria-label={`${career.season.competitionName} 전체 순위`} data-testid="full-standings">{heading(true)}<tbody>{rows(table,0,true)}</tbody></table></div>
+      <div className="table-note full-standings-note">{boundaries}<span>내 팀은 연두색으로 표시합니다. 작은 화면에서는 표를 좌우로 움직일 수 있습니다.</span></div>
+    </Modal>}
+  </>;
 }
 export default function LockerRoom({career,busy,command,onMatch,onTraining}:Props&{onMatch:(m:MatchRecord)=>void;onTraining?:()=>void;presenting?:boolean}) {
   const [transfers,setTransfers]=useState(false),[matchPage,setMatchPage]=useState(0),[allMatches,setAllMatches]=useState(false);
@@ -55,11 +80,12 @@ export default function LockerRoom({career,busy,command,onMatch,onTraining}:Prop
       {career.stage==='offseason'&&<><button className="button secondary" data-testid="transfer-window" disabled={busy} onClick={()=>setTransfers(true)}><ArrowLeftRight size={18}/>이적 · 재계약{career.transferDecision&&<Check size={18}/>}</button>{!trainingConfirmed&&onTraining&&<button className="button secondary" data-testid="training-plan" disabled={busy} onClick={onTraining}><Dumbbell size={17}/>훈련 선택</button>}</>}
     </div></div>
     <div className="locker-core" data-testid="locker-core"><div className="locker-records">
-      <Panel title="이번 시즌 기록" className="season-summary-panel"><table className="season-summary"><thead><tr><th>범위</th><th>출전</th><th>분</th><th>{p.position==='GK'?'선방':'골'}</th><th>{p.position==='GK'?'무실점':'도움'}</th><th>평점</th></tr></thead><tbody>{summaries.map(([label,stats])=><tr key={label}><th>{label}</th><td>{stats.apps}</td><td>{stats.minutes}</td><td>{p.position==='GK'?stats.saves:stats.goals}</td><td>{p.position==='GK'?stats.cleanSheets:stats.assists}</td><td>{average(stats)}</td></tr>)}</tbody></table></Panel>
+      <Panel title="이번 시즌 기록" action={<LeagueLeaders career={career}/>} className="season-summary-panel"><table className="season-summary"><thead><tr><th>범위</th><th>출전</th><th>분</th><th>{p.position==='GK'?'선방':'골'}</th><th>{p.position==='GK'?'무실점':'도움'}</th><th>평점</th></tr></thead><tbody>{summaries.map(([label,stats])=><tr key={label}><th>{label}</th><td>{stats.apps}</td><td>{stats.minutes}</td><td>{p.position==='GK'?stats.saves:stats.goals}</td><td>{p.position==='GK'?stats.cleanSheets:stats.assists}</td><td>{average(stats)}</td></tr>)}</tbody></table></Panel>
       <Panel title={allMatches?'시즌 경기':'최근 경기'} action={recent.length>3?<button className="text-button" onClick={()=>{setAllMatches(v=>!v);setMatchPage(0);}}>{allMatches?'최근 경기':'전체 경기'}</button>:undefined} className="recent-panel">
         {recent.length?<><div className="match-list">{recent.slice(allMatches?matchPage*3:0,allMatches?matchPage*3+3:3).map(m=><MatchRow key={m.id} match={m} onClick={()=>onMatch(m)}/>)}</div>{allMatches&&<div className="pagination"><button aria-label="라커룸 경기 이전 페이지" disabled={matchPage===0} onClick={()=>setMatchPage(page=>page-1)}><ChevronLeft size={18}/></button><span>{matchPage+1} / {Math.ceil(recent.length/3)}</span><button aria-label="라커룸 경기 다음 페이지" disabled={(matchPage+1)*3>=recent.length} onClick={()=>setMatchPage(page=>page+1)}><ChevronRight size={18}/></button></div>}</>:<Empty title="첫 경기를 기다립니다">전반기 진행을 누르면 경기가 시작됩니다.</Empty>}
       </Panel>
     </div><NearbyTable career={career}/></div>
+    <ClubDevelopment career={career}/>
     <Panel title="이번 시즌 통합 세부 기록" action={<span className="pill">{calendarLabel(career)} · 클럽 + 국대</span>} className="locker-season-details">
       <div className="panel-body" data-testid="locker-season-details"><StatsNine stats={combined} detailedStats={detailed} position={p.position}/></div>
     </Panel>

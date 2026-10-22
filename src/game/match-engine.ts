@@ -210,7 +210,7 @@ export function simulateMatch(career:Career,fixture:Fixture,options:MatchOptions
     const keeperAt=(minute:number)=>opposition.actors.find(a=>a.position==='GK'&&a.from<minute&&a.to>=minute)??opposition.actors.find(a=>a.from<minute&&a.to>=minute)!;
     const firstKeeper=keeperAt(1);
     const organization=firstKeeper?ability(firstKeeper,'gkDefensiveOrganization'):opposition.power;
-    const powerFactor=clamp(1+(team.power-opposition.power)*.012+(side===0?.07:0),.45,1.8);
+    const powerFactor=clamp(1+(team.power-opposition.power)*.012+(side===0&&!options.neutralVenue ? .07 : 0),.45,1.8);
     const actionFactor=clamp(1+(buildUp[side]-4)*.045-(disruption[1-side]-6)*.045,.68,1.32);
     for(const shooter of team.actors){
       const a=(key:AttributeKey)=>ability(shooter,key);

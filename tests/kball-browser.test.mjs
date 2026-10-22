@@ -87,6 +87,32 @@ async function desktopLayouts(page) {
 }
 async function skipPresentation(page) { const skip=page.getByRole('button',{name:'연출 건너뛰기'});if(await skip.isVisible())await skip.click(); }
 async function closeDialog(page) { const dialog=page.getByRole('dialog');if(await dialog.isVisible())await dialog.getByRole('button',{name:'닫기',exact:true}).first().click(); }
+async function fullStandings(page,career,mobile=false) {
+  await page.getByTestId('standings-more').click();
+  const rows=await page.getByTestId('full-standings').locator('tbody tr').evaluateAll(rows=>rows.map(row=>({clubId:row.dataset.clubId,values:[...row.cells].map(cell=>cell.textContent.trim())})));
+  assert.equal(rows.length,career.season.table.length);
+  for(const [i,row] of rows.entries()){
+    const t=career.season.table[i];assert.equal(row.clubId,t.clubId);assert.equal(Number(row.values[0]),i+1);
+    assert.deepEqual(row.values.slice(2).map(Number),[t.played,t.won,t.drawn,t.lost,t.goalsFor,t.goalsAgainst,t.goalsFor-t.goalsAgainst,t.points]);
+  }
+  assert.equal(await page.getByTestId('full-standings').locator('tr.my-team').count(),1);
+  if(mobile){
+    const scroll=page.getByTestId('full-standings-scroll');assert.ok(await scroll.evaluate(el=>el.scrollWidth>el.clientWidth));
+    await scroll.evaluate(el=>el.scrollLeft=el.scrollWidth);
+    const last=await page.getByTestId('full-standings').locator('thead th').last().boundingBox();assert.ok(last&&last.x>=0&&last.x+last.width<=390,'the points column can be reached by horizontal scrolling');
+  }
+  await noOverflow(page,'full league standings');await closeDialog(page);
+}
+async function downloadText(page,career) {
+  let count=0;const observeDownload=()=>count++;page.on('download',observeDownload);
+  const pending=page.waitForEvent('download');await page.getByTestId('career-text-download').click();const download=await pending;
+  assert.equal(download.suggestedFilename(),`K볼_${career.player.name}_은퇴커리어.txt`);
+  const file=path.join(results,download.suggestedFilename());await download.saveAs(file);page.off('download',observeDownload);assert.equal(count,1);
+  const bytes=await readFile(file),text=bytes.toString('utf8');assert.equal(text.charCodeAt(0),0xfeff);assert.ok(!/(?<!\r)\n/.test(text));
+  for(const section of ['A. 선수 기본','B. 통산','C. 연도별','D. 클럽','E. 국가대표','F. 개인 수상','G. 팀 수상','H. 주장','I. 몸값','J. 능력치','K. 전체 순위','L. 원본 보존'])assert.ok(text.includes(section),section);
+  assert.ok(text.includes(career.player.name));for(const h of career.history)assert.ok(text.includes(`[${h.year}시즌]`));
+  assert.equal((await saved(page)).find(c=>c.id===career.id).revision,career.revision,'TXT export does not change the save');
+}
 async function openCommon(page) { await page.getByTestId('common-menu').click();await page.getByRole('dialog',{name:'커리어 보관함과 설정'}).waitFor(); }
 async function exportFile(page, name) {
   await openCommon(page);
@@ -152,11 +178,9 @@ try {
   assert.equal(await page.getByTestId('season-competitions').count(),1);assert.ok((await page.getByTestId('club-competition').textContent()).includes(career.season.competitionName));
   await navigate(page,'player');await page.getByTestId('player-view-training').click();assert.equal(await page.locator('.training-row:enabled').count(),0);assert.equal(await page.getByTestId('confirm-training').count(),0);await navigate(page,'locker');
   await page.locator('.match-row').first().click();assert.equal(await page.getByRole('dialog').locator('[data-testid="role-metrics"] .stat-detail').count(),9);await closeDialog(page);
-  await page.getByRole('button',{name:'전체 순위',exact:true}).click();
-  while(await page.getByRole('button',{name:'순위 이전 페이지',exact:true}).isEnabled())await page.getByRole('button',{name:'순위 이전 페이지',exact:true}).click();
-  const standings=[];
-  for(;;){standings.push(...await page.locator('.league-table tbody .rank-marker').allTextContents());const next=page.getByRole('button',{name:'순위 다음 페이지',exact:true});if(await next.isDisabled())break;await next.click();}
-  assert.equal(standings.length,career.season.table.length);assert.equal(new Set(standings).size,career.season.table.length);await noOverflow(page,'desktop paginated full standings');
+  await fullStandings(page,career);
+  await page.getByTestId('league-leaders-more').click();assert.ok(await page.getByTestId('league-leaders').locator('tbody tr').count()>0);await closeDialog(page);
+  completed.push('all league teams in one modal, actual W/D/L/GF/GA/GD/points and league-only scorer table');
   await navigate(page,'career');assert.equal(await page.locator('.record-summary > button').count(),3);await page.getByTestId('records-scope-club').click();assert.equal(await page.getByTestId('role-metrics').locator('.stat-detail').count(),9);
   const rows=await page.locator('.record-summary > button').evaluateAll(buttons=>buttons.map(b=>Array.from(b.children).slice(1).map(e=>Number(e.textContent.replace(/[^\d]/g,'')))));for(const column of[0,1,2,3])assert.equal(rows[0][column],rows[1][column]+rows[2][column]);
   await page.getByTestId('records-scope-national').click();assert.equal(await page.getByTestId('role-metrics').locator('.stat-detail').count(),9);await navigate(page,'locker');
@@ -190,9 +214,14 @@ try {
   await navigate(page,'career');await page.getByRole('button',{name:'통산',exact:true}).click();const before=totals(career),summaryBefore=await page.getByTestId('records-scope-all').textContent();
   await page.getByTestId('career-view-retirement').click();page.once('dialog',d=>d.accept());await page.getByTestId('retire-career').click();career=await waitState(page,c=>c.id===replicaId&&c.stage==='retired','retirement');await ready(page);await page.getByRole('heading',{name:'김도윤의 축구 인생'}).waitFor();assert.deepEqual(totals(career),before);await page.getByTestId('career-view-records').click();await page.getByRole('button',{name:'통산',exact:true}).click();assert.equal(await page.getByTestId('records-scope-all').textContent(),summaryBefore);assert.equal(career.history.length,1);await noOverflow(page,'desktop career');await page.screenshot({path:path.join(results,'kball-career.png'),fullPage:true});
   completed.push('contract-controlled wage, transfer fees separate from income, next season, reload and retirement totals');
+  await downloadText(page,career);
+  await page.getByTestId('career-view-awards').click();
+  for(const name of ['발롱도르 순위','FIFPRO 월드 11']){await page.getByRole('button',{name,exact:true}).click();assert.equal(await page.locator('.world-candidates,.world-eleven').count(),0);}
+  completed.push('one click downloads one complete UTF-8 career TXT, leaves saves untouched and awards show only own selection');
   if(await page.evaluate(()=>!!document.querySelector('script[src*="assets/"]'))){await page.waitForFunction(()=>navigator.serviceWorker.controller!==null);await context.setOffline(true);await page.reload({waitUntil:'domcontentloaded'});await page.getByRole('button',{name:'이어서 플레이',exact:true}).click();await page.getByRole('heading',{level:1,name:'라커룸',exact:true}).waitFor();assert.equal((await saved(page)).length,2);await context.setOffline(false);completed.push('production offline reload with saved slots');}else skipped.push('offline cache reload requires a production build');
 
   const mobile=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true,reducedMotion:'reduce'}),mobilePage=await mobile.newPage();observe(mobilePage);await mobilePage.goto(baseURL,{waitUntil:'networkidle'});await noOverflow(mobilePage,'mobile landing');let keeper=await create(mobilePage,{name:'이수호',age:24,position:'GK',talent:'SSS',difficulty:'free',intensity:'balanced'});const keeperId=keeper.id;await noOverflow(mobilePage,'mobile locker room');await mobilePage.screenshot({path:path.join(results,'kball-mobile.png'),fullPage:true});await navigate(mobilePage,'player');assert.equal(await mobilePage.locator('.attribute-row').count(),10);assert.equal(await mobilePage.getByTestId('attribute-gkHandling').locator('.attribute-values strong').textContent(),String(Math.round(keeper.player.attributes.gkHandling)));await mobilePage.getByTestId('player-view-training').click();assert.equal(await mobilePage.locator('.training-row').count(),10);await noOverflow(mobilePage,'mobile goalkeeper training');await navigate(mobilePage,'locker');await mobilePage.getByTestId('advance-half').click();keeper=await waitState(mobilePage,c=>c.id===keeperId&&c.season.week===c.systems.halfRound,'mobile goalkeeper half');await ready(mobilePage);keeper=await dismissRenewal(mobilePage,keeperId);assert.ok(keeper.season.playerStats.apps>0);assert.ok(keeper.season.playerStats.saves>0);assert.ok(keeper.season.playerStats.goals<=keeper.season.playerStats.shotsOnTarget);await navigate(mobilePage,'career');await mobilePage.getByTestId('records-scope-club').click();assert.equal(await mobilePage.getByTestId('role-metrics').locator('.stat-detail').count(),9);await noOverflow(mobilePage,'mobile goalkeeper records');await mobilePage.screenshot({path:path.join(results,'kball-mobile-records.png'),fullPage:true});completed.push('mobile three-menu navigation, ten goalkeeper abilities, half progression and nine goalkeeper metrics');
+  await navigate(mobilePage,'locker');await fullStandings(mobilePage,keeper,true);completed.push('mobile full standings retain every team and allow reaching the last points column');
   if(portable){assert.deepEqual([...new Set(requests)],[baseURL],'portable game must not fetch external code/data/images');completed.push('standalone HTML makes no external HTTP asset requests');}
   assert.deepEqual(errors,[],`Browser page errors: ${errors.join(' | ')}`);await writeFile(path.join(results,'browser-results.json'),JSON.stringify({passed:completed,skipped,pageErrors:errors,httpRequests:[...new Set(requests)]},null,2));console.log('Kball browser E2E passed:',JSON.stringify(completed));
 }catch(error){if(activePage&&!activePage.isClosed())await activePage.screenshot({path:path.join(results,'failure.png'),fullPage:true}).catch(()=>{});await writeFile(path.join(results,'browser-results.json'),JSON.stringify({passed:completed,pageErrors:errors,failure:String(error)},null,2));throw error;}finally{await browser.close();}

@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { FIELD_ATTRIBUTES, GK_ATTRIBUTES } from './attributes';
 import { ALL_STATS, emptyStats, sumStats } from './math';
 import { simulateMatch } from './match-engine';
+import { calculateTable,makeFixtures } from './engine';
 import { ATTRIBUTE_EFFECTS, fieldMetrics, goalkeeperMetrics, per90, successRate } from './metrics';
 import type { MatchOptions, MatchParticipant } from './revision-types';
 import type { AttributeKey, Career, Club, Fixture, PlayerStats, Position } from './types';
@@ -22,6 +23,50 @@ function career(position:Position='CM'):Career {
 }
 const value=(s:PlayerStats,key:keyof PlayerStats)=>s[key]??0;
 const freezeDeep=(object:unknown)=>{if(object&&typeof object==='object'){Object.freeze(object);for(const child of Object.values(object))freezeDeep(child);}};
+
+test('paired complete league schedules turn individual actions into different points and rank distributions',t=>{
+  const ids=[home.id,...Array.from({length:7},(_,i)=>`opponent-${i}`)],output=[];
+  for(const level of [25,95]){
+    let points=0,ranks=0,titles=0,goals=0;
+    for(let seed=0;seed<40;seed++){
+      const input=career('ST');input.seed=`league-impact-${seed}`;input.player.attributes=Object.fromEntries(FIELD_ATTRIBUTES.map(k=>[k,level]));
+      const schedule=makeFixtures(ids,2026);
+      for(const f of schedule){
+        const own=f.homeId===home.id||f.awayId===home.id,h={...home,id:f.homeId},a={...away,id:f.awayId};
+        const record=simulateMatch(input,f,{home:h,away:a,homePlayers:roster(h.id),awayPlayers:roster(a.id),userParticipates:own,forceSelection:{from:0,to:90,started:true},detailed:false});
+        f.played=true;f.homeGoals=record.homeGoals;f.awayGoals=record.awayGoals;
+        if(own){assert.ok(record.playerStats.goals<=(f.homeId===home.id?record.homeGoals:record.awayGoals));goals+=record.playerStats.goals;}
+      }
+      const table=calculateTable(schedule,ids),rank=table.findIndex(row=>row.clubId===home.id)+1,row=table[rank-1];points+=row.points;ranks+=rank;titles+=+(rank===1);
+      for(const r of table){assert.equal(r.played,r.won+r.drawn+r.lost);assert.equal(r.points,r.won*3+r.drawn);}
+    }
+    output.push({ability:level,meanPoints:points/40,meanRank:ranks/40,titles,goals});
+  }
+  assert.ok(output[1].meanPoints>output[0].meanPoints+3,JSON.stringify(output));assert.ok(output[1].meanRank<output[0].meanRank-.5,JSON.stringify(output));
+  assert.ok(output[1].goals>output[0].goals);assert.ok(output[1].titles<40,'one excellent player never guarantees the title');t.diagnostic(JSON.stringify({paired40Seasons:output}));
+});
+
+test('a weak club’s 30-to-40-goal striker is included in actual scores and improves earned season points',t=>{
+  const ids=[home.id,...Array.from({length:19},(_,i)=>`weak-test-${i}`)],output=[];
+  for(const ability of [25,95]){
+    let points=0,ranks=0;const goals=[];
+    for(let seed=0;seed<8;seed++){
+      const input=career('ST');input.seed=`weak-season-${seed}`;input.player.attributes=Object.fromEntries(FIELD_ATTRIBUTES.map(k=>[k,ability]));
+      const schedule=makeFixtures(ids,2026);let ownGoals=0;
+      for(const f of schedule){
+        const strength=(id:string)=>id===home.id?50:50+Number(id.split('-').at(-1))%6*3;
+        const own=f.homeId===home.id||f.awayId===home.id,h={...home,id:f.homeId,power:strength(f.homeId)},a={...away,id:f.awayId,power:strength(f.awayId)};
+        const players=(id:string)=>roster(id).map(p=>({...p,ovr:strength(id)}));
+        const m=simulateMatch(input,f,{home:h,away:a,homePlayers:players(h.id),awayPlayers:players(a.id),userParticipates:own,forceSelection:{from:0,to:90,started:true},detailed:false});
+        f.played=true;f.homeGoals=m.homeGoals;f.awayGoals=m.awayGoals;
+        if(own){ownGoals+=m.playerStats.goals;assert.ok(m.playerStats.goals<=(f.homeId===home.id?m.homeGoals:m.awayGoals));}
+      }
+      const table=calculateTable(schedule,ids),rank=table.findIndex(row=>row.clubId===home.id)+1;points+=table[rank-1].points;ranks+=rank;goals.push(ownGoals);
+    }
+    output.push({ability,meanPoints:points/8,meanRank:ranks/8,goals});
+  }
+  assert.ok(output[1].goals.some(g=>g>=30&&g<=40),JSON.stringify(output));assert.ok(output[1].meanPoints>output[0].meanPoints,JSON.stringify(output));assert.ok(output[1].meanRank<output[0].meanRank,JSON.stringify(output));t.diagnostic(JSON.stringify({weakClubEight38GameSeasons:output}));
+});
 
 test('seed replay is pure, and output verbosity does not change any performance',()=>{
   const input=career();const options=structuredClone(settings);freezeDeep(input);freezeDeep(options);

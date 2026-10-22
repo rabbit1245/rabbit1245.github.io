@@ -9,7 +9,7 @@ import type { Career, Club, Fixture, MatchRecord, PlayerStats, Position, RosterP
 
 /** Competition names/cycles are real; the reduced three-team qualification and four-team
  * finals are a game model, not a claim to reproduce every federation's actual regulations. */
-export const NATIONAL_MODEL_NOTE = '국대는 실제 대회 주기를 바탕으로 한 축약 모형입니다. 예선 3팀 조 상위 2팀 → 본선 4강·결승입니다. 승점·득실·득점까지 동률이면 추첨하며, 실제 국가별 예선 방식·개최 일정과 다를 수 있습니다. 선수 국적은 보관된 FC25 자료를 사용하고 부족한 명단은 (가상) 선수로 보완합니다.';
+export const NATIONAL_MODEL_NOTE = '국대는 실제 대회 주기를 바탕으로 한 축약 모형입니다. 내 예선은 3팀 조 상위 2팀이며, 본선 상대도 실제 모의 예선을 통과해야 합니다. 참가국 수에 따라 4강·결승 또는 결승을 치르고 본선은 중립 구장입니다. 승점·득실·득점까지 동률이면 추첨하며, 실제 국가별 예선 방식·개최 일정과 다를 수 있습니다. 선수 국적은 보관된 FC25 자료를 사용하고 부족한 명단은 (가상) 선수로 보완합니다.';
 
 type Squad = NationalState['squad'];
 type Stage = 'qualifying' | 'friendly' | 'semifinal' | 'final';
@@ -182,6 +182,39 @@ function drawCountries(career: Career, competition: Competition, label: string):
     .map(country=>({country,draw:seededRandom(`${career.seed}|national-draw|${competition.id}|${label}|${country}`)()}))
     .sort((a,b)=>a.draw-b.draw).map(row=>row.country);
 }
+export function nationalRosterPower(career:Career,country:string,squad:Squad):number {
+ const roster=rosterFor(career,country,squad).slice(0,11);return roster.reduce((sum,p)=>sum+p.ovr,0)/Math.max(1,roster.length);
+}
+/** Other finalists also earn qualification. Strong squads are seeded into the
+ * compact model's representative groups; no unplayed country is awarded a title. */
+function finalistGroupWinners(matches:MatchRecord[]):string[]{
+ const winners:string[]=[];
+ for(let g=0;g<3;g++){
+  const games=matches.filter(m=>m.fixtureId.includes(`|qualifying|finalist-group:${g}:`));if(games.length!==3)continue;
+  const rows=new Map<string,{country:string;points:number;gd:number;gf:number;played:number}>();
+  const row=(id:string)=>{const country=id.slice(4).split(':')[0];if(!rows.has(country))rows.set(country,{country,points:0,gd:0,gf:0,played:0});return rows.get(country)!;};
+  for(const m of games){const a=row(m.homeId),b=row(m.awayId);a.played++;b.played++;a.gf+=m.homeGoals;b.gf+=m.awayGoals;a.gd+=m.homeGoals-m.awayGoals;b.gd-=m.homeGoals-m.awayGoals;a.points+=m.homeGoals>m.awayGoals?3:m.homeGoals===m.awayGoals?1:0;b.points+=m.awayGoals>m.homeGoals?3:m.homeGoals===m.awayGoals?1:0;}
+  if(rows.size===3&&[...rows.values()].every(r=>r.played===2))winners.push([...rows.values()].sort((a,b)=>b.points-a.points||b.gd-a.gd||b.gf-a.gf||a.country.localeCompare(b.country))[0].country);
+ }
+ return winners;
+}
+function qualifiedFinalists(career:Career,competition:Competition,date:string,excluded:string[]):string[]{
+ const state=career.systems!.national as State;
+ const known=matchLedger(state).filter(m=>m.competitionId===competition.id&&nationalMatchSquad(m)===state.squad);
+ const qualifiers=known.filter(m=>m.fixtureId.includes('finalist-group:'));
+ // The played draw is authoritative even when club injuries or squad strength
+ // change later in the same window. Never redraw completed qualifying groups.
+ if(qualifiers.length)return finalistGroupWinners(qualifiers);
+ // Preserve pre-2.3 recorded semifinals without inventing earlier qualifiers.
+ const ownId=teamId(state.country,state.squad),own=known.find(m=>m.fixtureId.includes('|semifinal|')&&(m.homeId===ownId||m.awayId===ownId)),other=known.find(m=>m.fixtureId.includes('|semifinal|')&&m.homeId!==ownId&&m.awayId!==ownId);
+ if(own&&other)return [own.homeId===ownId?own.awayId:own.homeId,other.homeId,other.awayId].map(id=>id.slice(4).split(':')[0]);
+ const countries=competition.countries.filter(country=>!excluded.includes(country)).map(country=>({country,power:nationalRosterPower(career,country,state.squad),draw:seededRandom(`${career.seed}|finals-seeding|${competition.id}|${country}`)()})).sort((a,b)=>(b.power+b.draw*5)-(a.power+a.draw*5)).slice(0,9).map(row=>row.country);
+ for(let g=0;g<3;g++){
+  const group=countries.slice(g*3,g*3+3);if(group.length<3)continue;
+  for(let i=0;i<3;i++)for(let j=i+1;j<3;j++)qualifiers.push(play(career,competition,group[i],group[j],'qualifying',date,`finalist-group:${g}:${i}:${j}`));
+ }
+ return finalistGroupWinners(qualifiers);
+}
 function syntheticTeam(country: string, squad: Squad, players: Candidate[]): Club {
   const starting = players.slice(0,11);
   return {id:teamId(country,squad),name:getTeamLabel(teamId(country,squad)),nativeName:country,country,leagueId:'national',power:starting.reduce((sum,p)=>sum+p.ovr,0)/Math.max(1,starting.length),color:'#426c65'};
@@ -193,7 +226,7 @@ function play(career: Career, competition: Competition, homeCountry: string, awa
   const fixture: Fixture = {id:`NAT|${state.squad}|${competition.id}|${stage}|${label}`,round:state.matches.length+1,homeId:teamId(homeCountry,state.squad),awayId:teamId(awayCountry,state.squad),played:false};
   const isOwn = homeCountry===state.country || awayCountry===state.country;
   const called = isOwn && state.status==='called' && career.player.injuryWeeks===0;
-  const match = simulateMatch(career,fixture,{home:syntheticTeam(homeCountry,state.squad,homePlayers),away:syntheticTeam(awayCountry,state.squad,awayPlayers),homePlayers,awayPlayers,scope:'national',competitionId:competition.id,date,userParticipates:called});
+  const match = simulateMatch(career,fixture,{home:syntheticTeam(homeCountry,state.squad,homePlayers),away:syntheticTeam(awayCountry,state.squad,awayPlayers),homePlayers,awayPlayers,scope:'national',competitionId:competition.id,date,userParticipates:called,neutralVenue:stage==='semifinal'||stage==='final'});
   if ((stage==='semifinal'||stage==='final') && match.homeGoals===match.awayGoals) resolveNationalShootout(career,match);
   match.playerClubId = isOwn ? teamId(state.country,state.squad) : match.homeId;
   if (isOwn) {
@@ -268,7 +301,7 @@ function qualifyingTable(career: Career, competition: Competition, opponents: st
   const sorted=[...rows.values()].sort((a,b)=>b.points-a.points||b.gd-a.gd||b.gf-a.gf||lot(a.country)-lot(b.country));
   const self=rows.get(teamId(state.country,state.squad))!;
   const rank=sorted.indexOf(self)+1;
-  return {points:self.points,rank,played:self.played,qualified:self.played>=2&&rank<=2};
+  return {points:self.points,rank,played:self.played,qualified:self.played>=2&&rank<=2,countries:sorted.map(row=>row.country)};
 }
 
 export interface InternationalWindow {
@@ -361,17 +394,18 @@ function processWindowThrough(career:Career,window:InternationalWindow,through:s
     if(!state.qualified){state.phase='eliminated';appendResultEvent(career,competition,`예선 ${state.rank}위 · 본선 진출 실패`);}
     else {
       state.phase='finals';
-      const finalists=drawCountries(career,competition,'finals').slice(0,3);
-      const semifinal=duePlay(state.country,finalists[0],'semifinal',18,`country:${state.country}:semi`);
-      const other=duePlay(finalists[1],finalists[2],'semifinal',18,`other:${state.country}:semi`);
-      if(semifinal&&other){
-        if(winner(semifinal)!==teamId(state.country,state.squad)){
+      if(timestamp(through)<timestamp(dateAt(12)))return;
+      let finalists=qualifiedFinalists(career,competition,dateAt(12),[state.country,...opponents]);
+      if(!finalists.length)finalists=table.countries.slice(0,2).filter(country=>country!==state.country);
+      const semifinal=finalists.length>=2?duePlay(state.country,finalists[0],'semifinal',18,`country:${state.country}:semi`):undefined;
+      const other=finalists.length>=3?duePlay(finalists[1],finalists[2],'semifinal',18,`other:${state.country}:semi`):undefined;
+      const opponent=other?(winner(other)??other.homeId).slice(4).split(':')[0]:finalists.length===1?finalists[0]:finalists[1];
+      if((finalists.length===1||semifinal)&&(finalists.length<3||other)){
+        if(semifinal&&winner(semifinal)!==teamId(state.country,state.squad)){
           const first=(winner(semifinal)??semifinal.homeId).slice(4).split(':')[0];
-          const second=(winner(other)??other.homeId).slice(4).split(':')[0];
-          duePlay(first,second,'final',25,`other:${state.country}:final`);
+          duePlay(first,opponent,'final',25,`other:${state.country}:final`);
           state.phase='eliminated';appendResultEvent(career,competition,'4강 탈락');
         }else{
-          const opponent=(winner(other)??other.homeId).slice(4).split(':')[0];
           const alreadyFinal=find('final',`country:${state.country}:final`);
           const final=duePlay(state.country,opponent,'final',25,`country:${state.country}:final`);
           if(final){

@@ -7,6 +7,7 @@ import { createCareer } from './game/engine';
 import { runGameCommand } from './game/client';
 import { deleteSlot, exportCareer, importCareer, listSlots, loadCareer, restoreBackup, saveCareer } from './game/storage';
 import { sumStats } from './game/math';
+import { careerTextChunks,careerTextFilename } from './game/career-text';
 import { getSeasonCompetitions } from './game/season-competitions';
 import Creation from './components/Creation';
 import LockerRoom, { phaseLabel } from './components/LockerRoom';
@@ -41,8 +42,6 @@ function PlayerStrip({career}:{career:Career}) {
   const nationalStatus=n.status==='called'?'소집':n.status==='played'?'이번 시즌 출전':n.status==='completed'?'시즌 기록':n.statusLabel;
   return <section className="player-strip" data-testid="player-strip" aria-label="선수 요약"><div className="strip-identity"><TeamBadge id={p.clubId}/><div><strong>{p.name}{role&&role!=='none'&&<span className="armband">{role==='captain'?'C':'VC'}</span>}</strong><span>{p.age}세 · {p.position} · {p.squad==='youth'?'U19':'1군'} · {teamName(p.clubId)}</span></div></div><div className="strip-ovr"><span>OVR</span><strong>{p.ovr}</strong><Delta value={p.ovr-career.season.ovrStart}/></div><div className="strip-economics"><span>몸값 <b>{e?compactMoney(e.marketValue):'미집계'}</b></span><span>주급 <b>{money(p.wage)}</b></span><small>{e?.contract.role||'계약 역할 미집계'}</small></div><div className="strip-national"><span>국가대표 <b>{nationalStatus}</b></span><small>{n.teamName}</small></div><div className="strip-condition"><span>체력 <b>{Math.round(p.fitness)}%</b> · 신뢰 <b>{Math.round(career.managerTrust)}%</b></span><small>{p.injuryWeeks>0?`부상 회복 ${p.injuryWeeks}주`:'경기 출전 가능'}</small></div></section>;
 }
-function careerText(c:Career) {const club=clubTotal(c),national=nationalTotal(c),all=sumStats([club,national]);const stats=(s:typeof club)=>`${s.apps}경기 ${s.minutes}분 ${s.goals}골 ${s.assists}도움 평점 ${average(s)}`;return [`K볼 · ${c.player.name}의 커리어`,`${c.player.position} · OVR ${c.player.ovr} · ${c.player.age}세`,`통합 ${stats(all)}`,`클럽 ${stats(club)}`,`국대 ${stats(national)}`,...c.history.map(h=>`${calendarLabel(c,h.year)} ${h.clubName} · ${h.competitionName} ${h.rank}위 · ${stats(h.stats)} · OVR ${h.ovrStart}→${h.ovrEnd}`),...visibleAwards(c.awards).map(a=>`${a.year} ${a.name}: ${a.description}`),...c.transfers.map(t=>`${t.year} ${teamName(t.fromClubId)} → ${teamName(t.toClubId)} · 이적료 €${t.fee}`)].join('\n');}
-
 export default function App() {
   const [career, setCareer] = useState<Career | null>(null);
   const [page, setPage] = useState<Page>('locker');
@@ -162,11 +161,13 @@ export default function App() {
     catch (e) { setError(errorMessage(e)); }
     finally { locked.current = false; setBusy(false); }
   }
-  async function copyCareer() {
-    if (!careerRef.current) return;
-    const text = careerText(careerRef.current);
-    try { await navigator.clipboard.writeText(text); setToast('전체 커리어 기록을 복사했습니다.'); }
-    catch { const textarea = document.createElement('textarea'); textarea.value = text; textarea.style.position = 'fixed'; textarea.style.opacity = '0'; document.body.appendChild(textarea); textarea.select(); const copied = document.execCommand('copy'); textarea.remove(); copied ? setToast('전체 커리어 기록을 복사했습니다.') : setError('복사 권한을 확인해 주세요. JSON 내보내기로도 모든 기록을 보관할 수 있습니다.'); }
+  function copyCareer() {
+    const career=careerRef.current;if(!career)return;
+    try {
+      const blob=new Blob([...careerTextChunks(career)],{type:'text/plain;charset=utf-8'}),url=URL.createObjectURL(blob),link=document.createElement('a');
+      link.href=url;link.download=careerTextFilename(career);document.body.appendChild(link);link.click();link.remove();window.setTimeout(()=>URL.revokeObjectURL(url),30_000);
+      setToast('전체 커리어 상세 기록을 TXT 한 파일로 다운로드했습니다.');
+    } catch(error) {setError(errorMessage(error));}
   }
   function changeReduced(value:boolean){setReduced(value);try{localStorage.setItem('kball-reduced-motion',String(value));}catch{/* Active for this session. */}}
   return <div className={reduced?'reduce-motion':''}>

@@ -1,7 +1,7 @@
 {
   "name": "kball-career",
   "private": true,
-  "version": "2.2.0",
+  "version": "2.3.0",
   "scripts": {
     "dev": "vite --host 0.0.0.0 --port 5173",
     "build": "tsc --noEmit && vite build && node scripts/copy-static.mjs",
@@ -10,6 +10,7 @@
     "test": "tsx --test src/game/*.test.ts",
     "test:legacy": "node tests/v55-core.test.js",
     "test:e2e": "node tests/kball-browser.test.mjs",
+    "test:long-txt": "node tests/kball-long-txt.test.mjs",
     "data:extract": "python3 scripts/extract_kball_data.py",
     "build:playable": "node scripts/build-playable.mjs",
     "test:colors": "node tests/kball-color-audit.mjs"

@@ -1,4 +1,4 @@
-import type { CareerSystems, MatchPerformance, MatchEffects } from './revision-types';
+import type { CareerSystems, MatchPerformance, MatchEffects, ClubSeasonDevelopment } from './revision-types';
 export type Position = 'GK'|'CB'|'LB'|'RB'|'LWB'|'RWB'|'CDM'|'CM'|'CAM'|'LM'|'RM'|'LW'|'RW'|'CF'|'SS'|'ST';
 export type Talent = 'SSS'|'SS'|'S'|'A'|'B'|'C'|'D';
 export type Foot = 'right'|'left'|'both';
@@ -52,7 +52,13 @@ export interface SeasonSummary {
   calendarYear?: number;
   age: number; position: Position; squad: Squad; rank: number; ovrStart: number; ovrEnd: number;
   stats: PlayerStats; awards: Award[]; matches: MatchRecord[]; attributeGrowth: Attributes;
-  income: number; completed: boolean;
+  income: number; completed: boolean; details?:SeasonDetails;
+}
+export interface SeasonDetails {
+  version:1; clubDevelopment?:ClubSeasonDevelopment; table:Standing[]; attributes:Attributes; startAttributes:Attributes;
+  marketValue:number; seasonStartValue?:number; contract:{clubId:string;wage:number;years:number;signedYear:number;expiresYear:number;role:string};
+  personalRanks:{goals:number|null;assists:number|null;cleanSheets:number|null};
+  captain:{club:'none'|'captain'|'vice';national:'none'|'captain'|'vice'};
 }
 export interface NewsItem { id: string; week: number; year: number; kind: 'match'|'training'|'transfer'|'injury'|'award'|'career'; title: string; body: string }
 export interface TransferOffer { id: string; clubId: string; wage: number; years: number; role: string; fee: number; reason: string; type: 'transfer'|'renew'; expiresRound?: number; effective?: 'now'|'nextSeason'; currentWage?: number; budgetLimit?: number }
