@@ -1,5 +1,6 @@
 import { getClub,getLeague } from './data';
 import { clamp,round } from './math';
+import { getClubRatingOffset } from './world';
 import type { Career } from './types';
 export interface ScoutReport {clubId:string;score:number;currentAbility:number;projectedAbility:number;need:number;interest:boolean;offerEligible:boolean;reason:string;}
 const group=(p:string)=>p==='GK'?'GK':/^(CB|LB|RB|LWB|RWB)$/.test(p)?'DEF':/^(CDM|CM|CAM|LM|RM)$/.test(p)?'MID':'FWD';
@@ -23,7 +24,8 @@ export function scoutingReports(c:Career):ScoutReport[]{
  const w=c.systems?.world;if(!w||c.stage==='retired')return [];
  const p=c.player,a=scoutingProfile(c),source=getLeague(c.season.leagueId),own=w.clubs[p.clubId];
  return Object.values(w.clubs).filter(club=>club.id!==p.clubId).map(club=>{
-  const candidates=club.rosterIds.map(id=>w.players[id]).filter(row=>row&&group(row.position)===group(p.position)).sort((a,b)=>b.ovr-a.ovr);
+  const offset=getClubRatingOffset(c,club.id);
+  const candidates=club.rosterIds.map(id=>w.players[id]).filter(row=>row&&group(row.position)===group(p.position)).map(row=>({...row,ovr:clamp(row.ovr+offset,25,99)})).sort((a,b)=>b.ovr-a.ovr);
   const positionLevel=candidates.slice(0,p.position==='GK'?1:3).reduce((sum,row)=>sum+row.ovr,0)/Math.max(1,Math.min(candidates.length,p.position==='GK'?1:3));
   const need=clamp((a.projected-positionLevel+4)/12,0,1),gap=club.power-p.ovr;
   const interest=gap<=Math.min(19,a.projected-p.ovr+5)&&gap>=-18;

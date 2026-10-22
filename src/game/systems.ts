@@ -1,11 +1,11 @@
 import type { Career } from './types';
-import { createWorld } from './world';
+import { createWorld, repairLegacyRosterScale } from './world';
 import { createNational } from './national';
 import { createEconomics, createLeadership } from './career-systems';
 
 /** Called only on a new career or an editable copy, after an old save's hash was checked. */
 export function initializeSystems(career: Career, legacyMetrics = true): void {
-  if (career.systems) return;
+  if (career.systems) {repairLegacyRosterScale(career);return;}
   const halfRound = Math.ceil(career.season.totalWeeks / 2);
   career.systems = {
     version: 2, world: createWorld(career), national: createNational(career),

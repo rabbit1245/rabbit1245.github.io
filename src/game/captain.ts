@@ -1,6 +1,7 @@
 import { getClub } from './data';
 import { clamp,round,sumStats } from './math';
 import { normalizeNationality } from './national-data';
+import { getClubRatingOffset } from './world';
 import type { Career,MatchRecord,PlayerStats } from './types';
 import type { CaptainAssessment,CaptainOffer } from './revision-types';
 
@@ -16,7 +17,8 @@ function records(c:Career,scope:Scope):MatchRecord[]{
 export function getCaptainAssessment(c:Career,scope:Scope):CaptainAssessment{
   const p=c.player,l=c.systems!.leadership,n=c.systems!.national,world=c.systems!.world;
   const junior=scope==='club'?p.squad==='youth':n.squad==='U20',teamId=scope==='club'?p.clubId:`NAT:${n.country}:${n.squad}`;
-  const peers=Object.values(world.players).filter(w=>w.id!==p.id&&(scope==='club'?w.clubId===p.clubId:normalizeNationality(w.nationality)===normalizeNationality(n.country))&&(scope==='national'?(junior?w.age<=20:w.age>20):!junior||w.age<=21));
+  const offset=scope==='club'&&!junior?getClubRatingOffset(c,p.clubId):0;
+  const peers=Object.values(world.players).filter(w=>w.id!==p.id&&(scope==='club'?w.clubId===p.clubId:normalizeNationality(w.nationality)===normalizeNationality(n.country))&&(scope==='national'?(junior?w.age<=20:w.age>20):!junior||w.age<=21)).map(row=>({...row,ovr:clamp(row.ovr+offset,25,99)}));
   const strongest=[...peers].sort((a,b)=>b.ovr-a.ovr).slice(0,11);
   const squadOvr=strongest.length?strongest.reduce((sum,w)=>sum+w.ovr,0)/strongest.length:scope==='club'?(world.clubs[p.clubId]?.power??getClub(p.clubId).power):65;
   const teamPower=scope==='club'&&!junior?world.clubs[p.clubId]?.power??squadOvr:squadOvr;

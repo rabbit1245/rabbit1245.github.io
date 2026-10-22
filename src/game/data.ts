@@ -13,6 +13,7 @@ type Catalogue = {
     generatedPlayers: number; clubsWithGeneratedPlayers: number;
     unmatchedSourcePlayers: number; verified2026: boolean;
   };
+  calibration: { version: number; legacyPower: Record<string, number>; leagueBaselines: Record<string, number> };
   leagues: LeagueRow[]; clubs: ClubRow[]; rosters: Record<string, PlayerRow[]>;
 };
 const catalogue = rawCatalogue as unknown as Catalogue;
@@ -48,6 +49,7 @@ export const COUNTRY_FLAGS: Record<string, string> = {
 export const COUNTRIES = [...new Set(CLUBS.map(club => club.country))];
 export const NATIONALITIES = Object.keys(COUNTRY_FLAGS);
 export const CATALOG_INFO = Object.freeze({ ...catalogue.metadata });
+export const ROSTER_CALIBRATION = catalogue.calibration;
 export const DATA_PROVENANCE = '기존 2024 / FC25 자료 기반 · 14개국, 43개 리그 단계 / 50개 진행 그룹. 실제 2026/27 명단이 아니며, 미매칭 선수단은 가상 선수로 보완합니다.';
 
 export function getClub(id: string): Club {

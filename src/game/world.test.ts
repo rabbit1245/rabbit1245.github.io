@@ -34,7 +34,7 @@ test('the persistent world contains every retained club, independently generated
   assert.notEqual(world.competitions[career.season.leagueId].fixtures,career.season.fixtures);
   const power=getClubWorldPower(career,career.player.clubId);
   for (const id of world.clubs[career.player.clubId].rosterIds) if(id!==career.player.id) world.players[id].ovr=90;
-  assert.ok(getClubWorldPower(career,career.player.clubId)>power);
+  assert.equal(getClubWorldPower(career,career.player.clubId),power,'NPC rating inflation cannot overwrite the club baseline');
   career.player.ovr=99;
   assert.ok(getWorldClubPlayers(career,career.player.clubId).some(p=>p.id===career.player.id&&p.ovr===99));
 });

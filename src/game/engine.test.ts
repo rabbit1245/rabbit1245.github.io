@@ -156,13 +156,16 @@ test('GK records saves without striker output; position performance differs over
     for(const key of position==='GK'?GK_ATTRIBUTES:FIELD_ATTRIBUTES)career.player.attributes[key]=90;
     career.player.ovr=overall(career.player);career.managerTrust=90;
     const fixture=career.season.fixtures.find(f=>f.homeId===career.player.clubId||f.awayId===career.player.clubId)!;
-    for(let seed=0;seed<100;seed++) {
+    const samples=position==='GK'?1000:100;
+    for(let seed=0;seed<samples;seed++) {
       const match=simulateMatch({...career,seed:`distribution-${seed}`},fixture,{forceSelection:{from:0,to:90,started:true}});
       addStats(totals,match.playerStats);verifyMatch(match);
     }
     outputs[position]={apps:totals.apps,goals:totals.goals,saves:totals.saves,goalsAgainst:totals.goalsConceded};
   }
-  assert.ok(outputs.GK.saves>80);assert.ok(outputs.GK.goals<=1,'goalkeepers may very rarely score');
+  // Keep the same <=1% scoring-rate ceiling over a larger sample. A single
+  // 100-game seed slice is too noisy to classify a rare event after roster changes.
+  assert.ok(outputs.GK.saves>800);assert.ok(outputs.GK.goals<=outputs.GK.apps*.01,JSON.stringify(outputs));
   assert.ok(outputs.ST.goals>outputs.CB.goals*2,JSON.stringify(outputs));
   assert.ok(outputs.ST.goals>outputs.CAM.goals,JSON.stringify(outputs));
   assert.equal(outputs.ST.apps,100);

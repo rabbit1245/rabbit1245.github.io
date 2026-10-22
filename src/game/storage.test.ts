@@ -568,14 +568,20 @@ test('historical award snapshots survive retirement of the ranked NPC without re
 });
 
 test('actual international goalkeeper matches and their attempt denominators survive export/import', async () => {
-  const original = createCareer({name: '국대 골키퍼', nationality: '대한민국', age: 24, height: 190, weight: 85,
+  let original!:Career;
+  // Search actual simulated draws; roster updates must not require one specific
+  // seed to produce a tied knockout. No score or shootout is fabricated.
+  for(let trial=0;trial<12;trial++){
+  original = createCareer({name: '국대 골키퍼', nationality: '대한민국', age: 24, height: 190, weight: 85,
     foot: 'right', position: 'GK', talent: 'SSS', style: PLAY_STYLES.GK[0], clubId: CLUBS.find(c => c.leagueId === 'KR1')!.id,
-    squad: 'senior', difficulty: 'free', seed: 'storage-national-keeper'});
+    squad: 'senior', difficulty: 'free', seed: `storage-national-keeper-${trial}`});
   for (const key of Object.keys(original.player.attributes) as (keyof typeof original.player.attributes)[]) original.player.attributes[key] = 95;
   original.systems!.growthLedger!.baselineAttributes = {...original.player.attributes};
   original.season.attributeStart = {...original.player.attributes};
   original.player.ovr = 95; original.managerTrust = 98;
   processNationalWindow(original, 'first');
+  if([...original.systems!.national.matches,...(original.systems!.national.teamResults??[])].some(m=>m.shootout))break;
+  }
   const records = original.systems!.national.matches;
   assert.ok(records.length >= 2 && records.some(record => record.playerPlayed));
   assert.ok(records.every(record => record.playerClubId.startsWith('NAT:대한민국:')));
