@@ -59,7 +59,8 @@ test('club-level repair keeps every NPC, personal profile and played record inta
  }
  const before=structuredClone(c);
  initializeSystems(c);
- for(const key of ['player','season','history','awards','transfers'] as const)assert.deepEqual(c[key],before[key],key);
+ for(const key of ['season','history','awards','transfers'] as const)assert.deepEqual(c[key],before[key],key);
+ assert.deepEqual({...c.player,potential:before.player.potential},before.player);assert.ok(c.player.potential>=before.player.potential,'new talent ceilings may increase only future potential');
  for(const key of ['national','economics','leadership','growthReports','rankings'] as const)assert.deepEqual(c.systems![key],before.systems![key],key);
  assert.deepEqual(w.competitions,before.systems!.world.competitions);
  assert.deepEqual(w.playerStats,before.systems!.world.playerStats);

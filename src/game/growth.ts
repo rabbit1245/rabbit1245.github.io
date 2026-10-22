@@ -2,6 +2,7 @@ import { FIELD_ATTRIBUTES,GK_ATTRIBUTES,POSITION_ATTRIBUTES,overall } from './at
 import { clamp,round,seededRandom } from './math';
 import type { AttributeKey,Career,PlayerStats,Talent } from './types';
 import type { GrowthCause,GrowthLedger } from './revision-types';
+import { growthAgeFactor } from './talent';
 
 const GROWTH:Record<Talent,number>={D:.055,C:.075,B:.105,A:.14,S:.18,SS:.215,SSS:.25};
 export function trainingQuality(career:Career):number {
@@ -24,7 +25,11 @@ function apply(career:Career,key:AttributeKey,amount:number,cause:GrowthCause):v
   const next=round(clamp(current+amount,1,100)),change=round(next-current);
   if(!change)return;
   career.player.attributes[key]=next;
-  const ledger=ensureGrowthTracking(career),row=ledger.byCause[cause];row[key]=round((row[key]??0)+change);
+  const ledger=ensureGrowthTracking(career),row=ledger.byCause[cause]??(ledger.byCause[cause]={});row[key]=round((row[key]??0)+change);
+}
+export function increaseAttribute(career:Career,key:AttributeKey,amount:number):void{
+  apply(career,key,amount,'cheat');career.player.ovr=overall(career.player);
+  career.player.potential=Math.max(career.player.potential,career.player.ovr);
 }
 function cappedGain(career:Career,key:AttributeKey,amount:number,cause:'experience'|'development',cap:number):void {
   const prior=ensureGrowthTracking(career).byCause[cause][key]??0;
@@ -36,8 +41,8 @@ export function trainRound(career:Career):void {
   ledger.trainingQuality=trainingQuality(career);
   if(career.intensity==='rest'){p.fitness=clamp(p.fitness+27,0,100);p.morale=clamp(p.morale+1,0,100);return;}
   const rng=seededRandom(`${career.seed}|training|${career.season.year}|${career.season.week}`);
-  const age=p.age<=18?1.5:p.age<=22?1.25:p.age<=26?1:p.age<=30?.6:p.age<=34?.28:.12;
-  const ceiling=clamp((p.potential-p.ovr)/18,.025,1.1),availability=injured?.2:1;
+  const age=growthAgeFactor(p);
+  const ceiling=p.ovr>=p.potential?0:clamp((p.potential-p.ovr+4)/12,.025,1.15),availability=injured?.2:1;
   const exposure=.8+.2*clamp(career.season.playerStats.minutes/Math.max(90,(career.season.week-1)*75),0,1);
   for(const key of career.training)apply(career,key,GROWTH[p.talent]*(38/career.season.totalWeeks)*age*ceiling*(career.intensity==='intense'?1.32:1)*availability*ledger.trainingQuality*exposure*(.8+rng()*.4),'training');
   // Small, bounded maturation affects mental attributes; it never copies the training gain to every attribute.
@@ -52,10 +57,11 @@ export function trainRound(career:Career):void {
   p.ovr=overall(p);p.fitness=clamp(p.fitness+(career.intensity==='intense'?10:19),0,100);
 }
 export function applyMatchExperience(career:Career,stats:PlayerStats):void {
-  if(!stats.apps||!stats.minutes||career.player.age>30)return;
+  if(!stats.apps||!stats.minutes||career.player.ovr>=career.player.potential)return;
   const p=career.player,allowed=p.position==='GK'?GK_ATTRIBUTES:FIELD_ATTRIBUTES,weights=new Map<AttributeKey,number>();
   // Match learning follows position and actions, not a blanket boost to every skill.
-  for(const [index,key] of POSITION_ATTRIBUTES[p.position].entries())weights.set(key,.72-index*.045);
+  for(const key of allowed)weights.set(key,.18);
+  for(const [index,key] of POSITION_ATTRIBUTES[p.position].entries())weights.set(key,.8-index*.035);
   const add=(key:AttributeKey,value:number)=>{if(allowed.includes(key))weights.set(key,Math.min(1.4,(weights.get(key)??.15)+value));};
   if(stats.passesCompleted>=10)add(p.position==='GK'?'gkDistribution':'passing',.45);
   if((stats.keyPasses??0)>0)add('vision',.5);
@@ -64,11 +70,11 @@ export function applyMatchExperience(career:Career,stats:PlayerStats):void {
   if(stats.shotsOnTarget>0){add('shooting',.45);add('composure',.35);}
   if(stats.saves>0){add('gkShotStopping',.45);add('gkReflexes',.35);add('gkPositioning',.3);}
   if(stats.minutes>=60){add('stamina',.2);add('decisions',.25);}
-  const talent:Record<Talent,number>={D:.45,C:.58,B:.74,A:.9,S:1.05,SS:1.16,SSS:1.25};
-  const ceiling=clamp((p.potential-p.ovr)/20,.025,1.1),age=p.age<=18?1.25:p.age<=22?1.1:p.age<=26?.8:.35;
+  const talent:Record<Talent,number>={D:.45,C:.58,B:.74,A:.9,S:1.15,SS:1.35,SSS:1.55};
+  const ceiling=clamp((p.potential-p.ovr+4)/12,.025,1.15),age=growthAgeFactor(p);
   const rating=stats.ratingCount?stats.ratingSum/stats.ratingCount:6.5,form=clamp(.85+(rating-6.5)*.16,.55,1.25);
-  const base=.14*(38/career.season.totalWeeks)*Math.min(1,stats.minutes/90)*ceiling*age*talent[p.talent]*trainingQuality(career)*form;
-  const cap=(p.age<=18?4:p.age<=22?3.2:p.age<=26?2:.7)*talent[p.talent];
+  const base=.20*(38/career.season.totalWeeks)*Math.min(1,stats.minutes/90)*ceiling*age*talent[p.talent]*trainingQuality(career)*form;
+  const cap=(p.age<=18?6:5.2)*Math.min(1,age)*talent[p.talent];
   for(const [key,weight] of weights)cappedGain(career,key,base*weight,'experience',cap*weight);
   p.ovr=overall(p);
 }

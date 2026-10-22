@@ -138,8 +138,9 @@ function growthLedger(value: unknown, end: unknown, throughRound: number, year: 
   assert(legacy || from === 0, `${label}의 추적 시작 주차에 과거 미집계 표시가 없습니다.`);
   if (!legacy) sameAttributeValues(baseline, object(seasonStart, `${label}.seasonStart`), label);
   const causes = object(row.byCause, `${label}.byCause`);
-  assert(Object.keys(causes).length === growthCauses.length && growthCauses.every(cause => cause in causes), `${label}의 성장 원인이 누락되거나 올바르지 않습니다.`);
-  for (const cause of growthCauses) {
+  const trackedCauses=causes.cheat===undefined?[...growthCauses]:[...growthCauses,'cheat'];
+  assert(Object.keys(causes).length === trackedCauses.length && trackedCauses.every(cause => cause in causes), `${label}의 성장 원인이 누락되거나 올바르지 않습니다.`);
+  for (const cause of trackedCauses) {
     attributes(causes[cause], `${label}.byCause.${cause}`, undefined, -100);
     for (const [key, amount] of Object.entries(object(causes[cause], `${label}.byCause.${cause}`))) {
       assert(key in baseline, `${label}의 성장 원인에 다른 능력치가 있습니다.`);
@@ -147,7 +148,7 @@ function growthLedger(value: unknown, end: unknown, throughRound: number, year: 
     }
   }
   for (const key of Object.keys(baseline)) {
-    const change = growthCauses.reduce((total, cause) => total + Number((causes[cause] as Record<string, unknown>)[key] ?? 0), 0);
+    const change = trackedCauses.reduce((total, cause) => total + Number((causes[cause] as Record<string, unknown>)[key] ?? 0), 0);
     assert(Math.abs(Number(baseline[key]) + change - Number(target[key])) <= .025, `${label}의 원인별 성장 합계와 능력치가 다릅니다.`);
   }
 }

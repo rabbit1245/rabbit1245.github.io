@@ -36,3 +36,12 @@
 .club-development > div { display:grid; gap:8px; padding-top:10px; color:var(--muted); font-size:15px; }
 .scout-row { display:flex; flex-wrap:wrap; align-items:center; gap:8px; padding:10px 0; border-bottom:1px solid var(--border); }
 .scout-row p { flex-basis:100%; color:var(--muted); font-size:15px; }
+
+.season-honours-grid { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+.season-honours h4 { font-size:17px; margin:8px 0; }
+.season-honours ul { list-style:none; padding:0; margin:0; }
+.season-honours li { border-bottom:1px solid var(--border); padding:10px 0; overflow-wrap:anywhere; }
+.season-honours li strong { font-size:17px; color:var(--text); }
+.season-honours li p,.season-honours li small { line-height:1.6; margin-top:5px; }
+.season-honours section+section { margin-top:20px; border-top:1px solid var(--border); padding-top:14px; }
+@media(max-width:650px) { .season-honours-grid { grid-template-columns:1fr; gap:10px; } }

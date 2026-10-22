@@ -27,3 +27,14 @@
   .player-workspace .captain-offer .action-inline .button { flex:1; }
   .player-workspace .captain-workspace .panel-head { flex-wrap:wrap; }
 }
+
+.cheat-attribute-tools { display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin:12px 0; }
+.cheat-attribute-tools label { display:flex; align-items:center; gap:8px; }
+.attribute-grid.cheating { grid-template-columns:repeat(3,minmax(0,1fr)); }
+.attribute-grid.cheating .attribute-row { grid-template-columns:minmax(0,1fr) auto 38px 44px; }
+.attribute-cheat-button { min-height:36px; border:1px solid var(--border); border-radius:6px; background:var(--surface); color:var(--text); font-weight:700; cursor:pointer; }
+.attribute-cheat-button:disabled { opacity:1; color:var(--disabled-text); background:var(--disabled-bg); cursor:default; }
+.cheat-settings { display:grid; gap:12px; }
+.talent-reference { margin-bottom:10px; line-height:1.6; }
+@media(max-width:1100px) { .attribute-grid.cheating { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+@media(max-width:650px) { .attribute-grid.cheating { grid-template-columns:1fr; } }

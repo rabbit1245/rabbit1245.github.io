@@ -11,6 +11,7 @@ const MIDFIELD = new Set<Position>(['CDM','CM','CAM','LM','RM']);
 const DEFENCE = new Set<Position>(['CB','LB','RB','LWB','RWB']);
 const SHOTS:Record<Position,number>={GK:.025,CB:.55,LB:.65,RB:.65,LWB:.9,RWB:.9,CDM:.75,CM:1.1,CAM:1.9,LM:1.2,RM:1.2,LW:2.25,RW:2.25,CF:2.5,SS:2.8,ST:3.2};
 const PASSES:Record<Position,number>={GK:19,CB:43,LB:39,RB:39,LWB:38,RWB:38,CDM:52,CM:57,CAM:46,LM:37,RM:37,LW:29,RW:29,CF:29,SS:26,ST:23};
+const CREATION_ROLE:Record<Position,number>={GK:.03,CB:.2,LB:.85,RB:.85,LWB:1.1,RWB:1.1,CDM:.75,CM:1.45,CAM:2.4,LM:1.8,RM:1.8,LW:1.8,RW:1.8,CF:1.75,SS:1.75,ST:1.4};
 // World NPCs carry a validated 1–100 OVR rather than thirty identical attribute entries.
 const ability=(p:MatchParticipant,key:AttributeKey)=>p.attributes?clamp(p.attributes[key]??p.ovr,1,100):p.ovr;
 const duration=(p:Actor)=>Math.max(0,p.to-p.from)/90;
@@ -107,7 +108,7 @@ function sampleActions(actor:Actor,opponentPower:number,rng:()=>number,emit:(typ
     s.passes=count(PASSES[actor.position]*styleFactor(actor,'pass')*(.66+a('teamwork')*.005)*endurance);
     s.passesCompleted=success(s.passes,(.33+a('passing')*.0045+a('ballControl')*.0012+a('decisions')*.0013+a('concentration')*.0009-resistance)*endurance);
     const wide=['LW','RW','LM','RM','LB','RB','LWB','RWB'].includes(actor.position);
-    actor.creation=(.15+a('vision')*.021+a('passing')*.007+a('crossing')*(wide?.019:.008)+a('decisions')*.006+a('setPieces')*.006+a('teamwork')*.005)*styleFactor(actor,'pass')*endurance;
+    actor.creation=(.15+a('vision')*.021+a('passing')*.007+a('crossing')*(wide?.019:.008)+a('decisions')*.006+a('setPieces')*.006+a('teamwork')*.005)*CREATION_ROLE[actor.position]*styleFactor(actor,'pass')*endurance;
     s.dribbleAttempts=count((FORWARD.has(actor.position)?5.2:MIDFIELD.has(actor.position)?3.4:1.9)*styleFactor(actor,'dribble')*(.55+a('speed')*.007)*endurance);
     s.dribblesCompleted=success(s.dribbleAttempts,(.07+a('dribbling')*.005+a('agility')*.0022+a('ballControl')*.0013+a('speed')*.0008+a('strength')*.0006-resistance)*endurance);
     s.tackleAttempts=count((DEFENCE.has(actor.position)?4.3:MIDFIELD.has(actor.position)?3.1:1.6)*styleFactor(actor,'tackle')*endurance);
@@ -230,7 +231,8 @@ export function simulateMatch(career:Career,fixture:Fixture,options:MatchOptions
         // A key pass is an actual final pass before this shot, never an independent estimated count.
         const creatorGate=creatorRng(),creatorPick=creatorRng();
         let creator:Actor|undefined;
-        if(shotType!=='penalty'&&shotType!=='setPiece'&&creatorGate<.86){
+        const supplied=shotType==='header'?.96:shotType==='oneOnOne'?.82:.90;
+        if(shotType!=='penalty'&&shotType!=='setPiece'&&creatorGate<supplied){
           const creators=team.actors.filter(actor=>actor.id!==shooter.id&&actor.from<minute&&actor.to>=minute&&actor.stats.passesCompleted>(actor.stats.keyPasses??0));
           const weights=creators.map(actor=>actor.position==='GK'?.12:actor.creation);
           let pick=creatorPick*weights.reduce((total,weight)=>total+weight,0);

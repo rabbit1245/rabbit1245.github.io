@@ -18,22 +18,21 @@ try{
   assert.equal(downloads.length,1);assert.equal(download.suggestedFilename(),`K볼_${career.player.name}_은퇴커리어.txt`);
   const target=path.join(output,download.suggestedFilename());await download.saveAs(target);const bytes=await readFile(target),text=bytes.toString('utf8');assert.equal(text.charCodeAt(0),0xfeff);assert.ok(!/(?<!\r)\n/.test(text));
   assert.equal((text.match(/\[\d{4}시즌\]/g)??[]).length,30);
-  const appendix=text.slice(text.indexOf('\r\n{\r\n',text.indexOf('L. 원본 보존'))+2),raw=JSON.parse(appendix);
-  assert.deepEqual(raw.profile,career.player);assert.equal(raw.history.length,30);
-  for(const [i,h] of career.history.entries()){
-    assert.ok(text.includes(`[${h.year}시즌]`));assert.deepEqual(raw.history[i].stats,h.stats);assert.deepEqual(raw.history[i].details,h.details);
-    assert.deepEqual(raw.history[i].matches,h.matches.map(m=>({...m,performers:m.performers?.filter(p=>p.id===career.player.id)})));
+  assert.doesNotMatch(text,/"profile"|"byCause"|"playerId"|"schemaVersion"|原本|L\. 원본 보존/);
+  for(const h of career.history){assert.ok(text.includes(`[${h.year}시즌]`));assert.ok(text.includes(`${h.competitionName}`));}
+  for(const a of career.awards)assert.ok(text.includes(a.name),a.name);
+  const club=[...new Map([...career.history.flatMap(h=>h.matches),...career.season.matches].map(m=>[m.fixtureId||m.id,m])).values()];
+  const national=[...new Map([...career.systems.national.history.flatMap(h=>h.matches),...career.systems.national.matches].map(m=>[m.fixtureId||m.id,m])).values()];
+  const sourceMatches=[...club,...national];
+  const matchSection=text.slice(text.indexOf('K. 전체 순위'),text.indexOf('L. 훈련'));
+  const blocks=matchSection.split(/\r\n(?=\[\d{4}년 [^\r\n]* \/ [^\r\n]*\] )/).filter(block=>block.includes('내 출전:'));
+  assert.equal(blocks.length,sourceMatches.length,'all club and international matches remain readable');
+  const labels={apps:'출전 경기',minutes:'출전 시간(분)',goals:'득점(골)',assists:'도움(개)',saves:'선방(회)',cleanSheets:'무실점 경기',keyPasses:'키패스(회)',shotsOnTarget:'유효 슈팅(회)'};
+  for(const [key,label] of Object.entries(labels)){
+    const found=blocks.reduce((sum,block)=>{const line=block.split('\r\n').find(line=>line.startsWith(label+': '));return sum+(line&&/^\d+(?:\.\d+)?$/.test(line.slice(label.length+2))?Number(line.slice(label.length+2)):0);},0);
+    const expected=sourceMatches.reduce((sum,m)=>sum+(m.playerStats[key]??0),0);assert.ok(Math.abs(found-expected)<.01,`${label}: all original matches reconcile`);
   }
-  assert.deepEqual(raw.awards,career.awards);assert.deepEqual(raw.transfers,career.transfers);assert.deepEqual(raw.economics,career.systems.economics);assert.deepEqual(raw.leadership,career.systems.leadership);
-  assert.deepEqual(raw.growthReports,career.systems.growthReports);assert.deepEqual(raw.season.playerStats,career.season.playerStats);assert.deepEqual(raw.season.table,career.season.table);
-  assert.equal(raw.national.history.length,career.systems.national.history.length);
-  for(const [i,h] of career.systems.national.history.entries()){
-    const exported=raw.national.history[i];assert.equal(exported.competitionId,h.competitionId);assert.equal(exported.result,h.result);assert.deepEqual(exported.stats,h.stats);assert.equal(exported.matches.length,h.matches.length);
-    for(const [j,m] of h.matches.entries()){assert.equal(exported.matches[j].fixtureId,m.fixtureId);assert.deepEqual(exported.matches[j].playerStats,m.playerStats);}
-  }
-  assert.equal(raw.national.teamResults.length,career.systems.national.teamResults.length);
-  for(const [i,r] of career.systems.rankings.entries()){assert.equal(raw.rankings[i].playerRank,r.playerRank);assert.equal(raw.rankings[i].world11.some(p=>p.playerId===career.player.id),r.world11.some(p=>p.playerId===career.player.id));assert.ok(raw.rankings[i].candidates.every(p=>p.playerId===career.player.id));}
   if(process.env.KBALL_EXPECTED_TXT)assert.equal(createHash('sha256').update(bytes).digest('hex'),createHash('sha256').update(await readFile(process.env.KBALL_EXPECTED_TXT)).digest('hex'),'browser download equals the engine’s complete TXT');
-  assert.deepEqual(errors,[]);const report={source,saveBytes:(await readFile(source)).length,txtBytes:bytes.length,seasons:raw.history.length,clubMatches:raw.history.reduce((s,h)=>s+h.matches.length,0),newSeasonSnapshots:raw.history.filter(h=>h.details).length,downloads:downloads.length,bom:true,crlf:true,allOriginalOwnSeasonData:true,reload:true,pageErrors:errors};
+  assert.deepEqual(errors,[]);const report={source,saveBytes:(await readFile(source)).length,txtBytes:bytes.length,seasons:career.history.length,clubMatches:club.length,nationalMatches:national.length,newSeasonSnapshots:career.history.filter(h=>h.details).length,downloads:downloads.length,bom:true,crlf:true,rawJSON:false,readableMatchTotalsReconcile:true,reload:true,pageErrors:errors};
   await writeFile(path.join(output,'long-txt-results.json'),JSON.stringify(report,null,2));console.log(JSON.stringify(report));
 }catch(error){await page.screenshot({path:path.join(output,'failure.png'),fullPage:true}).catch(()=>{});throw error;}finally{await browser.close();}

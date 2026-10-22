@@ -39,8 +39,8 @@ test('actual minutes and actions give bounded experience while non-participants 
   assert.deepEqual(career.player.attributes,before);
   for(let game=0;game<150;game++)applyMatchExperience(career,{...emptyStats(),apps:1,minutes:90,passesCompleted:30,keyPasses:2});
   const ledger=ensureGrowthTracking(career);
-  for(const key of ['passing','vision','decisions'] as const)assert.ok(ledger.byCause.experience[key]!>0&&ledger.byCause.experience[key]!<=7,key);
-  assert.equal(ledger.byCause.experience.defending??0,0,'no defensive actions or role means no defensive boost');
+  for(const key of ['passing','vision','decisions'] as const)assert.ok(ledger.byCause.experience[key]!>0&&ledger.byCause.experience[key]!<=15,key);
+  assert.ok((ledger.byCause.experience.defending??0)<ledger.byCause.experience.passing!,'actual actions receive more experience than baseline match learning');
   assert.ok(new Set(Object.values(ledger.byCause.experience)).size>1,'position and actions produce different gains');
   const capped={...career.player.attributes};
   for(let game=0;game<150;game++)applyMatchExperience(career,{...emptyStats(),apps:1,minutes:90,passesCompleted:30,keyPasses:2});
@@ -99,7 +99,7 @@ test('annual plans confirm once in offseason and aging has its own transition re
   beginGrowthSeason(next);reconcile(next);
 });
 
-test('repeated youth-to-peak growth separates talents and depends on actual exposure without guaranteeing S reaches 80',t=>{
+test('repeated youth-to-peak growth separates talents and depends on actual exposure with world-class S and historical SSS ceilings',t=>{
   const outputs:Record<string,number[]>={D:[],A:[],S:[],SSS:[]};
   function develop(talent:CreateOptions['talent'],seed:number,position:CreateOptions['position']='ST',playing=true){
     const c=createCareer(options({age:15,talent,position,style:PLAY_STYLES[position][0],clubId:'KR2_01',squad:'senior',seed:`growth-v23-${seed}`,training:position==='ST'?['shooting','positioning','composure']:POSITION_ATTRIBUTES[position].slice(0,3),intensity:playing?'intense':'rest'}));
@@ -116,7 +116,7 @@ test('repeated youth-to-peak growth separates talents and depends on actual expo
   for(const talent of ['D','A','S','SSS'] as const)for(let seed=0;seed<6;seed++)outputs[talent].push(develop(talent,seed).player.ovr);
   const mean=(values:number[])=>values.reduce((sum,v)=>sum+v,0)/values.length;
   assert.ok(mean(outputs.D)<mean(outputs.A)&&mean(outputs.A)<mean(outputs.S)&&mean(outputs.S)<mean(outputs.SSS),JSON.stringify(outputs));
-  assert.ok(outputs.S.some(v=>v>=80)&&outputs.S.some(v=>v<80),'good conditions make 80 attainable, not automatic');
+  assert.ok(outputs.S.every(v=>v>=86&&v<=93),'regular full-match development supports the requested world-class S tier');
   const bench=develop('S',0,'ST',false);assert.ok(bench.player.ovr<Math.min(...outputs.S)-10,'a talent label alone grants no match learning');
   const positions=(['CB','GK'] as const).map(position=>{const c=develop('S',0,position);assert.ok(c.player.ovr>c.season.ovrStart+15);assert.ok(c.player.ovr<=c.player.potential);return {position,ovr:c.player.ovr};});
   t.diagnostic(JSON.stringify({controlledGrowth15to28:outputs,benchS:bench.player.ovr,positions}));

@@ -9,15 +9,15 @@ import { applyContract, evaluateAwards, makeContractOffers, payBonus, paySalary,
 import { initializeSystems } from './systems';
 import { fixtureDate, nextCalendarYear, seasonDate, seasonHalfEndDate } from './calendar';
 import { captureSeasonDetails } from './season-details';
-import { applyMatchExperience, beginGrowthSeason, ensureGrowthTracking, trainRound } from './growth';
+import { applyMatchExperience, beginGrowthSeason, ensureGrowthTracking, trainRound,increaseAttribute } from './growth';
+import { TALENT_PROFILES,declineAge } from './talent';
 import type { AttributeKey, Attributes, Career, CreateOptions, Fixture, Intensity, MatchRecord, Player, PlayerStats, SeasonState, SeasonSummary, Standing, Talent, TransferOffer } from './types';
 import type { PresentationEvent } from './revision-types';
 
-export const ENGINE_VERSION = '2.3.1';
+export const ENGINE_VERSION = '2.4.0';
 export const overall = calculateOverall;
 export { addStats, emptyStats, hashSeed, seededRandom } from './math';
 const TALENT_ORDER: Talent[] = ['D','C','B','A','S','SS','SSS'];
-const POTENTIAL: Record<Talent,[number,number]> = {D:[54,68],C:[62,75],B:[70,82],A:[77,88],S:[83,93],SS:[88,97],SSS:[93,100]};
 
 function editable(career:Career):Career {
   // One isolated snapshot per command. Rounds mutate this snapshot, never an earlier save.
@@ -111,7 +111,7 @@ export function previewPlayer(options:CreateOptions):Player {
   for(const key of keys) attributes[key]=clamp(Math.round(base+integer(rng,-7,7)+(POSITION_ATTRIBUTES[options.position].slice(0,3).includes(key)?4:0)),25,90);
   const player: Player={id:'player_'+hashSeed(options.seed+'|'+options.name).toString(36),name:options.name.trim(),nationality:options.nationality,age:options.age,height:options.height,weight:options.weight,foot:options.foot,position:options.position,secondaryPositions:[...(options.secondaryPositions??[])],talent:options.talent,style:options.style,attributes,clubId:club.id,squad:options.squad,fitness:100,morale:72,form:65,injuryWeeks:0,ovr:0,potential:0,wage:0,contractYears:3};
   player.ovr=overall(player);
-  const [low,high]=POTENTIAL[player.talent];
+  const [low,high]=TALENT_PROFILES[player.talent].potential;
   player.potential=Math.max(player.ovr+2,integer(rng,low,high)); player.potential=Math.min(100,player.potential);
   player.wage=salary(player.ovr,club.power);
   return player;
@@ -259,6 +259,17 @@ export function setTraining(career:Career,keys:AttributeKey[],intensity:Intensit
   present(next,'growth','다음 시즌 훈련 확정',`${keys.length}개 능력치에 집중합니다. 시즌 중에는 이 계획을 유지합니다.`);
   touch(next);return next;
 }
+export function configureCheats(career:Career,enabled:boolean,freezeAging:boolean):Career{
+  if(typeof enabled!=='boolean'||typeof freezeAging!=='boolean')throw new Error('치트 설정이 올바르지 않습니다.');
+  const next=editable(career);next.systems!.cheats={enabled,freezeAging,used:next.systems!.cheats?.used??false};touch(next);return next;
+}
+export function cheatIncreaseAttribute(career:Career,key:AttributeKey,amount:number):Career{
+  if(!career.systems?.cheats?.enabled)throw new Error('설정에서 치트 모드를 켜 주세요.');
+  if(career.stage==='retired')throw new Error('은퇴한 선수의 능력치는 변경할 수 없습니다.');
+  const allowed=career.player.position==='GK'?GK_ATTRIBUTES:FIELD_ATTRIBUTES;
+  if(!allowed.includes(key)||![1,5,10].includes(amount))throw new Error('능력치와 증가량을 확인해 주세요.');
+  const next=editable(career);increaseAttribute(next,key,amount);next.systems!.cheats!.used=true;updateMarketValue(next,'능력치 직접 조정');touch(next);return next;
+}
 export function acceptTransfer(career:Career,offerId:string):Career {
   if(career.stage==='retired')throw new Error('은퇴한 선수는 계약을 체결할 수 없습니다.');
   if(career.stage!=='offseason')throw new Error('이적과 재계약은 시즌 종료 후에만 결정할 수 있습니다.');
@@ -297,7 +308,7 @@ export function stayAtClub(career:Career):Career {
 }
 function aging(career:Career) {
   const p=career.player;
-  const threshold=p.position==='GK'?33:30;
+  const threshold=declineAge(p);
   if(p.age<threshold)return;
   const rng=seededRandom(`${career.seed}|aging|${career.season.year}|${p.age}`);
   const physical:AttributeKey[]=['strength','stamina','speed','agility','jumping','gkReflexes','gkOneOnOnes','gkAerialCommand'];
@@ -310,14 +321,15 @@ function aging(career:Career) {
 }
 export function startNextSeason(career:Career):Career {
   if(career.stage!=='offseason')throw new Error('현재 시즌을 먼저 마무리해 주세요.');
-  if(career.player.age>=45)return retireCareer(career);
+  if(career.player.age>=45&&!(career.systems?.cheats?.enabled&&career.systems.cheats.freezeAging))return retireCareer(career);
   if(career.systems?.trainingPlan&&!career.systems.trainingPlan.confirmed)throw new Error('다음 시즌 훈련 계획을 먼저 확정해 주세요.');
   const decided=career.transferDecision?career:stayAtClub(career),next=editable(decided);
   const previousSeason=next.season,lastYear=next.season.year,previousOvr=next.player.ovr;
   transitionWorldSeason(next);
   for(const h of next.history){const report=next.systems!.world.clubs[h.clubId]?.development?.history.find(r=>r.year===h.year);if(h.details&&report)h.details.clubDevelopment=structuredClone(report);}
   const beforeAging={...next.player.attributes};
-  next.player.age++;aging(next);
+  if(next.systems?.cheats?.enabled&&next.systems.cheats.freezeAging)next.systems.cheats.used=true;
+  else {next.player.age++;aging(next);}
   const afterAging={...next.player.attributes};
   const promoted=next.player.squad==='youth'&&(next.player.age>=20||(next.player.age>=17&&next.player.ovr>=getClubWorldPower(next,next.player.clubId)-18));
   if(promoted)next.player.squad='senior';

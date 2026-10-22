@@ -30,15 +30,15 @@ export interface CaptainOffer { id:string; scope:'club'|'national'; teamId:strin
 export interface Leadership { trait: number; baseTrait?: number; traitUpdatedYear?: number; clubSinceYear: number; clubId: string; clubRole: 'none'|'captain'|'vice'; nationalRole: 'none'|'captain'|'vice'; clubMatches: number; nationalMatches: number; terms: CaptainTerm[]; reason: string; offers?:CaptainOffer[] }
 export interface RankingCandidate { playerId: string; name: string; clubId: string; position: Position; score: number; rank: number; stats: PlayerStats; nationalStats: PlayerStats }
 export interface BallonDorYear { year: number; candidates: RankingCandidate[]; playerRank: number|null; winnerId: string; world11: RankingCandidate[]; awards: Award[] }
-export type GrowthCause='training'|'experience'|'development'|'injury'|'aging';
-export type GrowthBreakdown=Record<GrowthCause,Attributes>;
+export type GrowthCause='training'|'experience'|'development'|'injury'|'aging'|'cheat';
+export type GrowthBreakdown=Record<Exclude<GrowthCause,'cheat'>,Attributes>&{cheat?:Attributes};
 export interface GrowthLedger {year:number;baselineAttributes:Attributes;trackedFromRound:number;byCause:GrowthBreakdown;injuredRounds:number;trainingQuality:number;legacy:boolean}
 export interface AgingReport {year:number;startAttributes:Attributes;endAttributes:Attributes;changes:Attributes;ovrStart:number;ovrEnd:number}
 export interface TrainingPlan {forYear:number;confirmed:boolean;confirmedAtRound:number;source:'creation'|'offseason'|'legacy'}
 export interface GrowthReport { year: number; half: 'first'|'season'; fromRound: number; toRound: number; startAttributes: Attributes; endAttributes: Attributes; ovrStart: number; ovrEnd: number; stats: PlayerStats; previousStats: PlayerStats; valueStart: number; valueEnd: number; context: string; growth?:GrowthLedger; offseasonAging?:AgingReport }
 export interface PresentationEvent { id: string; year: number; round: number; type: 'mom'|'injury'|'national'|'transfer'|'renewal'|'captain'|'award'|'growth'|'promotion'|'retirement'; title: string; body: string; importance: 'brief'|'decision'|'milestone' }
 export interface CareerSystems {
-  version: 2; growthLedger?:GrowthLedger; agingReport?:AgingReport; trainingPlan?:TrainingPlan; world: WorldState; national: NationalState; economics: Economics; leadership: Leadership;
+  version: 2; growthModelVersion?:2; cheats?:{enabled:boolean;freezeAging:boolean;used:boolean}; growthLedger?:GrowthLedger; agingReport?:AgingReport; trainingPlan?:TrainingPlan; world: WorldState; national: NationalState; economics: Economics; leadership: Leadership;
   phase: 'preseason'|'first'|'midseason'|'second'|'review'|'retired'; halfRound: number; trainingLocked: boolean;
   firstHalfSnapshot?: { attributes: Attributes; stats: PlayerStats; ovr: number; value: number; round: number };
   growthReports: GrowthReport[]; pendingChoice?: { kind: 'renewal'|'transfer'; offerIds: string[]; deadlineRound: number; reason: string };
