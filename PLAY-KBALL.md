@@ -10,4 +10,4 @@
 
 [상세 구현·검증·남은 규정 확인](https://github.com/rabbit1245/rabbit1245.github.io/blob/codex/kball-white-green-20261021/docs/IMPROVEMENT-2.7.md)
 
-ZIP SHA-256: `984f017e491b7c46211e7694b4e55cd108b2b1daee074be8415f024fcaefad18`
+ZIP SHA-256: `ca487814243a0d27f6cd987815145993b94fcfbd8212aaf426e54605f6ac09f9`
