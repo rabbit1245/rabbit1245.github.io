@@ -1,0 +1,78 @@
+{
+  "version": "2.7.1",
+  "baselineCommit": "70093d1d9b2cee4101f544f14f918ea38ebb33fb",
+  "issue": "AZ and NEC abbreviations were not connected to existing real crest sources; missing mappings were incorrectly left as neutral icons.",
+  "sourceRevision": "5ab11fed47427b3003f4b276554491fe683387b1",
+  "added": 187,
+  "embedded": 784,
+  "neutralDomestic": 129,
+  "neutralInternationalGuests": 87,
+  "preservation": {
+    "all597PreviouslyCorrectAssetsAndLinksUnchanged": true,
+    "allNonCrestCatalogueDataUnchanged": true,
+    "clubIdsRostersPowerAndCompetitionRecordsNotChanged": true
+  },
+  "validation": {
+    "typescriptAndWebBuild": "passed",
+    "portableBuild": "passed",
+    "staticMappingAudit": "passed",
+    "sourceBrowser": {
+      "url": "http://127.0.0.1:4173/",
+      "portable": false,
+      "checks": [
+        "All 784 real crest SVGs decode; 129 explicitly missing crests remain neutral",
+        "AZ and NEC render their exact embedded/file SVG in club selection and all 18 Eredivisie standings rows",
+        "Mobile standings fit, saved career reopens, and the crests persist after reload"
+      ],
+      "errors": [],
+      "external": [],
+      "count": 913,
+      "decoded": 784,
+      "neutral": 129
+    },
+    "portableBrowser": {
+      "url": "http://127.0.0.1:4180/Kball.html",
+      "portable": true,
+      "checks": [
+        "All 784 real crest SVGs decode; 129 explicitly missing crests remain neutral",
+        "AZ and NEC render their exact embedded/file SVG in club selection and all 18 Eredivisie standings rows",
+        "Mobile standings fit, saved career reopens, and the crests persist after reload"
+      ],
+      "errors": [],
+      "external": [],
+      "count": 913,
+      "decoded": 784,
+      "neutral": 129
+    },
+    "previousVersionSaveIntegration": {
+      "passed": [
+        "one-click training displays all actual current attributes",
+        "national, awards and season history open their existing view in one click",
+        "all nine metrics remain expandable and reconcile with the detailed record book without save mutations",
+        "2.4 completed save retains named titles, gated offseason choices and actual goal/assist rankings"
+      ],
+      "pageErrors": []
+    },
+    "visualInspection": "Rendered Eredivisie standings and 187-logo contact sheet inspected. All new additions use the supplied real SVGs."
+  },
+  "delivery": {
+    "version": "2.7.1",
+    "zipBytes": 17167116,
+    "zipSHA256": "fb776ddbb3dad4c3fabdad745f95075e5f9e6620987a492207c2f8b305042b7a",
+    "htmlBytes": 22791201,
+    "htmlSHA256": "066233b27ebfae0652c39f541104bf5822b300960ac80f959083d3a79c33bd64",
+    "commit": "07807726e0c1f4449eba018d7a0b28e8a3f730f0",
+    "url": "https://github.com/rabbit1245/rabbit1245.github.io/raw/07807726e0c1f4449eba018d7a0b28e8a3f730f0/Kball.zip?download=1",
+    "httpStatus": 200,
+    "downloadVerified": true,
+    "zipIntegrityVerified": true,
+    "htmlMatchesTestedBuild": true
+  },
+  "evidencePaths": [
+    "test-results/p271/crests-web/eredivisie-desktop.png",
+    "test-results/p271/crests-web/eredivisie-mobile.png",
+    "test-results/p271/crests-web/added-crests.png",
+    "test-results/p271/crests-portable/results.json",
+    "test-results/p271/compatibility/home-integration-results.json"
+  ]
+}

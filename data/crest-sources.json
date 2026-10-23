@@ -1,0 +1,1317 @@
+{
+  "schemaVersion": 1,
+  "repository": "https://github.com/JoseArroyave/football-logos",
+  "revision": "5ab11fed47427b3003f4b276554491fe683387b1",
+  "note": "Explicit canonical IDs; no runtime fuzzy matching. Source filenames identify each club, including reviewed abbreviations, transliterations and source spelling variants.",
+  "clubs": [
+    {
+      "id": "BE1_03",
+      "native": "Genk",
+      "sourcePath": "logos/belgium/KRC_Genk.svg",
+      "method": "reviewed-alias",
+      "sha256": "9142f15459cdf440ede47b624c2192e6c5b023404399c759979fd5afd1305dea"
+    },
+    {
+      "id": "BE1_05",
+      "native": "Gent",
+      "sourcePath": "logos/belgium/KAA_Gent.svg",
+      "method": "reviewed-alias",
+      "sha256": "1243201f10f5aeeb2d2f4d3d932a7034b70a8245e4f04e2f169b2171f0eba1dc"
+    },
+    {
+      "id": "BE1_07",
+      "native": "Mechelen",
+      "sourcePath": "logos/belgium/KV_Mechelen.svg",
+      "method": "reviewed-alias",
+      "sha256": "e2184a9c8af0dc7e97928f2a760504bf4037c31cdce1e640e2f99f865bfd38fa"
+    },
+    {
+      "id": "BE1_08",
+      "native": "Charleroi",
+      "sourcePath": "logos/belgium/Royal_Charleroi_S.C..svg",
+      "method": "reviewed-alias",
+      "sha256": "cb673337fa9ae95f3d06b6009d60efb72dd5c8f66fb2dcce97d1df5f8a6e3719"
+    },
+    {
+      "id": "BE1_10",
+      "native": "OH Leuven",
+      "sourcePath": "logos/belgium/Oud-Heverlee_Leuven.svg",
+      "method": "reviewed-alias",
+      "sha256": "e96f41949ee8de5a51f222e9ecbb6b1dea65f540989eb8496ddbe7f62611dc13"
+    },
+    {
+      "id": "BE1_15",
+      "native": "Cercle Brugge",
+      "sourcePath": "logos/belgium/Cercle_Brugge_KSV.svg",
+      "method": "reviewed-alias",
+      "sha256": "a6f130f2fa4870a8ffe314db5a57d4012bafd247a9dc7fc8a693b56b7d02c2fc"
+    },
+    {
+      "id": "BE2_03",
+      "native": "Deinze",
+      "sourcePath": "logos/belgium/KMSK_Deinze.svg",
+      "method": "reviewed-alias",
+      "sha256": "b9797007392153dc4864e524f13bec3e2b5ac13ec59da3f766faa8f151c4808e"
+    },
+    {
+      "id": "BE2_14",
+      "native": "RWDM",
+      "sourcePath": "logos/belgium/RWDM_Brussels.svg",
+      "method": "reviewed-alias",
+      "sha256": "9a018784a0cac9faa540d2ebf8bc31a5bd656061b155d425478a5062c1d48433"
+    },
+    {
+      "id": "BE3_03",
+      "native": "Sporting Hasselt",
+      "sourcePath": "logos/belgium/Sporting_Hasselt.svg",
+      "method": "normalized-exact",
+      "sha256": "10572180532eeedd16b7111b1ba0f21c4cf022136562f673f25415a0c3d3506a"
+    },
+    {
+      "id": "BE3_21",
+      "native": "Virton",
+      "sourcePath": "logos/belgium/Royal_Excelsior_Virton.svg",
+      "method": "reviewed-alias",
+      "sha256": "3f30041bfcb3d590507923070a57b635663c61df1782c67f3c9593706c364064"
+    },
+    {
+      "id": "BR1_01",
+      "native": "Botafogo",
+      "sourcePath": "logos/brazil/Botafogo_FR.svg",
+      "method": "reviewed-alias",
+      "sha256": "03d9c0c18d2b4fd04e34af7665472aaba8d734a5d50f662b72aa512b0b5cf344"
+    },
+    {
+      "id": "BR1_16",
+      "native": "Red Bull Bragantino",
+      "sourcePath": "logos/brazil/RB_Bragantino.svg",
+      "method": "reviewed-alias",
+      "sha256": "bcd4558beb21b0ffc4fb4f2f97d96a29ac0a9f967d5cc5b1a2a321649ba80f27"
+    },
+    {
+      "id": "BR2_16",
+      "native": "CRB",
+      "sourcePath": "logos/brazil/Clube_de_Regatas_Brasil.svg",
+      "method": "reviewed-alias",
+      "sha256": "fa49ff56ef795aed0d90bf2712ec4e14f95bccc030b9c4993ca508b6c8423e83"
+    },
+    {
+      "id": "BR3_08",
+      "native": "Remo",
+      "sourcePath": "logos/brazil/Clube_do_Remo.svg",
+      "method": "reviewed-alias",
+      "sha256": "9066b0c0787c380c8b9440a0a48301aba4d6cfd7899c4c08479c5dd0295f0e0d"
+    },
+    {
+      "id": "BR3_10",
+      "native": "CSA",
+      "sourcePath": "logos/brazil/CSA.svg",
+      "method": "normalized-exact",
+      "sha256": "e734df940261b6f2147c613e423df292230ef55a6c9a17159be4f28e85693654"
+    },
+    {
+      "id": "BR3_12",
+      "native": "Tombense",
+      "sourcePath": "logos/brazil/Tombense_FC.svg",
+      "method": "reviewed-alias",
+      "sha256": "bdade81314905ba4888ed60c30787e5e02c2e017cdac90710cdaa09c53de61a6"
+    },
+    {
+      "id": "BR3_14",
+      "native": "ABC",
+      "sourcePath": "logos/brazil/ABC_Futebol_Clube.svg",
+      "method": "reviewed-alias",
+      "sha256": "a8070490bbf7fdfa70768b7f58d4eea245f067628fa1235f06d7171fcb3a0da5"
+    },
+    {
+      "id": "BR3_19",
+      "native": "Ferroviario",
+      "sourcePath": "logos/brazil/Ferroviário_Atlético_Clube.svg",
+      "method": "reviewed-alias",
+      "sha256": "092625939c7cb76aa597c7ca90900f70293fc039a896e862e11e20698f085e35"
+    },
+    {
+      "id": "BR3_20",
+      "native": "Sao Jose-RS",
+      "sourcePath": "logos/brazil/EC_São_José.svg",
+      "method": "reviewed-alias",
+      "sha256": "0f770b27157c25036b5061daf4bb501e075589be1e169416ac1c659004d54753"
+    },
+    {
+      "id": "CN1_15",
+      "native": "Shenzhen Peng City",
+      "sourcePath": "logos/china/Shenzhen_Xinpengcheng.svg",
+      "method": "reviewed-alias",
+      "sha256": "dca93591c684d6b5b608f97213ac372732ed5c3aebbea4852060073459ab8c74"
+    },
+    {
+      "id": "CN2_04",
+      "native": "Liaoning Tieren",
+      "sourcePath": "logos/china/Liaoning_Tiening.svg",
+      "method": "reviewed-alias",
+      "sha256": "bf71de5812238c9415c933e2dc5f1e53a9b97a2a42c5b954b865e2d2d3c89abb"
+    },
+    {
+      "id": "CN2_07",
+      "native": "Guangxi Pingguo Haliao",
+      "sourcePath": "logos/china/Guangxi_Pingguo_Haliao.svg",
+      "method": "normalized-exact",
+      "sha256": "e23e9682e1622de6dea951214aed3bce0cb1a62d5d209efaefb51745ba593924"
+    },
+    {
+      "id": "CN3_03",
+      "native": "Shenzhen Juniors",
+      "sourcePath": "logos/china/Shenzhen_Juniors.svg",
+      "method": "normalized-exact",
+      "sha256": "aa945187b66d334834d235db4eaa4e19e03ef7f6d63cc53da895a12bc3a25052"
+    },
+    {
+      "id": "CN3_12",
+      "native": "Beijing IT",
+      "sourcePath": "logos/china/Beijing_Institute_of_Technology.svg",
+      "method": "reviewed-alias",
+      "sha256": "28994473ccc09396ff831ce7ef106110f4cc2f40b8656cd7dc5fe1dcda1fa25e"
+    },
+    {
+      "id": "DE2_11",
+      "native": "1. FC Koln",
+      "sourcePath": "logos/germany/Cologne.svg",
+      "method": "reviewed-alias",
+      "sha256": "803e798efbeb48407b6a743f25943fe6797df508f6080da8500d02f490847336"
+    },
+    {
+      "id": "DE2_13",
+      "native": "Preussen Munster",
+      "sourcePath": "logos/germany/Preußen_Münster.svg",
+      "method": "normalized-exact",
+      "sha256": "fa018ae5fe8dc76fe21bbe9fe251404f6197fa1514d4e3205039988949c39be8"
+    },
+    {
+      "id": "DE2_16",
+      "native": "Jahn Regensburg",
+      "sourcePath": "logos/germany/Jahn.svg",
+      "method": "reviewed-alias",
+      "sha256": "8d770f81d369fb2b8f0b4b024bfb544a79effc83f514bed81088a75ac5abc22d"
+    },
+    {
+      "id": "DE3_19",
+      "native": "1860 Munich",
+      "sourcePath": "logos/germany/TSV_1860_München.svg",
+      "method": "reviewed-alias",
+      "sha256": "89112acfde7471b6ed5e86900ccc6196f0fff1b7f5453f8fa50957a840a11abe"
+    },
+    {
+      "id": "ES3_09",
+      "native": "Gimnastic",
+      "sourcePath": "logos/spain/Gimnàstic_de_Tarragona.svg",
+      "method": "reviewed-alias",
+      "sha256": "296d0f5113a839c8d574c6a6d5705b963c5ffd316376037a88780bb7fc9517bd"
+    },
+    {
+      "id": "ES3_22",
+      "native": "Alcoyano",
+      "sourcePath": "logos/spain/Alcoyano.svg",
+      "method": "normalized-exact",
+      "sha256": "7651e8a329066a43784e56684b950e6142fd51000ae9cca3bca21f2775190d75"
+    },
+    {
+      "id": "ES3_29",
+      "native": "Fuenlabrada",
+      "sourcePath": "logos/spain/CF_Fuenlabrada.svg",
+      "method": "reviewed-alias",
+      "sha256": "b04f23c6ef71f62b9a34116350bb2805010a2159df820f226e20b3a817b1b969"
+    },
+    {
+      "id": "ES3_32",
+      "native": "Intercity",
+      "sourcePath": "logos/spain/CF_Intercity.svg",
+      "method": "reviewed-alias",
+      "sha256": "4f07046ab73e2a6d60458fcf2e95ba4e2dbc18e044d82a58c86c6af9a215e2d5"
+    },
+    {
+      "id": "ES3_37",
+      "native": "Recreativo Huelva",
+      "sourcePath": "logos/spain/Recreativo_de_Huelva.svg",
+      "method": "reviewed-alias",
+      "sha256": "a1ed30b04ca787758e9531eb034b23fadc9403545c22164e3ba4a4525481c0da"
+    },
+    {
+      "id": "FR1_01",
+      "native": "Paris Saint-Germain",
+      "sourcePath": "logos/france/Paris_Saint-Germain_(PSG).svg",
+      "method": "reviewed-alias",
+      "sha256": "e84ea40d76120257439495e18ae747aef60d179bd5d351dfc2c7e9a02e93a1ea"
+    },
+    {
+      "id": "FR1_05",
+      "native": "Lyon",
+      "sourcePath": "logos/france/Olympique_Lyonnais.svg",
+      "method": "reviewed-alias",
+      "sha256": "9a7ab42d3846658b83eb5613163cc6d2b2389a78c46372916ee071966ed1c053"
+    },
+    {
+      "id": "FR1_07",
+      "native": "Lens",
+      "sourcePath": "logos/france/RC_Lens.svg",
+      "method": "reviewed-alias",
+      "sha256": "fc2b509d4395ec08bc61d742674affe452d24565c5f1b56571b1e025652d399b"
+    },
+    {
+      "id": "FR2_17",
+      "native": "Caen",
+      "sourcePath": "logos/france/Stade_Malherbe_Caen.svg",
+      "method": "reviewed-alias",
+      "sha256": "d02d5483bbc1a4fae17de327051d915011d9e966a9bb397117029ef17451a698"
+    },
+    {
+      "id": "FR2_18",
+      "native": "Martigues",
+      "sourcePath": "logos/france/FC_Martigues.svg",
+      "method": "reviewed-alias",
+      "sha256": "710488dd839cf7d66442b251646d9d374c59d0fb6ee0a057ed063cc9fc17c4c2"
+    },
+    {
+      "id": "FR3_05",
+      "native": "Bourg-Peronnas",
+      "sourcePath": "logos/france/Bourg-en-Bresse_Péronnas_01.svg",
+      "method": "reviewed-alias",
+      "sha256": "98128d3e14fe5daff0f03ba8f72914ead220dee6dfbe8e272f628a0a6fa2d74c"
+    },
+    {
+      "id": "FR3_11",
+      "native": "Quevilly-Rouen",
+      "sourcePath": "logos/france/Quevilly_Rouen_Métropole.svg",
+      "method": "reviewed-alias",
+      "sha256": "dfefeec0c58e62a3a3b173b086a7a019f0bf4e82802179bf571b588592c6eae1"
+    },
+    {
+      "id": "IT1_01",
+      "native": "Inter Milan",
+      "sourcePath": "logos/italy/Inter.svg",
+      "method": "reviewed-alias",
+      "sha256": "5e51212e97a473905fc7f9e46626628b766c18145c3b2474a7b2c84ad2a70c4d"
+    },
+    {
+      "id": "IT2_20",
+      "native": "Sudtirol",
+      "sourcePath": "logos/italy/Suditrol.svg",
+      "method": "reviewed-alias",
+      "sha256": "20dec1cb1371e44c9ad27499c386b096e1f46287ac5953ed480340f1ad550a86"
+    },
+    {
+      "id": "IT3_27",
+      "native": "Lucchese",
+      "sourcePath": "logos/italy/Lucchese_1905.svg",
+      "method": "reviewed-alias",
+      "sha256": "664c49853b0762f9bad9d49cf16f4e63b5cc1f7c9e6593dec812fe42cec23b29"
+    },
+    {
+      "id": "IT3_36",
+      "native": "SPAL",
+      "sourcePath": "logos/italy/SPAL.svg",
+      "method": "normalized-exact",
+      "sha256": "db6f8538e1c4c65e74e195deb3852cc06520acc13477aa4d6579cfcd6ae16fd8"
+    },
+    {
+      "id": "JP1_18",
+      "native": "Jubilo Iwata",
+      "sourcePath": "logos/japan/Jubilo_Iwata.svg",
+      "method": "normalized-exact",
+      "sha256": "c49f8f2c409c8ea4ee638a63742708c44b2bf1a8c73c78ff3af20fac29a603dd"
+    },
+    {
+      "id": "JP1_19",
+      "native": "Hokkaido Consadole Sapporo",
+      "sourcePath": "logos/japan/Hokkaido_Consadole_Sapporo.svg",
+      "method": "normalized-exact",
+      "sha256": "a089dba9b0604357e9052ebd5ea5b5b39af5df4e40bbe5533d3124849ae126b6"
+    },
+    {
+      "id": "JP1_20",
+      "native": "Sagan Tosu",
+      "sourcePath": "logos/japan/Sagan_Tosu.svg",
+      "method": "normalized-exact",
+      "sha256": "d1146701d806bf449eb412a079dedffd4d1ca696e4b81aea56f5fdd29ee0f4c9"
+    },
+    {
+      "id": "JP2_04",
+      "native": "Montedio Yamagata",
+      "sourcePath": "logos/japan/Montedio_Yamagata.svg",
+      "method": "normalized-exact",
+      "sha256": "3f152e11b56ecef483c96cc952a22010a0d50bad8e234a741aebe0f0acb2ee68"
+    },
+    {
+      "id": "JP2_06",
+      "native": "Vegalta Sendai",
+      "sourcePath": "logos/japan/Vegalta_Sendai.svg",
+      "method": "normalized-exact",
+      "sha256": "3d172d2c297a221dc261a97329568c96fd3e5e8130d148278da38db8cde08b28"
+    },
+    {
+      "id": "JP2_09",
+      "native": "Iwaki FC",
+      "sourcePath": "logos/japan/Iwaki_FC.svg",
+      "method": "normalized-exact",
+      "sha256": "c926ef83b95f47e00181295ecc06426b9aa851288399692bdfeaaf3cc8a6437a"
+    },
+    {
+      "id": "JP2_10",
+      "native": "Blaublitz Akita",
+      "sourcePath": "logos/japan/Blaublitz_Akita.svg",
+      "method": "normalized-exact",
+      "sha256": "d848444bfc703194a4b6f3f644f48733054b4dac39ca5ef209c7d394e390da51"
+    },
+    {
+      "id": "JP2_11",
+      "native": "Renofa Yamaguchi",
+      "sourcePath": "logos/japan/Renofa_Yamaguchi_FC.svg",
+      "method": "reviewed-alias",
+      "sha256": "44911704023f1764ecb6128df4882879c6e4218cb4813fb53fe2919e28594ebf"
+    },
+    {
+      "id": "JP2_12",
+      "native": "Roasso Kumamoto",
+      "sourcePath": "logos/japan/Roasso_Kumamoto.svg",
+      "method": "normalized-exact",
+      "sha256": "234919e24949bdcb9d8e92e685c75be9fef0832ac1acbfcc5d4cdd1fb067f307"
+    },
+    {
+      "id": "JP2_13",
+      "native": "Fujieda MYFC",
+      "sourcePath": "logos/japan/Fujieda_MYFC.svg",
+      "method": "normalized-exact",
+      "sha256": "8a05eab7eb746fff046e59ed8fa3d77029c38fbb9c2d76142db456eea385deb4"
+    },
+    {
+      "id": "JP2_14",
+      "native": "Ventforet Kofu",
+      "sourcePath": "logos/japan/Ventforet_Kofu.svg",
+      "method": "normalized-exact",
+      "sha256": "2bcf3264f371718479f8cab36627dd3beec9cc2efe0442489ece9c0d185af4f9"
+    },
+    {
+      "id": "JP2_17",
+      "native": "Ehime FC",
+      "sourcePath": "logos/japan/Ehime_FC.svg",
+      "method": "normalized-exact",
+      "sha256": "a2a70957876d988a27d0dcb3dcca53e8127505e2bd9c4cc918c6e6bbb54e1f95"
+    },
+    {
+      "id": "JP2_18",
+      "native": "Tochigi SC",
+      "sourcePath": "logos/japan/Tochigi_SC.svg",
+      "method": "normalized-exact",
+      "sha256": "3bc3862abcf93d777f02af9c0ff22a097f891644ac6ad8eeb71e1ead21df1265"
+    },
+    {
+      "id": "JP2_19",
+      "native": "Kagoshima United",
+      "sourcePath": "logos/japan/Kagoshima_United_FC.svg",
+      "method": "reviewed-alias",
+      "sha256": "6ef5968f9357a723d7f109586e78ce4728b1ac5f98debe6bb122cd04ac0c338f"
+    },
+    {
+      "id": "JP2_20",
+      "native": "Thespa Gunma",
+      "sourcePath": "logos/japan/Thespa_Gunma.svg",
+      "method": "normalized-exact",
+      "sha256": "ac945a2c800c74fb19b4af2dbf4354b25e8641240e2000d806f05fdf34aab23b"
+    },
+    {
+      "id": "JP3_01",
+      "native": "Omiya Ardija",
+      "sourcePath": "logos/japan/RB_Omiya_Ardija.svg",
+      "method": "reviewed-alias",
+      "sha256": "733aad9ab3652290e7224098471574dd0c971f78f1d6f683c521a5072f503005"
+    },
+    {
+      "id": "JP3_02",
+      "native": "FC Imabari",
+      "sourcePath": "logos/japan/FC_Imabari.svg",
+      "method": "normalized-exact",
+      "sha256": "a33062ae9fdbf0275765fcb4270b5a8957075d4e30439c2f0a2642861c9cdf48"
+    },
+    {
+      "id": "JP3_03",
+      "native": "Kataller Toyama",
+      "sourcePath": "logos/japan/Kataller_Toyama.svg",
+      "method": "normalized-exact",
+      "sha256": "491ce8e0c10ff89f2189adde397250b75970fd47e81920a978b6e449282510e2"
+    },
+    {
+      "id": "JP3_04",
+      "native": "Matsumoto Yamaga",
+      "sourcePath": "logos/japan/Matsumoto_Yamaga_FC.svg",
+      "method": "reviewed-alias",
+      "sha256": "8e5d8ed7a4afc5a21aad7d7fe577503646b93de8783ab1186e76d9e574126cb4"
+    },
+    {
+      "id": "JP3_05",
+      "native": "Fukushima United",
+      "sourcePath": "logos/japan/Fukushima_United_FC.svg",
+      "method": "reviewed-alias",
+      "sha256": "c69c7b800c3ca2b3d89fe0718cdcbedbdc9b7b44db0f14f39fb20caf0c1dbdfa"
+    },
+    {
+      "id": "JP3_06",
+      "native": "FC Osaka",
+      "sourcePath": "logos/japan/FC_Osaka.svg",
+      "method": "normalized-exact",
+      "sha256": "8ec394565fa6b95d478c2c0c7d19287c21d092729a93adc716ca7038a9dfdf42"
+    },
+    {
+      "id": "JP3_07",
+      "native": "Giravanz Kitakyushu",
+      "sourcePath": "logos/japan/Giravanz_Kitakyushu.svg",
+      "method": "normalized-exact",
+      "sha256": "dd0a608e6a90ae999b9e1ba10bcf148eacc81246ab58f3fb41d340a58505435a"
+    },
+    {
+      "id": "JP3_08",
+      "native": "FC Gifu",
+      "sourcePath": "logos/japan/FC_Gifu.svg",
+      "method": "normalized-exact",
+      "sha256": "3303cada5e038178ebf8068763034fdaf771cf9d4b2b504b5875cceb789d9f07"
+    },
+    {
+      "id": "JP3_09",
+      "native": "SC Sagamihara",
+      "sourcePath": "logos/japan/SC_Sagamihara.svg",
+      "method": "normalized-exact",
+      "sha256": "52e06e27d509333ebb26e589eb798d1202a66866b1cb6ef45e8232d1d4479e85"
+    },
+    {
+      "id": "JP3_11",
+      "native": "Vanraure Hachinohe",
+      "sourcePath": "logos/japan/Vanraure_Hachinohe.svg",
+      "method": "normalized-exact",
+      "sha256": "3c7da0d2f1f58c75312234cf14ba7e9c0a079851187bb1853aef40e9b44f1949"
+    },
+    {
+      "id": "JP3_12",
+      "native": "Zweigen Kanazawa",
+      "sourcePath": "logos/japan/Zweigen_Kanazawa.svg",
+      "method": "normalized-exact",
+      "sha256": "e0324c148f8af1fe261f05e5993386744eb0a9dbb9fbeed5bb4b2368864917b0"
+    },
+    {
+      "id": "JP3_13",
+      "native": "Gainare Tottori",
+      "sourcePath": "logos/japan/Gainare_Tottori.svg",
+      "method": "normalized-exact",
+      "sha256": "0692e980736396b720c60f8a1c8b547d9acbc1f2aa3b69ad34014a47090dff69"
+    },
+    {
+      "id": "JP3_14",
+      "native": "FC Ryukyu",
+      "sourcePath": "logos/japan/FC_Ryukyu.svg",
+      "method": "normalized-exact",
+      "sha256": "11b79ab7f640434128eb006826b64ba55c1fa1b67b5493f7e8bd1e959f30ebb4"
+    },
+    {
+      "id": "JP3_15",
+      "native": "Tegevajaro Miyazaki",
+      "sourcePath": "logos/japan/Tegevajaro_Miyazaki.svg",
+      "method": "normalized-exact",
+      "sha256": "c224f1f267939940d3719326aa17cda06c5a43e7f2f6a7635a9513174df53c59"
+    },
+    {
+      "id": "JP3_16",
+      "native": "Kamatamare Sanuki",
+      "sourcePath": "logos/japan/Kamatamare_Sanuki.svg",
+      "method": "normalized-exact",
+      "sha256": "7af2f732da9d8016a079d8eb04d0085ca6ceeaee668a101da06456a1646701a3"
+    },
+    {
+      "id": "JP3_17",
+      "native": "Nara Club",
+      "sourcePath": "logos/japan/Nara_Club.svg",
+      "method": "normalized-exact",
+      "sha256": "d0543989d1408334eed533b44e5d84eb4581d636902661bf7ce1c5ca083a11be"
+    },
+    {
+      "id": "JP3_18",
+      "native": "AC Nagano Parceiro",
+      "sourcePath": "logos/japan/AC_Nagano_Parceiro.svg",
+      "method": "normalized-exact",
+      "sha256": "9cc1fe2577acdf8ebfad0052eff8e28917b336443d000d335c4f51c08eabb3da"
+    },
+    {
+      "id": "KR2_02",
+      "native": "Chungnam Asan",
+      "sourcePath": "logos/south-korea/Chungnam_Asan_FC.svg",
+      "method": "reviewed-alias",
+      "sha256": "6cba70611aeb84e59d9968873aea5caa462ce80e9c145e828fe0416d7681c934"
+    },
+    {
+      "id": "KR2_03",
+      "native": "Seoul E-Land",
+      "sourcePath": "logos/south-korea/Seoul_E-Land_FC.svg",
+      "method": "reviewed-alias",
+      "sha256": "a3ae3cb7861e7838b32eae69f8af445e59c20aaa70983cbcaa8f3b7477b55c5c"
+    },
+    {
+      "id": "KR2_04",
+      "native": "Jeonnam Dragons",
+      "sourcePath": "logos/south-korea/Jeonnam_Dragons.svg",
+      "method": "normalized-exact",
+      "sha256": "dfbeb71d8da38ba450d88302ab11325aa36e0b0601a42c2f7540d8438462a68e"
+    },
+    {
+      "id": "KR2_05",
+      "native": "Busan IPark",
+      "sourcePath": "logos/south-korea/Busan_IPark.svg",
+      "method": "normalized-exact",
+      "sha256": "b110d84063b12c616b93214c27ea50cc4ab11c9f1f4dbd9998775f285ca3187e"
+    },
+    {
+      "id": "KR2_06",
+      "native": "Suwon Samsung Bluewings",
+      "sourcePath": "logos/south-korea/Suwon_Samsung_Bluewings.svg",
+      "method": "normalized-exact",
+      "sha256": "5a33b63394b5d90485a5ec91bd9eeb962d69b4872d4b01b58687033a5919b641"
+    },
+    {
+      "id": "KR2_07",
+      "native": "Gimpo FC",
+      "sourcePath": "logos/south-korea/Gimpo_FC.svg",
+      "method": "normalized-exact",
+      "sha256": "3d7bdede4ff80919c5cba1c1b44a95865a7d7e23a9a242b33a11b77bde6ebcca"
+    },
+    {
+      "id": "KR2_09",
+      "native": "Cheonan City",
+      "sourcePath": "logos/south-korea/Cheonan_City_FC.svg",
+      "method": "reviewed-alias",
+      "sha256": "93571ad2913c1aca3047fdd96688c9c21f014649f6776736bc1ffa29a853505b"
+    },
+    {
+      "id": "KR2_10",
+      "native": "Chungbuk Cheongju",
+      "sourcePath": "logos/south-korea/Chungbuk_Cheongju_FC.svg",
+      "method": "reviewed-alias",
+      "sha256": "9a1ef2eb1b6a4824b74efc81147bc57af81ab5a1f31c5c946453654aa7a5fb2f"
+    },
+    {
+      "id": "KR2_11",
+      "native": "Ansan Greeners",
+      "sourcePath": "logos/south-korea/Ansan_Greeners_FC.svg",
+      "method": "reviewed-alias",
+      "sha256": "08ccb687575b079ac440f7b39ac569ccb87031e549cf47a3bcbaac709b7f56d4"
+    },
+    {
+      "id": "KR2_12",
+      "native": "Gyeongnam FC",
+      "sourcePath": "logos/south-korea/Gyeongnam_FC.svg",
+      "method": "normalized-exact",
+      "sha256": "f5f0f249ac2f003e005795cb9d590b638a963eeedc5a441fd2ce2751b7f9de35"
+    },
+    {
+      "id": "KR2_13",
+      "native": "Seongnam FC",
+      "sourcePath": "logos/south-korea/Seongnam_FC.svg",
+      "method": "normalized-exact",
+      "sha256": "7941806ce4c4e0548ef8888bd6f5a9486c51272ef40f0435bf315e4010513bcb"
+    },
+    {
+      "id": "KR3_03",
+      "native": "Hwaseong FC",
+      "sourcePath": "logos/south-korea/Hwaseong_FC.svg",
+      "method": "normalized-exact",
+      "sha256": "add77e88a6aaef3cc579adec35a0043c3a8a672d6f8e678b02f5633064cec6d3"
+    },
+    {
+      "id": "KR3_04",
+      "native": "Gimhae FC",
+      "sourcePath": "logos/south-korea/Gimhae_FC_2008.svg",
+      "method": "reviewed-alias",
+      "sha256": "a3af127bd1f2986d311fb5717ca7cbfcb7d97017217480e7e3dafb32c1ee7628"
+    },
+    {
+      "id": "NL1_04",
+      "native": "AZ",
+      "sourcePath": "logos/netherlands/AZ_Alkmaar.svg",
+      "method": "reviewed-alias",
+      "sha256": "4e459ec04cdfe37fe35d1b27db588489e29671a89b30c1b14fd22568351a3e47"
+    },
+    {
+      "id": "NL1_07",
+      "native": "NEC",
+      "sourcePath": "logos/netherlands/N.E.C._Nijmegen.svg",
+      "method": "reviewed-alias",
+      "sha256": "7596d9d82200e031783c129c350b1b1c93f708ffaf148f848c006f0ee14722d6"
+    },
+    {
+      "id": "NL2_07",
+      "native": "Excelsior",
+      "sourcePath": "logos/netherlands/Excelsior_Rotterdam.svg",
+      "method": "reviewed-alias",
+      "sha256": "1115f89868ce9a190309bc8076d216132f12005dce77dbb55041e22cc50dbcfc"
+    },
+    {
+      "id": "NL3_01",
+      "native": "ACV",
+      "sourcePath": "logos/netherlands/ACV_Assen.svg",
+      "method": "reviewed-alias",
+      "sha256": "9203a99f719780405ede455ba1f97fcd5e8cf2f7b941a655f9c61654fc4ab182"
+    },
+    {
+      "id": "NL3_03",
+      "native": "AFC",
+      "sourcePath": "logos/netherlands/AFC_Amsterdam.svg",
+      "method": "reviewed-alias",
+      "sha256": "1e3cbf7a925eca65b0f9ac4255952e0be588503210876440a010bc05ae3ae612"
+    },
+    {
+      "id": "PT1_18",
+      "native": "AVS",
+      "sourcePath": "logos/portugal/AVS_Futebol_SAD.svg",
+      "method": "reviewed-alias",
+      "sha256": "14b87cf9cd27b5adda93b283a461336c4234319bc15342eeef31cbd9b4d845de"
+    },
+    {
+      "id": "PT2_11",
+      "native": "Pacos de Ferreira",
+      "sourcePath": "logos/portugal/Paços_Ferreira.svg",
+      "method": "reviewed-alias",
+      "sha256": "35a05693187942a519eb2ce468790932804d5b2d8ab1410a211679620f08874c"
+    },
+    {
+      "id": "PT3_05",
+      "native": "Atletico CP",
+      "sourcePath": "logos/portugal/Atlético_Clube_de_Portugal.svg",
+      "method": "reviewed-alias",
+      "sha256": "7e4b0037819fdb82624b3ab1cc36c2ef8f9fcf6809b04ab40a109a3bc999479b"
+    },
+    {
+      "id": "PT3_09",
+      "native": "Fafe",
+      "sourcePath": "logos/portugal/AD_Fafe.svg",
+      "method": "reviewed-alias",
+      "sha256": "95220c4af4a6ce835ea5690adf6c5a0c3beb28efa7b43bf0e8823dd67287cb23"
+    },
+    {
+      "id": "PT3_11",
+      "native": "Lusitania Lourosa",
+      "sourcePath": "logos/portugal/Lusitânia_de_Lourosa.svg",
+      "method": "reviewed-alias",
+      "sha256": "d99054288c297d1bc64c98c71711453cfb07aa7b1912cce828bd2f9db077c932"
+    },
+    {
+      "id": "PT3_14",
+      "native": "Sao Joao de Ver",
+      "sourcePath": "logos/portugal/São_João_Ver.svg",
+      "method": "reviewed-alias",
+      "sha256": "019c1235a39ced85624fc8f75cf27a32dcee0f8e99ab28f2969314e4672744f3"
+    },
+    {
+      "id": "TR1_14",
+      "native": "Kasimpasa",
+      "sourcePath": "logos/turkey/Kasımpaşa.svg",
+      "method": "normalized-exact",
+      "sha256": "d9eebb282d025684fc15066be4d0086013359316c716f83e3622a50d9241ddd6"
+    },
+    {
+      "id": "TR2_02",
+      "native": "Amed",
+      "sourcePath": "logos/turkey/Amed_SFK.svg",
+      "method": "reviewed-alias",
+      "sha256": "9c4732e1d78b2e7634b5b56c357e704ee8dbb7430cdeeb40f212965daffb3be7"
+    },
+    {
+      "id": "TR2_04",
+      "native": "Bandirmaspor",
+      "sourcePath": "logos/turkey/Bandırmaspor.svg",
+      "method": "normalized-exact",
+      "sha256": "a53a1d187aac42c044f67d7b3fcc0e319fcc8f3ed5b485b32c813e6b35d6de9b"
+    },
+    {
+      "id": "TR2_11",
+      "native": "Igdir FK",
+      "sourcePath": "logos/turkey/Iğdır_FK.svg",
+      "method": "normalized-exact",
+      "sha256": "14068f6d4334feb5a9fc802529b56116ef8bb28e1ae5ca2400493bd5c60c0044"
+    },
+    {
+      "id": "TR2_18",
+      "native": "Sanliurfaspor",
+      "sourcePath": "logos/turkey/Şanlıurfaspor.svg",
+      "method": "normalized-exact",
+      "sha256": "05cc4a535f5fe5b55b21bb84c58ef6188b7e8592cc63491bf51a828ec57f8fb1"
+    },
+    {
+      "id": "TR3_01",
+      "native": "24 Erzincanspor",
+      "sourcePath": "logos/turkey/Erzincanspor.svg",
+      "method": "reviewed-alias",
+      "sha256": "e91e54aba335c9f65af7300880c29677965321eae1f32987f7d597bfbe3b84f5"
+    },
+    {
+      "id": "TR3_02",
+      "native": "Adana 01 FK",
+      "sourcePath": "logos/turkey/Adana_01_FK.svg",
+      "method": "normalized-exact",
+      "sha256": "8066ab788c95ac81631c773a6c7ae81fd089b6140bcd8242ee0cf203b7ae5a1a"
+    },
+    {
+      "id": "TR3_06",
+      "native": "Ankaraspor",
+      "sourcePath": "logos/turkey/Ankaraspor.svg",
+      "method": "normalized-exact",
+      "sha256": "b8d1aadc56cfc8f252565849494b9a7e22f8e67e475726d3c5fb3008a7e0cfd7"
+    },
+    {
+      "id": "TR3_07",
+      "native": "Batman Petrolspor",
+      "sourcePath": "logos/turkey/Batman_Petrolspor.svg",
+      "method": "normalized-exact",
+      "sha256": "e29f9f7310b8bce128d24b7c0654f7e44c9fa64619ae7ae707b8b526b1ac48f9"
+    },
+    {
+      "id": "TR3_09",
+      "native": "Fethiyespor",
+      "sourcePath": "logos/turkey/Fethiyespor.svg",
+      "method": "normalized-exact",
+      "sha256": "3d838d59346e8ac987110cc010a2d418bb5f9ef87de253f16a363c99401ba825"
+    },
+    {
+      "id": "TR3_10",
+      "native": "Inegolspor",
+      "sourcePath": "logos/turkey/İnegölspor.svg",
+      "method": "normalized-exact",
+      "sha256": "6a7b7eaf389764c59cbbf6dcfb218fbfd34c728e9fd66ac5a3ad9d9dfa96d058"
+    },
+    {
+      "id": "TR3_11",
+      "native": "Iskenderunspor",
+      "sourcePath": "logos/turkey/İskenderunspor.svg",
+      "method": "normalized-exact",
+      "sha256": "1c86c20c04f4b5bf23b436f670b8b39b44d3ab9cd103573e667823390fc7d618"
+    },
+    {
+      "id": "TR3_12",
+      "native": "Isparta 32 Spor",
+      "sourcePath": "logos/turkey/Isparta_32_Spor.svg",
+      "method": "normalized-exact",
+      "sha256": "4ad64c5dd2baca46e7a4c3e891ae5012229d64fe595f0bfb3f360a35c6e60fbe"
+    },
+    {
+      "id": "TR3_14",
+      "native": "Kastamonuspor 1966",
+      "sourcePath": "logos/turkey/Kastamonuspor.svg",
+      "method": "reviewed-alias",
+      "sha256": "084debc156c76a50e8a511cfb97638557df39b7fdfc709007d3ffdb5f246a691"
+    },
+    {
+      "id": "TR3_16",
+      "native": "Kirklarelispor",
+      "sourcePath": "logos/turkey/Kırklarelispor.svg",
+      "method": "normalized-exact",
+      "sha256": "948648d4c2fba21e36521c758d43af76a33ee9fbcf0a04f5429f578aac92b351"
+    },
+    {
+      "id": "TR3_17",
+      "native": "Sariyer",
+      "sourcePath": "logos/turkey/Sarıyer.svg",
+      "method": "normalized-exact",
+      "sha256": "5a9de4c4827024e4ee7d981800d6ed9e2e65d15fb376d2e0ad2aa1775e7906fb"
+    },
+    {
+      "id": "TR3_18",
+      "native": "1461 Trabzon FK",
+      "sourcePath": "logos/turkey/1461_Trabzon_FK.svg",
+      "method": "normalized-exact",
+      "sha256": "06d4631a07e7982f2a9bd4a9af02d1e59225689cc03b18c4a36ebf6fd202237b"
+    },
+    {
+      "id": "TR3_19",
+      "native": "68 Aksarayspor",
+      "sourcePath": "logos/turkey/68_Aksaray_Belediyespor.svg",
+      "method": "reviewed-alias",
+      "sha256": "81793034db5bb8487b549220c8aa8d8059f99ecfad670ad58c677e639914de95"
+    },
+    {
+      "id": "TR3_20",
+      "native": "Ankara Demirspor",
+      "sourcePath": "logos/turkey/Ankara_Demirspor.svg",
+      "method": "normalized-exact",
+      "sha256": "5bc4e1c03ea123c69841abe3700e8092dfb96939ec436b4eb3b5886257de9a06"
+    },
+    {
+      "id": "TR3_21",
+      "native": "Arnavutkoy Belediyespor",
+      "sourcePath": "logos/turkey/Arnavutköy_Belediyespor.svg",
+      "method": "normalized-exact",
+      "sha256": "10e3b4a88e0dcab335de7065db04206e8f2f2a2181eae63d9836157a37bc450c"
+    },
+    {
+      "id": "TR3_23",
+      "native": "Beyoglu Yeni Carsi",
+      "sourcePath": "logos/turkey/Beyoğlu_Yeni_Çarşı_FK.svg",
+      "method": "reviewed-alias",
+      "sha256": "da084910d445c4d2db243104277e785794bf21c4e572f3598e2c38a3270b5fb2"
+    },
+    {
+      "id": "TR3_26",
+      "native": "Elazigspor",
+      "sourcePath": "logos/turkey/Elazığspor.svg",
+      "method": "normalized-exact",
+      "sha256": "dc27bead89e6ac0594a36594a7cfc8cd3adeca12567957c6d8cc987a8c15e9d9"
+    },
+    {
+      "id": "TR3_27",
+      "native": "Erbaaspor",
+      "sourcePath": "logos/turkey/Erbaaspor.svg",
+      "method": "normalized-exact",
+      "sha256": "ee61b231b3b5f853ee65d7dc759bb8069a05749abc9db4477a218b809fcd5c93"
+    },
+    {
+      "id": "TR3_29",
+      "native": "Karacabey Belediyespor",
+      "sourcePath": "logos/turkey/Karacabey_Belediye_Spor.svg",
+      "method": "normalized-exact",
+      "sha256": "d5a1f0600ed452bd112bb88715d3c8cc1f0e42ffcdabc75e641f04de36760056"
+    },
+    {
+      "id": "TR3_31",
+      "native": "Menemen FK",
+      "sourcePath": "logos/turkey/Menemen_FK.svg",
+      "method": "normalized-exact",
+      "sha256": "939d7910d7e5c2aff723c435972a37dac8724fd8b838cb5a2262cfe772d365d4"
+    },
+    {
+      "id": "TR3_34",
+      "native": "Somaspor",
+      "sourcePath": "logos/turkey/Somaspor.svg",
+      "method": "normalized-exact",
+      "sha256": "5881e60b9dcd8842d022e8d673a37ea526b8afda560746efd826d4b285f3208f"
+    },
+    {
+      "id": "US1_01",
+      "native": "Atlanta United",
+      "sourcePath": "logos/usa/Atlanta_United.svg",
+      "method": "normalized-exact",
+      "sha256": "c1881d8c7e29b4cc89006ad9a4678bc4378e5109d5ad3364a754d9a22753713d"
+    },
+    {
+      "id": "US1_02",
+      "native": "Austin FC",
+      "sourcePath": "logos/usa/Austin_FC.svg",
+      "method": "normalized-exact",
+      "sha256": "9d425c970d1834c72f6e16c15adb65a45a85008ed32cd9f684ed24804f157d38"
+    },
+    {
+      "id": "US1_03",
+      "native": "CF Montreal",
+      "sourcePath": "logos/usa/CF_Montréal.svg",
+      "method": "reviewed-alias",
+      "sha256": "b6626f656a0168be7c9c8d5ec7bfc4cf5fc80c2966a4e35690f982bd23049612"
+    },
+    {
+      "id": "US1_04",
+      "native": "Charlotte FC",
+      "sourcePath": "logos/usa/Charlotte_FC.svg",
+      "method": "normalized-exact",
+      "sha256": "8b0a418e5f082a410fff2d5d64af9f54726ad6cd5c1444619cd5d1be617630d9"
+    },
+    {
+      "id": "US1_05",
+      "native": "Chicago Fire FC",
+      "sourcePath": "logos/usa/Chicago_Fire_FC.svg",
+      "method": "normalized-exact",
+      "sha256": "b7ca4c27ed3138a99a96a96fc0b50012310231d6dbbb380d2052e66428962468"
+    },
+    {
+      "id": "US1_06",
+      "native": "Colorado Rapids",
+      "sourcePath": "logos/usa/Colorado_Rapids.svg",
+      "method": "normalized-exact",
+      "sha256": "3231290c9698422d5a4655fc54516cfbdf16e505b24c65f44585ddf02ed9bb01"
+    },
+    {
+      "id": "US1_07",
+      "native": "Columbus Crew",
+      "sourcePath": "logos/usa/Columbus_Crew.svg",
+      "method": "normalized-exact",
+      "sha256": "4c0f32b3513c42b89fee8cbd1594f14c2ad2e26e60401d476099e8db3c82aac4"
+    },
+    {
+      "id": "US1_08",
+      "native": "D.C. United",
+      "sourcePath": "logos/usa/DC_United.svg",
+      "method": "normalized-exact",
+      "sha256": "ae2e43a5dbe9db43145c91222819abaa3c8f9033aac0049af2ba7ce6682370b4"
+    },
+    {
+      "id": "US1_09",
+      "native": "FC Cincinnati",
+      "sourcePath": "logos/usa/FC_Cincinnati.svg",
+      "method": "normalized-exact",
+      "sha256": "d12a7507af485a8f66024b250d5e0f6ee520846289770b81109b7a2116c3d77e"
+    },
+    {
+      "id": "US1_10",
+      "native": "FC Dallas",
+      "sourcePath": "logos/usa/FC_Dallas.svg",
+      "method": "normalized-exact",
+      "sha256": "a581b824776b335bdd800b01b43a4becbf4a97e3d77d05d9ce9e4fd1f2f27127"
+    },
+    {
+      "id": "US1_11",
+      "native": "Houston Dynamo FC",
+      "sourcePath": "logos/usa/Houston_Dynamo_FC.svg",
+      "method": "normalized-exact",
+      "sha256": "15ce49e987ab085d0f03bd033947a76346e00c74d300cbc09e43593e672559c3"
+    },
+    {
+      "id": "US1_12",
+      "native": "Inter Miami CF",
+      "sourcePath": "logos/usa/Inter_Miami_CF.svg",
+      "method": "normalized-exact",
+      "sha256": "b10964a15c10c83fb7971fdc384a980acc0bd3fbed1f8f7f48bdef899f6f69d6"
+    },
+    {
+      "id": "US1_13",
+      "native": "LA Galaxy",
+      "sourcePath": "logos/usa/Los_Angeles_Galaxy.svg",
+      "method": "reviewed-alias",
+      "sha256": "e2116ca4dca7e0e2c768445ed72c1ad6a9832e08c8607ad4e97ee2f51677ff85"
+    },
+    {
+      "id": "US1_14",
+      "native": "Los Angeles FC",
+      "sourcePath": "logos/usa/Los_Angeles_Football_Club.svg",
+      "method": "reviewed-alias",
+      "sha256": "2bd1bc4fc7dcf95138805d8489333d9d7df0adebe68eb10264aa0d2494e3acd6"
+    },
+    {
+      "id": "US1_15",
+      "native": "Minnesota United FC",
+      "sourcePath": "logos/usa/Minnesota_United_FC.svg",
+      "method": "normalized-exact",
+      "sha256": "4bb6f67614f766799b914f3c1cbec557bff59ca64298ea05d7c3498d296e50f7"
+    },
+    {
+      "id": "US1_16",
+      "native": "Nashville SC",
+      "sourcePath": "logos/usa/Nashville_SC.svg",
+      "method": "normalized-exact",
+      "sha256": "078e3dc760a0802d5fc29d2242581bc3cbde825bfc81c3a07646fba6e2136aea"
+    },
+    {
+      "id": "US1_17",
+      "native": "New England Revolution",
+      "sourcePath": "logos/usa/New_England_Revolution.svg",
+      "method": "normalized-exact",
+      "sha256": "bc5c45fa61b53c7aa79f5be795f4342695b7969f9982f2551b37ff4c892d8555"
+    },
+    {
+      "id": "US1_18",
+      "native": "New York City FC",
+      "sourcePath": "logos/usa/New_York_City_Football_Club.svg",
+      "method": "reviewed-alias",
+      "sha256": "51f61e9a4859ab4382847c7178a84b2f55ef406bab69b3a757237ccc535520a5"
+    },
+    {
+      "id": "US1_19",
+      "native": "New York Red Bulls",
+      "sourcePath": "logos/usa/New_York_Red_Bulls.svg",
+      "method": "normalized-exact",
+      "sha256": "dd4d46054dadfeb40e64400182c30de28ac2d61cd8deff63bd2cb4cd1e9e21c9"
+    },
+    {
+      "id": "US1_20",
+      "native": "Orlando City SC",
+      "sourcePath": "logos/usa/Orlando_City.svg",
+      "method": "reviewed-alias",
+      "sha256": "5a9edc407cfc40f997319ddd4b7f7ae15928e962299952264788ef3aab1c67de"
+    },
+    {
+      "id": "US1_21",
+      "native": "Philadelphia Union",
+      "sourcePath": "logos/usa/Philadelphia_Union.svg",
+      "method": "normalized-exact",
+      "sha256": "9bb4469237a17296dc662dab5607b391e9c43386104ac315af9454ef066e5ac2"
+    },
+    {
+      "id": "US1_22",
+      "native": "Portland Timbers",
+      "sourcePath": "logos/usa/Portland_Timbers.svg",
+      "method": "normalized-exact",
+      "sha256": "6d9e17e81b3aadf481f0f8f8aeac6ea5ee05804ba583e9fde89aeb637528e516"
+    },
+    {
+      "id": "US1_23",
+      "native": "Real Salt Lake",
+      "sourcePath": "logos/usa/Real_Salt_Lake.svg",
+      "method": "normalized-exact",
+      "sha256": "cf6ea024b096018323cf482cb5e31264d3dceec6aa626e9a1373d43c8d156da6"
+    },
+    {
+      "id": "US1_24",
+      "native": "San Jose Earthquakes",
+      "sourcePath": "logos/usa/San_Jose_Earthquakes.svg",
+      "method": "normalized-exact",
+      "sha256": "c2e78cdfce107323ebfafe5ac7984123f5c4d16f255463306f49251dfb888018"
+    },
+    {
+      "id": "US1_25",
+      "native": "Seattle Sounders FC",
+      "sourcePath": "logos/usa/Seattle_Sounders_FC.svg",
+      "method": "normalized-exact",
+      "sha256": "6fd70a5bb25b9e63a53a8081442cf12b1eb685cdefc5a5ac255d22862421ed5a"
+    },
+    {
+      "id": "US1_26",
+      "native": "Sporting Kansas City",
+      "sourcePath": "logos/usa/Sporting_Kansas_City.svg",
+      "method": "normalized-exact",
+      "sha256": "2533fa526a446373189f8b6e3c383a7393c8afbaac9ba7c1f568af755f634f49"
+    },
+    {
+      "id": "US1_27",
+      "native": "St. Louis City SC",
+      "sourcePath": "logos/usa/St._Louis_CITY_SC.svg",
+      "method": "normalized-exact",
+      "sha256": "7344423bef061fac47418a9c7677b16f4838cc059071914f4aeb54dca65d32dd"
+    },
+    {
+      "id": "US1_28",
+      "native": "Toronto FC",
+      "sourcePath": "logos/usa/Toronto_FC.svg",
+      "method": "normalized-exact",
+      "sha256": "aabae08cb6905d31c42d145ceda3f77bfad58692d956fc8f50e96ced43330a2d"
+    },
+    {
+      "id": "US1_29",
+      "native": "Vancouver Whitecaps FC",
+      "sourcePath": "logos/usa/Vancouver_Whitecaps_FC.svg",
+      "method": "normalized-exact",
+      "sha256": "25dc20f91713730f314b9dc6ea3ed323ed0649b12691f748ea54a598037a5315"
+    },
+    {
+      "id": "US2_01",
+      "native": "Birmingham Legion FC",
+      "sourcePath": "logos/usa/Birmingham_Legion_FC.svg",
+      "method": "normalized-exact",
+      "sha256": "6a253118a2fa8752a63cb93fb9a061b8f0a5bb2eedd7d70b4a0e9b51e484fb87"
+    },
+    {
+      "id": "US2_02",
+      "native": "Charleston Battery",
+      "sourcePath": "logos/usa/Charleston_Battery.svg",
+      "method": "normalized-exact",
+      "sha256": "68973ace729cdc70ba126d60bcc02430e12988b760b7ad3a000df687fe3ca2b2"
+    },
+    {
+      "id": "US2_03",
+      "native": "Colorado Springs Switchbacks FC",
+      "sourcePath": "logos/usa/Colorado_Springs_Switchbacks_FC.svg",
+      "method": "normalized-exact",
+      "sha256": "c5debff4d2f3daef5834972dc35d3ab9e272ab3ebba7e06c2a8405858cabb75e"
+    },
+    {
+      "id": "US2_04",
+      "native": "Detroit City FC",
+      "sourcePath": "logos/usa/Detroit_City_FC.svg",
+      "method": "normalized-exact",
+      "sha256": "67a1554a6b94383eaf4a51019f53f4e1c78781974ba09ec2a6dbae53ea156c61"
+    },
+    {
+      "id": "US2_05",
+      "native": "El Paso Locomotive FC",
+      "sourcePath": "logos/usa/El_Paso_Locomotive_FC.svg",
+      "method": "normalized-exact",
+      "sha256": "342846962f8333ce7b2c68dcfcd33f5505d1647d9de91ffeb2f5fa8268eb0c74"
+    },
+    {
+      "id": "US2_06",
+      "native": "FC Tulsa",
+      "sourcePath": "logos/usa/FC_Tulsa.svg",
+      "method": "normalized-exact",
+      "sha256": "7747d2005be32c18e7f831b305299866c043bc528ab657712ea54b26d42caf88"
+    },
+    {
+      "id": "US2_07",
+      "native": "Hartford Athletic",
+      "sourcePath": "logos/usa/Hartford_Athletic.svg",
+      "method": "normalized-exact",
+      "sha256": "0b44070d9d1c97c300b9f4dc50b361d1d872b84f896b776124edb718d7bfacaa"
+    },
+    {
+      "id": "US2_08",
+      "native": "Indy Eleven",
+      "sourcePath": "logos/usa/Indy_Eleven.svg",
+      "method": "normalized-exact",
+      "sha256": "ae8c12b3bef4f4d08151f7325c54502b796c429d714320361203d0e3ac6b10a0"
+    },
+    {
+      "id": "US2_09",
+      "native": "Las Vegas Lights FC",
+      "sourcePath": "logos/usa/Las_Vegas_Lights_FC.svg",
+      "method": "normalized-exact",
+      "sha256": "5b41cc60c9d231b87373217037004aaa90b38690a2e400d42615515d2037b46c"
+    },
+    {
+      "id": "US2_10",
+      "native": "Loudoun United FC",
+      "sourcePath": "logos/usa/Loudoun_United_FC.svg",
+      "method": "normalized-exact",
+      "sha256": "38e8eeb74f2973eec68aa17540f9b0776ab5f9b8d01575d441aa434a4b576753"
+    },
+    {
+      "id": "US2_11",
+      "native": "Louisville City FC",
+      "sourcePath": "logos/usa/Louisville_City_FC.svg",
+      "method": "normalized-exact",
+      "sha256": "05335105ef070e82c42edd9fd507d5dc86682487eb78131a9992b9d18906ed4e"
+    },
+    {
+      "id": "US2_13",
+      "native": "Miami FC",
+      "sourcePath": "logos/usa/Miami_FC.svg",
+      "method": "normalized-exact",
+      "sha256": "38956856afae3cee747ad975cdb2ae5057cacc3983d497579fc9e3838d45898f"
+    },
+    {
+      "id": "US2_14",
+      "native": "Monterey Bay FC",
+      "sourcePath": "logos/usa/Monterey_Bay_FC.svg",
+      "method": "normalized-exact",
+      "sha256": "1b1bcb611c166e1ae99c65580a44300bb2261e0b0de40a1c6e2e4859d751a571"
+    },
+    {
+      "id": "US2_15",
+      "native": "North Carolina FC",
+      "sourcePath": "logos/usa/North_Carolina_FC.svg",
+      "method": "normalized-exact",
+      "sha256": "67780ad23658f425f41f1dfd3dec775c43a73accade50f28698b6adfcfc71edd"
+    },
+    {
+      "id": "US2_16",
+      "native": "New Mexico United",
+      "sourcePath": "logos/usa/New_Mexico_United.svg",
+      "method": "normalized-exact",
+      "sha256": "e2edfb450be2420c76c0183cf8635ad356ac7b98088b1006b72b14b32fdde025"
+    },
+    {
+      "id": "US2_17",
+      "native": "Oakland Roots SC",
+      "sourcePath": "logos/usa/Oakland_Roots_SC.svg",
+      "method": "normalized-exact",
+      "sha256": "3e3763ef1c4bc1dcccf3d8a7533ffbc957686c77ba1023ab9952514be28de918"
+    },
+    {
+      "id": "US2_18",
+      "native": "Orange County SC",
+      "sourcePath": "logos/usa/Orange_County_SC.svg",
+      "method": "normalized-exact",
+      "sha256": "2027a52521eaf39c7846d37eb4ff6e879b81c46a1ba8c47fdb0b24621a4a7222"
+    },
+    {
+      "id": "US2_19",
+      "native": "Phoenix Rising FC",
+      "sourcePath": "logos/usa/Phoenix_Rising_FC.svg",
+      "method": "normalized-exact",
+      "sha256": "003f86a453f18d543bc343eded301be0fca98cb4c4e10a954e8d2e72c923e632"
+    },
+    {
+      "id": "US2_20",
+      "native": "Pittsburgh Riverhounds SC",
+      "sourcePath": "logos/usa/Pittsburgh_Riverhounds_SC.svg",
+      "method": "normalized-exact",
+      "sha256": "359b1e584a52319defd4b1770d272d8046adc73ee4a8c3653f6cbffb6ab651c2"
+    },
+    {
+      "id": "US2_21",
+      "native": "Rhode Island FC",
+      "sourcePath": "logos/usa/Rhode_Island_FC.svg",
+      "method": "normalized-exact",
+      "sha256": "22b38d22ab4105d2b4090996ac905927c77f4e4bae3c92598b0a3af32608ab9a"
+    },
+    {
+      "id": "US2_22",
+      "native": "Sacramento Republic FC",
+      "sourcePath": "logos/usa/Sacramento_Republic_FC.svg",
+      "method": "normalized-exact",
+      "sha256": "43278fb3550cbbea0e6172acf55735e9966eaa8221610bb512c0401cc14fcf93"
+    },
+    {
+      "id": "US2_23",
+      "native": "San Antonio FC",
+      "sourcePath": "logos/usa/San_Antonio_FC.svg",
+      "method": "normalized-exact",
+      "sha256": "ca4d7b149c30b2f26f6cceb8f038ce56af66249a1b9d6c0046835c6d5d1f47d7"
+    },
+    {
+      "id": "US2_24",
+      "native": "Tampa Bay Rowdies",
+      "sourcePath": "logos/usa/Tampa_Bay_Rowdies.svg",
+      "method": "normalized-exact",
+      "sha256": "5f6f3d80dfdebc62de467c79d97e91fa7f947ee5dbd3415075a6648bef14d1cd"
+    },
+    {
+      "id": "US3A_02",
+      "native": "Charlotte Independence",
+      "sourcePath": "logos/usa/Charlotte_Independence.svg",
+      "method": "normalized-exact",
+      "sha256": "22fdd3092d7850bd6e76c126d447d4d1a8bec81eadf53edb8d42c0824a101b53"
+    },
+    {
+      "id": "US3A_03",
+      "native": "Chattanooga Red Wolves SC",
+      "sourcePath": "logos/usa/Chattanooga_Red_Wolves_SC.svg",
+      "method": "normalized-exact",
+      "sha256": "2f8d4a323e2433ad92628b3a20b84e5db60860b2ff8e505dc89f273f1830a29a"
+    },
+    {
+      "id": "US3A_04",
+      "native": "Forward Madison FC",
+      "sourcePath": "logos/usa/Forward_Madison_FC.svg",
+      "method": "normalized-exact",
+      "sha256": "a069ccdbfc7223180122ad7cf5ad2d2d9797c4cba8d1e36a7df49257b8bd02c0"
+    },
+    {
+      "id": "US3A_05",
+      "native": "Greenville Triumph SC",
+      "sourcePath": "logos/usa/Greenville_Triumph_SC.svg",
+      "method": "normalized-exact",
+      "sha256": "1ee7ba2d03de63f0b4683d633812e4e4dc0496381879c4f758975289f1cbe61f"
+    },
+    {
+      "id": "US3A_06",
+      "native": "Lexington SC",
+      "sourcePath": "logos/usa/Lexington_SC.svg",
+      "method": "normalized-exact",
+      "sha256": "b57163dc33f568680b6de57f846a3a516e34119b3d9fb99046bb49e33da0d11a"
+    },
+    {
+      "id": "US3A_08",
+      "native": "One Knoxville SC",
+      "sourcePath": "logos/usa/One_Knoxville_SC.svg",
+      "method": "normalized-exact",
+      "sha256": "9cc2eb0c9b1bac473210b648893d0f5ec3ab241746957a46dd16fe4ba608f5cf"
+    },
+    {
+      "id": "US3A_09",
+      "native": "Richmond Kickers",
+      "sourcePath": "logos/usa/Richmond_Kickers.svg",
+      "method": "normalized-exact",
+      "sha256": "cc3e19ee78773cc4a0d602ad42fc9bc9911bbe6c0b6322074ed5f00f79ea077d"
+    },
+    {
+      "id": "US3A_11",
+      "native": "Spokane Velocity FC",
+      "sourcePath": "logos/usa/Spokane_Velocity_FC.svg",
+      "method": "normalized-exact",
+      "sha256": "c503cbcbc37aa372a1182659478a563cb05f5a2b59309c9caf39386d6f8d52d5"
+    },
+    {
+      "id": "US3A_12",
+      "native": "Union Omaha",
+      "sourcePath": "logos/usa/Union_Omaha.svg",
+      "method": "normalized-exact",
+      "sha256": "4b4f5d476e2403df8667bd12aa135b4f2ca2d1b3e65efb1b6f758ca6fb832825"
+    }
+  ]
+}
