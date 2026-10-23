@@ -25,7 +25,7 @@ async function saved(page) {
         db.close(); resolve(read.result.map(value => {
           const c = value.envelope.career;
           const summarizeMatch = m => ({ id:m.id,fixtureId:m.fixtureId,round:m.round,seasonYear:m.seasonYear,homeId:m.homeId,awayId:m.awayId,homeGoals:m.homeGoals,awayGoals:m.awayGoals,playerStats:m.playerStats,metricsVersion:m.metricsVersion,scope:m.scope,competitionId:m.competitionId });
-          return {...c,season:{...c.season,matches:c.season.matches.map(summarizeMatch)},history:c.history.map(h=>({...h,matches:h.matches.map(summarizeMatch)})),systems:c.systems?{...c.systems,world:undefined,national:{...c.systems.national,matches:c.systems.national.matches.map(summarizeMatch),history:c.systems.national.history.map(h=>({...h,matches:h.matches.map(summarizeMatch)})),teamResults:undefined}}:undefined};
+          return {...c,season:{...c.season,matches:c.season.matches.map(summarizeMatch)},history:c.history.map(h=>({...h,matches:h.matches.map(summarizeMatch)})),systems:c.systems?{...c.systems,world:undefined,clubCompetitions:c.systems.clubCompetitions?{...c.systems.clubCompetitions,current:c.systems.clubCompetitions.current.map(({playerStats,...t})=>({...t,matches:t.matches.map(summarizeMatch)})),history:c.systems.clubCompetitions.history.map(({playerStats,...t})=>({...t,matches:t.matches.map(summarizeMatch)}))}:undefined,national:{...c.systems.national,matches:c.systems.national.matches.map(summarizeMatch),history:c.systems.national.history.map(h=>({...h,matches:h.matches.map(summarizeMatch)})),teamResults:undefined}}:undefined};
         }));
       };
       transaction.onabort = () => reject(transaction.error);
@@ -136,7 +136,7 @@ async function create(page,{name,age=20,position='CAM',talent='S',difficulty='re
 }
 function observe(page) {activePage=page;page.setDefaultTimeout(30_000);page.on('pageerror',e=>errors.push(String(e)));page.on('request',r=>{if(/^https?:/.test(r.url()))requests.push(r.url());});}
 function totals(c) {
-  const matches=[...c.history.flatMap(h=>h.matches),...(!c.history.some(h=>h.year===c.season.year)?c.season.matches:[])];
+  const matches=[...[...(c.systems?.clubCompetitions?.current??[]),...(c.systems?.clubCompetitions?.history??[])].flatMap(t=>t.matches),...c.history.flatMap(h=>h.matches),...(!c.history.some(h=>h.year===c.season.year)?c.season.matches:[])];
   const n=c.systems?.national,seen=new Set();for(const m of [...n?.history.flatMap(h=>h.matches)||[],...n?.matches||[]])if(!seen.has(m.id)){seen.add(m.id);matches.push(m);}
   return matches.reduce((s,m)=>{for(const [k,v]of Object.entries(m.playerStats))s[k]=(s[k]||0)+v;return s;},{});
 }
@@ -174,9 +174,9 @@ try {
   assert.equal(career.systems.pendingChoice,undefined);assert.deepEqual(career.offers,[]);assert.equal(await page.getByTestId('transfer-window').count(),0);assert.equal(await page.getByTestId('training-plan').count(),0);assert.equal(await page.getByText('팀 현황',{exact:true}).count(),0);
   await page.getByTestId('season-details-disclosure').locator('summary').click();const details=page.getByTestId('locker-season-details');assert.equal(await details.locator('.stat-detail').count(),9);
   const currentNational=[...new Map([...career.systems.national.history.flatMap(h=>h.matches),...career.systems.national.matches].filter(m=>m.seasonYear===career.season.year).map(m=>[m.id,m])).values()];
-  const combinedMinutes=career.season.playerStats.minutes+currentNational.reduce((sum,m)=>sum+m.playerStats.minutes,0);
+  const combinedMinutes=career.season.playerStats.minutes+(career.systems.clubCompetitions?.current??[]).flatMap(t=>t.matches).reduce((n,m)=>n+m.playerStats.minutes,0)+currentNational.reduce((sum,m)=>sum+m.playerStats.minutes,0);
   assert.equal(await details.locator('.shared-stats > span').nth(2).textContent(),`시간 ${combinedMinutes.toLocaleString()}′`,'locker details combine actual club and national minutes');
-  assert.equal(await page.getByTestId('season-competitions').count(),1);assert.ok((await page.getByTestId('club-competition').textContent()).includes(career.season.competitionName));
+  assert.equal(await page.getByTestId('season-competitions').count(),1);assert.ok((await page.getByTestId('club-competition').allTextContents()).join(' ').includes(career.season.competitionName));
   await navigate(page,'player');await page.getByTestId('player-view-training').click();assert.equal(await page.locator('.training-row:enabled').count(),0);assert.equal(await page.getByTestId('confirm-training').count(),0);await navigate(page,'locker');
   await page.locator('.match-row').first().click();assert.equal(await page.getByRole('dialog').locator('[data-testid="role-metrics"] .stat-detail').count(),9);await closeDialog(page);
   await fullStandings(page,career);
@@ -199,7 +199,7 @@ try {
   }
   await page.setViewportSize({width:1440,height:1000});await page.getByTestId('training-panel').getByLabel('강도').selectOption('balanced');await page.getByTestId('confirm-training').click();
   career=await waitState(page,c=>c.id===replicaId&&c.intensity==='balanced','offseason training change');await ready(page);
-  assert.equal(career.systems.trainingPlan.confirmed,true);assert.equal(career.systems.trainingPlan.forYear,initialYear+1);assert.equal(await page.getByTestId('confirm-training').count(),0,'confirming locks the next-season plan');
+  assert.equal(career.systems.trainingPlan.confirmed,true);assert.equal(career.systems.trainingPlan.forYear,initialYear+1);assert.equal(await page.getByTestId('confirm-training').count(),0,'confirming locks the next-season plan');assert.equal(await page.getByTestId('locker-tab').getAttribute('aria-current'),'page','successful training confirmation returns to locker');
   await openCommon(page);page.once('dialog',d=>d.accept());await page.locator('.save-item').filter({has:page.locator('.pill',{hasText:'현재'})}).getByRole('button',{name:'이전 저장 복원',exact:true}).click();
   career=await waitState(page,c=>c.id===replicaId&&c.intensity==='intense','previous-good backup restore');await ready(page);assert.equal(career.stage,'offseason');
   const invalid=structuredClone(baseline);invalid.career.player.name='손상된 커리어';await page.getByLabel('K볼 저장 파일 가져오기').setInputFiles({name:'invalid-save.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(invalid))});await page.getByRole('alert').waitFor();assert.equal((await saved(page)).length,2);assert.ok(!(await saved(page)).some(c=>c.player.name==='손상된 커리어'));await page.getByRole('button',{name:'오류 알림 닫기'}).click();

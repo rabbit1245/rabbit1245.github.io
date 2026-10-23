@@ -52,7 +52,7 @@ test('Golden Glove compares only actual goalkeeper performance and U20 uses its 
   const awards=evaluateTournamentAwards(c);
   assert.equal(awards.filter(a=>a.id.includes(':golden-glove:')).length,1);
   assert.ok(awards.every(a=>a.name.includes('2027 FIFA U-20 월드컵')));
-  assert.ok(awards.every(a=>a.organiser==='FIFA'&&a.criterion?.includes('4팀')));
+  assert.ok(awards.every(a=>a.organiser==='FIFA'&&a.criterion?.includes('본선')));
   const user=c.systems!.national.matches[0].performers![0];user.ovr=1;
   assert.deepEqual(evaluateTournamentAwards(c),awards,'ability does not replace played tournament performance');
 });

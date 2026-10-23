@@ -1,3 +1,5 @@
+import {nationalAudit} from './national-audit';
+import {cupMatches,cupStats,cupLedger,tournamentResult} from './club-competitions';
 import { ATTRIBUTE_LABELS, POSITION_LABELS, TALENT_LABELS } from './attributes';
 import { getClub } from './data';
 import { ALL_STATS, emptyStats, sumStats } from './math';
@@ -12,11 +14,11 @@ const money=(n:number)=>`€${Math.round(n).toLocaleString('ko-KR')}`;
 const avg=(s:PlayerStats)=>s.ratingCount?(s.ratingSum/s.ratingCount).toFixed(2):'미집계';
 const unique=(matches:MatchRecord[])=>[...new Map(matches.map(m=>[m.fixtureId||m.id,m])).values()];
 export function careerMatchLedger(c:Career){
- const club=unique([...c.history.flatMap(h=>h.matches),...c.season.matches]);
+ const club=unique([...c.history.flatMap(h=>h.matches),...c.season.matches,...cupMatches(c)]);
  const national=unique([...(c.systems?.national.history.flatMap(h=>h.matches)??[]),...(c.systems?.national.matches??[])]);
  return {club,national};
 }
-function clubTotal(c:Career){return sumStats([...c.history.map(h=>h.stats),...(!c.history.some(h=>h.year===c.season.year)?[c.season.playerStats]:[])]);}
+function clubTotal(c:Career){return sumStats([cupStats(c),...c.history.map(h=>h.stats),...(!c.history.some(h=>h.year===c.season.year)?[c.season.playerStats]:[])]);}
 function statsText(stats:PlayerStats,matches:readonly MatchRecord[]):string[]{
  const measured=sumStats(matches.filter(m=>m.metricsVersion===2).map(m=>m.playerStats)),legacy=stats.apps>(stats.detailedApps??0),keys=[...new Set([...ALL_STATS,...Object.keys(stats)])];
  const lines=[`출전 ${stats.apps}경기 · ${stats.minutes}분 · ${stats.goals}골 · ${stats.assists}도움 · 평균 평점 ${avg(stats)}`,`상세 행동 기록 ${stats.detailedApps??0}/${stats.apps}경기. 과거에 집계하지 않은 지표와 분모는 추정하지 않습니다.`];
@@ -54,7 +56,8 @@ export function* careerTextChunks(c:Career):Generator<string>{
  yield line('보존된 출전·대회 기록을 기준으로 집계했습니다. 기록이 없는 대회의 성적은 포함하지 않습니다.');
  yield section('C. 연도별·시즌별 상세 기록');
  for(const year of years){
-  const h=seasons.find(row=>row.year===year),current=year===c.season.year,cm=h?.matches??(current?c.season.matches:[]),nm=ledger.national.filter(m=>m.seasonYear===year),stats=h?.stats??(current?c.season.playerStats:emptyStats());
+  const h=seasons.find(row=>row.year===year),current=year===c.season.year,cm=h?.matches??(current?c.season.matches:[]),nm=ledger.national.filter(m=>m.seasonYear===year),stats=sumStats([h?.stats??(current?c.season.playerStats:emptyStats()),cupStats(c,year)]);
+  const allClubMatches=[...cm,...cupMatches(c,year)];
   if(!h&&!current){yield line(`${year}시즌: 과거 기록 미보존`);continue;}
   yield line(`[${year}시즌] ${h?.age??p.age}세 · ${h?.clubName??name(p.clubId)} · ${h?.competitionName??c.season.competitionName} · ${POSITION_LABELS[h?.position??p.position]}`);
   yield line(`리그 순위: ${h?.rank??(c.season.table.findIndex(t=>t.clubId===p.clubId)+1)}위 · ${h?.completed?'시즌 종료':current?'진행 중/은퇴 시점':'과거 기록 미보존'}`);
@@ -67,18 +70,22 @@ export function* careerTextChunks(c:Career):Generator<string>{
   yield line(`주장 직책: ${l?.terms.filter(t=>t.startYear<=year&&(t.endYear??Infinity)>=year).map(t=>`${name(t.teamId)} ${t.role==='captain'?'주장':t.role==='vice'?'부주장':'임시 경기 주장'}`).join(' / ')||'해당 없음 또는 과거 미보존'}`);
   yield line(`몸값: ${e?.valueHistory.filter(v=>v.year===year).map(v=>`R${v.round} ${money(v.value)}`).join(' / ')||'과거 기록 미보존'}`);
   yield line(`개인 수상: ${c.awards.filter(a=>a.year===year&&!isTeamAward(a)).map(a=>`${a.name} (${a.description})`).join(' / ')||'기록된 수상 없음'}`);
-  for(const row of statsText(stats,cm))yield line(`클럽 ${row}`);
+  for(const row of statsText(stats,allClubMatches))yield line(`클럽 ${row}`);
   if(nm.length){for(const row of statsText(sumStats(nm.map(m=>m.playerStats)),nm))yield line(`국대 ${row}`);}else yield line('국대: 이 시즌 보존된 출전 기록 없음');
   for(const n of s?.national.history.filter(n=>n.year===year)??[])yield line(`참가 대회: ${n.competitionName} · ${korean(n.squad)} · ${n.result} · 본선 자격 ${n.qualified?'획득':'미획득'}`);
   if(h?.details){const d=h.details;yield line(`시즌 종료 몸값: ${money(d.marketValue)} · 시작 몸값: ${d.seasonStartValue===undefined?'과거 기록 미보존':money(d.seasonStartValue)}`);yield line(`당시 계약: ${name(d.contract.clubId)} · 주급 ${money(d.contract.wage)} · ${d.contract.years}년 · ${d.contract.signedYear}–${d.contract.expiresYear} · 역할 ${d.contract.role}`);yield line(`개인 리그 순위: 득점 ${d.personalRanks.goals?`${d.personalRanks.goals}위`:'해당 없음/미집계'} · 도움 ${d.personalRanks.assists?`${d.personalRanks.assists}위`:'해당 없음/미집계'} · 무실점 ${d.personalRanks.cleanSheets?`${d.personalRanks.cleanSheets}위`:'해당 없음/미집계'}`);yield line(`시즌 종료 주장 직책: 클럽 ${roleText(d.captain.club)} · 국대 ${roleText(d.captain.national)}`);if(d.clubDevelopment){const x=d.clubDevelopment;yield line(`구단 성과 반영: 성과 수입 ${money(x.bonus)} · 실제 재투자 ${money(x.reinvestment)} · 전력 ${x.beforePower} → ${x.afterPower} · 위상 ${x.prestigeBefore} → ${x.prestigeAfter}`);}}
   else yield line('시즌 종료 전체 순위표·당시 계약·개인 득점/도움 순위 원본: 과거 기록 미보존 (아래 보존 원장으로 확인 가능한 값만 표시)');
  }
  yield section('D. 클럽 및 이적 경력');
- for(const id of new Set([...seasons.map(h=>h.clubId),p.clubId])){const hs=seasons.filter(h=>h.clubId===id),ms=ledger.club.filter(m=>m.playerClubId===id);yield line(`${name(id)} · 보존 시즌 ${hs.map(h=>h.year).join(', ')||'현재 시즌'} · ${teamRecord(ms,id)}`);for(const row of statsText(sumStats([...hs.map(h=>h.stats),...(!seasons.some(h=>h.year===c.season.year)&&id===p.clubId?[c.season.playerStats]:[])]),ms))yield line(row);}
+ for(const id of new Set([...seasons.map(h=>h.clubId),p.clubId])){const hs=seasons.filter(h=>h.clubId===id),ms=ledger.club.filter(m=>m.playerClubId===id);yield line(`${name(id)} · 보존 시즌 ${hs.map(h=>h.year).join(', ')||'현재 시즌'} · ${teamRecord(ms,id)}`);for(const row of statsText(sumStats([...hs.map(h=>h.stats),...cupLedger(c).flatMap(t=>t.matches.filter(m=>m.playerClubId===id).map(m=>m.playerStats)),...(!seasons.some(h=>h.year===c.season.year)&&id===p.clubId?[c.season.playerStats]:[])]),ms))yield line(row);}
  for(const t of c.transfers)yield line(`${t.year}년 ${name(t.fromClubId)} → ${name(t.toClubId)} · 이적료 ${money(t.fee)} · 주급 ${money(t.wage)}`);
  yield section('E. 국가대표 커리어');
  yield line(`현재/마지막 상태: ${korean(s?.national.status)} · ${s?.national.reason??'과거 기록 미보존'}`);
  for(const n of [...s?.national.history??[]].sort((a,b)=>a.year-b.year||a.competitionId.localeCompare(b.competitionId))){yield line(`${n.year}년 · ${korean(n.squad)} · ${n.competitionName} · ${n.result} · 예선 통과 ${n.qualified?'예':'아니오'}`);for(const row of statsText(n.stats,n.matches))yield line(row);}
+ for(const r of nationalAudit(c)){
+  yield line(`${r.year}년 ${korean(r.squad)} · 편성 ${r.scheduled} · 진행 ${r.teamGames} · 소집 ${r.called} · 선발 ${r.starts} · 교체 ${r.sub} · 벤치 ${r.bench} · 제외 ${r.excluded} · 실제 본선 참가 ${r.tournaments}개 대회${r.legacy?' · 과거 소집 세부 일부 미보존':''}`);
+  for(const t of r.types)yield line(`${t.kind}: 대표팀 ${t.teamGames}경기 · 내 출전 ${t.stats.apps}경기 · ${t.stats.minutes}분 · ${t.stats.goals}골 · ${t.stats.assists}도움`);
+ }
  yield section('F. 개인 수상·개인 순위 전체');
  const counts=new Map<string,number>();for(const a of c.awards.filter(a=>!isTeamAward(a))){counts.set(a.name,(counts.get(a.name)??0)+1);yield line(`${a.year}년 · ${a.name} · ${name(a.clubId)} · ${a.description} · 평가 ${a.evaluationPeriod??'기간 미보존'} · 순위 ${a.rank??'해당 없음'}`);}
  for(const [award,count] of counts)yield line(`통산 ${award}: ${count}회`);
@@ -88,6 +95,10 @@ export function* careerTextChunks(c:Career):Generator<string>{
  for(const h of seasons)yield line(`${h.year}년 · ${h.clubName} · ${h.competitionName} · ${h.rank}위 · ${h.completed?'완료':'중도 종료'} · ${teamRecord(h.matches,h.clubId)}`);
  for(const h of s?.national.history??[])yield line(`${h.year}년 ${h.competitionName} ${korean(h.squad)}: ${h.result} · 본선 진출 ${h.qualified?'예':'아니오'}`);
  for(const a of c.awards.filter(isTeamAward))yield line(`${a.year}년 ${a.name}: ${a.description}`);
+ for(const t of cupLedger(c)){
+  const team=t.matches[0]?.playerClubId;if(!team)continue;
+  yield line(`${t.year}년 ${t.name} · ${name(team)} · ${tournamentResult(t,team)} · 실제 내 출전 ${t.matches.reduce((n,m)=>n+m.playerStats.apps,0)}경기 · 우승 구단 ${t.winnerId?name(t.winnerId):'미확정'} · 참가 근거 ${t.basis}`);
+ }
  yield section('H. 주장·부주장 전체 이력');
  if(!l?.terms.length)yield line('기록된 주장/부주장 임기 없음');
  for(const t of l?.terms??[])yield line(`${t.scope==='club'?'클럽':'국가대표'} ${name(t.teamId)} · ${t.role==='captain'?'주장':t.role==='vice'?'부주장':'임시 경기 주장'} · ${t.startYear}년 라운드 ${t.startRound??'미기록'} → ${t.endYear??'현재'} 라운드 ${t.endRound??'미기록'} · ${t.apps}경기 · ${t.reason}`);
@@ -102,6 +113,7 @@ export function* careerTextChunks(c:Career):Generator<string>{
  yield line('세부 능력치 최고점은 보존된 시점끼리 비교합니다. 과거 매 경기 능력치가 없으면 그 사이의 최고값은 추정하지 않습니다.');
  for(const key of Object.keys(p.attributes)){const observed=snapshots.filter(r=>r.attributes[key as keyof typeof r.attributes]!==undefined),highest=Math.max(...observed.map(r=>r.attributes[key as keyof typeof r.attributes]!));yield line(`${ATTRIBUTE_LABELS[key as keyof typeof ATTRIBUTE_LABELS]??'추가 능력치'} 보존 최고점: ${highest} · ${[...new Set(observed.filter(r=>r.attributes[key as keyof typeof r.attributes]===highest).map(r=>r.label))].join(', ')}`);}
  for(const r of [...s?.growthReports??[]].sort((a,b)=>a.year-b.year||a.toRound-b.toRound)){yield line(`${r.year}년 ${korean(r.half)} 라운드 ${r.fromRound}–${r.toRound} · 종합 능력 ${r.ovrStart} → ${r.ovrEnd}`);yield line(`시작: ${attributesText(r.startAttributes)}`);yield line(`종료: ${attributesText(r.endAttributes)}`);if(r.growth)for(const [cause,changes] of Object.entries(r.growth.byCause))yield line(`원인 ${korean(cause)}: ${attributesText(changes)}`);if(r.offseasonAging)yield line(`시즌 전 노화: ${attributesText(r.offseasonAging.changes)}`);}
+ for(const a of s?.manualAging??[]){yield line(`수동 노화 · ${a.playerName??p.name} · ${a.date.slice(0,10)} · ${a.year}년 라운드 ${a.round} · 전체 능력치 −${a.amount} · 종합 능력 ${a.ovrBefore} → ${a.ovrAfter}`);yield line(`적용 전: ${attributesText(a.before)}`);yield line(`적용 후: ${attributesText(a.after)}`);}
  yield section('K. 전체 순위 지표 및 경기별 모든 상세 기록');
  for(const h of seasons){yield line(`[${h.year}년 ${h.competitionName}] ${h.rank}위`);if(h.details)for(const [i,t] of h.details.table.entries())yield line(standingText(t,i));else yield line('최종 전체 순위표 원본: 과거 기록 미보존');}
  yield line(`[현재/마지막 시즌 전체 순위] ${c.season.competitionName}`);
@@ -119,10 +131,15 @@ export function* careerTextChunks(c:Career):Generator<string>{
  }
  yield section('L. 훈련·직접 조정·대회 추가 기록');
  yield line(`현재 훈련: ${c.training.map(k=>ATTRIBUTE_LABELS[k]).join(' · ')} · ${korean(c.intensity)} 강도`);
- yield line(`치트 모드: ${s?.cheats?.enabled?'사용 중':'꺼짐'} · 노화 중지: ${s?.cheats?.enabled&&s.cheats.freezeAging?'사용 중':'꺼짐'} · 치트 사용 이력: ${s?.cheats?.used?'있음':'없음'}`);
+ yield line(`치트 모드: ${s?.cheats?.enabled?'사용 중':'꺼짐'} · 나이 증가 중지: ${s?.cheats?.enabled&&s.cheats.freezeAging?'사용 중':'꺼짐'} · 치트 사용 이력: ${s?.cheats?.used?'있음':'없음'}`);
  if(s?.growthLedger){yield line(`현재 시즌 성장 원인 (${s.growthLedger.year}년 ${s.growthLedger.trackedFromRound}라운드부터)`);for(const [cause,changes] of Object.entries(s.growthLedger.byCause))yield line(`${korean(cause)}: ${attributesText(changes)}`);}
  if(e){yield line(`현재 계약: ${name(e.contract.clubId)} · 주급 ${money(p.wage)} · 잔여 ${p.contractYears}년 · 역할 ${e.contract.role}`);for(const h of e.contractHistory??[])if(h.previous)yield line(`${h.year}년 계약 이전 조건: ${name(h.previous.clubId)} · 주급 ${money(h.previous.wage)} · ${h.previous.years}년 · 역할 ${h.previous.role}`);}
  if(s?.national){const n=s.national;yield line(`마지막 국가대표 대회: ${n.competitionName} · ${korean(n.squad)} · ${korean(n.phase)} · 순위 ${n.rank||'미집계'} · 승점 ${n.points} · 본선 자격 ${n.qualified?'획득':'미획득'}`);}
+ for(const r of s?.rankings??[])for(const d of r.diagnostics??[])yield line(`${r.year}년 수상 평가 ${d.name}: ${d.result} · ${d.scope} · ${d.eligible?'자격 충족':'자격 미충족'} · ${d.detail}`);
+ for(const t of cupLedger(c)){
+  yield line(`${t.year}년 ${t.name} 전체 대진·일정 · ${t.rules}`);
+  for(const f of t.fixtures)yield line(`${f.date?.slice(0,10)??'일정 대기'} · ${f.stage} ${f.leg}차전 · ${name(f.homeId)} ${f.played?`${f.homeGoals}:${f.awayGoals}`:'예정'} ${name(f.awayId)}${f.shootout?` · 승부차기 ${f.shootout.home}:${f.shootout.away}`:''}${f.winnerId?` · 진출/우승 ${name(f.winnerId)}`:''}`);
+ }
  for(const year of years){const h=seasonHonours(c,year);for(const t of h.titles)yield line(`${year}년 우승 대회: ${t.name} · ${t.team} · 내 출전 ${t.apps===null?'기록 미보존':`${t.apps}경기`} · 개인 메달 ${t.medal?'획득':'획득 기록 없음'}`);}
  const teamGames=unique(s?.national.teamResults??[]);
  if(teamGames.length)yield line('국가대표 대회의 다른 팀 경기 결과');

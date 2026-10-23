@@ -1,3 +1,4 @@
+import {validateCompetitionData} from './competition-validation';
 import { validateCareerExtensions } from './extension-validation';
 import { CLUBS, LEAGUES } from './data';
 import { CORE_STATS, DETAIL_STATS } from './math';
@@ -5,7 +6,7 @@ import type { Career, MatchRecord, PlayerStats, SaveEnvelope, SaveSlot } from '.
 
 const DATABASE = 'kball-careers';
 const DATABASE_VERSION = 1;
-const MAX_SAVE_BYTES = 128 * 1024 * 1024;
+const MAX_SAVE_BYTES = 256 * 1024 * 1024;
 const clubs = new Map(CLUBS.map(club => [club.id, club]));
 const leagues = new Set(LEAGUES.map(league => league.id));
 const positions = new Set(['GK', 'CB', 'LB', 'RB', 'LWB', 'RWB', 'CDM', 'CM', 'CAM', 'LM', 'RM', 'LW', 'RW', 'CF', 'SS', 'ST']);
@@ -102,15 +103,15 @@ function stringify(value: unknown): string {
   try { serialized = JSON.stringify(value); }
   catch { throw new Error('저장 데이터를 JSON으로 변환할 수 없습니다.'); }
   assert(typeof serialized === 'string', '저장할 내용이 없습니다.');
-  assert(new TextEncoder().encode(serialized).byteLength <= MAX_SAVE_BYTES, '저장 파일은 128MB 이하여야 합니다.');
+  assert(new TextEncoder().encode(serialized).byteLength <= MAX_SAVE_BYTES, '저장 파일은 256MB 이하여야 합니다.');
   return serialized;
 }
 
-function attributes(value: unknown, label: string, required?: string[], minimum = 1): void {
+function attributes(value: unknown, label: string, required?: string[], minimum = 0, maximum = 100): void {
   const values = object(value, label);
   for (const [key, amount] of Object.entries(values)) {
     assert(allAttributes.has(key), `${label}에 알 수 없는 능력치가 있습니다.`);
-    number(amount, `${label}.${key}`, minimum, 100);
+    number(amount, `${label}.${key}`, minimum, maximum);
   }
   if (required) assert(required.every(key => typeof values[key] === 'number'), `${label}의 필수 능력치가 누락되었습니다.`);
 }
@@ -141,7 +142,7 @@ function growthLedger(value: unknown, end: unknown, throughRound: number, year: 
   const trackedCauses=causes.cheat===undefined?[...growthCauses]:[...growthCauses,'cheat'];
   assert(Object.keys(causes).length === trackedCauses.length && trackedCauses.every(cause => cause in causes), `${label}의 성장 원인이 누락되거나 올바르지 않습니다.`);
   for (const cause of trackedCauses) {
-    attributes(causes[cause], `${label}.byCause.${cause}`, undefined, -100);
+    attributes(causes[cause], `${label}.byCause.${cause}`, undefined, -1e6, 1e6);
     for (const [key, amount] of Object.entries(object(causes[cause], `${label}.byCause.${cause}`))) {
       assert(key in baseline, `${label}의 성장 원인에 다른 능력치가 있습니다.`);
       assert(cause === 'injury' || cause === 'aging' ? Number(amount) <= 0 : Number(amount) >= 0, `${label}의 성장 원인 방향이 올바르지 않습니다.`);
@@ -156,7 +157,7 @@ function growthLedger(value: unknown, end: unknown, throughRound: number, year: 
 function agingReport(value: unknown, year: number, label: string, seasonStart: unknown): void {
   const row = object(value, label);
   assert(number(row.year, `${label}.year`, 1900, 2500, true) === year, `${label}의 연도가 다릅니다.`);
-  attributes(row.startAttributes, `${label}.startAttributes`); attributes(row.endAttributes, `${label}.endAttributes`); attributes(row.changes, `${label}.changes`, undefined, -100);
+  attributes(row.startAttributes, `${label}.startAttributes`); attributes(row.endAttributes, `${label}.endAttributes`); attributes(row.changes, `${label}.changes`, undefined, -1e6, 1e6);
   const start = object(row.startAttributes, `${label}.startAttributes`), end = object(row.endAttributes, `${label}.endAttributes`), changes = object(row.changes, `${label}.changes`);
   sameAttributes(start, end, label);
   sameAttributeValues(end, object(seasonStart, `${label}.seasonStart`), label);
@@ -325,7 +326,7 @@ function matches(value: unknown, label: string, playerId: string, national = fal
       }
     } else assert(match.momPlayerId === undefined, `${prefix}의 MOM 경기 명단이 없습니다.`);
     if (match.shootout !== undefined) {
-      assert(national && homeGoals === awayGoals, `${prefix}의 승부차기 경기 범위·점수가 올바르지 않습니다.`);
+      assert((national && homeGoals === awayGoals)||(!national&&match.aggregate&&typeof match.aggregate==='object'&&Number((match.aggregate as any).home)===Number((match.aggregate as any).away)), `${prefix}의 승부차기 경기 범위·점수가 올바르지 않습니다.`);
       const shootout = object(match.shootout, `${prefix}.shootout`);
       const h = number(shootout.home, `${prefix}.shootout.home`, 0, 100, true), a = number(shootout.away, `${prefix}.shootout.away`, 0, 100, true);
       assert(h !== a && shootout.winnerId === (h > a ? home : away), `${prefix}의 승부차기 승자가 올바르지 않습니다.`);
@@ -498,7 +499,7 @@ function validateSystems(career: Record<string, unknown>, player: Record<string,
   const nationalMatches = matches(national.matches, 'national.matches', playerId, true);
   // Other countries' qualifiers and finals are a career-long ledger, unlike
   // the player's current-season match list. Keep every per-match invariant.
-  if (national.teamResults !== undefined) matches(national.teamResults, 'national.teamResults', playerId, true, 10_000);
+  if (national.teamResults !== undefined) matches(national.teamResults, 'national.teamResults', playerId, true, 100_000);
   assert(nationalMatches.every(row => row.playerClubId.startsWith(`NAT:${national.country}:`)), '국가대표 경기와 선수 국적이 다릅니다.');
   const processedWindows = list(national.processedWindows, 'national.processedWindows', 10_000).map(raw => text(raw, 'national.processedWindow'));
   unique(processedWindows, '국가대표 소집 기간');
@@ -508,7 +509,7 @@ function validateSystems(career: Record<string, unknown>, player: Record<string,
     assert(new Date(through).toISOString() === through, '국가대표 처리 시각이 정규 UTC 날짜가 아닙니다.');
   }
   if (national.timingVersion === 1) for (const key of processedWindows) {
-    assert(/^(?:19\d{2}|2[0-4]\d{2}|2500):(first|second)$/.test(key) || /^(window|callup):(?:19\d{2}|2[0-4]\d{2}|2500)-(06|11):(U20|senior)$/.test(key), '국가대표 소집 기간 키가 올바르지 않습니다.');
+    assert(/^(?:19\d{2}|2[0-4]\d{2}|2500):(first|second)$/.test(key) || /^(window|callup):(?:19\d{2}|2[0-4]\d{2}|2500)-(03|06|09|10|11):(U20|senior)$/.test(key), '국가대표 소집 기간 키가 올바르지 않습니다.');
     if (national.processedThrough !== undefined && /^(window|callup):/.test(key)) assert(key.split(':')[1] <= String(national.processedThrough).slice(0, 7), '국가대표 소집이 처리 시각보다 미래입니다.');
   }
   const nationalHistory = list(national.history, 'national.history', 200).map(raw => object(raw, 'national.history.item'));
@@ -807,7 +808,7 @@ export function validateCareer(value: unknown): Career {
     number(summary.income, `${prefix}.income`, 0, 1e15);
     assert(positions.has(String(summary.position)) && ['youth', 'senior'].includes(String(summary.squad)), `${prefix}의 포지션·소속 단계가 올바르지 않습니다.`);
     bool(summary.completed, `${prefix}.completed`);
-    attributes(summary.attributeGrowth, `${prefix}.attributeGrowth`, undefined, -100);
+    attributes(summary.attributeGrowth, `${prefix}.attributeGrowth`, undefined, -1e6, 1e6);
     const ledger = matches(summary.matches, `${prefix}.matches`, playerId);
     reconciledStats(summary.stats, ledger, `${prefix}.stats`);
     awards(summary.awards, `${prefix}.awards`);
@@ -850,6 +851,7 @@ export function validateCareer(value: unknown): Career {
   }
   validateSystems(career, player, playerId);
   validateCareerExtensions(parsed as Career);
+  validateCompetitionData(parsed as Career,rows=>{matches(rows,'clubCompetition.matches',playerId,false);},value=>{stats(value,'대회 개인 지표');});
   return parsed as Career;
 }
 
@@ -1056,7 +1058,7 @@ export async function exportCareer(career: Career): Promise<string> {
 
 /** Imported saves always become new slots; no existing game or legacy localStorage is overwritten. */
 export async function importCareer(source: string): Promise<Career> {
-  assert(typeof source === 'string' && new TextEncoder().encode(source).byteLength <= MAX_SAVE_BYTES, '저장 파일은 128MB 이하여야 합니다.');
+  assert(typeof source === 'string' && new TextEncoder().encode(source).byteLength <= MAX_SAVE_BYTES, '저장 파일은 256MB 이하여야 합니다.');
   let parsed: unknown;
   try { parsed = JSON.parse(source); }
   catch { throw new Error('저장 파일을 읽을 수 없습니다. 올바른 JSON 백업을 선택해 주세요.'); }

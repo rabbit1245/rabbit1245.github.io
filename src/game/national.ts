@@ -1,6 +1,7 @@
+import {advanceNationalWindow} from './national-expanded';
 import { CLUBS, ROSTERS, getClub, getLeague } from './data';
 import { getLeagueRule } from './league-rules';
-import { fixtureDate, seasonDate } from './calendar';
+import { fixtureDate, seasonDate,seasonHalfEndDate } from './calendar';
 import { simulateMatch } from './match-engine';
 import { addStats, clamp, emptyStats, seededRandom, sumStats } from './math';
 import { nationalityForPlayer, normalizeNationality } from './national-data';
@@ -9,10 +10,10 @@ import type { Career, Club, Fixture, MatchRecord, PlayerStats, Position, RosterP
 
 /** Competition names/cycles are real; the reduced three-team qualification and four-team
  * finals are a game model, not a claim to reproduce every federation's actual regulations. */
-export const NATIONAL_MODEL_NOTE = '국대는 실제 대회 주기를 바탕으로 한 축약 모형입니다. 내 예선은 3팀 조 상위 2팀이며, 본선 상대도 실제 모의 예선을 통과해야 합니다. 참가국 수에 따라 4강·결승 또는 결승을 치르고 본선은 중립 구장입니다. 승점·득실·득점까지 동률이면 추첨하며, 실제 국가별 예선 방식·개최 일정과 다를 수 있습니다. 선수 국적은 보관된 FC25 자료를 사용하고 부족한 명단은 (가상) 선수로 보완합니다.';
+export const NATIONAL_MODEL_NOTE = '대표팀은 3·6·9·10·11월 소집 기간에 예선·친선·본선을 진행합니다. 월드컵 48팀, 유로·아시안컵·아프리카컵·U20 월드컵 24팀 본선과 녹아웃을 지원합니다. 본선은 중립 경기이며 토너먼트 동률이면 연장을 생략하고 승부차기를 진행합니다. 예선은 지원 국가를 조로 나누는 게임 모형이며 실제 국가별 예선 방식·개최일과 차이가 있습니다. 기존 저장의 진행 중 대회는 종전 모형을 보존하고 다음 시즌부터 확장합니다. 선수 국적은 FC25 보관 자료를 사용하며 부족한 명단은 (가상) 선수로 보완합니다.';
 
 type Squad = NationalState['squad'];
-type Stage = 'qualifying' | 'friendly' | 'semifinal' | 'final';
+type Stage = 'qualifying'|'friendly'|'group'|'round32'|'round16'|'quarterfinal'|'semifinal'|'final'|'thirdPlace';
 type Shootout = { home: number; away: number; winnerId: string; attempts: { teamId: string; playerId: string; scored: boolean }[] };
 type NationalMatch = MatchRecord & { shootout?: Shootout };
 type State = NationalState & { teamResults?: MatchRecord[]; timingVersion?: 1; processedThrough?: string };
@@ -20,16 +21,25 @@ type Competition = { id: string; name: string; year: number; countries: string[]
 type Candidate = MatchParticipant & { age: number; score: number; injured: boolean };
 
 const continents: Record<string, string[]> = {
-  AFC: ['대한민국','일본','중국','호주','이란','카타르','사우디아라비아','우즈베키스탄','이라크','아랍에미리트','인도','인도네시아','베트남','태국','필리핀','싱가포르','말레이시아'],
+  AFC: ['대한민국','일본','중국','호주','이란','카타르','사우디아라비아','우즈베키스탄','이라크','아랍에미리트','인도','인도네시아','베트남','태국','필리핀','싱가포르','말레이시아','요르단','바레인','오만','쿠웨이트','레바논','팔레스타인','시리아','타지키스탄','키르기스스탄','투르크메니스탄','방글라데시','네팔'],
   UEFA: ['잉글랜드','이탈리아','프랑스','스페인','독일','포르투갈','벨기에','네덜란드','튀르키예','스코틀랜드','덴마크','스위스','폴란드','노르웨이','크로아티아','오스트리아','세르비아','체코','스웨덴','아일랜드','웨일스','북아일랜드','우크라이나','루마니아','슬로바키아','슬로베니아','헝가리','그리스','핀란드','아이슬란드'],
   CONMEBOL: ['브라질','아르헨티나','우루과이','콜롬비아','칠레','에콰도르','페루','파라과이','베네수엘라','볼리비아'],
-  CONCACAF: ['미국','멕시코','캐나다','코스타리카','자메이카','파나마'],
-  CAF: ['모로코','세네갈','나이지리아','가나','이집트','카메룬','남아프리카공화국','알제리','튀니지','말리','코트디부아르','잠비아','콩고민주공화국','앙골라'],
-  OFC: ['뉴질랜드','피지','뉴칼레도니아','바누아투'],
+  CONCACAF: ['미국','멕시코','캐나다','코스타리카','자메이카','파나마','온두라스','엘살바도르','과테말라','트리니다드 토바고','아이티','쿠바','니카라과','수리남','퀴라소','도미니카 공화국'],
+  CAF: ['모로코','세네갈','나이지리아','가나','이집트','카메룬','남아프리카공화국','알제리','튀니지','말리','코트디부아르','잠비아','콩고민주공화국','앙골라','부르키나파소','기니','적도기니','가봉','우간다','베냉','탄자니아','모잠비크','마다가스카르','케냐','카보베르데','코모로'],
+  OFC: ['뉴질랜드','피지','뉴칼레도니아','바누아투','솔로몬 제도','사모아','통가','쿡 제도'],
 };
+// Membership covers the selectable nationalities; a country's confederation never follows its club.
+const extraCountries:Record<string,string[]>={
+ AFC:['아프가니스탄','바레인','방글라데시','부탄','브루나이','캄보디아','북한','대만','홍콩','마카오','라오스','레바논','몰디브','몽골','미얀마','네팔','오만','파키스탄','팔레스타인','스리랑카','시리아','동티모르','타지키스탄','투르크메니스탄','예멘'],
+ UEFA:['알바니아','안도라','아르메니아','아제르바이잔','벨라루스','보스니아 헤르체고비나','불가리아','키프로스','에스토니아','조지아','지브롤터','이스라엘','카자흐스탄','코소보','라트비아','리히텐슈타인','리투아니아','룩셈부르크','몰타','몰도바','몬테네그로','북마케도니아','러시아','산마리노','페로 제도'],
+ CAF:['보츠와나','부룬디','중앙아프리카 공화국','차드','콩고','콩고 공화국','지부티','에리트레아','에스와티니','에티오피아','감비아','기니비사우','레소토','라이베리아','리비아','말라위','모리타니','모리셔스','나미비아','니제르','르완다','상투메 프린시페','세이셸','시에라리온','소말리아','남수단','수단','토고','짐바브웨'],
+ CONCACAF:['앤티가 바부다','아루바','바하마','바베이도스','벨리즈','버뮤다','케이맨 제도','도미니카','그레나다','가이아나','몬트세랫','푸에르토리코','세인트키츠 네비스','세인트루시아','세인트빈센트 그레나딘','신트마르턴','터크스 케이커스 제도','영국령 버진아일랜드','미국령 버진아일랜드'],
+ OFC:['아메리칸 사모아','타히티','파푸아뉴기니']};
+for(const [federation,countries]of Object.entries(extraCountries))continents[federation]=[...new Set([...continents[federation],...countries])];
 const confederation = (country: string) => Object.keys(continents).find(key => continents[key].includes(country)) ?? 'UEFA';
 const allCountries = [...new Set(Object.values(continents).flat())];
 const countryPower: Record<string, number> = { '아르헨티나':86,'브라질':85,'프랑스':86,'잉글랜드':85,'스페인':85,'독일':83,'포르투갈':84,'이탈리아':82,'네덜란드':82,'벨기에':81,'우루과이':80,'크로아티아':79,'대한민국':73,'일본':76,'중국':61,'미국':76,'멕시코':76,'모로코':78,'이란':73,'호주':72,'뉴질랜드':64 };
+Object.assign(countryPower,{'베트남':59,'태국':59,'인도':57,'인도네시아':60,'필리핀':53,'말레이시아':55,'싱가포르':49,'네팔':42,'방글라데시':44,'파키스탄':40,'부탄':36,'스리랑카':39,'몽골':41,'브루나이':41,'몰디브':43,'미얀마':48,'캄보디아':44,'라오스':43,'산마리노':35,'안도라':45,'페로 제도':54,'지브롤터':43,'리히텐슈타인':43,'룩셈부르크':61,'나이지리아':75,'세네갈':77,'알제리':73,'이집트':73,'가나':72,'튀니지':71,'카메룬':73,'말리':71,'코트디부아르':75,'남아프리카공화국':67,'뉴칼레도니아':46,'피지':43,'사모아':35,'통가':35,'쿡 제도':35});
 const clubsById = new Map(CLUBS.map(club => [club.id, club]));
 const retainedRosterIds = new Set(Object.values(ROSTERS).flat().map(player=>player.id));
 const rosterByCountry = new Map<string, RosterPlayer[]>();
@@ -41,7 +51,12 @@ for (const club of CLUBS) for (const player of ROSTERS[club.id] ?? []) {
 const group = (position: Position) => position === 'GK' ? 'GK' : ['CB','LB','RB','LWB','RWB'].includes(position) ? 'DEF' : ['CDM','CM','CAM','LM','RM'].includes(position) ? 'MID' : 'ATT';
 const quotas = { GK: 3, DEF: 8, MID: 7, ATT: 5 };
 const firstEleven: Position[] = ['GK','LB','CB','CB','RB','CDM','CM','CAM','LW','RW','ST'];
-const squadFor = (career: Career): Squad => career.player.age <= 20 ? 'U20' : 'senior';
+export function nationalSquadFor(career:Career):Squad{
+ if(career.player.age>20)return 'senior';
+ const peers=Object.values(career.systems?.world.players??{}).filter(p=>normalizeNationality(p.nationality)===normalizeNationality(career.player.nationality)&&group(p.position)===group(career.player.position)).map(p=>p.ovr).sort((a,b)=>b-a);
+ return career.player.age>=17&&career.player.ovr>=Math.max(75,(peers[2]??75)-3)?'senior':'U20';
+}
+const squadFor=(career:Career):Squad=>career.systems?.national&&career.systems.national.formatVersion!==2?(career.player.age<=20?'U20':'senior'):nationalSquadFor(career);
 const teamId = (country: string, squad: Squad) => `NAT:${country}:${squad}`;
 const nationalMatchSquad = (match: MatchRecord): Squad => match.homeId.endsWith(':U20') ? 'U20' : 'senior';
 
@@ -56,7 +71,8 @@ export function getTeamLabel(id: string): string {
 function nextCycle(year: number, base: number, interval: number): number {
   return year <= base ? base : base + Math.ceil((year - base) / interval) * interval;
 }
-function competitionFor(country: string, squad: Squad, year: number, month: number): Competition {
+function competitionFor(country: string, squad: Squad, year: number, month: number,legacy=false): Competition {
+  if(!allCountries.includes(country))return {id:`FRIENDLIES:${year}`,name:'지원 대표팀 대회 없음',year,countries:[]};
   const earliest = year + (month > 6 ? 1 : 0);
   if (squad === 'U20') {
     const finalYear = nextCycle(earliest, 2027, 2);
@@ -64,11 +80,11 @@ function competitionFor(country: string, squad: Squad, year: number, month: numb
   }
   const federation = confederation(country);
   const wc = nextCycle(earliest, 2026, 4);
-  const continentalBase = federation === 'AFC' || federation === 'CAF' ? 2027 : 2028;
-  const continental = nextCycle(earliest, continentalBase, federation === 'CONCACAF' ? 2 : 4);
+  const continentalBase = ['AFC','CAF','CONCACAF'].includes(federation) ? 2027 : 2028;
+  const continental = nextCycle(earliest, continentalBase, ['CONCACAF','CAF'].includes(federation) ? 2 : 4);
   if (wc <= continental) return { id: `WC:${wc}`, name: `${wc} FIFA 월드컵`, year: wc, countries: allCountries };
   const names: Record<string,string> = { AFC: 'AFC 아시안컵', UEFA: 'UEFA 유로', CONMEBOL: '코파 아메리카', CONCACAF: 'CONCACAF 골드컵', CAF: '아프리카 네이션스컵', OFC: 'OFC 네이션스컵' };
-  return { id: `${federation}:${continental}`, name: `${continental} ${names[federation]}`, year: continental, countries: continents[federation] };
+  return { id: `${federation}:${continental}`, name: `${continental} ${names[federation]}`, year: continental, countries:legacy&&federation==='OFC'?continents.OFC.slice(0,4):continents[federation] };
 }
 function competitionName(id: string): string {
   const [kind, year] = id.split(':');
@@ -117,7 +133,7 @@ function poolFor(career: Career, country: string, squad: Squad): Candidate[] {
     if((squad==='U20'&&row.age>20)||(squad==='senior'&&row.age>40))continue;
     pool.push({id:row.id,name:row.name,position:row.position,ovr:row.ovr,age:row.age,clubId:row.clubId,nationality:country,injured:row.injuryWeeks>0,score:scoreCandidate(career,row.id,row.ovr,row.clubId,false)});
   }
-  if (normalizeNationality(career.player.nationality) === country && squadFor(career) === squad) {
+  if (normalizeNationality(career.player.nationality) === country && (squadFor(career) === squad || career.systems?.national.squad===squad&&squad==='U20'&&career.player.age<=21)) {
     const p = career.player;
     pool.push({id:p.id,name:p.name,position:p.position,ovr:p.ovr,attributes:p.attributes,age:p.age,clubId:p.clubId,nationality:country,injured:p.injuryWeeks>0,score:scoreCandidate(career,p.id,p.ovr,p.clubId,true)});
   }
@@ -136,7 +152,11 @@ function poolFor(career: Career, country: string, squad: Squad): Candidate[] {
   }
   return pool.sort((a,b)=>b.score-a.score || a.id.localeCompare(b.id));
 }
+// Cache immutable opposing squads only within one calendar advancement.
+const windowRosters=new WeakMap<Career,Map<string,Candidate[]>>();
 function rosterFor(career: Career, country: string, squad: Squad): Candidate[] {
+  const cache=country!==normalizeNationality(career.player.nationality)?windowRosters.get(career):undefined,key=`${country}:${squad}`;
+  const cached=cache?.get(key);if(cached)return cached;
   const pool = poolFor(career,country,squad).filter(player=>!player.injured);
   const roster: Candidate[] = [];
   for (const key of Object.keys(quotas) as (keyof typeof quotas)[]) roster.push(...pool.filter(player=>group(player.position)===key).slice(0,quotas[key]));
@@ -148,7 +168,7 @@ function rosterFor(career: Career, country: string, squad: Squad): Candidate[] {
     const groupIndex = index>=0 ? index : available.findIndex(p=>group(p.position)===group(position));
     if (groupIndex>=0) ordered.push(...available.splice(groupIndex,1));
   }
-  return [...ordered,...available];
+  const result=[...ordered,...available];cache?.set(key,result);return result;
 }
 function selection(career: Career, state: NationalState): Candidate[] {
   const roster = rosterFor(career,state.country,state.squad);
@@ -167,8 +187,9 @@ export function createNational(career: Career): NationalState {
   const country = normalizeNationality(career.player.nationality);
   const date = windowDate(career,'first');
   const competition = competitionFor(country,squadFor(career),date.year,date.month);
-  const state: State = {country,squad:squadFor(career),status:'unselected',reason:'다음 대표팀 소집에서 경기력과 포지션 경쟁을 평가합니다.',competitionId:competition.id,competitionName:competition.name,phase:'qualifying',points:0,rank:0,qualified:false,fatigue:0,reputation:0,matches:[],history:[],processedWindows:[],teamResults:[],timingVersion:1,processedThrough:lastKnownClubDate(career)};
+  const state: State = {formatVersion:2,country,squad:squadFor(career),status:'unselected',reason:'다음 대표팀 소집에서 경기력과 포지션 경쟁을 평가합니다.',competitionId:competition.id,competitionName:competition.name,phase:'qualifying',points:0,rank:0,qualified:false,fatigue:0,reputation:0,matches:[],history:[],processedWindows:[],teamResults:[],timingVersion:1,processedThrough:lastKnownClubDate(career)};
   selection(career,state);
+  if(!allCountries.includes(country)){state.status='unselected';state.reason='지원 목록에 없는 대표팀입니다. 공식 대회 일정과 출전을 생성하지 않습니다.';return state;}
   if(state.status==='called'){state.status='watchlist';state.reason='대표팀 관찰 명단 · 실제 소집 날짜에 출전과 포지션 경쟁을 다시 평가합니다.';}
   return state;
 }
@@ -226,10 +247,11 @@ function play(career: Career, competition: Competition, homeCountry: string, awa
   const fixture: Fixture = {id:`NAT|${state.squad}|${competition.id}|${stage}|${label}`,round:state.matches.length+1,homeId:teamId(homeCountry,state.squad),awayId:teamId(awayCountry,state.squad),played:false};
   const isOwn = homeCountry===state.country || awayCountry===state.country;
   const called = isOwn && state.status==='called' && career.player.injuryWeeks===0;
-  const match = simulateMatch(career,fixture,{home:syntheticTeam(homeCountry,state.squad,homePlayers),away:syntheticTeam(awayCountry,state.squad,awayPlayers),homePlayers,awayPlayers,scope:'national',competitionId:competition.id,date,userParticipates:called,neutralVenue:stage==='semifinal'||stage==='final'});
-  if ((stage==='semifinal'||stage==='final') && match.homeGoals===match.awayGoals) resolveNationalShootout(career,match);
+  const match = simulateMatch(isOwn?{...career,managerTrust:Math.max(career.managerTrust,career.player.ovr>=nationalRosterPower(career,state.country,state.squad)?90:65)}:career,fixture,{home:syntheticTeam(homeCountry,state.squad,homePlayers),away:syntheticTeam(awayCountry,state.squad,awayPlayers),homePlayers,awayPlayers,scope:'national',competitionId:competition.id,date,userParticipates:called,neutralVenue:!['qualifying','friendly'].includes(stage)});
+  if (['round32','round16','quarterfinal','semifinal','final','thirdPlace'].includes(stage) && match.homeGoals===match.awayGoals) resolveNationalShootout(career,match);
   match.playerClubId = isOwn ? teamId(state.country,state.squad) : match.homeId;
   if (isOwn) {
+    match.nationalSelection={called,role:match.playerStarted?'starter':match.playerPlayed?'substitute':called?'bench':'excluded',reason:called?(match.playerPlayed?'대표팀 실제 출전':'로테이션·체력·포지션 경쟁으로 벤치 대기'):state.reason};
     state.matches.push(match);
     if (match.playerPlayed) {
       if (match.effects) {career.player.fitness=match.effects.fitnessAfter;career.player.form=match.effects.formAfter;career.player.morale=match.effects.moraleAfter;career.player.injuryWeeks=match.effects.injuryWeeksAfter;}
@@ -239,7 +261,8 @@ function play(career: Career, competition: Competition, homeCountry: string, awa
       state.fatigue = Math.round(100-career.player.fitness);
       if (career.player.injuryWeeks>0) {state.status='injured';state.reason=`대표팀 경기 중 부상 · 회복 ${career.player.injuryWeeks}주. 소속팀 계약은 유지됩니다.`;}
     }
-  } else (state.teamResults ??= []).push(match);
+  } else (state.teamResults ??= []).push(state.formatVersion===2&&!match.shootout?{...match,events:match.events.filter(e=>e.type==='goal'||e.type==='red'||e.type==='yellow'||match.events.some(g=>g.type==='goal'&&g.relatedId===e.id)),performers:undefined,momPlayerId:undefined,effects:undefined,metricsVersion:undefined}:match);
+  if(state.formatVersion===2&&!['qualifying','friendly'].includes(stage)){state.tournamentStats??={};const map=state.tournamentStats[competition.id]??(state.tournamentStats[competition.id]={});for(const p of match.performers??[]){const row=map[p.id]??(map[p.id]={id:p.id,name:p.name,position:p.position,stats:emptyStats()});addStats(row.stats,p.stats);}}
   for (const performer of match.performers ?? []) {
     const competitor = career.systems!.world.playerStats[performer.id];
     if (competitor) addStats(competitor.nationalStats ??= emptyStats(),performer.stats);
@@ -311,6 +334,16 @@ export interface InternationalWindow {
 /** Two model windows follow the actual calendar of the player's league season. */
 export function scheduledInternationalWindows(career: Career): InternationalWindow[] {
   const squad=squadFor(career);
+  if(career.systems?.national.formatVersion===2){
+   const start=new Date(seasonDate(career.season,0)),end=new Date(seasonHalfEndDate(career.season,'second')),half=new Date(seasonHalfEndDate(career.season,'first'));
+   const result:InternationalWindow[]=[];
+   for(let year=start.getUTCFullYear()-1;year<=end.getUTCFullYear();year++)for(const month of [3,6,9,10,11]){
+    const prefix=`${year}-${String(month).padStart(2,'0')}`,date=`${prefix}-${month===6?'01':'18'}`,endDate=month===6?`${year}-07-19`:`${prefix}-28`;
+    if(new Date(endDate)<start||new Date(date)>end)continue;
+    result.push({id:`window:${prefix}:${squad}`,date,endDate,half:new Date(date)<=half?'first':'second',year,month});
+   }
+   return result.sort((a,b)=>a.date.localeCompare(b.date));
+  }
   return (['first','second'] as const).map(half=>{
     const {year,month}=windowDate(career,half),prefix=`${year}-${String(month).padStart(2,'0')}`;
     return {id:`window:${prefix}:${squad}`,date:`${prefix}-05`,endDate:`${prefix}-${month===6?'25':'15'}`,half,year,month};
@@ -336,7 +369,7 @@ function completedWindow(state:State,window:InternationalWindow):boolean {
 }
 function migratedCompletedWindow(career:Career,state:State,window:InternationalWindow):boolean {
   const oldKey=`${career.season.year}:${window.half}`;
-  const callupKey=`callup:${window.date.slice(0,7)}:${squadFor(career)}`;
+  const callupKey=`callup:${window.date.slice(0,7)}:${state.windowSquads?.[window.date.slice(0,7)]??squadFor(career)}`;
   // Older versions calculated a complete window at a half-season boundary. Their
   // known match ledger is authoritative and is never supplemented retrospectively.
   return state.processedWindows.includes(oldKey)||(!state.processedWindows.includes(callupKey)&&matchLedger(state).some(match=>match.date?.startsWith(window.date.slice(0,7))));
@@ -346,15 +379,21 @@ function carryPreviousNationalSeasons(career:Career):void {
   for(const year of new Set(state.matches.filter(match=>match.seasonYear!==career.season.year).map(match=>match.seasonYear)))archiveNationalSeason(career,year);
   state.matches=state.matches.filter(match=>match.seasonYear===career.season.year);
 }
+function processExpandedWindow(career:Career,window:InternationalWindow,through:string){
+ const state=career.systems!.national,prefix=window.date.slice(0,7);state.windowSquads??={};state.country=normalizeNationality(career.player.nationality);state.squad=state.windowSquads[prefix]??(state.windowSquads[prefix]=squadFor(career));
+ const competition=competitionFor(state.country,state.squad,window.year,window.month);if(!competition.countries.includes(state.country))competition.countries=[...competition.countries,state.country];
+ advanceNationalWindow(career,window,through,competition,{play,select:c=>{selection(c,c.systems!.national);},power:(c,country)=>nationalRosterPower(c,country,state.squad)});
+}
 function processWindowThrough(career:Career,window:InternationalWindow,through:string):void {
   const state=career.systems!.national as State;
+  if(state.formatVersion===2){processExpandedWindow(career,window,through);return;}
   if(completedWindow(state,window))return;
   if(migratedCompletedWindow(career,state,window)){completeWindow(state,window);return;}
   if(timestamp(through)<timestamp(window.date))return;
   const key=`callup:${window.date.slice(0,7)}:${squadFor(career)}`;
   if(!state.processedWindows.includes(key)) {
     state.country=normalizeNationality(career.player.nationality);state.squad=squadFor(career);
-    const competition=competitionFor(state.country,state.squad,window.year,window.month);
+    const competition=competitionFor(state.country,state.squad,window.year,window.month,true);
     state.competitionId=competition.id;state.competitionName=competition.name;state.phase='qualifying';
     selection(career,state);
     state.processedWindows.push(key);
@@ -363,7 +402,7 @@ function processWindowThrough(career:Career,window:InternationalWindow,through:s
   if(career.player.injuryWeeks>0&&state.status==='called'){
     state.status='injured';state.reason=`소집 기간 중 부상 · 남은 회복 ${career.player.injuryWeeks}주. 이번 대표팀 경기에는 출전하지 않습니다.`;
   }
-  const competition=competitionFor(state.country,state.squad,window.year,window.month);
+  const competition=competitionFor(state.country,state.squad,window.year,window.month,true);
   const opponents=drawCountries(career,competition,'qualifying').slice(0,2);
   const dateAt=(day:number)=>`${window.year}-${String(window.month).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
   const find=(stage:Stage,label:string)=>matchLedger(state).find(match=>match.fixtureId===`NAT|${state.squad}|${competition.id}|${stage}|${label}`);
@@ -426,16 +465,19 @@ export function processDueNationalWindows(career:Career,throughDate:string):void
   if(!career.systems)return;
   if(!Number.isFinite(timestamp(throughDate)))throw new Error('대표팀 진행 날짜가 올바르지 않습니다.');
   const state=career.systems.national as State;
+  if(!allCountries.includes(normalizeNationality(career.player.nationality))){state.status='unselected';state.reason='지원 목록에 없는 대표팀입니다. 공식 대회 일정과 출전을 생성하지 않습니다.';state.processedThrough=iso(throughDate);return;}
   if(career.stage==='retired'){state.status='retired';state.reason='국가대표 경력을 마쳤습니다.';return;}
   carryPreviousNationalSeasons(career);
   const through=iso(throughDate),baseline=state.processedThrough??lastKnownClubDate(career);
   state.timingVersion=1;
   if(timestamp(through)<=timestamp(baseline)){state.processedThrough=baseline;return;}
+  windowRosters.set(career,new Map());
+  try {
   for(const window of scheduledInternationalWindows(career)){
     if(timestamp(window.date)>timestamp(through))continue;
     if(completedWindow(state,window))continue;
     if(migratedCompletedWindow(career,state,window)){completeWindow(state,window);continue;}
-    const callupKey=`callup:${window.date.slice(0,7)}:${squadFor(career)}`;
+    const callupKey=`callup:${window.date.slice(0,7)}:${state.windowSquads?.[window.date.slice(0,7)]??squadFor(career)}`;
     if(timestamp(window.date)<=timestamp(baseline)&&!state.processedWindows.includes(callupKey)){
       // An old save may resume after a national window has started. No past
       // call-up, fixture or personal action is invented for that elapsed period.
@@ -443,6 +485,7 @@ export function processDueNationalWindows(career:Career,throughDate:string):void
     }
     processWindowThrough(career,window,through);
   }
+  } finally {windowRosters.delete(career);}
   state.processedThrough=through;
 }
 
@@ -452,7 +495,9 @@ export function processNationalWindow(career: Career, half: 'first'|'second'): v
   const state=career.systems.national as State;
   if(career.stage==='retired'){state.status='retired';state.reason='국가대표 경력을 마쳤습니다.';return;}
   carryPreviousNationalSeasons(career);
-  const window=scheduledInternationalWindows(career).find(row=>row.half===half)!;
+  const windows=scheduledInternationalWindows(career).filter(row=>row.half===half);
+  if(state.formatVersion===2){for(const window of windows)processDueNationalWindows(career,window.endDate);return;}
+  const window=windows[0];
   if(completedWindow(state,window))return;
   processWindowThrough(career,window,window.endDate);
   const oldKey=`${career.season.year}:${half}`;
@@ -469,8 +514,11 @@ function resultFor(matches:MatchRecord[],country:string,squad:Squad):string {
   const ownId=teamId(country,squad);
   const final=matches.find(match=>match.fixtureId.includes('|final|')) as NationalMatch|undefined;
   if(final)return winner(final)===ownId?'우승':'준우승';
+  const third=matches.find(m=>m.fixtureId.includes('|thirdPlace|'));if(third)return winner(third)===ownId?'3위':'4위';
   const semifinal=matches.find(match=>match.fixtureId.includes('|semifinal|')) as NationalMatch|undefined;
   if(semifinal)return winner(semifinal)===ownId?'결승 진출':'4강';
+  const knockout=matches.filter(m=>/\|(round32|round16|quarterfinal)\|/.test(m.fixtureId)).at(-1);if(knockout)return knockout.fixtureId.includes('|quarterfinal|')?'8강':knockout.fixtureId.includes('|round16|')?'16강':'32강';
+  if(matches.some(m=>m.fixtureId.includes('|group|')))return '조별리그';
   return matches.every(match=>match.fixtureId.includes('|friendly|'))?'친선 경기':'예선 참가';
 }
 export function archiveNationalSeason(career: Career,year=career.season.year): void {
@@ -482,7 +530,7 @@ export function archiveNationalSeason(career: Career,year=career.season.year): v
     const [squad,id]=key.split('|') as [Squad,string];
     const matches=current.filter(match=>nationalMatchSquad(match)===squad&&match.competitionId===id);
     const existing=state.history.findIndex(row=>row.year===year&&row.squad===squad&&row.competitionId===id);
-    const entry:NationalSeason={year,squad,competitionId:id,competitionName:competitionName(id),stats:sumStats(matches.map(match=>match.playerStats)),matches:structuredClone(matches),result:state.competitionId===id&&state.phase==='eliminated'&&!matches.some(match=>match.fixtureId.includes('|semifinal|'))?'예선 탈락':resultFor(matches,state.country,squad),qualified:matches.some(match=>!match.fixtureId.includes('|qualifying|'))||(state.competitionId===id&&state.qualified)};
+    const entry:NationalSeason={year,squad,competitionId:id,competitionName:competitionName(id),stats:sumStats(matches.map(match=>match.playerStats)),matches:structuredClone(matches),result:state.competitionId===id&&state.phase==='eliminated'&&!matches.some(match=>/\|(group|round32|round16|quarterfinal|semifinal|final|thirdPlace)\|/.test(match.fixtureId))?'예선 탈락':resultFor(matches,state.country,squad),qualified:matches.some(match=>/\|(group|round32|round16|quarterfinal|semifinal|final|thirdPlace)\|/.test(match.fixtureId))||(!id.startsWith('FRIENDLIES:')&&state.competitionId===id&&state.qualified)};
     if(existing>=0)state.history[existing]=entry;else state.history.push(entry);
   }
 }

@@ -1,0 +1,7 @@
+import type {Career} from '../game/types';
+import {scheduledInternationalWindows} from '../game/national';
+import {nationalAudit} from '../game/national-audit';
+export default function NationalAudit({career}:{career:Career}){
+ const rows=nationalAudit(career);
+ return <details className="national-audit" data-testid="national-audit"><summary>연도별 소집·출전과 경기 종류</summary><p>이번 시즌 소집 기간: {scheduledInternationalWindows(career).map(w=>`${w.date} ~ ${w.endDate}`).join(' · ')}</p><p className="fine-print">편성은 현재 확정된 일정입니다. 이후 추첨·소집으로 추가됩니다. 소집·벤치 대기는 출전으로 계산하지 않습니다. 과거에 보존하지 않은 소집 사유는 추정하지 않습니다.</p>{rows.map(r=><details key={`${r.year}:${r.squad}`}><summary>{r.year}년 · {r.squad==='U20'?'U20':'성인'} · 편성 {r.scheduled} / 진행 {r.teamGames} / 내 출전 {r.stats.apps}경기</summary><p>소집 {r.called}회 · 선발 {r.starts} · 교체 {r.sub} · 벤치 {r.bench} · 제외 {r.excluded} · 실제 본선 참가 {r.tournaments}개 대회{r.legacy?' · 과거 소집 세부 일부 미보존':''}</p><div className="full-standings-scroll"><table className="league-table"><thead><tr><th>종류</th><th>대표팀 경기</th><th>출전</th><th>분</th><th>골</th><th>도움</th></tr></thead><tbody>{r.types.map(t=><tr key={t.kind}><td>{t.kind}</td><td>{t.teamGames}</td><td>{t.stats.apps}</td><td>{t.stats.minutes}</td><td>{t.stats.goals}</td><td>{t.stats.assists}</td></tr>)}</tbody></table></div>{r.pending.length>0&&<p>다음 확정 일정: {r.pending.map(f=>`${f.date} ${f.stage==='qualifying'?'예선':f.stage==='friendly'?'친선':'본선'}`).join(' · ')}</p>}</details>)}</details>;
+}

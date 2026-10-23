@@ -1,3 +1,4 @@
+import {cupLedger,cupMatches,cupStats} from './club-competitions';
 import { CLUBS, getClub, getLeague } from './data';
 import { LEAGUE_AWARD_RULES, GLOBAL_AWARD_RULES, AWARD_MODEL_VERSION } from './award-rules';
 import type { AwardRule } from './award-rules';
@@ -239,7 +240,7 @@ export function updateLeadership(career: Career, scope: 'club'|'national', appoi
     expireCaptainOffers(career,'club');
     l.clubId = p.clubId; l.clubSinceYear = career.season.year; l.clubRole = 'none';
   }
-  const records = scope === 'club' ? [...career.history.flatMap(h => h.matches), ...career.season.matches] : nationalMatches(career);
+  const records = scope === 'club' ? [...career.history.flatMap(h => h.matches), ...career.season.matches,...cupMatches(career)] : nationalMatches(career);
   const teamId = scope === 'club' ? p.clubId : `NAT:${national.country}:${national.squad}`;
   const matches = [...new Map(records.map(m => [m.id, m])).values()].filter(m => m.playerPlayed && (scope === 'club' ? m.playerClubId === p.clubId : m.homeId === teamId || m.awayId === teamId));
   if (scope === 'club') l.clubMatches = matches.length; else l.nationalMatches = matches.length;
@@ -278,7 +279,7 @@ function competitors(career: Career): CompetitorSeason[] {
   byId.set(career.player.id, { playerId: career.player.id, name: career.player.name, clubId: career.player.clubId, leagueId: career.season.leagueId, position: career.player.position, nationality: career.player.nationality, ovr: career.player.ovr, stats: career.season.playerStats, nationalStats: sumStats(nationalRows.length ? nationalRows : currentNational) });
   return [...byId.values()];
 }
-interface VotingContext { prestige: Map<string, number>; teamScore: Map<string, number> }
+interface VotingContext { prestige: Map<string, number>; teamScore: Map<string, number>;cupScore?:Map<string,number> }
 function votingContext(career: Career): VotingContext {
   const strengths = new Map<string, { sum: number; count: number }>();
   const world = career.systems!.world;
@@ -290,7 +291,8 @@ function votingContext(career: Career): VotingContext {
   const prestige = new Map([...strengths].map(([id, value]) => [id, (.3 + value.sum / value.count / 100 * .7) / Math.sqrt(getLeague(id).tier)]));
   const teamScore = new Map<string, number>();
   for (const competition of Object.values(world.competitions)) for (const team of competition.table) teamScore.set(team.clubId, team.points / Math.max(1, team.played * 3) * 12);
-  return { prestige, teamScore };
+  const cupScore=new Map<string,number>();for(const t of cupLedger(career,career.season.year))if(t.winnerId)cupScore.set(t.winnerId,(cupScore.get(t.winnerId)??0)+(t.id.startsWith('UCL:')?5:t.id.startsWith('UEL:')?3:t.id.startsWith('UECL:')?2:1));
+  return { prestige, teamScore,cupScore };
 }
 /** Position-normalised season performance. OVR deliberately has no role in award votes. */
 export function performanceScore(row: CompetitorSeason, career: Career, includeNational = false, context = votingContext(career)): number {
@@ -312,7 +314,7 @@ export function performanceScore(row: CompetitorSeason, career: Career, includeN
   const discipline = s.yellowCards * .12 + s.redCards * 2.5;
   let value = (common + contribution) * (.35 + .65 * participation) + teamScore - discipline;
   if (includeNational) {
-    value *= prestige;
+    value=value*prestige+(context.cupScore?.get(row.clubId)??0);
     const n = row.nationalStats ?? emptyStats();
     const nationalImpact = n.minutes ? Math.max(0, avgRating(n) - 5) * Math.min(8, n.apps) * .6 + n.goals * (group === 'DEF' || group === 'GK' ? 1.5 : .9) + n.assists * .7 + (group === 'GK' ? n.cleanSheets : 0) * 1.2 : 0;
     value += nationalImpact - n.redCards * 1.5;
@@ -377,7 +379,14 @@ export function evaluateAwards(career: Career): Award[] {
   const nationalSeasons = national.history.filter(h => h.year === career.season.year && /우승|champion/i.test(h.result) && !/준우승|runner/i.test(h.result));
   for (const title of nationalSeasons) if (title.stats.apps > 0 && title.matches.some(m => m.playerPlayed && m.playerMinutes > 0 && /\|(semifinal|final)\|/.test(m.fixtureId))) won.push({ id: `${career.season.year}:national:${title.competitionId}:${career.player.id}`, name: `${title.competitionName} 우승`, year: career.season.year, clubId: career.player.clubId, description: `대표팀 대회 ${title.stats.apps}경기 실제 출전 · ${title.result}`, organiser: /월드컵|World Cup/i.test(title.competitionName) ? 'FIFA' : '해당 대륙 축구연맹', criterion: '게임에서는 실제 본선 출전이 있는 우승팀 선수에게 우승 기록을 부여합니다. 대회별 공식 메달 규정과는 구별됩니다.', sourceUrl: 'https://www.fifa.com/', category: 'national', official: true });
   won.push(...evaluateTournamentAwards(career));
-  const fullRanking = rankRows(rows.filter(r => (career.player.squad === 'senior' || r.playerId !== career.player.id) && r.stats.apps >= Math.min(10, minApps) && r.stats.minutes >= 450), career, true, context);
+  // Global votes include actual club cup games for every competitor; league awards above remain league-only.
+  const globalRows=rows.map(r=>({...r,stats:{...r.stats},nationalStats:{...(r.nationalStats??emptyStats())}}));
+  const globalMap=new Map(globalRows.map(r=>[r.playerId,r]));
+  for(const t of cupLedger(career,career.season.year))for(const r of Object.values(t.playerStats??{})){
+    const target=globalMap.get(r.playerId);if(target)target.stats=sumStats([target.stats,r.stats]);else{const row={...r,stats:{...r.stats},nationalStats:emptyStats()};globalMap.set(r.playerId,row);globalRows.push(row);}
+  }
+  const globalOwn=globalMap.get(career.player.id);if(globalOwn)globalOwn.stats=sumStats([career.season.playerStats,cupStats(career,career.season.year)]);
+  const fullRanking = rankRows(globalRows.filter(r => (career.player.squad === 'senior' || r.playerId !== career.player.id) && r.stats.apps >= Math.min(10, minApps) && r.stats.minutes >= 450), career, true, context);
   const candidates = fullRanking.slice(0,30);
   const playerRank = candidates.find(r => r.playerId === career.player.id)?.rank ?? null;
   const world11 = selectEleven(fullRanking.filter(r => r.stats.apps+r.nationalStats.apps >= 30), 3,3,3,true);
@@ -387,7 +396,12 @@ export function evaluateAwards(career: Career): Award[] {
     item.ruleVersion=AWARD_MODEL_VERSION;item.verification='game-model';
     if(!item.evaluationPeriod)item.evaluationPeriod=`게임 시즌 ${seasonDate(career.season,0).slice(0,10)} ~ ${seasonDate(career.season,career.season.totalWeeks).slice(0,10)}의 기록${item.category==='world'?' · 각 리그의 같은 게임 시즌을 비교':''}`;
   }
-  const result: BallonDorYear = { year: career.season.year, candidates, playerRank, winnerId: candidates[0]?.playerId ?? '', world11, awards: won };
+  const diagnostics=(LEAGUE_AWARD_RULES[career.season.leagueId]??[]).map(rule=>({name:rule.name,scope:'리그만',eligible:!!own&&(rule.metric!=='cleanSheets'||own.position==='GK')&&(rule.metric==='performance'||rule.metric==='eleven'?own.stats.apps>=minApps:true),result:won.some(a=>a.id.includes(`:${rule.id}:`))?'수상':'미선정',detail:!own?'성인 리그 실제 출전이 필요합니다.':`${own.stats.apps}경기 · ${own.stats.goals}골 · ${own.stats.assists}도움 · 평점 ${avgRating(own.stats).toFixed(2)}${['performance','eleven'].includes(rule.metric)?` · 최소 ${minApps}경기`:''} · 같은 리그 실제 출전 선수 ${leagueRows.length}명 비교` }));
+  const rankedOwn=fullRanking.find(r=>r.playerId===career.player.id);
+  for(const [name,selected] of [['발롱도르',playerRank===1],['FIFPRO 월드 11',world11.some(r=>r.playerId===career.player.id)]] as const)diagnostics.push({name,scope:'리그·클럽 컵·국가대표',eligible:!!rankedOwn&&(name==='발롱도르'||rankedOwn.stats.apps+rankedOwn.nationalStats.apps>=30),result:selected?'수상':name==='발롱도르'&&playerRank?`${playerRank}위 · 미선정`:'미선정',detail:rankedOwn?`경기력 점수 ${rankedOwn.score.toFixed(2)} · 전체 비교 ${fullRanking.length}명 · 클럽 ${rankedOwn.stats.apps}경기 · 국대 ${rankedOwn.nationalStats.apps}경기. 발롱도르는 30인 후보 중 1위, 월드 11은 포지션별 비교와 총 30경기 이상.`:'성인 클럽 최소 출전·450분 기준 미충족 또는 실제 성적 미확인'});
+  diagnostics.push({name:'경기 최우수 선수',scope:'실제 경기별',eligible:!!globalOwn?.stats.apps,result:`${(globalOwn?.stats.mom??0)+(globalOwn?.nationalStats.mom??0)}회`,detail:'각 경기에서 실제로 뛰고 받은 평점과 기여를 비교합니다. 출전하지 않은 경기는 제외합니다.'});
+  for(const t of cupLedger(career,career.season.year).filter(t=>t.kind==='continental'&&t.entrants.includes(career.player.clubId)))diagnostics.push({name:`${t.name} 시즌의 선수`,scope:'해당 대회만',eligible:!!t.playerStats?.[career.player.id]&&t.phase==='completed',result:career.awards.some(a=>a.id===`${t.id}:player-season:${career.player.id}`)?'수상':'미선정',detail:`실제 해당 대회 ${t.playerStats?.[career.player.id]?.stats.apps??0}경기 · ${t.phase==='completed'?'대회 완료 후 전체 출전 선수의 역할별 기여 비교':'대회 미종료'}`});
+  const result: BallonDorYear = {diagnostics, year: career.season.year, candidates, playerRank, winnerId: candidates[0]?.playerId ?? '', world11, awards: won };
   career.systems.rankings.push(result);
   for (const a of won) if (!career.awards.some(previous => previous.id === a.id)) career.awards.push(a);
   return won;

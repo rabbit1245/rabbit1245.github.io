@@ -80,7 +80,7 @@ test('legacy growth starts at the known present and does not attribute an unknow
   career.season.week++;trainRound(career);reconcile(career);
 });
 
-test('annual plans confirm once in offseason and aging has its own transition report',()=>{
+test('annual plans confirm once and a new season never automatically decreases player attributes',()=>{
   const career=createCareer(options({age:34,squad:'senior'}));
   assert.throws(()=>setTraining(career,['passing'],'balanced'),/시즌 중/);
   career.stage='offseason';career.season.week=career.season.totalWeeks;career.season.completed=true;
@@ -89,10 +89,8 @@ test('annual plans confirm once in offseason and aging has its own transition re
   const confirmed=setTraining(career,['speed'],'balanced');
   assert.equal(career.systems!.trainingPlan.confirmed,false,'commands preserve the prior snapshot');
   assert.throws(()=>setTraining(confirmed,['passing'],'intense'),/이미 확정/);
-  const next=startNextSeason(confirmed),aging=next.systems!.agingReport!;
-  assert.equal(aging.year,next.season.year);assert.deepEqual(aging.startAttributes,confirmed.player.attributes);
-  assert.deepEqual(aging.endAttributes,next.season.attributeStart);
-  assert.ok(aging.changes.speed!<0);assert.ok(aging.ovrEnd<=aging.ovrStart,'rounded OVR may stay the same despite a fractional decline');
+  const next=startNextSeason(confirmed);
+  assert.equal(next.player.age,confirmed.player.age+1);assert.deepEqual(next.player.attributes,confirmed.player.attributes);assert.equal(next.systems!.agingReport,undefined);
   assert.deepEqual(next.systems!.growthLedger!.baselineAttributes,next.player.attributes);
   assert.ok(Object.values(next.systems!.growthLedger!.byCause).every(cause=>Object.keys(cause).length===0),'offseason aging is not counted twice as in-season loss');
   assert.equal(next.systems!.trainingPlan!.confirmed,true);assert.deepEqual(next.training,['speed']);

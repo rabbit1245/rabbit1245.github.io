@@ -22,7 +22,7 @@ export function ensureGrowthTracking(career:Career):GrowthLedger {
 }
 function apply(career:Career,key:AttributeKey,amount:number,cause:GrowthCause):void {
   const current=career.player.attributes[key];if(current===undefined)return;
-  const next=round(clamp(current+amount,1,100)),change=round(next-current);
+  const next=round(clamp(current+amount,0,100)),change=round(next-current);
   if(!change)return;
   career.player.attributes[key]=next;
   const ledger=ensureGrowthTracking(career),row=ledger.byCause[cause]??(ledger.byCause[cause]={});row[key]=round((row[key]??0)+change);
@@ -81,3 +81,5 @@ export function applyMatchExperience(career:Career,stats:PlayerStats):void {
 export function roleGrowthDescription(career:Career):string {
   return `${career.player.position} · ${POSITION_ATTRIBUTES[career.player.position].slice(0,3).join(', ')}`;
 }
+
+export function applyManualAging(career:Career,amount:number):void{for(const key of Object.keys(career.player.attributes) as AttributeKey[])apply(career,key,-amount,'aging');career.player.ovr=overall(career.player);}

@@ -1,3 +1,4 @@
+import {cupMatches,cupStats} from './club-competitions';
 import type { Career, MatchRecord } from './types';
 import { sumStats } from './math';
 
@@ -26,9 +27,9 @@ export function newestMatchFirst(a: MatchRecord, b: MatchRecord): number {
 /** Display projections only: no edits, backfilled history or second simulation. */
 export function seasonOverview(career: Career) {
   const nationalMatches = nationalMatchLedger(career).filter(match => match.seasonYear === career.season.year);
-  const club = career.season.playerStats;
+  const club = sumStats([career.season.playerStats,cupStats(career,career.season.year)]);
   const national = sumStats(nationalMatches.map(match => match.playerStats));
-  const matches = [...career.season.matches, ...nationalMatches];
+  const matches = [...career.season.matches, ...cupMatches(career,career.season.year), ...nationalMatches];
   return {
     club, national, combined: sumStats([club, national]), nationalMatches,
     detailed: sumStats(matches.filter(match => match.metricsVersion === 2).map(match => match.playerStats)),

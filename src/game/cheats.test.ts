@@ -22,12 +22,12 @@ test('manual increases require ON, obey bounds and retain a distinct growth caus
  assert.throws(()=>cheatIncreaseAttribute(changed,'gkHandling',1),/능력치/);assert.throws(()=>cheatIncreaseAttribute(changed,'shooting',-1),/증가량/);
  const bad=structuredClone(changed);(bad.systems!.cheats as any).enabled='true';assert.throws(()=>validateCareer(bad),/치트/);
 });
-test('freezing aging stops age and attribute decline while calendar seasons still advance; OFF restores aging',()=>{
+test('freezing aging stops age and attribute decline while calendar seasons still advance; OFF restores age progression without attribute loss',()=>{
  let closed=advanceCareer(fresh(),120);assert.equal(closed.stage,'offseason');closed=stayAtClub(closed);
  if(!closed.systems!.trainingPlan!.confirmed)closed=setTraining(closed,['shooting'],'balanced');
  const frozen=configureCheats(closed,true,true),next=startNextSeason(frozen);
  assert.equal(next.season.year,closed.season.year+1);assert.equal(next.player.age,closed.player.age);
  assert.deepEqual(next.player.attributes,closed.player.attributes);assert.equal(next.systems!.cheats!.used,true);validateCareer(next);
  const off=startNextSeason(configureCheats(closed,false,true));assert.equal(off.player.age,closed.player.age+1);
- assert.ok(off.player.attributes.speed!<closed.player.attributes.speed!);validateCareer(off);
+ assert.deepEqual(off.player.attributes,closed.player.attributes);validateCareer(off);
 });

@@ -37,8 +37,8 @@ test('candidate ranking compares the same season and weights without a user-only
  for(const p of peers){p.ovr=85;p.leadership=95;p.age=27;c.systems!.world.playerStats[p.id]={playerId:p.id,name:p.name,clubId:p.clubId,leagueId:c.season.leagueId,position:p.position,nationality:p.nationality,ovr:p.ovr,stats,nationalStats:emptyStats()};}
  const a=getCaptainAssessment(c,'club');assert.equal(a.candidateRank,4);assert.equal(a.eligibleRole,'none');
 });
-test('age, actual performances, tenure and trust each constrain proposals',()=>{
- for(const change of [(c:Career)=>{c.player.age=18;},(c:Career)=>{c.systems!.leadership.clubSinceYear=c.season.year;},(c:Career)=>{c.managerTrust=40;},(c:Career)=>{for(const m of c.season.matches)m.playerStats.ratingSum=5.5;},(c:Career)=>{for(const m of c.season.matches)m.playerStats.minutes=15;}]){
+test('actual performances, tenure and trust constrain proposals without an age gate',()=>{
+ for(const change of [(c:Career)=>{c.systems!.leadership.clubSinceYear=c.season.year;},(c:Career)=>{c.managerTrust=40;},(c:Career)=>{for(const m of c.season.matches)m.playerStats.ratingSum=5.5;},(c:Career)=>{for(const m of c.season.matches)m.playerStats.minutes=15;}]){
   const c=candidate();change(c);assert.equal(getCaptainAssessment(c,'club').eligibleRole,'none');
  }
 });
@@ -57,3 +57,5 @@ test('national proposals require the correct age group and actual national selec
  const c=candidate();assert.equal(getCaptainAssessment(c,'national').eligibleRole,'none');
  c.player.age=22;c.systems!.national.squad='U20';assert.equal(getCaptainAssessment(c,'national').eligibleRole,'none');
 });
+
+test('an eighteen-year-old proven ace can receive a captain proposal',()=>{const c=candidate();c.player.age=18;c.player.attributes.teamwork=90;c.systems!.leadership.clubSinceYear=c.season.year;assert.equal(getCaptainAssessment(c,'club').eligibleRole,'captain');proposeCaptainOffer(c,'club');assert.equal(c.systems!.leadership.offers!.length,1);});

@@ -32,6 +32,7 @@ export interface Standing { clubId: string; played: number; won: number; drawn: 
 export interface Fixture { id: string; round: number; homeId: string; awayId: string; played: boolean; homeGoals?: number; awayGoals?: number }
 export interface MatchEvent { id: string; minute: number; type: 'shot'|'goal'|'save'|'assist'|'yellow'|'red'|'injury'|'substitution'|'pass'|'keyPass'|'dribble'|'tackle'|'interception'|'aerial'|'handling'|'sweep'|'longKick'; teamId: string; playerName: string; playerId?: string; relatedId?: string; detail: string }
 export interface MatchRecord {
+  aggregate?:{home:number;away:number};nationalSelection?:{called:boolean;role:'starter'|'substitute'|'bench'|'excluded';reason:string;};
   id: string; fixtureId: string; round: number; seasonYear: number; homeId: string; awayId: string;
   homeGoals: number; awayGoals: number; events: MatchEvent[]; playerClubId: string;
   playerPlayed: boolean; playerStarted: boolean; playerMinutes: number; playerRating: number;
@@ -76,6 +77,6 @@ export interface CreateOptions {
   position: Position; secondaryPositions?: Position[]; talent: Talent; style: string; clubId: string;
   squad: Squad; difficulty: 'realistic'|'challenge'|'free'; seed: string; training?: AttributeKey[]; intensity?: Intensity;
 }
-export type GameCommand = {type:'advance'; weeks:number} | {type:'training'; keys:AttributeKey[]; intensity:Intensity} | {type:'transfer'; offerId:string} | {type:'captainDecision';offerId:string;accept:boolean} | {type:'cheatSettings';enabled:boolean;freezeAging:boolean} | {type:'increaseAttribute';key:AttributeKey;amount:number} | {type:'stay'} | {type:'nextSeason'} | {type:'retire'} | {type:'advanceHalf'} | {type:'continueHalf'} | {type:'dismissChoice'};
+export type GameCommand = {type:'manualAging';amount:1|5|10} | {type:'advance'; weeks:number} | {type:'training'; keys:AttributeKey[]; intensity:Intensity} | {type:'transfer'; offerId:string} | {type:'captainDecision';offerId:string;accept:boolean} | {type:'cheatSettings';enabled:boolean;freezeAging:boolean} | {type:'increaseAttribute';key:AttributeKey;amount:number} | {type:'stay'} | {type:'nextSeason'} | {type:'retire'} | {type:'advanceHalf'} | {type:'continueHalf'} | {type:'dismissChoice'};
 export interface SaveSlot { id: string; name: string; playerName: string; clubName: string; year: number; age: number; ovr: number; updatedAt: string; revision: number }
 export interface SaveEnvelope { format: 'kball-save'; schemaVersion: 1; hash: string; savedAt: string; career: Career }

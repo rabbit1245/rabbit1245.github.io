@@ -3,13 +3,15 @@ import assert from 'node:assert/strict';
 import { FIELD_ATTRIBUTES, GK_ATTRIBUTES } from './attributes';
 import { CLUBS, ROSTERS } from './data';
 import { emptyStats, sumStats } from './math';
-import { archiveNationalSeason, createNational, getNationalTotals, getTeamLabel, processDueNationalWindows, processNationalWindow, resolveNationalShootout, scheduledInternationalWindows, nationalRosterPower } from './national';
+import { archiveNationalSeason, createNational as createExpandedNational, getNationalTotals, getTeamLabel, processDueNationalWindows, processNationalWindow, resolveNationalShootout, scheduledInternationalWindows, nationalRosterPower } from './national';
 import { fixtureDate } from './calendar';
 import { simulateMatch } from './match-engine';
 import { nationalityForPlayer } from './national-data';
 import type { Career, MatchRecord, Player, Position } from './types';
 import type { MatchPerformance } from './revision-types';
 
+// These fixtures intentionally preserve the published legacy bracket and migration contract.
+function createNational(c:Career){const n=createExpandedNational(c);delete n.formatVersion;n.squad=c.player.age<=20?'U20':'senior';return n;}
 function fixture(options: Partial<Player> & { seed?: string; leagueId?: string } = {}): Career {
   const {seed='national-tests',leagueId='KR1',...player}=options;
   const club=CLUBS.find(row=>row.leagueId===leagueId)!;
@@ -80,7 +82,7 @@ test('injury and real positional competition explain non-selection without award
 });
 
 test('U20 and senior match ledgers remain separate across season changes',()=>{
-  const career=fixture({age:20});processNationalWindow(career,'first');archiveNationalSeason(career);
+  const career=fixture({age:16});processNationalWindow(career,'first');archiveNationalSeason(career);
   const youth=getNationalTotals(career,{squad:'U20'});assert.ok(youth.apps>0);
   career.player.age=21;career.player.fitness=100;career.player.injuryWeeks=0;
   career.season.year=2027;career.season.index=1;
@@ -338,7 +340,7 @@ test('legacy whole-window records and keys remain authoritative after restoring 
 
 test('a restored career with played fixtures uses its last club date as its migration cursor',()=>{
   const career=fixture();
-  const round=career.season.totalWeeks/2;
+  const round=career.season.totalWeeks/2+1;
   career.season.fixtures=[{id:'played',round,homeId:career.player.clubId,awayId:'test-away',played:true}];
   career.season.week=round;
   const current=fixtureDate(career.season,round);

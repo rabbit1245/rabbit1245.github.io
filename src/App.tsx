@@ -1,3 +1,4 @@
+import {careerMatchLedger} from './game/career-text';
 import { useEffect, useRef, useState, type ChangeEvent } from 'react';
 import { AlertCircle, ArrowRight, ArrowUpRight, CheckCircle2, Download, FolderOpen, LayoutDashboard, Loader2, Menu, Plus, RotateCcw, Save, Settings2, Shield, SkipForward, Trash2, Trophy, Upload, UserRound, X } from 'lucide-react';
 import type { Career, CreateOptions, GameCommand, MatchRecord, SaveSlot } from './game/types';
@@ -105,8 +106,8 @@ export default function App() {
   async function command(value: GameCommand) {
     if (locked.current || !careerRef.current) return;
     locked.current = true; setBusy(true); setError('');
-    try { const previous = careerRef.current; const next = await runGameCommand(previous, value); await commit(next);
-      if (['advanceHalf','continueHalf','transfer','nextSeason','retire'].includes(value.type) && !reduced) { const matchIds = new Set(previous.season.matches.map(m => m.id)), eventIds = new Set(previous.systems?.events.map(e => e.id) || []); const matches = next.season.matches.filter(m => !matchIds.has(m.id)), events = next.systems?.events.filter(e => !eventIds.has(e.id)) || []; if (matches.length || events.some(e => e.importance === 'milestone')) setPresentation({ matches, events }); } if (value.type === 'nextSeason' || value.type === 'retire') navigate(value.type === 'retire' ? 'career' : 'locker'); if (value.type === 'training') setToast('새로운 훈련 계획을 적용했습니다.'); }
+    try { const previous = careerRef.current; const next = await runGameCommand(previous, value); const saved=await commit(next);if(value.type==='training'&&saved)navigate('locker');
+      if (['advanceHalf','continueHalf','transfer','nextSeason','retire'].includes(value.type) && !reduced) { const matchIds = new Set([...careerMatchLedger(previous).club,...careerMatchLedger(previous).national].map(m => m.id)), eventIds = new Set(previous.systems?.events.map(e => e.id) || []); const matches = [...careerMatchLedger(next).club,...careerMatchLedger(next).national].filter(m => !matchIds.has(m.id)), events = next.systems?.events.filter(e => !eventIds.has(e.id)) || []; if (matches.length || events.some(e => e.importance === 'milestone')) setPresentation({ matches, events }); } if (value.type === 'nextSeason' || value.type === 'retire') navigate(value.type === 'retire' ? 'career' : 'locker'); if (value.type === 'training') setToast('새로운 훈련 계획을 적용했습니다.'); }
     catch (e) { setError(errorMessage(e)); }
     finally { locked.current = false; setBusy(false); }
   }
@@ -141,7 +142,7 @@ export default function App() {
     const file = event.target.files?.[0]; event.target.value = '';
     if (!file || locked.current || !confirmReplace('가져온 커리어를 열까요')) return;
     locked.current = true; setBusy(true); setError('');
-    try { if (file.size > 128 * 1024 * 1024) throw new Error('128MB 이하의 K볼 저장 파일을 선택해 주세요.'); const next = await importCareer(await file.text()); const saved = await commit(next); setSelectedMatch(null); setCommon(false); navigate('locker'); if (saved) setToast('별도 슬롯으로 커리어를 가져왔습니다.'); }
+    try { if (file.size > 256 * 1024 * 1024) throw new Error('256MB 이하의 K볼 저장 파일을 선택해 주세요.'); const next = await importCareer(await file.text()); const saved = await commit(next); setSelectedMatch(null); setCommon(false); navigate('locker'); if (saved) setToast('별도 슬롯으로 커리어를 가져왔습니다.'); }
     catch (e) { setError(errorMessage(e)); }
     finally { locked.current = false; setBusy(false); }
   }
@@ -172,7 +173,7 @@ export default function App() {
     <input ref={fileRef} type="file" hidden accept=".json,application/json" aria-label="K볼 저장 파일 가져오기" onChange={importFile}/>
     {!career?<Landing slots={slots} loading={loading} busy={busy} onNew={requestNewCareer} onLoad={load} onImport={()=>fileRef.current?.click()}/>:<div className="app-shell">
       <header className="app-header"><div className="header-inner"><Brand/><nav className="main-nav" aria-label="주요 화면">{NAVIGATION.map(n=><button key={n.id} data-testid={`${n.id}-tab`} aria-current={page===n.id?'page':undefined} className={page===n.id?'active':''} onClick={()=>navigate(n.id)}><n.icon size={17}/><span>{n.label}{n.id==='player'&&career.systems?.leadership.offers?.some(o=>o.status==='pending')&&<small className="nav-captain-offer">주장 제의</small>}</span></button>)}</nav><div className="header-tools"><span className={`save-status ${saveStatus}`} data-testid="save-status" aria-live="polite">{saveStatus==='saving'?<Loader2 size={13} className="spinner"/>:saveStatus==='error'?<AlertCircle size={13}/>:<CheckCircle2 size={13}/>}<span>{saveStatus==='saved'?'자동 저장됨':saveStatus==='saving'?'저장 중':'저장 실패'}</span></span><button className="icon-button" data-testid="common-menu" aria-label="저장 및 설정 메뉴" onClick={()=>setCommon(true)}><Menu size={21}/></button></div>{toast&&<div className="toast" role="status"><CheckCircle2 size={17}/>{toast}</div>}</div></header>
-      <main className="game-main"><PlayerStrip career={career}/><SeasonCompetitions career={career}/><div className="page-title"><h1>{page==='locker'?'라커룸':page==='player'?'선수':'커리어'}</h1><span className="page-context">{calendarLabel(career)} · {phaseLabel(career)} · {career.season.competitionName}</span></div>
+      <main className="game-main"><PlayerStrip career={career}/><SeasonCompetitions career={career} onMatch={setSelectedMatch}/><div className="page-title"><h1>{page==='locker'?'라커룸':page==='player'?'선수':'커리어'}</h1><span className="page-context">{calendarLabel(career)} · {phaseLabel(career)} · {career.season.competitionName}</span></div>
         {error&&<div className="error-banner" role="alert"><AlertCircle size={18}/><span>{error}</span><button className="icon-button" aria-label="오류 알림 닫기" onClick={()=>setError('')}><X size={16}/></button></div>}
         {busy&&<div className="processing" role="status"><Loader2 className="spinner" size={17}/>경기와 성장 기록을 계산하고 있습니다.</div>}
         {page==='locker'&&<LockerRoom career={career} busy={busy} command={command} onMatch={setSelectedMatch} presenting={Boolean(presentation)} onTraining={openTraining} onCareer={openCareer}/>}{page==='player'&&<PlayerPanel career={career} busy={busy} command={command} requestedView={playerView} viewRequest={playerViewRequest}/>} {page==='career'&&<CareerPanel career={career} busy={busy} command={command} onExport={exportFile} onCopy={copyCareer} onMatch={setSelectedMatch} requestedView={careerView}/>}

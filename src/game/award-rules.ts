@@ -1,5 +1,5 @@
 /** Real award names and organisers. Numerical voting below is a game model, never an official vote. */
-export const AWARD_MODEL_VERSION='kball-awards-2.1';
+export const AWARD_MODEL_VERSION='kball-awards-2.6';
 export const AWARD_VERIFICATION_NOTE='게임 경기 기록으로 선정하는 모형입니다. 대상 연도의 공식 규정·평가 기간을 모두 검증한 결과는 아닙니다.';
 export interface AwardRule {
   id: string; name: string; organiser: string; criterion: string; sourceUrl: string;
@@ -36,7 +36,7 @@ export const GLOBAL_AWARD_RULES = {
 
 /** Shared award definitions for the FIFA senior and U-20 World Cups. */
 export const FIFA_TOURNAMENT_AWARD_RULES = {
-  goldenBoot: { id: 'golden-boot', name: '골든 부트', organiser: 'FIFA', sourceUrl: 'https://www.fifa.com/', criterion: '본선 최다 득점, 동률이면 도움, 이어 적은 출전 시간을 우선합니다. 승부차기 득점은 포함하지 않습니다. 게임은 실제 4팀 축약 본선의 기록만 비교합니다.' },
-  goldenBall: { id: 'golden-ball', name: '골든 볼', organiser: 'FIFA', sourceUrl: 'https://www.fifa.com/', criterion: '실제 상은 대회 최우수 선수 선정입니다. 게임에서는 실제 4팀 축약 본선의 평점·역할별 경기 기여·징계로 투표를 모형화하며, 능력치는 점수에 넣지 않습니다.' },
-  goldenGlove: { id: 'golden-glove', name: '골든 글러브', organiser: 'FIFA', sourceUrl: 'https://www.fifa.com/', criterion: '실제 상은 대회 최우수 골키퍼 선정입니다. 게임에서는 실제 4팀 축약 본선 골키퍼들의 선방·선방률·무실점·평점·징계로 투표를 모형화합니다.' },
+  goldenBoot: { id: 'golden-boot', name: '골든 부트', organiser: 'FIFA', sourceUrl: 'https://www.fifa.com/', criterion: '본선 최다 득점, 동률이면 도움, 이어 적은 출전 시간을 우선합니다. 승부차기 득점은 포함하지 않습니다. 게임은 실제 본선의 기록만 비교합니다.' },
+  goldenBall: { id: 'golden-ball', name: '골든 볼', organiser: 'FIFA', sourceUrl: 'https://www.fifa.com/', criterion: '실제 상은 대회 최우수 선수 선정입니다. 게임에서는 실제 본선의 평점·역할별 경기 기여·징계로 투표를 모형화하며, 능력치는 점수에 넣지 않습니다.' },
+  goldenGlove: { id: 'golden-glove', name: '골든 글러브', organiser: 'FIFA', sourceUrl: 'https://www.fifa.com/', criterion: '실제 상은 대회 최우수 골키퍼 선정입니다. 게임에서는 실제 본선 골키퍼들의 선방·선방률·무실점·평점·징계로 투표를 모형화합니다.' },
 };

@@ -27,7 +27,7 @@ function measureText(){
   const ratio=(a,b)=>{const values=[luminance(a),luminance(b)].sort((x,y)=>x-y);return(values[1]+.05)/(values[0]+.05);};
   const id=el=>el.dataset?.testid?`[data-testid="${el.dataset.testid}"]`:el.id?`#${el.id}`:`${el.tagName.toLowerCase()}${[...el.classList||[]].slice(0,3).map(c=>'.'+c).join('')}`;
   const visible=el=>{
-    for(let p=el;p;p=p.parentElement){const s=getComputedStyle(p);if(s.display==='none'||s.visibility==='hidden'||s.visibility==='collapse'||Number(s.opacity)===0)return false;}
+    for(let p=el;p;p=p.parentElement){const s=getComputedStyle(p);if(s.display==='none'||s.visibility==='hidden'||s.visibility==='collapse'||Number(s.opacity)===0)return false;if(p instanceof HTMLDetailsElement&&!p.open&&!p.querySelector(':scope > summary')?.contains(el))return false;}
     return true;
   };
   const dialog=[...document.querySelectorAll('[role="dialog"]')].find(visible),scope=dialog||document.body;
@@ -136,6 +136,10 @@ try{
     await imported(page,baseline);await sample(page,`${prefix}-baseline-locker-toast`);
     await nav(page,'player');await sample(page,`${prefix}-baseline-attributes`);
     await page.getByTestId('player-view-training').click();await sample(page,`${prefix}-baseline-locked-training`);
+    await page.getByTestId('manual-aging').getByRole('button',{name:'노화',exact:true}).click();await sample(page,`${prefix}-manual-aging-options`);await page.getByRole('button',{name:'−5',exact:true}).click();await sample(page,`${prefix}-manual-aging-preview`);await closeDialog(page);
+    await page.getByTestId('competition-details-club').click();await sample(page,`${prefix}-club-competition-details`);await closeDialog(page);
+    await page.getByTestId('competition-details-national').click();await page.getByRole('dialog').getByTestId('national-audit').locator('summary').first().click();await sample(page,`${prefix}-national-audit`);await closeDialog(page);
+
     await imported(page,completed);await sample(page,`${prefix}-offseason-locker-disabled`);
     if(await page.locator('.match-row').count()){
       await sample(page,`${prefix}-match-row-hover`,{hover:page.locator('.match-row').first()});
@@ -157,7 +161,7 @@ try{
     await page.getByTestId('career-view-records').click();
     for(const scope of['all','club','national']){await page.getByTestId(`records-scope-${scope}`).click();await sample(page,`${prefix}-record-${scope}`);}
     await page.getByTestId('career-view-awards').click();
-    for(const name of['발롱도르 순위','FIFPRO 월드 11']){await page.getByRole('button',{name,exact:true}).click();await sample(page,`${prefix}-awards-${name.startsWith('FIFPRO')?'eleven':'ballon'}`);}
+    for(const name of['발롱도르 순위','FIFPRO 월드 11']){await page.getByRole('button',{name,exact:true}).click();await sample(page,`${prefix}-awards-${name.startsWith('FIFPRO')?'eleven':'ballon'}`);if(name==='발롱도르 순위'&&await page.locator('.award-diagnostics').count()){await page.locator('.award-diagnostics summary').click();await sample(page,`${prefix}-award-diagnostics`);}}
     await page.getByTestId('career-view-ledger').click();
     for(const name of['주장 이력','선수 수입']){await page.getByRole('button',{name,exact:true}).click();await sample(page,`${prefix}-ledger-${name==='선수 수입'?'income':'captain'}`);}
     await page.getByTestId('common-menu').click();await sample(page,`${prefix}-settings`);

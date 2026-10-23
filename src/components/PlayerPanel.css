@@ -38,3 +38,6 @@
 .talent-reference { margin-bottom:10px; line-height:1.6; }
 @media(max-width:1100px) { .attribute-grid.cheating { grid-template-columns:repeat(2,minmax(0,1fr)); } }
 @media(max-width:650px) { .attribute-grid.cheating { grid-template-columns:1fr; } }
+
+.training-header-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;} .manual-aging{display:flex;} .manual-aging .button{min-height:34px;padding:5px 12px;} .manual-aging-options{margin:12px 0;display:flex;gap:8px;flex-wrap:wrap;} .manual-aging-overall{font-size:20px;margin:12px 0;}
+@media(min-width:1100px){.training-panel>.panel-head{padding-top:6px;padding-bottom:6px;}.training-panel>.panel-body{padding-top:8px;padding-bottom:8px;}}

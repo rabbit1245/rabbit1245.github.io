@@ -1,5 +1,6 @@
+import {initializeClubCompetitions,processClubCompetitions,europeanEntries,cupStats} from './club-competitions';
 import { CLUBS, getClub, getLeague } from './data';
-import { FIELD_ATTRIBUTES, GK_ATTRIBUTES, PLAY_STYLES, POSITION_ATTRIBUTES, POSITION_LABELS, overall as calculateOverall } from './attributes';
+import { ATTRIBUTE_LABELS, FIELD_ATTRIBUTES, GK_ATTRIBUTES, PLAY_STYLES, POSITION_ATTRIBUTES, POSITION_LABELS, overall as calculateOverall } from './attributes';
 import { addStats, clamp, emptyStats, hashSeed, integer, round, seededRandom, sumStats } from './math';
 import { simulateMatch } from './match-engine';
 import { getClubWorldPower, getSeasonClubIds, getWorldClubPlayers, getYouthClubPlayers, processWorldRound, transitionWorldSeason } from './world';
@@ -9,12 +10,12 @@ import { applyContract, evaluateAwards, makeContractOffers, payBonus, paySalary,
 import { initializeSystems } from './systems';
 import { fixtureDate, nextCalendarYear, seasonDate, seasonHalfEndDate } from './calendar';
 import { captureSeasonDetails } from './season-details';
-import { applyMatchExperience, beginGrowthSeason, ensureGrowthTracking, trainRound,increaseAttribute } from './growth';
-import { TALENT_PROFILES,declineAge } from './talent';
+import { applyMatchExperience, beginGrowthSeason, ensureGrowthTracking, trainRound,increaseAttribute,applyManualAging } from './growth';
+import { TALENT_PROFILES } from './talent';
 import type { AttributeKey, Attributes, Career, CreateOptions, Fixture, Intensity, MatchRecord, Player, PlayerStats, SeasonState, SeasonSummary, Standing, Talent, TransferOffer } from './types';
 import type { PresentationEvent } from './revision-types';
 
-export const ENGINE_VERSION = '2.5.0';
+export const ENGINE_VERSION = '2.6.0';
 export const overall = calculateOverall;
 export { addStats, emptyStats, hashSeed, seededRandom } from './math';
 const TALENT_ORDER: Talent[] = ['D','C','B','A','S','SS','SSS'];
@@ -30,6 +31,7 @@ function editable(career:Career):Career {
   initializeSystems(next);
   ensureEconomicHistory(next);
   ensureGrowthTracking(next);
+  initializeClubCompetitions(next);
   if(!next.systems!.trainingPlan)next.systems!.trainingPlan={forYear:next.season.year+(next.stage==='offseason'?1:0),confirmed:true,confirmedAtRound:next.season.week,source:'legacy'};
   // Old midseason contract prompts are retired on the first command, after their original hash was checked.
   if(next.stage==='season'){next.systems!.pendingChoice=undefined;next.offers=[];}
@@ -120,6 +122,7 @@ export function createCareer(options:CreateOptions):Career {
   const player=previewPlayer(options),club=getClub(options.clubId);
   const career: Career={schemaVersion:1,id:'career_'+hashSeed(options.seed+'|career|'+options.name).toString(36),seed:options.seed,revision:0,createdAt:'2026-07-01T00:00:00.000Z',updatedAt:'2026-07-01T00:00:00.000Z',player,season:makeSeason(player,2026,1),history:[],news:[],training:[...(options.training??POSITION_ATTRIBUTES[player.position].slice(0,3))],intensity:options.intensity??'balanced',transfers:[],offers:[],stage:'season',managerTrust:55,careerIncome:0,awards:[],difficulty:options.difficulty,processedCommands:[]};
   initializeSystems(career,false);
+  initializeClubCompetitions(career);
   beginGrowthSeason(career);
   career.systems!.trainingPlan={forYear:career.season.year,confirmed:true,confirmedAtRound:0,source:'creation'};
   career.systems!.trainingLocked=true;
@@ -133,7 +136,7 @@ function growthReport(career:Career,half:'first'|'season') {
   if(systems.growthReports.some(r=>r.year===career.season.year&&r.half===half))return;
   const initial=systems.firstHalfSnapshot;
   const prior=career.history.at(-1)?.stats??emptyStats();
-  systems.growthReports.push({year:career.season.year,half,fromRound:0,toRound:career.season.week,startAttributes:{...career.season.attributeStart},endAttributes:{...career.player.attributes},ovrStart:career.season.ovrStart,ovrEnd:career.player.ovr,stats:{...career.season.playerStats},previousStats:{...prior},valueStart:systems.growthReports.find(r=>r.year===career.season.year&&r.half==='first')?.valueStart??initial?.value??systems.economics.previousValue,valueEnd:systems.economics.marketValue,growth:structuredClone(ensureGrowthTracking(career)),...(systems.agingReport?.year===career.season.year?{offseasonAging:structuredClone(systems.agingReport)}:{}),context:`${career.season.competitionName} · ${career.season.playerStats.minutes}분 출전 · 집중 훈련 ${career.training.join(', ')} · 부상은 훈련량과 출전 기회를 줄이며 연령 변화는 시즌 사이에 반영됩니다. 기록 변화에는 상대·출전 시간·팀 전력이 함께 작용합니다.`});
+  systems.growthReports.push({year:career.season.year,half,fromRound:0,toRound:career.season.week,startAttributes:{...career.season.attributeStart},endAttributes:{...career.player.attributes},ovrStart:career.season.ovrStart,ovrEnd:career.player.ovr,stats:{...career.season.playerStats},previousStats:{...prior},valueStart:systems.growthReports.find(r=>r.year===career.season.year&&r.half==='first')?.valueStart??initial?.value??systems.economics.previousValue,valueEnd:systems.economics.marketValue,growth:structuredClone(ensureGrowthTracking(career)),...(systems.agingReport?.year===career.season.year?{offseasonAging:structuredClone(systems.agingReport)}:{}),context:`${career.season.competitionName} · ${career.season.playerStats.minutes}분 출전 · 집중 훈련 ${career.training.map(k=>ATTRIBUTE_LABELS[k]).join(', ')} · 부상은 훈련량과 출전 기회를 줄입니다. 나이에 따른 자동 능력치 감소는 없으며 수동 노화만 따로 기록합니다. 기록 변화에는 상대·출전 시간·팀 전력이 함께 작용합니다.`});
   present(career,'growth',half==='first'?'전반기 성장 리포트':'시즌 성장 리포트',`종합 ${career.season.ovrStart} → ${career.player.ovr} · ${career.season.playerStats.minutes}분 출전`,'milestone');
 }
 function processInternationalThrough(career:Career,throughDate:string) {
@@ -163,7 +166,7 @@ function archive(career:Career,completed:boolean) {
   const changes:Attributes={};
   for(const key of Object.keys(player.attributes) as AttributeKey[])changes[key]=round((player.attributes[key]??0)-(season.attributeStart[key]??0));
   const priorIncome=career.history.reduce((s,h)=>s+h.income,0);
-  const summary:SeasonSummary={year:season.year,...(season.calendarYear?{calendarYear:season.calendarYear}:{}),clubId:season.matches[0]?.playerClubId??player.clubId,clubName:getClub(season.matches[0]?.playerClubId??player.clubId).name,leagueId:season.leagueId,competitionName:season.competitionName,age:player.age,position:player.position,squad:player.squad,rank:season.table.findIndex(r=>r.clubId===(season.matches[0]?.playerClubId??player.clubId))+1,ovrStart:season.ovrStart,ovrEnd:player.ovr,stats:{...season.playerStats},awards:[...awards],matches:[...season.matches],attributeGrowth:changes,income:round(Math.max(0,career.careerIncome-priorIncome)),completed,details:captureSeasonDetails(career)};
+  const summary:SeasonSummary={year:season.year,...(season.calendarYear?{calendarYear:season.calendarYear}:{}),clubId:season.matches[0]?.playerClubId??player.clubId,clubName:getClub(season.matches[0]?.playerClubId??player.clubId).name,leagueId:season.leagueId,competitionName:season.competitionName,age:player.age,position:player.position,squad:player.squad,rank:season.table.findIndex(r=>r.clubId===(season.matches[0]?.playerClubId??player.clubId))+1,ovrStart:season.ovrStart,ovrEnd:player.ovr,stats:{...season.playerStats},awards:[...new Map([...awards,...career.awards.filter(a=>a.year===season.year)].map(a=>[a.id,a])).values()],matches:[...season.matches],attributeGrowth:changes,income:round(Math.max(0,career.careerIncome-priorIncome)),completed,details:captureSeasonDetails(career)};
   career.history.push(summary);
   for(const award of awards){news(career,'award',award.name,award.description);present(career,'award',award.name,award.description,'milestone');}
 }
@@ -193,12 +196,14 @@ function applyEffects(career:Career,match:MatchRecord) {
 }
 function playRound(next:Career) {
   const systems=next.systems!;
-  processInternationalThrough(next,fixtureDate(next.season,next.season.week+1));
   next.season.week++;systems.trainingLocked=true;
   systems.phase=next.season.week<=systems.halfRound?'first':'second';
   const wasInjured=next.player.injuryWeeks>0;
   trainRound(next);
   if(next.season.week%4===0)news(next,'training','훈련 리포트',`선택 훈련과 경기 경험을 나누어 기록합니다. 종합 ${next.player.ovr}.`);
+  const cupGames=processClubCompetitions(next,match=>{applyEffects(next,match);applyMatchExperience(next,match.playerStats);next.lastMatchId=match.id;},date=>processInternationalThrough(next,date));
+  processInternationalThrough(next,fixtureDate(next.season,next.season.week));
+  const lastCup=cupGames.at(-1);if(lastCup?.date)next.player.fitness=clamp(next.player.fitness+Math.min(18,Math.max(0,(Date.parse(fixtureDate(next.season,next.season.week))-Date.parse(lastCup.date))/86400000)*5),0,100);
   const results:MatchRecord[]=[];
   for(const fixture of next.season.fixtures.filter(f=>f.round===next.season.week&&!f.played)) {
     const isUser=fixture.homeId===next.player.clubId||fixture.awayId===next.player.clubId;
@@ -259,6 +264,13 @@ export function setTraining(career:Career,keys:AttributeKey[],intensity:Intensit
   present(next,'growth','다음 시즌 훈련 확정',`${keys.length}개 능력치에 집중합니다. 시즌 중에는 이 계획을 유지합니다.`);
   touch(next);return next;
 }
+export function manuallyAge(career:Career,amount:1|5|10):Career{
+ if(career.stage==='retired'||![1,5,10].includes(amount))throw new Error('현역 선수에게 -1/-5/-10 중 하나를 적용해 주세요.');
+ const next=editable(career),before={...next.player.attributes},ovrBefore=next.player.ovr;
+ applyManualAging(next,amount);
+ (next.systems!.manualAging??=[]).push({playerId:next.player.id,playerName:next.player.name,id:`manual-aging:${next.id}:${next.revision}`,year:next.season.year,round:next.season.week,date:seasonDate(next.season),amount,before,after:{...next.player.attributes},ovrBefore,ovrAfter:next.player.ovr});
+ updateMarketValue(next,'사용자 수동 노화');touch(next);return next;
+}
 export function configureCheats(career:Career,enabled:boolean,freezeAging:boolean):Career{
   if(typeof enabled!=='boolean'||typeof freezeAging!=='boolean')throw new Error('치트 설정이 올바르지 않습니다.');
   const next=editable(career);next.systems!.cheats={enabled,freezeAging,used:next.systems!.cheats?.used??false};touch(next);return next;
@@ -306,31 +318,16 @@ export function stayAtClub(career:Career):Career {
   const next=editable(career);next.transferDecision='stay';next.offers=[];
   present(next,'transfer','소속 팀 잔류',`${getClub(next.player.clubId).name}에서 현재 계약을 이어갑니다.`);touch(next);return next;
 }
-function aging(career:Career) {
-  const p=career.player;
-  const threshold=declineAge(p);
-  if(p.age<threshold)return;
-  const rng=seededRandom(`${career.seed}|aging|${career.season.year}|${p.age}`);
-  const physical:AttributeKey[]=['strength','stamina','speed','agility','jumping','gkReflexes','gkOneOnOnes','gkAerialCommand'];
-  for(const key of Object.keys(p.attributes) as AttributeKey[]) {
-    const current=p.attributes[key]!;
-    const decline=(p.age-threshold+1)*(physical.includes(key)?.12:.035)*(.7+rng()*.6);
-    p.attributes[key]=round(clamp(current-decline,1,100));
-  }
-  p.ovr=overall(p);
-}
 export function startNextSeason(career:Career):Career {
   if(career.stage!=='offseason')throw new Error('현재 시즌을 먼저 마무리해 주세요.');
-  if(career.player.age>=45&&!(career.systems?.cheats?.enabled&&career.systems.cheats.freezeAging))return retireCareer(career);
   if(career.systems?.trainingPlan&&!career.systems.trainingPlan.confirmed)throw new Error('다음 시즌 훈련 계획을 먼저 확정해 주세요.');
   const decided=career.transferDecision?career:stayAtClub(career),next=editable(decided);
   const previousSeason=next.season,lastYear=next.season.year,previousOvr=next.player.ovr;
+  const entries=europeanEntries(next);
   transitionWorldSeason(next);
   for(const h of next.history){const report=next.systems!.world.clubs[h.clubId]?.development?.history.find(r=>r.year===h.year);if(h.details&&report)h.details.clubDevelopment=structuredClone(report);}
-  const beforeAging={...next.player.attributes};
   if(next.systems?.cheats?.enabled&&next.systems.cheats.freezeAging)next.systems.cheats.used=true;
-  else {next.player.age++;aging(next);}
-  const afterAging={...next.player.attributes};
+  else {next.player.age++;}
   const promoted=next.player.squad==='youth'&&(next.player.age>=20||(next.player.age>=17&&next.player.ovr>=getClubWorldPower(next,next.player.clubId)-18));
   if(promoted)next.player.squad='senior';
   next.player.fitness=100;next.player.morale=clamp(next.player.morale+10,0,100);next.player.injuryWeeks=0;
@@ -340,10 +337,11 @@ export function startNextSeason(career:Career):Career {
   next.stage='season';next.offers=[];next.transferDecision=undefined;next.lastMatchId=undefined;
   expireCaptainOffers(next);
   const systems=next.systems!;
+  systems.national.formatVersion=2;
   systems.phase='preseason';systems.halfRound=Math.ceil(next.season.totalWeeks/2);systems.trainingLocked=true;systems.pendingChoice=undefined;
-  const agingChanges:Attributes={};for(const key of Object.keys(afterAging) as AttributeKey[])agingChanges[key]=round((afterAging[key]??0)-(beforeAging[key]??0));
-  systems.agingReport={year:next.season.year,startAttributes:beforeAging,endAttributes:afterAging,changes:agingChanges,ovrStart:previousOvr,ovrEnd:next.player.ovr};
+  delete systems.agingReport;
   systems.trainingPlan={forYear:next.season.year,confirmed:true,confirmedAtRound:0,source:systems.trainingPlan?.source??'legacy'};
+  initializeClubCompetitions(next,entries);
   beginGrowthSeason(next);
   systems.firstHalfSnapshot={attributes:{...next.player.attributes},stats:emptyStats(),ovr:next.player.ovr,value:systems.economics.marketValue,round:0};
   updateMarketValue(next,'새 시즌 소속 리그·전력·연령 변화');beginEconomicSeason(next);updateLeadership(next,'club',true);
@@ -368,7 +366,7 @@ export function retireCareer(career:Career):Career {
   touch(next);return next;
 }
 export function getCareerTotals(career:Career,scope:'club'|'national'|'all'='all'):PlayerStats {
-  const club=sumStats([...career.history.map(s=>s.stats),...(!career.history.some(s=>s.year===career.season.year)?[career.season.playerStats]:[])]);
+  const club=sumStats([cupStats(career),...career.history.map(s=>s.stats),...(!career.history.some(s=>s.year===career.season.year)?[career.season.playerStats]:[])]);
   if(scope==='club')return club;
   const national=getNationalTotals(career);
   return scope==='national'?national:sumStats([club,national]);

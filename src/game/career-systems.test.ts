@@ -209,7 +209,7 @@ test('a youth starter develops leadership through mental ability, age and actual
   assert.ok(eligibleByThirty,'established good performers should compete for leadership between age25 and30');
   assert.ok(annual.systems!.leadership.trait>=70);
   assert.equal(annual.systems!.leadership.baseTrait,base,'original temperament is retained');
-  assert.equal(annual.systems!.leadership.clubRole,'vice','the more experienced teammate with leadership 80 still wins the captain comparison');
+  assert.ok(['vice','captain'].includes(annual.systems!.leadership.clubRole),'proven performance competes with senior leadership without an age veto');
   const newSigning=structuredClone(annual);newSigning.systems!.leadership.clubSinceYear=newSigning.season.year;newSigning.systems!.leadership.clubRole='none';newSigning.player.ovr=99;
   updateLeadership(newSigning,'club',true);assert.equal(newSigning.systems!.leadership.clubRole,'none');
 });
@@ -332,4 +332,12 @@ test('legacy baselines retain an expired contract or already-agreed next-season 
   assert.equal(expired.contract.expiresYear,c.season.year);
   assert.equal(expired.contractHistory![0].current.years,0);
   assert.equal(expired.contractHistory![0].previous,undefined);
+});
+
+
+test('97 OVR City 25G10A receives a visible evaluation and ability cannot guarantee a Ballon win',()=>{
+ const c=makeCareer();c.player.clubId='EN1_13';c.player.ovr=97;c.player.squad='senior';c.season.playerStats=statistics({apps:34,starts:34,minutes:3000,goals:25,assists:10,ratingSum:255,ratingCount:34});
+ competitor(c,'stronger-performer','ST',{apps:34,minutes:3000,goals:50,assists:20,ratingSum:320,ratingCount:34},'EN1_12');
+ evaluateAwards(c);const r=c.systems!.rankings[0],d=r.diagnostics!.find(d=>d.name==='발롱도르')!;assert.ok(d.eligible);assert.ok(d.detail.includes('경기력 점수'));assert.notEqual(r.playerRank,1);assert.ok(r.playerRank!==null);assert.ok(r.diagnostics!.some(d=>d.scope==='리그만'));
+ const lower=structuredClone(c);lower.player.ovr=30;lower.systems!.rankings=[];lower.awards=[];evaluateAwards(lower);assert.equal(lower.systems!.rankings[0].playerRank,r.playerRank);
 });

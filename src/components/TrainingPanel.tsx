@@ -1,3 +1,4 @@
+import ManualAging from './ManualAging';
 import { useEffect, useState } from 'react';
 import { ArrowLeft, Check, CheckCircle2, LockKeyhole } from 'lucide-react';
 import type { AttributeKey, Attributes, Career, GameCommand, Intensity } from '../game/types';
@@ -18,7 +19,7 @@ export default function TrainingPanel({career,busy,command,onClose}:{career:Care
   const editable=career.stage!=='retired'&&!confirmed&&(career.stage==='offseason'||career.season.week===0);
   useEffect(()=>{setKeys(career.training);setIntensity(career.intensity);},[career.id,year]);
   const toggle=(key:AttributeKey)=>setKeys(rows=>rows.includes(key)?rows.filter(k=>k!==key):rows.length<3?[...rows,key]:rows);
-  return <Panel title={editable?'다음 시즌 훈련 선택':'이번 시즌 훈련 계획'} action={<span className="pill">{confirmed?<LockKeyhole size={16}/>:<Check size={16}/>} {confirmed?'확정됨':`${keys.length}/3 선택`}</span>} className="training-panel">
+  return <Panel title={editable?'다음 시즌 훈련 선택':'이번 시즌 훈련 계획'} action={<div className="training-header-actions"><ManualAging career={career} busy={busy} command={command}/><span className="pill">{confirmed?<LockKeyhole size={16}/>:<Check size={16}/>} {confirmed?'확정됨':`${keys.length}/3 선택`}</span></div>} className="training-panel">
     <div className="panel-body" data-testid="training-panel"><p className="training-instruction">{editable?'현재 수치와 시즌 변화를 비교해 최대 3개를 선택하세요. 확정 전에는 자유롭게 바꿀 수 있습니다.':'확정한 방향에 집중하고 있습니다. 시즌을 마친 뒤 다음 계획을 선택합니다.'}</p>
       <TrainingList attributes={career.player.attributes} start={career.season.attributeStart} keys={keys} allowed={career.player.position==='GK'?GK_ATTRIBUTES:FIELD_ATTRIBUTES} disabled={!editable||busy} onToggle={toggle}/>
       <div className="training-summary"><span>선택한 훈련</span><strong>{keys.length?keys.map(k=>`${ATTRIBUTE_LABELS[k]} ${Math.round(career.player.attributes[k]??0)}`).join(' · '):'아직 선택하지 않았습니다'}</strong></div>

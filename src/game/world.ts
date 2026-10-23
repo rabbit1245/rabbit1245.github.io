@@ -69,15 +69,15 @@ function syncUser(career: Career, world: WorldState): void {
 const averagePower=(values:number[],n:number)=>values.slice(0,n).reduce((sum,v)=>sum+v,0)/Math.max(1,Math.min(n,values.length));
 const weightedPower=(values:number[])=>averagePower(values,11)*.82+averagePower(values,18)*.18;
 const basePowers=new Map(CLUBS.map(club=>[club.id,round(weightedPower(ROSTERS[club.id].map(p=>p.ovr).sort((a,b)=>b-a)))]));
-/** The club keeps its identity. Results move prestige gradually, at most +/-3
- * team points; NPC replacement generations cannot redefine the club's scale.
+/** The club keeps its identity. Prestige moves by at most +/-3 team points; funded investment
+ * adds at most 6 more, gradually. NPC replacement generations cannot redefine the club's scale.
  */
 function teamBase(career:Career,world:WorldState,club:ClubWorld):number {
   const d=club.development,base=d?.basePower??basePowers.get(club.id)!;
   const progress=clamp(((d?.prestige??base)-base)*.3,-3,3);
   const rng=seededRandom(`${career.seed}|club-season-form|${world.year}|${club.id}`);
   const form=(rng()+rng()-1)*2;
-  return base+progress+form;
+  return base+progress+clamp(d?.investmentPower??0,0,6)+form;
 }
 
 function squadStrength(career: Career, world: WorldState, club: ClubWorld) {
@@ -428,6 +428,11 @@ export function transitionWorldSeason(career: Career): void {
     refreshClub(career,world,club);
     club.development??={basePower:before,prestige:before,baselineYear:world.year,baselinePower:before,expectedRank:null,history:[]};
     club.development.prestige=performance.prestigeAfter;
+    // Funded recruitment/development changes the anchored team scale gradually.
+    // This is bounded and depreciates; inflated replacement NPC ratings cannot bypass it.
+    const previousInvestment=club.development.investmentPower??0;
+    const investment=completedLeagues.has(performance.leagueId)?Math.min(.7,performance.reinvestment/Math.max(1,oldRevenue)*18/Math.pow(getLeague(performance.leagueId).tier,1.5)):0;
+    club.development.investmentPower=round(clamp(previousInvestment*.97+investment,0,6),3);
     refreshClub(career,world,club);
     performance.afterPower=club.power;
     if(completedLeagues.has(performance.leagueId))club.development.history=[...club.development.history.filter(r=>r.year!==performance.year),performance].slice(-5);

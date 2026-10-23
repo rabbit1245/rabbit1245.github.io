@@ -1,3 +1,4 @@
+import {cupStats,cupMatches} from './club-competitions';
 import test from 'node:test';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { exportCareer, importCareer, validateCareer } from './storage';
@@ -117,7 +118,7 @@ test('match goal events, personal statistics and full league standings reconcile
   assertStatsEqual(career.history[0].stats,sumStats(career.history[0].matches));
   assert.deepEqual(career.history[0].details!.table,career.season.table);
   assert.deepEqual(career.history[0].details!.attributes,career.player.attributes);
-  assertStatsEqual(getCareerTotals(career,'club'),career.history[0].stats);
+  assertStatsEqual(getCareerTotals(career,'club'),addStats({...career.history[0].stats},cupStats(career)));
   assert.ok(career.season.fixtures.every(f=>f.played));
   const table=calculateTable(career.season.fixtures,career.season.table.map(r=>r.clubId));
   assert.deepEqual(table,career.season.table);
@@ -171,7 +172,7 @@ test('GK records saves without striker output; position performance differs over
   assert.equal(outputs.ST.apps,100);
 });
 
-test('30 seasons preserve history, finite stats, youth promotion, aging and retirement totals',{skip:process.env.KBALL_SKIP_LONG_TEST==='1'},async()=>{
+test('30 seasons preserve history, finite stats, youth promotion, age progression and retirement totals',{skip:process.env.KBALL_SKIP_LONG_TEST==='1'},async()=>{
   // A previously computed checkpoint can repeat persistence checks without resimulating the world.
   const checkpointFile=process.env.KBALL_LONG_CHECKPOINT;
   const checkpoint=checkpointFile?JSON.parse(await readFile(checkpointFile,'utf8')) as {career:Career;highestOvr:number}:undefined;
@@ -186,32 +187,32 @@ test('30 seasons preserve history, finite stats, youth promotion, aging and reti
     assert.equal(career.history.length,year+1);
     assertStatsEqual(career.history[year].stats,sumStats(career.history[year].matches));
     highestOvr=Math.max(highestOvr,career.player.ovr);
-    await writeFile('test-results/long-career-checkpoint.json',JSON.stringify({career,highestOvr}));
+    await writeFile('test-results/v26-long-career-checkpoint.json',JSON.stringify({career,highestOvr}));
     validateCareer(career);
     console.log(`Long career verified: ${year+1}/30 seasons, ${career.player.age} years old`);
     if(year<29)career=startNextSeason(setTraining(stayAtClub(career),career.training,career.intensity));
   }
   assert.equal(career.player.age,43);assert.equal(career.player.squad,'senior');
-  assert.ok(career.player.ovr<highestOvr,'late career aging must reduce ability');
+  assert.ok(career.player.ovr>=1&&career.player.ovr<=100,'no automatic age decline is required');
   const beforeRetirement=getCareerTotals(career);
   const retired=retireCareer(career);
   assertStatsEqual(getCareerTotals(retired),beforeRetirement);
   assert.equal(retired.stage,'retired');assert.equal(retired.history.length,30);
   const file=await exportCareer(retired);
   await mkdir('test-results',{recursive:true});
-  await writeFile('test-results/long-career-30-seasons.json',file);
+  await writeFile('test-results/v26-long-career-30-seasons.json',file);
   const text=buildCareerText(retired),ledger=careerMatchLedger(retired);
-  await writeFile('test-results/long-career-30-seasons.txt',text,'utf8');
+  await writeFile('test-results/v26-long-career-30-seasons.txt',text,'utf8');
   assert.equal(text.charCodeAt(0),0xfeff);assert.ok(!/(?<!\r)\n/.test(text));
   assert.equal((text.match(/\[\d{4}시즌\]/g)??[]).length,30);
   for(const season of retired.history){assert.ok(text.includes(`[${season.year}시즌]`));if(!checkpoint||checkpoint.career.history.every((h:Career['history'][number])=>h.details))assert.ok(season.details,`${season.year}: new seasons preserve standings and contract snapshots`);}
-  assert.equal(ledger.club.length,retired.history.reduce((sum,h)=>sum+h.matches.length,0));
+  assert.equal(ledger.club.length,retired.history.reduce((sum,h)=>sum+h.matches.length,0)+cupMatches(retired).length);
   console.log(`Long TXT verified: ${Buffer.byteLength(text)} bytes, ${ledger.club.length} club and ${ledger.national.length} national matches`);
   const imported=await importCareer(file);
   assert.deepEqual(imported.history,JSON.parse(JSON.stringify(retired.history)));
   assert.deepEqual(imported.systems,JSON.parse(JSON.stringify(retired.systems)));
   assertStatsEqual(getCareerTotals(imported),beforeRetirement);
-  const expected=retired.history.reduce((stats,row)=>addStats(stats,row.stats),emptyStats());
+  const expected=retired.history.reduce((stats,row)=>addStats(stats,row.stats),cupStats(retired));
   assertStatsEqual(getCareerTotals(retired,'club'),expected);
   assert.deepEqual(retireCareer(retired),retired);
   assert.deepEqual(advanceCareer(retired,1),retired);
@@ -222,7 +223,7 @@ test('retirement during a season archives the partial ledger exactly once',()=>{
   const partial=advanceCareer(createCareer(options()),7);
   const retired=retireCareer(partial);
   assert.equal(retired.history.length,1);assert.equal(retired.history[0].completed,false);
-  assertStatsEqual(getCareerTotals(retired,'club'),partial.season.playerStats);
+  assertStatsEqual(getCareerTotals(retired,'club'),addStats({...partial.season.playerStats},cupStats(partial)));
   assert.equal(retireCareer(retired).history.length,1);
 });
 
@@ -236,7 +237,7 @@ test('a future effective transfer cannot leave an earlier retirement in the care
   assert.equal(retired.stage,'retired');
   assert.ok(retired.transfers.every(transfer=>transfer.year<=retired.retiredYear!));
   assert.equal(retired.history.length,1,'retiring before the new first match must not fabricate a season');
-  assertStatsEqual(getCareerTotals(retired,'club'),complete.history[0].stats);
+  assertStatsEqual(getCareerTotals(retired,'club'),addStats({...complete.history[0].stats},cupStats(complete)));
 });
 
 test('personal actions and clean sheets use the actual on-pitch interval',()=>{

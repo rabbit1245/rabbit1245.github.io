@@ -1,3 +1,5 @@
+import {cupLedger,tournamentResult} from './club-competitions';
+import {nationalSquadFor} from './national';
 import { getClub } from './data';
 import { seasonDate,seasonHalfEndDate } from './calendar';
 import { normalizeNationality } from './national-data';
@@ -40,7 +42,7 @@ function currentNationalMatches(career:Career):MatchRecord[] {
 
 /** A retained `called` flag from last season is not proof of a new call-up. */
 function currentCallup(career:Career,national:NationalState,matches:MatchRecord[]):boolean {
-  if(national.status!=='called'||national.squad!==(career.player.age<=20?'U20':'senior'))return false;
+  if(national.status!=='called'||national.squad!==nationalSquadFor(career))return false;
   if(matches.some(match=>squadOf(match)===national.squad))return true;
   const start=seasonDate(career.season,0).slice(0,10),end=seasonHalfEndDate(career.season,'second').slice(0,10);
   const through=national.processedThrough?.slice(0,10);
@@ -63,7 +65,7 @@ function clubParticipation(career:Career):CompetitionParticipation {
 }
 
 function nationalEmpty(career:Career):CompetitionParticipation {
-  const national=career.systems?.national,ageSquad=career.player.age<=20?'U20':'senior';
+  const national=career.systems?.national,ageSquad=nationalSquadFor(career);
   const teamId=`NAT:${normalizeNationality(career.player.nationality)}:${ageSquad}`;
   let status:CompetitionParticipation['status']=national?.status==='injured'?'injured':national?.status==='watchlist'?'watchlist':'unselected';
   let statusLabel=status==='injured'?'부상 제외':status==='watchlist'?'관찰 중':'미선발';
@@ -76,7 +78,11 @@ function nationalEmpty(career:Career):CompetitionParticipation {
 
 /** Actual season membership and national selection, never predicted cup eligibility. */
 export function getSeasonCompetitions(career:Career):CompetitionParticipation[] {
-  const rows=[clubParticipation(career)],national=career.systems?.national;
+  const rows=[clubParticipation(career)],national=career.systems?.national,club=rows[0];
+  if(club.squad==='senior')for(const t of cupLedger(career,career.season.year).filter(t=>t.entrants.includes(club.teamId))){
+    const apps=t.matches.reduce((n,m)=>n+m.playerStats.apps,0),minutes=t.matches.reduce((n,m)=>n+m.playerStats.minutes,0),result=tournamentResult(t,club.teamId);
+    rows.push({id:t.id,scope:'club',competitionId:t.id,name:t.name,teamId:club.teamId,teamName:club.teamName,squad:'senior',apps,minutes,status:t.phase==='completed'||result.includes('탈락')?'completed':apps?'played':'registered',statusLabel:result,reason:`${t.basis} · ${t.rules}`});
+  }
   if(!national)return [...rows,nationalEmpty(career)];
   const matches=currentNationalMatches(career),called=currentCallup(career,national,matches);
   const groups=new Map<string,{teamId:string;squad:'U20'|'senior';competitionId?:string;matches:MatchRecord[];called:boolean}>();
@@ -95,7 +101,7 @@ export function getSeasonCompetitions(career:Career):CompetitionParticipation[] 
     const id=group.competitionId,known=national.history.find(row=>row.competitionId===id&&row.squad===group.squad&&row.year===career.season.year);
     let name=known?.competitionName||(id===national.competitionId?national.competitionName:id?nationalName(id):'국가대표 경기 · 대회 미집계');
     const qualifying=group.matches.some(match=>match.fixtureId.includes('|qualifying|'));
-    const finals=group.matches.some(match=>/\|(semifinal|final)\|/.test(match.fixtureId));
+    const finals=group.matches.some(match=>/\|(group|round32|round16|quarterfinal|semifinal|final|thirdPlace)\|/.test(match.fixtureId));
     if(!id?.startsWith('FRIENDLIES:')){
       if(qualifying||finals)name+=` · ${qualifying&&finals?'예선·본선':finals?'본선':'예선'}`;
       else if(group.called)name+=` · ${national.phase==='finals'?'본선 소집':'소집'}`;
@@ -106,5 +112,5 @@ export function getSeasonCompetitions(career:Career):CompetitionParticipation[] 
     const status:CompetitionParticipation['status']=ended?'completed':injured?'injured':group.called?'called':'played';
     rows.push({id:`national:${career.season.year}:${group.teamId}:${id??'unrecorded'}`,scope:'national',competitionId:id,name,teamId:group.teamId,teamName:nationalTeamName(group.teamId),squad:group.squad,status,statusLabel:ended?'시즌 기록':injured?'출전 기록 · 부상 제외':group.called?apps?'소집 · 출전 중':'소집 · 출전 대기':'이번 시즌 출전',apps,minutes,reason:group.called||injured?national.reason:'이번 시즌 실제 국가대표 출전 원장에서 확인한 대회입니다.'});
   }
-  return rows.length>1?rows:[...rows,nationalEmpty(career)];
+  return rows.some(row=>row.scope==='national')?rows:[...rows,nationalEmpty(career)];
 }

@@ -8,3 +8,7 @@
 .nav-captain-offer { display:inline-block; font-size:15px; padding:1px 5px; margin-left:5px; border-radius:4px; color:var(--teal-dark); background:var(--teal-soft); }
 @media(max-width:899px) { .season-competitions { grid-template-columns:minmax(0,1fr); } }
 @media(max-width:599px) { .season-competitions .competition-scope { flex-direction:column; gap:3px; } .nav-captain-offer { font-size:15px; margin-left:0; } }
+.national-audit,.award-diagnostics { border:1px solid var(--border); border-radius:6px; padding:10px 12px; margin:12px 0; color:var(--text); background:var(--surface); }
+.national-audit summary,.award-diagnostics summary { cursor:pointer; font-weight:600; }
+.national-audit details { margin-top:10px; padding-top:8px; border-top:1px solid var(--border); }
+.national-audit p,.award-diagnostics p { font-size:15px; line-height:1.6; }

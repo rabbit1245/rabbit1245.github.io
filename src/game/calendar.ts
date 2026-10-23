@@ -12,7 +12,7 @@ export function seasonHalfEndDate(season:SeasonState,half:'first'|'second'):stri
 /** The international model reserves these days for travel and international games. */
 export function isInternationalBreak(date:string):boolean {
   const day=new Date(date),month=day.getUTCMonth()+1,d=day.getUTCDate();
-  return month===6&&d>=5&&d<=25||month===11&&d>=5&&d<=15;
+  return month===6||month===7&&d<=19||[3,9,10,11].includes(month)&&d>=18&&d<=28;
 }
 function availableDates(season:SeasonState,half:'first'|'second'):string[] {
   const start=startOf(season,half==='first'?0:6),end=new Date(seasonHalfEndDate(season,half));

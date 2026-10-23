@@ -1,10 +1,16 @@
-import type { Career } from '../game/types';
-import { getSeasonCompetitions } from '../game/season-competitions';
+import {useState} from 'react';
+import type {Career,MatchRecord} from '../game/types';
+import {getSeasonCompetitions} from '../game/season-competitions';
+import {cupLedger,tournamentResult} from '../game/club-competitions';
+import {getClub} from '../game/data';
+import {Modal,MatchRow} from './Shared';
+import NationalAudit from './NationalAudit';
 import './SeasonCompetitions.css';
-
-export default function SeasonCompetitions({career}:{career:Career}){
-  const rows=getSeasonCompetitions(career);
-  return <section className="season-competitions" data-testid="season-competitions" aria-label="이번 시즌 참여 대회">
-    {(['club','national'] as const).map(scope=><div key={scope} className="competition-scope"><span className="competition-scope-label">{scope==='club'?'클럽 대회':'국가대표 대회'}</span><div className="competition-items">{rows.filter(row=>row.scope===scope).map(row=><div key={row.id} className="competition-item" data-testid={scope==='club'?'club-competition':row.competitionId?'national-competition':'national-competition-status'} title={`${row.teamName} · ${row.reason}`}><strong>{row.name}</strong><span>{row.statusLabel}{row.apps>0?` · ${row.apps}경기`:''}</span></div>)}</div></div>)}
-  </section>;
+export default function SeasonCompetitions({career,onMatch}:{career:Career;onMatch?:(m:MatchRecord)=>void}){
+ const rows=getSeasonCompetitions(career),[open,setOpen]=useState<string|null>(null),t=cupLedger(career).find(t=>t.id===open),club=rows[0];
+ return <><section className="season-competitions" data-testid="season-competitions" aria-label="이번 시즌 참여 대회">{(['club','national'] as const).map(scope=><div key={scope} className="competition-scope"><span className="competition-scope-label">{scope==='club'?'클럽 대회':'국가대표 대회'}</span><div className="competition-items">{rows.filter(row=>row.scope===scope).map(row=><div key={row.id} className="competition-item" data-testid={scope==='club'?'club-competition':row.competitionId?'national-competition':'national-competition-status'} title={`${row.teamName} · ${row.reason}`}><strong>{row.name}</strong><span>{row.statusLabel}{row.apps>0?` · ${row.apps}경기`:''}</span></div>)}<button className="text-button" data-testid={`competition-details-${scope}`} onClick={()=>setOpen(scope)}>상세</button></div></div>)}</section>
+ {open&&<Modal title={t?t.name:open==='national'?'대표팀 일정·출전':'이번 시즌 클럽 대회'} onClose={()=>setOpen(null)} wide>
+  {open==='national'?<NationalAudit career={career}/>:t?<><p>{tournamentResult(t,club.teamId)} · {t.basis}</p><p className="fine-print">{t.rules}</p>{t.winnerId&&<p><strong>우승: {getClub(t.winnerId).name}</strong></p>}{t.matches.map(m=><MatchRow key={m.id} match={m} onClick={()=>{setOpen(null);onMatch?.(m);}}/>)}<details><summary>전체 대진·결과 {t.fixtures.length}경기</summary><div className="full-standings-scroll"><table className="league-table"><thead><tr><th>날짜</th><th>라운드</th><th>홈</th><th>결과</th><th>원정</th></tr></thead><tbody>{t.fixtures.map(f=><tr key={f.id}><td>{f.date?.slice(0,10)??'일정 대기'}</td><td>{f.stage}{f.leg===2?' 2차전':''}</td><td>{getClub(f.homeId).name}</td><td>{f.played?`${f.homeGoals} : ${f.awayGoals}${f.shootout?` (승부차기 ${f.shootout.home}:${f.shootout.away})`:''}`:'예정'}</td><td>{getClub(f.awayId).name}</td></tr>)}</tbody></table></div></details>{t.leagueRounds>0&&<details><summary>리그 페이즈 전체 순위</summary><div className="full-standings-scroll"><table className="league-table"><thead><tr><th>순위</th><th>구단</th><th>경기</th><th>승</th><th>무</th><th>패</th><th>승점</th></tr></thead><tbody>{t.table.map((r,i)=><tr key={r.clubId}><td>{i+1}</td><td>{getClub(r.clubId).name}</td><td>{r.played}</td><td>{r.won}</td><td>{r.drawn}</td><td>{r.lost}</td><td>{r.points}</td></tr>)}</tbody></table></div></details>}</>:<><p>리그: {club.name} · {club.statusLabel}</p>{cupLedger(career,career.season.year).filter(t=>t.country===getClub(club.teamId).country||t.kind==='continental').map(t=><p key={t.id}><button className="text-button" onClick={()=>setOpen(t.id)}>{t.name}</button> · {tournamentResult(t,club.teamId)}<br/><small>{t.basis}</small></p>)}{!cupLedger(career,career.season.year).length&&<p>이전 버전에서 진행 중인 시즌은 지난 컵 경기를 새로 만들지 않습니다. 다음 시즌부터 참가권과 일정이 편성됩니다.</p>}</>}
+ </Modal>}
+ </>;
 }

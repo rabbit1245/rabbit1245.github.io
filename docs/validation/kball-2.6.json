@@ -1,0 +1,1387 @@
+{
+  "version": "2.6.0",
+  "unitSuite": {
+    "tests": 189,
+    "pass": 188,
+    "fail": 0,
+    "skippedNew30YearRegeneration": 1
+  },
+  "additionalNationalAndTournamentTests": 35,
+  "manualAndReplayTests": 2,
+  "seasonProjectionTests": 8,
+  "unsupportedNationalityTest": 1,
+  "standaloneBrowser": {
+    "passed": [
+      "1366x768 and 1920x1080 show all 20 abilities and training rows with primary fonts of at least 17px",
+      "creation training, three menus, one-command half progression and identical skipped/reduced-motion results",
+      "all league teams in one modal, actual W/D/L/GF/GA/GD/points and league-only scorer table",
+      "annual-only contracts, one training route, current competitions, locker combined details and reconciled records",
+      "JSON export, independent import slot, checksum rejection and previous-good backup restore",
+      "contract-controlled wage, transfer fees separate from income, next season, reload and retirement totals",
+      "one click downloads one complete UTF-8 career TXT, leaves saves untouched and awards show only own selection",
+      "mobile three-menu navigation, ten goalkeeper abilities, half progression and nine goalkeeper metrics",
+      "mobile full standings retain every team and allow reaching the last points column",
+      "season honours split trophies/personal awards; cheats edit attributes, retain freeze preference and survive reload on desktop/mobile",
+      "standalone HTML makes no external HTTP asset requests"
+    ],
+    "skipped": [
+      "offline cache reload requires a production build"
+    ],
+    "pageErrors": [],
+    "httpRequests": [
+      "http://127.0.0.1:4180/Kball.html"
+    ]
+  },
+  "manualUI": {
+    "url": "http://127.0.0.1:4180/Kball.html",
+    "passed": [
+      "domestic cup entry, model, complete bracket and fixture results open from one compact entry",
+      "manual aging options initially hidden; preview and cancel preserve every field and revision",
+      "explicit apply decreases all twenty attributes exactly once with no round/year progression",
+      "manual aging and OVR persist after reload",
+      "mobile preview fits and Korean TXT includes actual aging and cup records"
+    ],
+    "pageErrors": []
+  },
+  "colors": {
+    "screens": 139,
+    "textSamples": 13780,
+    "contrastFailures": 0,
+    "minimumRatio": 4.752,
+    "disabledSamples": 388,
+    "fixedOverlaps": 0,
+    "clippedText": 0,
+    "intentionalScrollable": 137,
+    "verifiedHorizontalScrolls": 1,
+    "pageErrors": 0
+  },
+  "sixSeasonCareer": {
+    "saveBytes": 61052673,
+    "txtBytes": 6770755,
+    "clubMatches": 361,
+    "nationalMatches": 70,
+    "retirement": true,
+    "saveReload": true
+  },
+  "actualCareerTotals": {
+    "apps": 389,
+    "starts": 377,
+    "minutes": 31685,
+    "goals": 390,
+    "assists": 88,
+    "shots": 1855,
+    "shotsOnTarget": 1480,
+    "passes": 9151,
+    "passesCompleted": 8966,
+    "tackles": 477,
+    "interceptions": 460,
+    "saves": 0,
+    "goalsConceded": 0,
+    "cleanSheets": 0,
+    "ratingSum": 3134.5,
+    "ratingCount": 389,
+    "yellowCards": 44,
+    "redCards": 2,
+    "mom": 123,
+    "keyPasses": 527,
+    "dribbleAttempts": 2224,
+    "dribblesCompleted": 2179,
+    "tackleAttempts": 543,
+    "aerialAttempts": 1597,
+    "aerialWon": 1413,
+    "shotsFaced": 0,
+    "oneOnOneAttempts": 0,
+    "oneOnOneSaves": 0,
+    "penaltiesFaced": 0,
+    "penaltiesSaved": 0,
+    "crossesFaced": 0,
+    "crossesCaught": 0,
+    "sweepingAttempts": 0,
+    "sweepingSuccesses": 0,
+    "buildUpPasses": 0,
+    "buildUpCompleted": 0,
+    "longKicks": 0,
+    "longKicksCompleted": 0,
+    "handlingAttempts": 0,
+    "handlingSuccesses": 0,
+    "lateActions": 6673,
+    "lateSuccesses": 3855,
+    "detailedApps": 389
+  },
+  "careerSeasons": [
+    {
+      "year": 2026,
+      "age": 18,
+      "ovr": 99,
+      "clubRank": 2,
+      "cupMatches": 26,
+      "ballon": 1,
+      "awards": [
+        "FA컵 우승 메달",
+        "프리미어리그 골든 부트",
+        "프리미어리그 시즌의 선수",
+        "PFA 올해의 팀",
+        "발롱도르",
+        "FIFPRO 월드 11"
+      ]
+    },
+    {
+      "year": 2027,
+      "age": 19,
+      "ovr": 99,
+      "clubRank": 1,
+      "cupMatches": 14,
+      "ballon": 2,
+      "awards": [
+        "프리미어리그 골든 부트",
+        "프리미어리그 시즌의 선수",
+        "PFA 올해의 팀",
+        "프리미어리그 우승 메달",
+        "FIFPRO 월드 11"
+      ]
+    },
+    {
+      "year": 2028,
+      "age": 20,
+      "ovr": 99,
+      "clubRank": 1,
+      "cupMatches": 13,
+      "ballon": 1,
+      "awards": [
+        "프리미어리그 골든 부트",
+        "프리미어리그 시즌의 선수",
+        "PFA 올해의 팀",
+        "프리미어리그 우승 메달",
+        "발롱도르",
+        "FIFPRO 월드 11"
+      ]
+    },
+    {
+      "year": 2029,
+      "age": 21,
+      "ovr": 99,
+      "clubRank": 1,
+      "cupMatches": 27,
+      "ballon": 1,
+      "awards": [
+        "FA컵 우승 메달",
+        "프리미어리그 골든 부트",
+        "프리미어리그 시즌의 선수",
+        "PFA 올해의 팀",
+        "프리미어리그 우승 메달",
+        "발롱도르",
+        "FIFPRO 월드 11"
+      ]
+    },
+    {
+      "year": 2030,
+      "age": 22,
+      "ovr": 99,
+      "clubRank": 1,
+      "cupMatches": 26,
+      "ballon": 1,
+      "awards": [
+        "2030 FIFA 월드컵 골든 부트",
+        "FA컵 우승 메달",
+        "UEFA 챔피언스리그 우승 메달",
+        "프리미어리그 골든 부트",
+        "프리미어리그 시즌의 선수",
+        "PFA 올해의 팀",
+        "프리미어리그 우승 메달",
+        "발롱도르",
+        "FIFPRO 월드 11"
+      ]
+    },
+    {
+      "year": 2031,
+      "age": 23,
+      "ovr": 99,
+      "clubRank": 1,
+      "cupMatches": 27,
+      "ballon": 1,
+      "awards": [
+        "카라바오컵 우승 메달",
+        "UEFA 챔피언스리그 우승 메달",
+        "프리미어리그 골든 부트",
+        "프리미어리그 시즌의 선수",
+        "PFA 올해의 팀",
+        "프리미어리그 우승 메달",
+        "발롱도르",
+        "FIFPRO 월드 11"
+      ]
+    }
+  ],
+  "balance": {
+    "model": "동일 선수단·고정 시드. 리그 분포 3개×8시즌. 약팀 비교 10년×2, 직접 경기 결과와 유급 재투자. 해당 비교만 선수 건강·체력 고정해 능력 차이를 분리. 전체 커리어 테스트와 구별.",
+    "distributions": [
+      {
+        "league": "EN1",
+        "seasons": 8,
+        "clubs": [
+          {
+            "club": "리버풀",
+            "id": "EN1_12",
+            "mean": 2.125,
+            "min": 1,
+            "max": 4,
+            "titles": 3,
+            "power": 85.57
+          },
+          {
+            "club": "맨체스터 시티",
+            "id": "EN1_13",
+            "mean": 2.75,
+            "min": 1,
+            "max": 7,
+            "titles": 3,
+            "power": 86.77
+          },
+          {
+            "club": "토트넘 홋스퍼",
+            "id": "EN1_18",
+            "mean": 4.125,
+            "min": 1,
+            "max": 7,
+            "titles": 1,
+            "power": 83.12
+          },
+          {
+            "club": "아스널",
+            "id": "EN1_01",
+            "mean": 4.75,
+            "min": 2,
+            "max": 11,
+            "titles": 0,
+            "power": 84.89
+          },
+          {
+            "club": "뉴캐슬 유나이티드",
+            "id": "EN1_15",
+            "mean": 6.375,
+            "min": 1,
+            "max": 11,
+            "titles": 1,
+            "power": 81.79
+          },
+          {
+            "club": "애스턴 빌라",
+            "id": "EN1_02",
+            "mean": 7,
+            "min": 2,
+            "max": 10,
+            "titles": 0,
+            "power": 80.56
+          },
+          {
+            "club": "맨체스터 유나이티드",
+            "id": "EN1_14",
+            "mean": 7.125,
+            "min": 4,
+            "max": 9,
+            "titles": 0,
+            "power": 82.45
+          },
+          {
+            "club": "웨스트햄 유나이티드",
+            "id": "EN1_19",
+            "mean": 7.25,
+            "min": 4,
+            "max": 11,
+            "titles": 0,
+            "power": 80.61
+          },
+          {
+            "club": "에버턴",
+            "id": "EN1_08",
+            "mean": 10.625,
+            "min": 5,
+            "max": 15,
+            "titles": 0,
+            "power": 77.39
+          },
+          {
+            "club": "풀럼",
+            "id": "EN1_09",
+            "mean": 11.5,
+            "min": 6,
+            "max": 17,
+            "titles": 0,
+            "power": 77.7
+          },
+          {
+            "club": "첼시",
+            "id": "EN1_06",
+            "mean": 11.875,
+            "min": 5,
+            "max": 17,
+            "titles": 0,
+            "power": 81.56
+          },
+          {
+            "club": "크리스털 팰리스",
+            "id": "EN1_07",
+            "mean": 12.25,
+            "min": 7,
+            "max": 18,
+            "titles": 0,
+            "power": 78.44
+          },
+          {
+            "club": "브라이턴 앤 호브 앨비언",
+            "id": "EN1_05",
+            "mean": 13,
+            "min": 6,
+            "max": 18,
+            "titles": 0,
+            "power": 77.81
+          },
+          {
+            "club": "노팅엄 포리스트",
+            "id": "EN1_16",
+            "mean": 13.5,
+            "min": 3,
+            "max": 19,
+            "titles": 0,
+            "power": 76.56
+          },
+          {
+            "club": "울버햄프턴 원더러스",
+            "id": "EN1_20",
+            "mean": 13.75,
+            "min": 6,
+            "max": 20,
+            "titles": 0,
+            "power": 78.43
+          },
+          {
+            "club": "브렌트퍼드",
+            "id": "EN1_04",
+            "mean": 14.25,
+            "min": 8,
+            "max": 18,
+            "titles": 0,
+            "power": 77.49
+          },
+          {
+            "club": "사우샘프턴",
+            "id": "EN1_17",
+            "mean": 14.75,
+            "min": 4,
+            "max": 19,
+            "titles": 0,
+            "power": 74.15
+          },
+          {
+            "club": "본머스",
+            "id": "EN1_03",
+            "mean": 15.125,
+            "min": 11,
+            "max": 19,
+            "titles": 0,
+            "power": 75.83
+          },
+          {
+            "club": "레스터 시티",
+            "id": "EN1_11",
+            "mean": 18.75,
+            "min": 17,
+            "max": 20,
+            "titles": 0,
+            "power": 75.72
+          },
+          {
+            "club": "입스위치 타운",
+            "id": "EN1_10",
+            "mean": 19.125,
+            "min": 16,
+            "max": 20,
+            "titles": 0,
+            "power": 74.58
+          }
+        ]
+      },
+      {
+        "league": "ES1",
+        "seasons": 8,
+        "clubs": [
+          {
+            "club": "레알 마드리드",
+            "id": "ES1_01",
+            "mean": 1.75,
+            "min": 1,
+            "max": 3,
+            "titles": 3,
+            "power": 86.36
+          },
+          {
+            "club": "아틀레티코 마드리드",
+            "id": "ES1_03",
+            "mean": 1.75,
+            "min": 1,
+            "max": 3,
+            "titles": 4,
+            "power": 83.39
+          },
+          {
+            "club": "FC 바르셀로나",
+            "id": "ES1_02",
+            "mean": 2.625,
+            "min": 1,
+            "max": 4,
+            "titles": 1,
+            "power": 84.65
+          },
+          {
+            "club": "레알 소시에다드",
+            "id": "ES1_07",
+            "mean": 5.5,
+            "min": 4,
+            "max": 11,
+            "titles": 0,
+            "power": 78.53
+          },
+          {
+            "club": "아틀레틱 클루브",
+            "id": "ES1_04",
+            "mean": 6.375,
+            "min": 3,
+            "max": 12,
+            "titles": 0,
+            "power": 80.25
+          },
+          {
+            "club": "레알 베티스",
+            "id": "ES1_06",
+            "mean": 7,
+            "min": 4,
+            "max": 11,
+            "titles": 0,
+            "power": 79.02
+          },
+          {
+            "club": "발렌시아",
+            "id": "ES1_10",
+            "mean": 7.5,
+            "min": 4,
+            "max": 13,
+            "titles": 0,
+            "power": 78.42
+          },
+          {
+            "club": "지로나",
+            "id": "ES1_08",
+            "mean": 8.75,
+            "min": 7,
+            "max": 12,
+            "titles": 0,
+            "power": 78.52
+          },
+          {
+            "club": "비야레알",
+            "id": "ES1_05",
+            "mean": 10.5,
+            "min": 5,
+            "max": 16,
+            "titles": 0,
+            "power": 77.96
+          },
+          {
+            "club": "라스팔마스",
+            "id": "ES1_16",
+            "mean": 12,
+            "min": 6,
+            "max": 20,
+            "titles": 0,
+            "power": 77.38
+          },
+          {
+            "club": "레가네스",
+            "id": "ES1_18",
+            "mean": 12.25,
+            "min": 6,
+            "max": 16,
+            "titles": 0,
+            "power": 73.16
+          },
+          {
+            "club": "오사수나",
+            "id": "ES1_12",
+            "mean": 12.375,
+            "min": 8,
+            "max": 18,
+            "titles": 0,
+            "power": 76.47
+          },
+          {
+            "club": "헤타페",
+            "id": "ES1_13",
+            "mean": 12.375,
+            "min": 9,
+            "max": 17,
+            "titles": 0,
+            "power": 75.26
+          },
+          {
+            "club": "세비야",
+            "id": "ES1_09",
+            "mean": 12.625,
+            "min": 8,
+            "max": 16,
+            "titles": 0,
+            "power": 77.59
+          },
+          {
+            "club": "셀타 비고",
+            "id": "ES1_11",
+            "mean": 12.875,
+            "min": 4,
+            "max": 19,
+            "titles": 0,
+            "power": 75.05
+          },
+          {
+            "club": "마요르카",
+            "id": "ES1_15",
+            "mean": 14.625,
+            "min": 8,
+            "max": 19,
+            "titles": 0,
+            "power": 77.72
+          },
+          {
+            "club": "라요 바예카노",
+            "id": "ES1_17",
+            "mean": 15.5,
+            "min": 12,
+            "max": 19,
+            "titles": 0,
+            "power": 77.29
+          },
+          {
+            "club": "알라베스",
+            "id": "ES1_14",
+            "mean": 17,
+            "min": 9,
+            "max": 20,
+            "titles": 0,
+            "power": 74.06
+          },
+          {
+            "club": "에스파뇰",
+            "id": "ES1_19",
+            "mean": 17.25,
+            "min": 14,
+            "max": 19,
+            "titles": 0,
+            "power": 75.95
+          },
+          {
+            "club": "레알 바야돌리드",
+            "id": "ES1_20",
+            "mean": 19.375,
+            "min": 18,
+            "max": 20,
+            "titles": 0,
+            "power": 73.03
+          }
+        ]
+      },
+      {
+        "league": "DE1",
+        "seasons": 8,
+        "clubs": [
+          {
+            "club": "바이에른 뮌헨",
+            "id": "DE1_02",
+            "mean": 2.125,
+            "min": 1,
+            "max": 6,
+            "titles": 4,
+            "power": 84.33
+          },
+          {
+            "club": "바이어 04 레버쿠젠",
+            "id": "DE1_01",
+            "mean": 2.25,
+            "min": 1,
+            "max": 4,
+            "titles": 3,
+            "power": 84.63
+          },
+          {
+            "club": "보루시아 도르트문트",
+            "id": "DE1_05",
+            "mean": 2.375,
+            "min": 1,
+            "max": 4,
+            "titles": 1,
+            "power": 82.34
+          },
+          {
+            "club": "RB 라이프치히",
+            "id": "DE1_04",
+            "mean": 3.875,
+            "min": 2,
+            "max": 5,
+            "titles": 0,
+            "power": 81.98
+          },
+          {
+            "club": "아인트라흐트 프랑크푸르트",
+            "id": "DE1_06",
+            "mean": 6,
+            "min": 4,
+            "max": 9,
+            "titles": 0,
+            "power": 78.72
+          },
+          {
+            "club": "TSG 호펜하임",
+            "id": "DE1_07",
+            "mean": 7.625,
+            "min": 3,
+            "max": 14,
+            "titles": 0,
+            "power": 77.19
+          },
+          {
+            "club": "보루시아 묀헨글라트바흐",
+            "id": "DE1_14",
+            "mean": 8.625,
+            "min": 5,
+            "max": 14,
+            "titles": 0,
+            "power": 77.14
+          },
+          {
+            "club": "VfB 슈투트가르트",
+            "id": "DE1_03",
+            "mean": 9,
+            "min": 7,
+            "max": 12,
+            "titles": 0,
+            "power": 77.32
+          },
+          {
+            "club": "우니온 베를린",
+            "id": "DE1_15",
+            "mean": 9.125,
+            "min": 7,
+            "max": 11,
+            "titles": 0,
+            "power": 74.87
+          },
+          {
+            "club": "SC 프라이부르크",
+            "id": "DE1_10",
+            "mean": 10.125,
+            "min": 5,
+            "max": 16,
+            "titles": 0,
+            "power": 76.78
+          },
+          {
+            "club": "VfL 볼프스부르크",
+            "id": "DE1_12",
+            "mean": 11.125,
+            "min": 6,
+            "max": 17,
+            "titles": 0,
+            "power": 77.3
+          },
+          {
+            "club": "베르더 브레멘",
+            "id": "DE1_09",
+            "mean": 11.5,
+            "min": 7,
+            "max": 14,
+            "titles": 0,
+            "power": 73.73
+          },
+          {
+            "club": "마인츠 05",
+            "id": "DE1_13",
+            "mean": 12.375,
+            "min": 10,
+            "max": 17,
+            "titles": 0,
+            "power": 74.92
+          },
+          {
+            "club": "FC 아우크스부르크",
+            "id": "DE1_11",
+            "mean": 13.5,
+            "min": 7,
+            "max": 16,
+            "titles": 0,
+            "power": 74.21
+          },
+          {
+            "club": "VfL 보훔",
+            "id": "DE1_16",
+            "mean": 13.625,
+            "min": 6,
+            "max": 17,
+            "titles": 0,
+            "power": 72.64
+          },
+          {
+            "club": "1. FC 하이덴하임",
+            "id": "DE1_08",
+            "mean": 14.25,
+            "min": 10,
+            "max": 17,
+            "titles": 0,
+            "power": 72.63
+          },
+          {
+            "club": "홀슈타인 킬",
+            "id": "DE1_18",
+            "mean": 16.375,
+            "min": 11,
+            "max": 18,
+            "titles": 0,
+            "power": 70.25
+          },
+          {
+            "club": "FC 장크트파울리",
+            "id": "DE1_17",
+            "mean": 17.125,
+            "min": 13,
+            "max": 18,
+            "titles": 0,
+            "power": 70.33
+          }
+        ]
+      }
+    ],
+    "impact": [
+      {
+        "club": "맨체스터 시티",
+        "means": [
+          {
+            "quality": 97,
+            "rank": 1.125,
+            "points": 86.75,
+            "titles": 7
+          },
+          {
+            "quality": 60,
+            "rank": 1.5,
+            "points": 82.625,
+            "titles": 5
+          }
+        ],
+        "rows": [
+          {
+            "quality": 97,
+            "seed": 0,
+            "rank": 1,
+            "points": 84,
+            "goals": 29,
+            "assists": 6
+          },
+          {
+            "quality": 97,
+            "seed": 1,
+            "rank": 1,
+            "points": 87,
+            "goals": 26,
+            "assists": 5
+          },
+          {
+            "quality": 97,
+            "seed": 2,
+            "rank": 1,
+            "points": 85,
+            "goals": 25,
+            "assists": 2
+          },
+          {
+            "quality": 97,
+            "seed": 3,
+            "rank": 1,
+            "points": 88,
+            "goals": 35,
+            "assists": 9
+          },
+          {
+            "quality": 97,
+            "seed": 4,
+            "rank": 1,
+            "points": 88,
+            "goals": 30,
+            "assists": 7
+          },
+          {
+            "quality": 97,
+            "seed": 5,
+            "rank": 2,
+            "points": 87,
+            "goals": 38,
+            "assists": 4
+          },
+          {
+            "quality": 97,
+            "seed": 6,
+            "rank": 1,
+            "points": 86,
+            "goals": 26,
+            "assists": 7
+          },
+          {
+            "quality": 97,
+            "seed": 7,
+            "rank": 1,
+            "points": 89,
+            "goals": 26,
+            "assists": 9
+          },
+          {
+            "quality": 60,
+            "seed": 0,
+            "rank": 1,
+            "points": 84,
+            "goals": 2,
+            "assists": 0
+          },
+          {
+            "quality": 60,
+            "seed": 1,
+            "rank": 1,
+            "points": 84,
+            "goals": 1,
+            "assists": 0
+          },
+          {
+            "quality": 60,
+            "seed": 2,
+            "rank": 1,
+            "points": 83,
+            "goals": 0,
+            "assists": 0
+          },
+          {
+            "quality": 60,
+            "seed": 3,
+            "rank": 1,
+            "points": 85,
+            "goals": 2,
+            "assists": 0
+          },
+          {
+            "quality": 60,
+            "seed": 4,
+            "rank": 1,
+            "points": 81,
+            "goals": 0,
+            "assists": 0
+          },
+          {
+            "quality": 60,
+            "seed": 5,
+            "rank": 2,
+            "points": 87,
+            "goals": 1,
+            "assists": 0
+          },
+          {
+            "quality": 60,
+            "seed": 6,
+            "rank": 2,
+            "points": 78,
+            "goals": 0,
+            "assists": 0
+          },
+          {
+            "quality": 60,
+            "seed": 7,
+            "rank": 3,
+            "points": 79,
+            "goals": 3,
+            "assists": 1
+          }
+        ]
+      },
+      {
+        "club": "바이에른 뮌헨",
+        "means": [
+          {
+            "quality": 97,
+            "rank": 1.125,
+            "points": 83.375,
+            "titles": 7
+          },
+          {
+            "quality": 60,
+            "rank": 1.875,
+            "points": 76.875,
+            "titles": 4
+          }
+        ],
+        "rows": [
+          {
+            "quality": 97,
+            "seed": 0,
+            "rank": 1,
+            "points": 89,
+            "goals": 28,
+            "assists": 15
+          },
+          {
+            "quality": 97,
+            "seed": 1,
+            "rank": 1,
+            "points": 81,
+            "goals": 32,
+            "assists": 5
+          },
+          {
+            "quality": 97,
+            "seed": 2,
+            "rank": 2,
+            "points": 78,
+            "goals": 29,
+            "assists": 5
+          },
+          {
+            "quality": 97,
+            "seed": 3,
+            "rank": 1,
+            "points": 91,
+            "goals": 32,
+            "assists": 5
+          },
+          {
+            "quality": 97,
+            "seed": 4,
+            "rank": 1,
+            "points": 82,
+            "goals": 36,
+            "assists": 8
+          },
+          {
+            "quality": 97,
+            "seed": 5,
+            "rank": 1,
+            "points": 80,
+            "goals": 35,
+            "assists": 5
+          },
+          {
+            "quality": 97,
+            "seed": 6,
+            "rank": 1,
+            "points": 87,
+            "goals": 30,
+            "assists": 10
+          },
+          {
+            "quality": 97,
+            "seed": 7,
+            "rank": 1,
+            "points": 79,
+            "goals": 29,
+            "assists": 3
+          },
+          {
+            "quality": 60,
+            "seed": 0,
+            "rank": 1,
+            "points": 78,
+            "goals": 0,
+            "assists": 1
+          },
+          {
+            "quality": 60,
+            "seed": 1,
+            "rank": 3,
+            "points": 73,
+            "goals": 2,
+            "assists": 0
+          },
+          {
+            "quality": 60,
+            "seed": 2,
+            "rank": 3,
+            "points": 69,
+            "goals": 3,
+            "assists": 2
+          },
+          {
+            "quality": 60,
+            "seed": 3,
+            "rank": 1,
+            "points": 90,
+            "goals": 2,
+            "assists": 0
+          },
+          {
+            "quality": 60,
+            "seed": 4,
+            "rank": 1,
+            "points": 77,
+            "goals": 0,
+            "assists": 0
+          },
+          {
+            "quality": 60,
+            "seed": 5,
+            "rank": 2,
+            "points": 71,
+            "goals": 1,
+            "assists": 0
+          },
+          {
+            "quality": 60,
+            "seed": 6,
+            "rank": 1,
+            "points": 85,
+            "goals": 0,
+            "assists": 1
+          },
+          {
+            "quality": 60,
+            "seed": 7,
+            "rank": 3,
+            "points": 72,
+            "goals": 2,
+            "assists": 1
+          }
+        ]
+      }
+    ],
+    "development": [
+      {
+        "quality": 97,
+        "records": [
+          {
+            "year": 2026,
+            "league": "KR1",
+            "rank": 11,
+            "points": 24,
+            "goals": 18,
+            "assists": 4,
+            "apps": 22,
+            "before": 69.76,
+            "after": 69.83,
+            "prestige": 67.85,
+            "investment": 0,
+            "bonus": 0,
+            "reinvestment": 0
+          },
+          {
+            "year": 2027,
+            "league": "KR1",
+            "rank": 3,
+            "points": 35,
+            "goals": 24,
+            "assists": 4,
+            "apps": 22,
+            "before": 69.83,
+            "after": 71.97,
+            "prestige": 68.55,
+            "investment": 0.129,
+            "bonus": 704479,
+            "reinvestment": 114478
+          },
+          {
+            "year": 2028,
+            "league": "KR1",
+            "rank": 3,
+            "points": 34,
+            "goals": 29,
+            "assists": 2,
+            "apps": 22,
+            "before": 71.97,
+            "after": 70.81,
+            "prestige": 69.42,
+            "investment": 0.254,
+            "bonus": 748160,
+            "reinvestment": 121576
+          },
+          {
+            "year": 2029,
+            "league": "KR1",
+            "rank": 3,
+            "points": 39,
+            "goals": 24,
+            "assists": 4,
+            "apps": 22,
+            "before": 70.81,
+            "after": 71.88,
+            "prestige": 70.04,
+            "investment": 0.376,
+            "bonus": 847403,
+            "reinvestment": 137703
+          },
+          {
+            "year": 2030,
+            "league": "KR1",
+            "rank": 11,
+            "points": 20,
+            "goals": 13,
+            "assists": 3,
+            "apps": 22,
+            "before": 71.88,
+            "after": 73.54,
+            "prestige": 69.67,
+            "investment": 0.365,
+            "bonus": 0,
+            "reinvestment": 0
+          },
+          {
+            "year": 2031,
+            "league": "KR1",
+            "rank": 2,
+            "points": 43,
+            "goals": 24,
+            "assists": 3,
+            "apps": 22,
+            "before": 73.54,
+            "after": 71.16,
+            "prestige": 70.72,
+            "investment": 0.515,
+            "bonus": 1049244,
+            "reinvestment": 170502
+          },
+          {
+            "year": 2032,
+            "league": "KR1",
+            "rank": 12,
+            "points": 13,
+            "goals": 15,
+            "assists": 3,
+            "apps": 22,
+            "before": 71.16,
+            "after": 72.26,
+            "prestige": 70.05,
+            "investment": 0.5,
+            "bonus": 0,
+            "reinvestment": 0
+          },
+          {
+            "year": 2033,
+            "league": "KR2",
+            "rank": 1,
+            "points": 63,
+            "goals": 43,
+            "assists": 10,
+            "apps": 24,
+            "before": 72.26,
+            "after": 72.37,
+            "prestige": 71.39,
+            "investment": 0.906,
+            "bonus": 2077636,
+            "reinvestment": 1048089
+          },
+          {
+            "year": 2034,
+            "league": "KR1",
+            "rank": 3,
+            "points": 36,
+            "goals": 14,
+            "assists": 2,
+            "apps": 22,
+            "before": 72.37,
+            "after": 72.88,
+            "prestige": 71.97,
+            "investment": 1.008,
+            "bonus": 896856,
+            "reinvestment": 145739
+          },
+          {
+            "year": 2035,
+            "league": "KR1",
+            "rank": 3,
+            "points": 41,
+            "goals": 27,
+            "assists": 3,
+            "apps": 22,
+            "before": 72.88,
+            "after": 73.07,
+            "prestige": 72.54,
+            "investment": 1.107,
+            "bonus": 917610,
+            "reinvestment": 149112
+          }
+        ]
+      },
+      {
+        "quality": 60,
+        "records": [
+          {
+            "year": 2026,
+            "league": "KR1",
+            "rank": 12,
+            "points": 18,
+            "goals": 5,
+            "assists": 3,
+            "apps": 16,
+            "before": 66.97,
+            "after": 66.98,
+            "prestige": 67.72,
+            "investment": 0,
+            "bonus": 0,
+            "reinvestment": 0
+          },
+          {
+            "year": 2027,
+            "league": "KR2",
+            "rank": 2,
+            "points": 48,
+            "goals": 13,
+            "assists": 1,
+            "apps": 20,
+            "before": 66.98,
+            "after": 69.22,
+            "prestige": 68.23,
+            "investment": 0.058,
+            "bonus": 641573,
+            "reinvestment": 104256
+          },
+          {
+            "year": 2028,
+            "league": "KR2",
+            "rank": 1,
+            "points": 56,
+            "goals": 12,
+            "assists": 1,
+            "apps": 21,
+            "before": 69.22,
+            "after": 68.28,
+            "prestige": 69.42,
+            "investment": 0.51,
+            "bonus": 1411918,
+            "reinvestment": 768350
+          },
+          {
+            "year": 2029,
+            "league": "KR1",
+            "rank": 8,
+            "points": 27,
+            "goals": 4,
+            "assists": 4,
+            "apps": 17,
+            "before": 68.28,
+            "after": 69.06,
+            "prestige": 69.09,
+            "investment": 0.495,
+            "bonus": 0,
+            "reinvestment": 0
+          },
+          {
+            "year": 2030,
+            "league": "KR1",
+            "rank": 11,
+            "points": 20,
+            "goals": 9,
+            "assists": 2,
+            "apps": 22,
+            "before": 69.06,
+            "after": 70.76,
+            "prestige": 68.5,
+            "investment": 0.48,
+            "bonus": 0,
+            "reinvestment": 0
+          },
+          {
+            "year": 2031,
+            "league": "KR1",
+            "rank": 4,
+            "points": 32,
+            "goals": 6,
+            "assists": 0,
+            "apps": 16,
+            "before": 70.76,
+            "after": 68.08,
+            "prestige": 69.1,
+            "investment": 0.563,
+            "bonus": 509753,
+            "reinvestment": 82835
+          },
+          {
+            "year": 2032,
+            "league": "KR1",
+            "rank": 12,
+            "points": 5,
+            "goals": 3,
+            "assists": 1,
+            "apps": 16,
+            "before": 68.08,
+            "after": 69.24,
+            "prestige": 68.26,
+            "investment": 0.546,
+            "bonus": 0,
+            "reinvestment": 0
+          },
+          {
+            "year": 2033,
+            "league": "KR2",
+            "rank": 1,
+            "points": 50,
+            "goals": 12,
+            "assists": 3,
+            "apps": 19,
+            "before": 69.24,
+            "after": 69.35,
+            "prestige": 69.45,
+            "investment": 0.952,
+            "bonus": 1662656,
+            "reinvestment": 841835
+          },
+          {
+            "year": 2034,
+            "league": "KR1",
+            "rank": 9,
+            "points": 30,
+            "goals": 4,
+            "assists": 1,
+            "apps": 16,
+            "before": 69.35,
+            "after": 69.48,
+            "prestige": 69.11,
+            "investment": 0.923,
+            "bonus": 0,
+            "reinvestment": 0
+          },
+          {
+            "year": 2035,
+            "league": "KR1",
+            "rank": 12,
+            "points": 18,
+            "goals": 4,
+            "assists": 0,
+            "apps": 16,
+            "before": 69.48,
+            "after": 69.22,
+            "prestige": 68.43,
+            "investment": 0.895,
+            "bonus": 0,
+            "reinvestment": 0
+          }
+        ]
+      }
+    ]
+  },
+  "old30SeasonCompatibility": {
+    "source": "/workspace/rabbit1245.github.io/test-results/long-career-30-seasons.json",
+    "saveBytes": 81104879,
+    "txtBytes": 14098161,
+    "seasons": 30,
+    "clubMatches": 1020,
+    "nationalMatches": 108,
+    "newSeasonSnapshots": 30,
+    "downloads": 1,
+    "bom": true,
+    "crlf": true,
+    "rawJSON": false,
+    "readableMatchTotalsReconcile": true,
+    "reload": true,
+    "pageErrors": []
+  },
+  "localFileNavigation": {
+    "verified": false,
+    "reason": "Managed browser policy: ERR_BLOCKED_BY_ADMINISTRATOR for file:// navigation; same self-contained HTML tested over HTTP."
+  }
+}

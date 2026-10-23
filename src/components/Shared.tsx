@@ -1,3 +1,4 @@
+import {cupStats} from '../game/club-competitions';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { ArrowUpRight, Flag, X } from 'lucide-react';
@@ -36,7 +37,7 @@ export function Sparkline({ values, label, format = v => String(Math.round(v)) }
   const all = values.length ? values : [0], min = Math.min(...all), max = Math.max(...all), points = all.map((v, i) => `${12 + i * 476 / Math.max(1, all.length - 1)},${89 - (v - min) / Math.max(1, max - min) * 65}`).join(' ');
   return <div className="sparkline"><svg viewBox="0 0 500 110" role="img" aria-label={`${label}: ${all.map(format).join(', ')}`}><line x1="12" y1="89" x2="488" y2="89" className="chart-grid" /><polyline points={points} fill="none" className="chart-line" />{all.map((v, i) => { const [x, y] = points.split(' ')[i].split(',').map(Number); return <g key={i}><title>{format(v)}</title><circle cx={x} cy={y} r="3" className="chart-dot" />{(i === 0 || i === all.length - 1) && <text x={x} y={y - 10} textAnchor={i === 0 ? 'start' : 'end'}>{format(v)}</text>}</g>; })}</svg><div><span>시작</span><span>현재</span></div></div>;
 }
-export function clubTotal(career: Career) { return sumStats([...career.history.map(s => s.stats), ...(career.stage === 'season' ? [career.season.playerStats] : [])]); }
+export function clubTotal(career: Career) { return sumStats([cupStats(career),...career.history.map(s => s.stats), ...(career.stage === 'season' ? [career.season.playerStats] : [])]); }
 export function nationalTotal(career: Career) { return sumStats(nationalMatchLedger(career).map(match => match.playerStats)); }
 export const STAT_LABELS: Partial<Record<keyof PlayerStats, string>> = { apps:'출전', starts:'선발', minutes:'출전 시간', goals:'득점', assists:'도움', shots:'슈팅', shotsOnTarget:'유효 슈팅', passes:'패스 시도', passesCompleted:'패스 성공', keyPasses:'키패스', dribbleAttempts:'드리블 시도', dribblesCompleted:'드리블 성공', tackles:'태클 성공', tackleAttempts:'태클 시도', interceptions:'인터셉트', aerialAttempts:'공중볼 시도', aerialWon:'공중볼 승리', saves:'선방', shotsFaced:'상대 유효 슈팅', goalsConceded:'실점', cleanSheets:'클린시트', oneOnOneAttempts:'일대일 시도', oneOnOneSaves:'일대일 선방', penaltiesFaced:'상대 페널티', penaltiesSaved:'페널티 선방', crossesFaced:'상대 크로스', crossesCaught:'크로스 포구', sweepingAttempts:'스위핑 시도', sweepingSuccesses:'스위핑 성공', buildUpPasses:'빌드업 패스 시도', buildUpCompleted:'빌드업 패스 성공', longKicks:'롱킥 시도', longKicksCompleted:'롱킥 성공', handlingAttempts:'공 처리 시도', handlingSuccesses:'공 처리 성공', lateActions:'후반 행동', lateSuccesses:'후반 성공', mom:'MOM' };
 
