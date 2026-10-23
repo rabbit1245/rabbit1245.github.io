@@ -21,6 +21,7 @@ export function ensureGrowthTracking(career:Career):GrowthLedger {
   return career.systems.growthLedger!;
 }
 function apply(career:Career,key:AttributeKey,amount:number,cause:GrowthCause):void {
+  if(career.systems?.attributeLocks?.includes(key))return;
   const current=career.player.attributes[key];if(current===undefined)return;
   const next=round(clamp(current+amount,0,100)),change=round(next-current);
   if(!change)return;
@@ -82,4 +83,4 @@ export function roleGrowthDescription(career:Career):string {
   return `${career.player.position} · ${POSITION_ATTRIBUTES[career.player.position].slice(0,3).join(', ')}`;
 }
 
-export function applyManualAging(career:Career,amount:number):void{for(const key of Object.keys(career.player.attributes) as AttributeKey[])apply(career,key,-amount,'aging');career.player.ovr=overall(career.player);}
+export function applyManualAging(career:Career,amount:number,key:AttributeKey):void{apply(career,key,-amount,'aging');career.player.ovr=overall(career.player);}

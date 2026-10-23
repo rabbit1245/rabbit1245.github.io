@@ -1,3 +1,6 @@
+import {reviewK3Promotion} from './korean-promotion';
+import {internationalRoster} from './international-clubs';
+import {compactMoney} from './currency';
 import { CLUBS, LEAGUES, ROSTERS, ROSTER_CALIBRATION, getClub, getLeague } from './data';
 import { ALL_STATS, clamp, emptyStats, hashSeed, integer, round, seededRandom } from './math';
 import { getLeagueRule } from './league-rules';
@@ -178,7 +181,7 @@ export function getClubRatingOffset(career:Career,id:string):number {
 /** Persistent, healthy squad members. The match engine selects its own XI and substitutions. */
 export function getWorldClubPlayers(career: Career, clubId: string): MatchParticipant[] {
   const world=career.systems?.world, club=world?.clubs[clubId];
-  if (!world || !club) return (ROSTERS[clubId]??[]).map(p=>({...p}));
+  if (!world || !club) return (ROSTERS[clubId]??internationalRoster(clubId)).map(p=>({...p}));
   const offset=getClubRatingOffset(career,clubId);
   const ids=club.rosterIds.filter(id=>id!==career.player.id);if(clubId===career.player.clubId)ids.push(career.player.id);
   return ids.flatMap(id => {
@@ -217,6 +220,7 @@ function aggregateMatch(career: Career, world: WorldState, match: MatchRecord, l
   const performers=match.performers??(match.playerPlayed?[{...career.player,clubId:match.playerClubId,stats:match.playerStats,rating:match.playerRating,minutes:match.playerMinutes,started:match.playerStarted}]:[]);
   for (const player of performers) {
     if (!player.stats.apps) continue;
+    const persistent=world.players[player.id];if(persistent?.joinedYear!==undefined&&persistent.leagueDebutYear===undefined)persistent.leagueDebutYear=world.year;
     let row=world.playerStats[player.id];
     if (!row) row=world.playerStats[player.id]={playerId:player.id,name:player.name,clubId:player.clubId,leagueId,position:player.position,nationality:player.nationality??world.players[player.id]?.nationality??getClub(player.clubId).country,ovr:player.ovr,stats:emptyStats()};
     // Keep actual competition scope for comparisons; only played rows occupy the season ledger.
@@ -300,6 +304,7 @@ function compareAcrossGroups(a: Standing,b: Standing): number {
 }
 
 function applyMovements(career: Career, world: WorldState): void {
+  if(world.pendingMovements){for(const m of world.pendingMovements)movement(career,world,m.clubId,m.toLeagueId,m.reason);delete world.pendingMovements;return;}
   for (const upper of LEAGUES) {
     const rule=getLeagueRule(upper.id);
     if (!rule.relegation || upper.id==='KR1') continue;
@@ -310,10 +315,10 @@ function applyMovements(career: Career, world: WorldState): void {
     const promoted: {row:Standing;leagueId:string}[]=[], vacancies=new Map<string,number>();
     const base=Math.floor(count/lower.length);
     for (const league of lower) {
-      const rows=world.competitions[league.id].table;
+      const rows=world.competitions[league.id].table.filter(row=>promotionEligible(row.clubId,upper.id));
       for (const row of rows.slice(0,base)) promoted.push({row,leagueId:league.id});
     }
-    const remaining=lower.flatMap(league=>world.competitions[league.id].table.slice(base).map(row=>({row,leagueId:league.id})))
+    const remaining=lower.flatMap(league=>world.competitions[league.id].table.filter(row=>promotionEligible(row.clubId,upper.id)).slice(base).map(row=>({row,leagueId:league.id})))
       .sort((a,b)=>compareAcrossGroups(a.row,b.row));
     promoted.push(...remaining.slice(0,count-promoted.length));
     for (const selected of promoted) vacancies.set(selected.leagueId,(vacancies.get(selected.leagueId)??0)+1);
@@ -343,6 +348,28 @@ function applyMovements(career: Career, world: WorldState): void {
       }
     }
   }
+
+  const edition=world.koreanLicenseEditions?.find(e=>e.year===career.season.year),review=reviewK3Promotion(career,edition);
+  if(review){(world.promotionReviews??=[]).push(review);if(review.promoted){const bottom=world.competitions.KR2.table.at(-1)!.clubId;movement(career,world,review.clubId,'KR2',review.reason);movement(career,world,bottom,'KR3',review.reason);}}
+}
+function promotionEligible(id:string,destination:string):boolean{
+ const club=getClub(id),country=club.country,reserve=/(?:\s(?:B|II)|\sU23|Futuro|Next Gen|Castilla|Atletic|Fortuna)$|^Jong /i.test(club.nativeName);
+ if(!reserve)return true;const tier=getLeague(destination).tier;
+ if(country==='독일'&&tier<=2)return false;
+ if(['스페인','포르투갈','이탈리아','네덜란드','벨기에'].includes(country)&&tier===1)return false;
+ return true;
+}
+/** Resolve once before the transfer window, apply membership changes only on the next season. */
+export function prepareWorldMovements(c:Career):void{
+ const world=c.systems?.world;if(!world||world.pendingMovements)return;
+ const snapshot:WorldState={...world,clubs:Object.fromEntries(Object.entries(world.clubs).map(([id,club])=>[id,{...club,changes:[...club.changes]}])),movements:[],promotionReviews:[]};
+ applyMovements(c,snapshot);world.pendingMovements=snapshot.movements;
+ world.promotionReviews=[...(world.promotionReviews??[]),...(snapshot.promotionReviews??[])];
+ for(const r of snapshot.promotionReviews??[])if(r.matches.length&&r.matches.some(m=>[m.homeId,m.awayId].includes(c.player.clubId))){
+  const matches=r.matches.filter(m=>[m.homeId,m.awayId].includes(c.player.clubId)),entrants=[matches[0].homeId,matches[0].awayId],last=matches.at(-1)!,winner=r.promoted?r.clubId:entrants.find(id=>id!==r.clubId)!;
+  const fixtures=matches.map((m,i)=>({id:m.fixtureId,round:i+1,homeId:m.homeId,awayId:m.awayId,homeGoals:m.homeGoals,awayGoals:m.awayGoals,date:m.date,played:true,step:i+1,leg:i+1,tieId:'promotion-final',stage:'결승',...(i===matches.length-1?{winnerId:winner}:{})}));
+  c.systems!.clubCompetitions?.current.push({id:`PLAYOFF:KR23:${c.season.year}`,name:'K리그2·K3 승강 결정전',year:c.season.year,country:'대한민국',kind:'cup',entrants,basis:r.reason,rules:r.reason,phase:'completed',step:matches.length,leagueRounds:0,stage:'우승 확정',active:[winner],byes:[],fixtures,matches,table:entrants.map(clubId=>({clubId,played:0,won:0,drawn:0,lost:0,goalsFor:0,goalsAgainst:0,points:0})),winnerId:winner,startedAtRound:c.season.week});
+ }
 }
 
 function recruit(career: Career, world: WorldState, club: ClubWorld, position: WorldPlayer['position'], nextYear: number, serial: number): void {
@@ -350,7 +377,7 @@ function recruit(career: Career, world: WorldState, club: ClubWorld, position: W
   const tier=getLeague(club.leagueId).tier, age=integer(rng,18,24);
   const quality=round(clamp(club.power+integer(rng,-5,2)+(club.budget>club.revenue*.25?1:0)-Math.max(0,tier-1)*.25,30,93));
   const id=`regen_${club.id}_${nextYear}_${serial}`;
-  world.players[id]={id,clubId:club.id,name:`유망주 ${hashSeed(id).toString(36).slice(0,4).toUpperCase()} (가상)`,position,age,ovr:quality,potential:clamp(quality+integer(rng,3,10),quality,97),injuryWeeks:0,nationality:nationalityForPlayer(id,getClub(club.id).country),leadership:integer(rng,35,72)};
+  world.players[id]={id,clubId:club.id,joinedYear:nextYear,name:`유망주 ${hashSeed(id).toString(36).slice(0,4).toUpperCase()} (가상)`,position,age,ovr:quality,potential:clamp(quality+integer(rng,3,10),quality,97),injuryWeeks:0,nationality:nationalityForPlayer(id,getClub(club.id).country),leadership:integer(rng,35,72)};
   club.rosterIds.push(id);
 }
 
@@ -414,7 +441,7 @@ export function transitionWorldSeason(career: Career): void {
         club.rosterIds.push(id);spent+=fee;performance.recruits=1;
       }
       club.budget=Math.max(0,Math.round(club.budget-spent));performance.reinvestment=spent;
-      club.changes.push(`${performance.year}시즌 ${performance.rank}위 · 성과 수입 +${Math.round(performance.bonus/1000)}천 유로, 선수단 재투자 ${Math.round(spent/1000)}천 유로`);
+      club.changes.push(`${performance.year}시즌 ${performance.rank}위 · 성과 수입 +${compactMoney(performance.bonus)}, 선수단 재투자 ${compactMoney(spent)}`);
     }
     const rng=seededRandom(`${career.seed}|recruit-policy|${nextYear}|${club.id}`);
     if (replacements.length===0 && club.rosterIds.length>18 && rng()<.16) {

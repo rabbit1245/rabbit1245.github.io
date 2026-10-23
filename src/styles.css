@@ -1080,3 +1080,43 @@ input,select { font-size:17px; min-height:38px; padding:7px 10px; border-radius:
 .header-inner > .toast { order:1; margin:0; flex:0 1 360px; min-width:0; }
 .header-tools { order:2; flex-shrink:0; }
 @media(max-width:899px) { .header-inner > .toast { order:4; flex-basis:100%; max-width:none; } }
+
+/* Inline attribute controls keep the clickable stat separate from its lock. */
+.manual-aging {display:flex;align-items:center;flex-wrap:wrap;gap:6px;}
+.training-cell {display:flex;min-width:0;align-items:stretch;gap:3px;}
+.training-cell .training-row {flex:1;min-width:0;padding:6px;gap:4px;grid-template-columns:22px minmax(0,1fr) 28px 38px;}
+.attribute-lock {flex:0 0 27px;display:grid;place-items:center;border:1px solid var(--border);background:#fff;border-radius:5px;color:#5f6368;}
+.attribute-lock.locked {color:#285f31;background:#ecf4e8;border-color:#6d8b62;}
+.inline-tool-note {padding:8px 10px;background:#f0f5ed;color:#29422b;border-radius:5px;}
+.training-rows {grid-template-columns:repeat(4,minmax(0,1fr));}
+@media(max-width:1000px){.training-rows{grid-template-columns:repeat(2,minmax(0,1fr));}}
+@media(max-width:600px){.training-rows{grid-template-columns:minmax(0,1fr);}.training-header-actions{flex-wrap:wrap;}.training-panel .panel-head{align-items:flex-start;flex-wrap:wrap;}}
+
+.money-value {display:inline-flex;flex-direction:column;max-width:100%;vertical-align:middle;align-items:flex-end;font-variant-numeric:tabular-nums;line-height:1.35;overflow-wrap:anywhere;}
+.money-value small {font-size:13px;font-weight:400;color:#5f6368;}
+@media(max-width:600px){.money-value .money-full{display:none;}.money-value small{font-size:inherit;font-weight:600;color:var(--text);}}
+@media(min-width:1100px){
+ .season-competitions {padding-top:6px;padding-bottom:6px;}
+ .locker-records {gap:8px;}
+ .recent-panel .first-match-note {padding-top:9px;padding-bottom:9px;}
+}
+.strip-economics {grid-template-columns:minmax(0,1fr);gap:2px;}
+.strip-economics > span {display:flex;flex-wrap:wrap;align-items:baseline;gap:3px 8px;}
+.strip-economics b {font-size:18px;white-space:nowrap;}
+@media(min-width:1200px){
+ .training-panel .training-rows{grid-template-columns:repeat(5,minmax(0,1fr));}
+ .training-cell .training-row{grid-template-columns:22px minmax(0,1fr) 28px 55px;}
+ .training-panel .training-bottom{grid-template-columns:245px minmax(0,1fr) auto;align-items:center;gap:10px;}
+ .training-panel .training-bottom .field{display:flex;align-items:center;gap:8px;}
+ .training-panel .training-bottom .field>span{white-space:nowrap;margin:0;}
+ .training-panel .training-summary{padding-top:4px;padding-bottom:4px;margin-top:4px;}
+ .training-panel .training-table-legend{margin-bottom:3px;}
+}
+@media(max-width:1199px){.training-cell .training-row{grid-template-columns:22px minmax(0,1fr) 28px 55px;}}
+@media(min-width:1200px){
+ .training-panel>.panel-body{padding-top:6px;padding-bottom:6px;}
+ .training-panel .training-rows{gap:6px 8px;}
+ .training-panel .training-table-legend{font-size:13px;line-height:1.3;}
+ .training-panel>.panel-body>.fine-print{font-size:13px;line-height:1.4;}
+ .training-header-actions .manual-aging-options{margin:0;}
+}

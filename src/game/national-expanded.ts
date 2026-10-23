@@ -1,3 +1,4 @@
+import {syncManualInjury} from './manual-injury';
 import {evaluateTournamentAwards} from './tournament-awards';
 import type {Career,MatchRecord} from './types';
 import type {InternationalWindow} from './national';
@@ -28,7 +29,7 @@ export function advanceNationalWindow(c:Career,w:InternationalWindow,through:str
  const records=ledger(c),byFixture=new Map(records.map(m=>[m.fixtureId,m]));
  const n=c.systems!.national,prefix=w.date.slice(0,7),callup=`callup:${prefix}:${n.squad}`;
  if(n.processedWindows.some(key=>key.startsWith(`window:${prefix}:`)))return;
- if(!n.processedWindows.includes(callup)){a.select(c);n.processedWindows.push(callup);c.systems!.events.push({id:`national:${callup}`,year:c.season.year,round:c.season.week,type:'national',title:n.status==='called'?'국가대표 발탁':'국가대표 소집 평가',body:n.reason,importance:'brief'});}
+ if(!n.processedWindows.includes(callup)){syncManualInjury(c,w.date);a.select(c);n.processedWindows.push(callup);c.systems!.events.push({id:`national:${callup}`,year:c.season.year,round:c.season.week,type:'national',title:n.status==='called'?'국가대표 발탁':'국가대표 소집 평가',body:n.reason,importance:'brief'});}
  n.competitionId=t.id;n.competitionName=t.name;
  const lookup=(stage:Stage,label:string,contest=t)=>byFixture.get(`NAT|${n.squad}|${contest.id}|${stage}|${label}`);
  const due=(h:string,v:string,stage:Stage,date:string,label:string,contest=t)=>{

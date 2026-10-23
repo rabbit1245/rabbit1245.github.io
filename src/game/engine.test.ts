@@ -127,10 +127,10 @@ test('match goal events, personal statistics and full league standings reconcile
   assert.deepEqual(advanceCareer(career,1),career,'completed seasons cannot advance or archive twice');
 });
 
-test('three distinct external offers, signing, contract renewal and new league work',()=>{
+test('six distinct external offers, signing, contract renewal and new league work',()=>{
   const complete=seasonDone(createCareer(options()));
   const offers=complete.offers.filter(o=>o.type==='transfer');
-  assert.equal(offers.length,3);assert.equal(new Set(offers.map(o=>o.clubId)).size,3);
+  assert.equal(offers.length,6);assert.equal(new Set(offers.map(o=>o.clubId)).size,6);
   assert.ok(offers.every(o=>o.clubId!==complete.player.clubId));
   assert.throws(()=>acceptTransfer(createCareer(options()),offers[0].id));
   const originalClub=complete.player.clubId;

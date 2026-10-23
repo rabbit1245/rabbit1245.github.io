@@ -1,15 +1,17 @@
+import {money as formatMoney,compactMoney as compact,EUR_KRW} from '../game/currency';
 import {cupStats} from '../game/club-competitions';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
-import { ArrowUpRight, Flag, X } from 'lucide-react';
+import { ArrowUpRight, Flag, Shield, X } from 'lucide-react';
 import type { Award, Career, Club, MatchRecord, PlayerStats } from '../game/types';
 import { COUNTRY_FLAGS, getClub } from '../game/data';
 import { emptyStats, sumStats } from '../game/math';
 import { nationalMatchLedger } from '../game/season-overview';
 import { getLeagueRule } from '../game/league-rules';
 
-export const money = (n: number) => `€${Math.round(n).toLocaleString('ko-KR')}`;
-export const compactMoney = (n: number) => n >= 1e6 ? `€${(n / 1e6).toFixed(1)}M` : n >= 1000 ? `€${(n / 1000).toFixed(0)}K` : money(n);
+export const money=formatMoney;
+export const compactMoney=compact;
+export function Money({value}:{value:number}){return <span className="money-value" title={`표시 환율 1유로 = ${EUR_KRW.toLocaleString()}원`}><span className="money-full">{money(value)}</span><small>{compactMoney(value)}</small></span>;}
 export const average = (s: PlayerStats) => s.ratingCount ? (s.ratingSum / s.ratingCount).toFixed(2) : '—';
 export const seasonLabel = (y: number) => `${y}/${String(y + 1).slice(-2)}`;
 export const shortDate = (value: string) => new Intl.DateTimeFormat('ko-KR', { timeZone: 'Asia/Seoul', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }).format(new Date(value));
@@ -17,7 +19,7 @@ export function teamName(id: string, supplied?: string) { if (supplied) return s
 export function TeamBadge({ id, small = false }: { id: string; small?: boolean }) {
   let club: Club | undefined; try { club = getClub(id); } catch { /* National sides have their own identity. */ }
   const [failed, setFailed] = useState(false); useEffect(() => setFailed(false), [id]);
-  return <span className={`team-badge ${small ? 'small' : ''}`} style={{ '--club-color': club?.color || '#39796d' } as React.CSSProperties} aria-hidden="true">{club?.crest && !failed ? <img src={club.crest} alt="" onError={() => setFailed(true)} /> : id.startsWith('NAT:') ? COUNTRY_FLAGS[id.split(':')[1]] || '🏳️' : club?.name.replace(/FC|CF|SC/g, '').trim().slice(0, 2) || 'K'}</span>;
+  return <span className={`team-badge ${small ? 'small' : ''}`} style={{ '--club-color': club?.color || '#39796d' } as React.CSSProperties} aria-hidden="true">{club?.crest && !failed ? <img src={club.crest} alt="" onError={() => setFailed(true)} /> : id.startsWith('NAT:') ? COUNTRY_FLAGS[id.split(':')[1]] || '🏳️' : <Shield size={small?18:25} strokeWidth={1.6}/>}</span>;
 }
 export function Brand() { return <div className="brand"><span className="brand-mark">K<span>·</span></span><span><strong>K볼</strong><small>A FOOTBALL LIFE</small></span></div>; }
 export function Empty({ title, children }: { title: string; children?: ReactNode }) { return <div className="empty"><Flag size={22} /><strong>{title}</strong>{children && <p>{children}</p>}</div>; }
@@ -41,6 +43,6 @@ export function clubTotal(career: Career) { return sumStats([cupStats(career),..
 export function nationalTotal(career: Career) { return sumStats(nationalMatchLedger(career).map(match => match.playerStats)); }
 export const STAT_LABELS: Partial<Record<keyof PlayerStats, string>> = { apps:'출전', starts:'선발', minutes:'출전 시간', goals:'득점', assists:'도움', shots:'슈팅', shotsOnTarget:'유효 슈팅', passes:'패스 시도', passesCompleted:'패스 성공', keyPasses:'키패스', dribbleAttempts:'드리블 시도', dribblesCompleted:'드리블 성공', tackles:'태클 성공', tackleAttempts:'태클 시도', interceptions:'인터셉트', aerialAttempts:'공중볼 시도', aerialWon:'공중볼 승리', saves:'선방', shotsFaced:'상대 유효 슈팅', goalsConceded:'실점', cleanSheets:'클린시트', oneOnOneAttempts:'일대일 시도', oneOnOneSaves:'일대일 선방', penaltiesFaced:'상대 페널티', penaltiesSaved:'페널티 선방', crossesFaced:'상대 크로스', crossesCaught:'크로스 포구', sweepingAttempts:'스위핑 시도', sweepingSuccesses:'스위핑 성공', buildUpPasses:'빌드업 패스 시도', buildUpCompleted:'빌드업 패스 성공', longKicks:'롱킥 시도', longKicksCompleted:'롱킥 성공', handlingAttempts:'공 처리 시도', handlingSuccesses:'공 처리 성공', lateActions:'후반 행동', lateSuccesses:'후반 성공', mom:'MOM' };
 
-export const visibleAwards = (awards: Award[]) => awards.filter(a => !/^K볼 (성장상|시즌 베스트|라이징 스타)$/.test(a.name) && a.name !== '구단 득점왕');
+export const visibleAwards = (awards: Award[]) => awards.filter(a => a.category!=='commercial'&&!/^K볼 (성장상|시즌 베스트|라이징 스타)$/.test(a.name) && a.name !== '구단 득점왕');
 
 export function calendarLabel(career:Career,year=career.season.year) { const season=year===career.season.year?career.season:career.history.find(h=>h.year===year);const displayYear=season?.calendarYear??year;return season&&getLeagueRule(season.leagueId).startMonth===1?String(displayYear):seasonLabel(displayYear); }

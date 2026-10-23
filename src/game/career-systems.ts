@@ -1,3 +1,5 @@
+import {evaluateExtraHonours} from './extra-honours';
+import {moneyText} from './currency';
 import {cupLedger,cupMatches,cupStats} from './club-competitions';
 import { CLUBS, getClub, getLeague } from './data';
 import { LEAGUE_AWARD_RULES, GLOBAL_AWARD_RULES, AWARD_MODEL_VERSION } from './award-rules';
@@ -126,41 +128,35 @@ function individualWageLimit(career: Career, clubId: string): number {
   const club = career.systems?.world.clubs[clubId];
   return club ? Math.max(0, Math.floor(club.wageBudget / 52 * .14)) : 0;
 }
-export function makeContractOffers(career: Career, timing: 'midseason'|'offseason'): TransferOffer[] {
-  if (!career.systems || career.stage !== 'offseason' || timing !== 'offseason') return [];
-  const { economics: e, world } = career.systems;
-  const p = career.player;
-  const random = seededRandom(`${career.seed}:offers:${career.season.year}:${timing}`);
-  const effectiveYear=career.season.year+1;
-  const remaining = Math.max(0, e.contract.expiresYear - effectiveYear);
-  const deadline=career.season.totalWeeks;
-  const reports=scoutingReports(career),scouts=new Map(reports.map(row=>[row.clubId,row]));
-  const offerFor = (clubId: string, renew: boolean): TransferOffer | null => {
-    const club = world.clubs[clubId];
-    if (!club) return null;
-    const power = club.power;
-    const wageLimit = individualWageLimit(career, clubId);
-    // Contract bargaining reflects value, term, role and funds; valuation itself never changes a wage.
-    const justified = e.marketValue / (52 * 210) * (1 + Math.max(0, avgRating(career.season.playerStats) - 6.5) * .08);
-    const wage = Math.round(Math.min(wageLimit, Math.max(150, justified * (.92 + random() * .2), renew ? p.wage * 1.04 : p.wage * .9)));
-    if (wageLimit < 150 || (renew && wage < p.wage && remaining > 0)) return null;
-    const years = p.age >= 32 ? 1 : p.age >= 29 ? 2 : 3 + Math.floor(random() * 2);
-    const fee = renew || remaining === 0 ? 0 : Math.round(e.marketValue * clamp(.45 + remaining * .18 + random() * .12, .45, 1.35));
-    if (fee > club.budget || (renew?Math.abs(p.ovr-power)>26:!scouts.get(clubId)?.offerEligible)) return null;
-    const role = roleFor(career, power);
-    return { id: `${career.season.year}:${timing}:${renew ? 'renew' : 'transfer'}:${clubId}`, clubId, wage, years, role, fee,
-      reason: `${renew?'':`${scouts.get(clubId)?.reason} `}${getClub(clubId).name} · 팀 전력 ${Math.round(power)} · ${role}. 현재 주급 €${p.wage.toLocaleString()} → €${wage.toLocaleString()} · ${years}년. ${renew ? '시즌 종료 후 새 계약을 검토합니다.' : `잔여 ${remaining}년 계약과 구단 예산을 반영한 구단 간 이적료입니다.`}`,
-      type: renew ? 'renew' : 'transfer', expiresRound: deadline, effective:'nextSeason', currentWage: p.wage, budgetLimit: club.budget };
-  };
-  const renew = offerFor(p.clubId, true);
-  const offers = renew ? [renew] : [];
-  const viable=reports.filter(row=>row.offerEligible).map(row=>({id:row.clubId,appeal:row.score+random()*1.5})).sort((a,b)=>b.appeal-a.appeal||a.id.localeCompare(b.id));
-  for (const club of viable) {
-    const offer = offerFor(club.id, false);
-    if (offer) offers.push(offer);
-    if (offers.filter(o => o.type === 'transfer').length === 3) break;
-  }
-  return offers;
+export function makeContractOffers(career:Career,timing:'midseason'|'offseason'):TransferOffer[]{
+ if(!career.systems||career.stage!=='offseason'||timing!=='offseason')return[];
+ const {world,economics:e}=career.systems,p=career.player,remaining=Math.max(0,e.contract.expiresYear-career.season.year-1);
+ const rng=seededRandom(`${career.seed}:offers-v27:${career.season.year}`),reports=new Map(scoutingReports(career).map(r=>[r.clubId,r]));
+ const candidates=Object.values(world.clubs).filter(x=>x.id!==p.clubId&&!/(?:\sB|\sII|카스티야)$/.test(getClub(x.id).name)&&individualWageLimit(career,x.id)>=150&&x.budget>=0);
+ const target=clamp(p.ovr+(avgRating(career.season.playerStats)-6.5)*1.5,25,100),used=new Set<string>(),selected:{id:string;band:NonNullable<TransferOffer['band']>}[]=[],countries=new Map<string,number>();
+ const choose=(pool:typeof candidates,band:NonNullable<TransferOffer['band']>,distance:(power:number)=>number)=>{
+  const ranked=pool.filter(x=>!used.has(x.id)).map(x=>({x,score:distance(x.power)+(countries.get(getClub(x.id).country)??0)*5-(reports.get(x.id)?.need??.25)*3+rng()*9})).sort((a,b)=>a.score-b.score||a.x.id.localeCompare(b.x.id));
+  const row=ranked[0]?.x;if(!row)return false;used.add(row.id);selected.push({id:row.id,band});const country=getClub(row.id).country;countries.set(country,(countries.get(country)??0)+1);return true;
+ };
+ // Reserve the distinct lower/higher/wild bands before choosing three nearby clubs.
+ const lower=candidates.filter(x=>x.power<target-4),higher=candidates.filter(x=>x.power>target+4);
+ choose(lower.length?lower:candidates,'lower',power=>Math.abs(power-(target-10)));
+ choose(higher.length?higher:candidates,'higher',power=>higher.length?Math.abs(power-(target+8)):-power);
+ const highWild=seededRandom(`${career.seed}|wild-direction`)()<.5?career.season.year%2===0:career.season.year%2!==0;
+ const wild=candidates.filter(x=>highWild?x.power>target+14:x.power<target-18),opposite=candidates.filter(x=>highWild?x.power<target-18:x.power>target+14);
+ choose(wild.length?wild:opposite.length?opposite:candidates,'wild',power=>wild.length||opposite.length?-Math.abs(power-target):-Math.abs(power-target));
+ for(let i=0;i<3;i++)choose(candidates,'similar',power=>Math.abs(power-target));
+ if(selected.length!==6)throw new Error('실제 구단과 예산을 충족하는 6개 제안을 편성할 수 없습니다.');
+ const offer=(id:string,renew:boolean,band?:TransferOffer['band']):TransferOffer=>{
+  const club=world.clubs[id],limit=individualWageLimit(career,id),justified=e.marketValue/(52*210)*(1+Math.max(0,avgRating(career.season.playerStats)-6.5)*.08);
+  const wage=Math.round(Math.min(limit,Math.max(150,justified*(.92+rng()*.2),renew?p.wage*1.04:p.wage*.9)));
+  const asking=renew||remaining===0?0:Math.round(e.marketValue*clamp(.45+remaining*.18+rng()*.12,.45,1.35)),fee=Math.min(asking,Math.floor(club.budget*.75));
+  const years=p.age>=32?1:p.age>=29?2:3+Math.floor(rng()*2),role=roleFor(career,club.power),labels={similar:'동급 경쟁',lower:'하위 전력 · 핵심 기용',higher:'상위 전력 · 우승 경쟁',wild:'극단적 랜덤 · 도전 제안'};
+  return {id:`${career.season.year}:offseason:${renew?'renew':'transfer'}:${id}`,clubId:id,wage,years,role,fee,type:renew?'renew':'transfer',...(band?{band}:{}),expiresRound:career.season.totalWeeks,effective:'nextSeason',currentWage:p.wage,budgetLimit:club.budget,reason:`${band?labels[band]:'재계약'} · 팀 전력 ${club.power.toFixed(1)} · ${role}. 포지션 수요 ${Math.round((reports.get(id)?.need??0)*100)}%. 현재 주급 ${moneyText(p.wage)} → ${moneyText(wage)} · ${years}년.${fee<asking?' 요구 이적료보다 낮은 예산 한도 내 입찰이며 수락 여부는 선수가 결정합니다.':''}${club.power>p.ovr+12?' 즉시 주전 보장 없는 장기 육성·로테이션 계약.':''}${higher.length===0&&band==='higher'?' 현재 수준보다 강한 팀이 없어 실제 최상위 경쟁 구단으로 대체.':''}${lower.length===0&&band==='lower'?' 현재 수준보다 낮은 팀이 없어 가능한 낮은 전력의 실제 비교 구단으로 대체.':''}`};
+ };
+ const result=selected.sort((a,b)=>({similar:0,lower:1,higher:2,wild:3}[a.band]-{similar:0,lower:1,higher:2,wild:3}[b.band])).map(row=>offer(row.id,false,row.band));
+ if(individualWageLimit(career,p.clubId)>=150)result.push(offer(p.clubId,true));
+ return result;
 }
 export function applyContract(career: Career, offer: TransferOffer): void {
   if (!career.systems) throw new Error('계약 시스템이 초기화되지 않았습니다.');
@@ -378,7 +374,7 @@ export function evaluateAwards(career: Career): Award[] {
   const national = career.systems.national;
   const nationalSeasons = national.history.filter(h => h.year === career.season.year && /우승|champion/i.test(h.result) && !/준우승|runner/i.test(h.result));
   for (const title of nationalSeasons) if (title.stats.apps > 0 && title.matches.some(m => m.playerPlayed && m.playerMinutes > 0 && /\|(semifinal|final)\|/.test(m.fixtureId))) won.push({ id: `${career.season.year}:national:${title.competitionId}:${career.player.id}`, name: `${title.competitionName} 우승`, year: career.season.year, clubId: career.player.clubId, description: `대표팀 대회 ${title.stats.apps}경기 실제 출전 · ${title.result}`, organiser: /월드컵|World Cup/i.test(title.competitionName) ? 'FIFA' : '해당 대륙 축구연맹', criterion: '게임에서는 실제 본선 출전이 있는 우승팀 선수에게 우승 기록을 부여합니다. 대회별 공식 메달 규정과는 구별됩니다.', sourceUrl: 'https://www.fifa.com/', category: 'national', official: true });
-  won.push(...evaluateTournamentAwards(career));
+  won.push(...evaluateTournamentAwards(career),...evaluateExtraHonours(career));
   // Global votes include actual club cup games for every competitor; league awards above remain league-only.
   const globalRows=rows.map(r=>({...r,stats:{...r.stats},nationalStats:{...(r.nationalStats??emptyStats())}}));
   const globalMap=new Map(globalRows.map(r=>[r.playerId,r]));
@@ -400,7 +396,7 @@ export function evaluateAwards(career: Career): Award[] {
   const rankedOwn=fullRanking.find(r=>r.playerId===career.player.id);
   for(const [name,selected] of [['발롱도르',playerRank===1],['FIFPRO 월드 11',world11.some(r=>r.playerId===career.player.id)]] as const)diagnostics.push({name,scope:'리그·클럽 컵·국가대표',eligible:!!rankedOwn&&(name==='발롱도르'||rankedOwn.stats.apps+rankedOwn.nationalStats.apps>=30),result:selected?'수상':name==='발롱도르'&&playerRank?`${playerRank}위 · 미선정`:'미선정',detail:rankedOwn?`경기력 점수 ${rankedOwn.score.toFixed(2)} · 전체 비교 ${fullRanking.length}명 · 클럽 ${rankedOwn.stats.apps}경기 · 국대 ${rankedOwn.nationalStats.apps}경기. 발롱도르는 30인 후보 중 1위, 월드 11은 포지션별 비교와 총 30경기 이상.`:'성인 클럽 최소 출전·450분 기준 미충족 또는 실제 성적 미확인'});
   diagnostics.push({name:'경기 최우수 선수',scope:'실제 경기별',eligible:!!globalOwn?.stats.apps,result:`${(globalOwn?.stats.mom??0)+(globalOwn?.nationalStats.mom??0)}회`,detail:'각 경기에서 실제로 뛰고 받은 평점과 기여를 비교합니다. 출전하지 않은 경기는 제외합니다.'});
-  for(const t of cupLedger(career,career.season.year).filter(t=>t.kind==='continental'&&t.entrants.includes(career.player.clubId)))diagnostics.push({name:`${t.name} 시즌의 선수`,scope:'해당 대회만',eligible:!!t.playerStats?.[career.player.id]&&t.phase==='completed',result:career.awards.some(a=>a.id===`${t.id}:player-season:${career.player.id}`)?'수상':'미선정',detail:`실제 해당 대회 ${t.playerStats?.[career.player.id]?.stats.apps??0}경기 · ${t.phase==='completed'?'대회 완료 후 전체 출전 선수의 역할별 기여 비교':'대회 미종료'}`});
+  for(const t of cupLedger(career,career.season.year).filter(t=>t.kind==='continental'&&t.format!=='super'&&t.format!=='intercontinental'&&t.entrants.includes(career.player.clubId)))diagnostics.push({name:t.id.startsWith('CLUB_WORLD_CUP:')?'FIFA 클럽 월드컵 골든볼':`${t.name} 시즌의 선수`,scope:'해당 대회만',eligible:!!t.playerStats?.[career.player.id]&&t.phase==='completed',result:career.awards.some(a=>a.id===`${t.id}:player-season:${career.player.id}`)?'수상':'미선정',detail:`실제 해당 대회 ${t.playerStats?.[career.player.id]?.stats.apps??0}경기 · ${t.phase==='completed'?'대회 완료 후 전체 출전 선수의 역할별 기여 비교':'대회 미종료'}`});
   const result: BallonDorYear = {diagnostics, year: career.season.year, candidates, playerRank, winnerId: candidates[0]?.playerId ?? '', world11, awards: won };
   career.systems.rankings.push(result);
   for (const a of won) if (!career.awards.some(previous => previous.id === a.id)) career.awards.push(a);

@@ -1,5 +1,5 @@
 import type { Career, GameCommand } from './types';
-import { advanceCareer, advanceHalf, dismissChoice, setTraining, acceptTransfer, stayAtClub, startNextSeason, retireCareer, respondToCaptainOffer,configureCheats,cheatIncreaseAttribute,manuallyAge } from './engine';
+import { advanceCareer, advanceHalf, dismissChoice, setTraining, acceptTransfer, stayAtClub, startNextSeason, retireCareer, respondToCaptainOffer,configureCheats,cheatIncreaseAttribute,manuallyAge,setAttributeLock,manuallyInjure } from './engine';
 
 export function executeCommand(career: Career, command: GameCommand, commandId: string): Career {
   if (!commandId || commandId.length > 160) throw new Error('잘못된 진행 요청입니다.');
@@ -15,7 +15,9 @@ export function executeCommand(career: Career, command: GameCommand, commandId: 
     case 'training': next = setTraining(career, command.keys, command.intensity); break;
     case 'transfer': next = acceptTransfer(career, command.offerId); break;
     case 'captainDecision':next=respondToCaptainOffer(career,command.offerId,command.accept);break;
-    case 'manualAging':next=manuallyAge(career,command.amount);break;
+    case 'manualAging':next=manuallyAge(career,command.amount,command.key);break;
+    case 'attributeLock':next=setAttributeLock(career,command.key,command.locked);break;
+    case 'manualInjury':next=manuallyInjure(career,command.duration);break;
     case 'cheatSettings':next=configureCheats(career,command.enabled,command.freezeAging);break;
     case 'increaseAttribute':next=cheatIncreaseAttribute(career,command.key,command.amount);break;
     case 'stay': next = stayAtClub(career); break;

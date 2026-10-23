@@ -1,0 +1,993 @@
+{
+  "version": "2.7.0",
+  "baselineSource": "9b78cbb521ae039610f50370ae476397eb1fcf03",
+  "sourceBranch": "codex/kball-white-green-20261021",
+  "date": "2026-10-23T17:23:09.306239+00:00",
+  "scope": "신규 요청 10개 항목 · 확인되지 않은 라이선스와 공식 연도별 규정은 별도 보류",
+  "limitations": [
+    "K3→K2는 승인 명단·결정전 원문 미확인으로 판정 보류. 공식 사이트/검색 HTTP403; 사용자에게 원문 요청. 테스트의 승인 자료는 현실 승인 명단이 아닌 분기 검증용.",
+    "K4 미지원. 국가별 연도별 승강·플레이오프 일부는 기존 게임 모형이며 공식 규정 완전 재현으로 주장하지 않음.",
+    "국제대회 미지원 국가의 초청 구단은 실존명·추정 전력·가상 선수단. 예선·배분·미래 개최국·개최일·연장 생략은 표시된 게임 모형.",
+    "이전 시즌에 실제 우승 기록이 없는 대회 자격과 진행 중 구버전 시즌의 새 과거 경기를 소급 생성하지 않음.",
+    "관리 브라우저의 file:// 정책 제한 때문에 자체 포함 HTML은 HTTP로 검증. 사용자 브라우저의 직접 파일 열기는 별도 실행 환경에 따름."
+  ],
+  "unitTests": {
+    "tests": 198,
+    "pass": 197,
+    "fail": 0,
+    "skip": 1,
+    "skipReason": "기존 30년 보존 자료를 덮어쓰는 신규 30년 생성 테스트 대신 별도 20시즌 실행",
+    "log": "/tmp/kball-p27-suite-final.log"
+  },
+  "latestTargetedTests": {
+    "attributeLockAgingTransferHonoursInjuryAndContinental": {
+      "pass": 9,
+      "fail": 0,
+      "log": "/tmp/kball-p27-injury-final.log"
+    },
+    "licenseMatchSaveValidation": {
+      "pass": 1,
+      "skip": 8,
+      "fail": 0,
+      "log": "/tmp/kball-p27-license-final.log"
+    },
+    "qualificationAndCommercialClassification": {
+      "pass": 2,
+      "skip": 8,
+      "fail": 0,
+      "log": "/tmp/kball-p27-classification-final.log",
+      "covers": [
+        "CWC host berth when champion already qualified",
+        "Canadian MLS club country cap/US host ineligibility",
+        "commercial records excluded from personal honours"
+      ]
+    }
+  },
+  "webE2E": {
+    "passed": [
+      "1366x768 and 1920x1080 show all 20 abilities and training rows with primary fonts of at least 17px",
+      "creation training, three menus, one-command half progression and identical skipped/reduced-motion results",
+      "all league teams in one modal, actual W/D/L/GF/GA/GD/points and league-only scorer table",
+      "annual-only contracts, one training route, current competitions, locker combined details and reconciled records",
+      "JSON export, independent import slot, checksum rejection and previous-good backup restore",
+      "contract-controlled wage, transfer fees separate from income, next season, reload and retirement totals",
+      "one click downloads one complete UTF-8 career TXT, leaves saves untouched and awards show only own selection",
+      "production offline reload with saved slots",
+      "mobile three-menu navigation, ten goalkeeper abilities, half progression and nine goalkeeper metrics",
+      "mobile full standings retain every team and allow reaching the last points column",
+      "season honours split trophies/personal awards; cheats edit attributes, retain freeze preference and survive reload on desktop/mobile"
+    ],
+    "skipped": [],
+    "pageErrors": [],
+    "httpRequests": [
+      "http://127.0.0.1:4173/",
+      "http://127.0.0.1:4173/assets/index-BdodwPRc.js",
+      "http://127.0.0.1:4173/assets/index-D6F8nm1m.css",
+      "http://127.0.0.1:4173/favicon.svg",
+      "http://127.0.0.1:4173/assets/Pretendard-SemiBold-ClEDdoZU.woff2",
+      "http://127.0.0.1:4173/assets/Pretendard-Regular-BhrLQoBv.woff2",
+      "http://127.0.0.1:4173/assets/crests/NL1_03.svg",
+      "http://127.0.0.1:4173/assets/crests/KR1_01.svg",
+      "http://127.0.0.1:4173/assets/save-preparation-BkvnZMj8.js",
+      "http://127.0.0.1:4173/assets/crests/KR1_02.svg",
+      "http://127.0.0.1:4173/assets/crests/KR1_03.svg",
+      "http://127.0.0.1:4173/assets/crests/KR1_04.svg",
+      "http://127.0.0.1:4173/assets/crests/KR1_05.svg",
+      "http://127.0.0.1:4173/assets/save-worker-BmKVLkY6.js",
+      "http://127.0.0.1:4173/assets/worker-C5X_WdL8.js",
+      "http://127.0.0.1:4173/assets/crests/KR1_10.svg",
+      "http://127.0.0.1:4173/assets/crests/KR1_09.svg",
+      "http://127.0.0.1:4173/assets/crests/KR1_06.svg",
+      "http://127.0.0.1:4173/assets/crests/KR1_08.svg",
+      "http://127.0.0.1:4173/assets/crests/KR1_12.svg",
+      "http://127.0.0.1:4173/assets/crests/KR1_11.svg",
+      "http://127.0.0.1:4173/assets/crests/KR1_07.svg",
+      "http://127.0.0.1:4173/assets/commands-DJSya-gq.js",
+      "http://127.0.0.1:4173/assets/crests/IT2_14.svg",
+      "http://127.0.0.1:4173/assets/crests/DE2_02.svg",
+      "http://127.0.0.1:4173/assets/crests/PT2_09.svg",
+      "http://127.0.0.1:4173/assets/crests/ES1_01.svg"
+    ]
+  },
+  "portableE2E": {
+    "passed": [
+      "1366x768 and 1920x1080 show all 20 abilities and training rows with primary fonts of at least 17px",
+      "creation training, three menus, one-command half progression and identical skipped/reduced-motion results",
+      "all league teams in one modal, actual W/D/L/GF/GA/GD/points and league-only scorer table",
+      "annual-only contracts, one training route, current competitions, locker combined details and reconciled records",
+      "JSON export, independent import slot, checksum rejection and previous-good backup restore",
+      "contract-controlled wage, transfer fees separate from income, next season, reload and retirement totals",
+      "one click downloads one complete UTF-8 career TXT, leaves saves untouched and awards show only own selection",
+      "mobile three-menu navigation, ten goalkeeper abilities, half progression and nine goalkeeper metrics",
+      "mobile full standings retain every team and allow reaching the last points column",
+      "season honours split trophies/personal awards; cheats edit attributes, retain freeze preference and survive reload on desktop/mobile",
+      "standalone HTML makes no external HTTP asset requests"
+    ],
+    "skipped": [
+      "offline cache reload requires a production build"
+    ],
+    "pageErrors": [],
+    "httpRequests": [
+      "http://127.0.0.1:4180/Kball.html"
+    ]
+  },
+  "newControlsPortable": {
+    "url": "http://127.0.0.1:4180/Kball.html",
+    "checks": [
+      "inline aging decreases only clicked attribute, without a popup or round progression",
+      "attribute locks persist after reload and disable manual aging target",
+      "mobile aging, locks and injury choices fit without dialogs or horizontal overflow",
+      "contract and market values use KRW with Korean units",
+      "half-season injury advances real team matches without fabricating player appearances",
+      "Korean TXT includes per-stat aging and lock records"
+    ],
+    "errors": []
+  },
+  "legacyHome": {
+    "passed": [
+      "one-click training displays all actual current attributes",
+      "national, awards and season history open their existing view in one click",
+      "all nine metrics remain expandable and reconcile with the detailed record book without save mutations",
+      "2.4 completed save retains named titles, gated offseason choices and actual goal/assist rankings"
+    ],
+    "pageErrors": []
+  },
+  "legacy30YearTXT": {
+    "source": "/workspace/rabbit1245.github.io/test-results/long-career-30-seasons.json",
+    "saveBytes": 81104879,
+    "txtBytes": 14111452,
+    "seasons": 30,
+    "clubMatches": 1020,
+    "nationalMatches": 108,
+    "newSeasonSnapshots": 30,
+    "downloads": 1,
+    "bom": true,
+    "crlf": true,
+    "rawJSON": false,
+    "readableMatchTotalsReconcile": true,
+    "reload": true,
+    "pageErrors": []
+  },
+  "colorAudit": {
+    "screens": 142,
+    "textSamples": 14949,
+    "contrastFailures": 0,
+    "minimumRatio": 4.752,
+    "disabledSamples": 590,
+    "fixedOverlaps": 0,
+    "clippedText": 0,
+    "intentionalScrollable": 137,
+    "verifiedHorizontalScrolls": 1,
+    "pageErrors": 0
+  },
+  "crests": {
+    "catalogue": 913,
+    "decoded": 597,
+    "neutral": 316,
+    "internationalGuests": 87,
+    "internationalGuestsNeutral": 87,
+    "allGuestIDsUnique": true,
+    "wrongMappingsRemoved": [
+      "KR2_03",
+      "KR2_06",
+      "JP3_19",
+      "BE3_09"
+    ],
+    "decodeFailures": []
+  },
+  "longCareer": {
+    "seasons": 20,
+    "fromYear": 2026,
+    "toYear": 2045,
+    "fromAge": 23,
+    "toAge": 42,
+    "fixedSpeedUnchanged": true,
+    "automaticAgingLedgerAlwaysEmpty": true,
+    "sixExternalOffersEverySeason": true,
+    "allCupsCompletedEverySeason": true,
+    "clubWorldCups": [
+      2029,
+      2033,
+      2037,
+      2041,
+      2045
+    ],
+    "matchesPerClubWorldCup": 63,
+    "annualIntercontinentalFrom": 2027,
+    "matchesPerIntercontinental": 5,
+    "note": "20시즌 안정성 실행 후 AFC 홈/원정 균형 및 컵 MVP 최소 출전 기준을 추가 교정했으며 최종 대상 테스트에서 별도 검증. 이전 결과는 호환 기록으로 보존.",
+    "results": [
+      {
+        "seasons": 1,
+        "year": 2026,
+        "age": 23,
+        "ms": 38605.750724,
+        "heap": 287290216,
+        "rss": 510861312,
+        "leagueApps": 18,
+        "cupApps": 10,
+        "cups": 25,
+        "world": null,
+        "inter": null
+      },
+      {
+        "seasons": 2,
+        "year": 2027,
+        "age": 24,
+        "ms": 24565.184207000006,
+        "heap": 199536720,
+        "rss": 651612160,
+        "leagueApps": 22,
+        "cupApps": 16,
+        "cups": 38,
+        "world": null,
+        "inter": {
+          "winner": "ES1_01",
+          "matches": 5
+        }
+      },
+      {
+        "seasons": 3,
+        "year": 2028,
+        "age": 25,
+        "ms": 16589.166609000007,
+        "heap": 287699120,
+        "rss": 883974144,
+        "leagueApps": 22,
+        "cupApps": 12,
+        "cups": 38,
+        "world": null,
+        "inter": {
+          "winner": "ES1_01",
+          "matches": 5
+        }
+      },
+      {
+        "seasons": 4,
+        "year": 2029,
+        "age": 26,
+        "ms": 17043.568757,
+        "heap": 229544520,
+        "rss": 659144704,
+        "leagueApps": 17,
+        "cupApps": 13,
+        "cups": 39,
+        "world": {
+          "entrants": [
+            "ES1_01",
+            "FR1_01",
+            "IT1_01",
+            "EN1_13",
+            "DE1_04",
+            "EN1_12",
+            "ES1_03",
+            "DE1_02",
+            "TR1_03",
+            "TR1_02",
+            "PT1_03",
+            "IT1_02",
+            "INT_AR_RACING",
+            "INT_AR_ESTUDIANTES",
+            "INT_AR_RIVER",
+            "BR1_16",
+            "BR1_15",
+            "INT_PY_OLIMPIA",
+            "INT_IR_PERSEPOLIS",
+            "INT_SA_AHLI",
+            "INT_SA_HILAL",
+            "KR1_01",
+            "INT_EG_PYRAMIDS",
+            "INT_TN_ESPERANCE",
+            "INT_EG_AHLY",
+            "INT_ZA_SUNDOWNS",
+            "INT_MX_MONTERREY",
+            "INT_MX_TIGRES",
+            "US1_24",
+            "US1_14",
+            "INT_NZ_AUCKLAND",
+            "TR1_01"
+          ],
+          "winner": "DE1_04",
+          "matches": 63
+        },
+        "inter": {
+          "winner": "FR1_01",
+          "matches": 5
+        }
+      },
+      {
+        "seasons": 5,
+        "year": 2030,
+        "age": 27,
+        "ms": 16538.253608999992,
+        "heap": 341080240,
+        "rss": 1058103296,
+        "leagueApps": 19,
+        "cupApps": 15,
+        "cups": 38,
+        "world": null,
+        "inter": {
+          "winner": "FR1_01",
+          "matches": 5
+        }
+      },
+      {
+        "seasons": 6,
+        "year": 2031,
+        "age": 28,
+        "ms": 21036.381691000002,
+        "heap": 1186702712,
+        "rss": 1417011200,
+        "leagueApps": 22,
+        "cupApps": 16,
+        "cups": 38,
+        "world": null,
+        "inter": {
+          "winner": "EN1_12",
+          "matches": 5
+        }
+      },
+      {
+        "seasons": 7,
+        "year": 2032,
+        "age": 29,
+        "ms": 14576.16043800002,
+        "heap": 395175968,
+        "rss": 706531328,
+        "leagueApps": 16,
+        "cupApps": 12,
+        "cups": 38,
+        "world": null,
+        "inter": {
+          "winner": "ES1_03",
+          "matches": 5
+        }
+      },
+      {
+        "seasons": 8,
+        "year": 2033,
+        "age": 30,
+        "ms": 14079.988052,
+        "heap": 280243648,
+        "rss": 651010048,
+        "leagueApps": 18,
+        "cupApps": 15,
+        "cups": 39,
+        "world": {
+          "entrants": [
+            "FR1_01",
+            "EN1_12",
+            "ES1_03",
+            "DE1_02",
+            "EN1_13",
+            "DE1_04",
+            "IT1_02",
+            "PT1_02",
+            "IT1_01",
+            "PT1_03",
+            "ES1_01",
+            "NL1_01",
+            "BR1_16",
+            "BR1_07",
+            "INT_EC_LDU",
+            "INT_AR_RIVER",
+            "INT_AR_BOCA",
+            "INT_PY_CERRO",
+            "INT_SA_HILAL",
+            "INT_AE_WASL",
+            "INT_SA_AHLI",
+            "INT_SA_NASSR",
+            "INT_ZA_SUNDOWNS",
+            "INT_EG_PYRAMIDS",
+            "INT_MA_WYDAD",
+            "INT_EG_AHLY",
+            "INT_MX_MONTERREY",
+            "INT_MX_GUADALAJARA",
+            "INT_MX_TIGRES",
+            "US1_09",
+            "INT_PG_HEKARI",
+            "BE1_01"
+          ],
+          "winner": "EN1_12",
+          "matches": 63
+        },
+        "inter": {
+          "winner": "DE1_02",
+          "matches": 5
+        }
+      },
+      {
+        "seasons": 9,
+        "year": 2034,
+        "age": 31,
+        "ms": 15869.929753000004,
+        "heap": 293828392,
+        "rss": 808263680,
+        "leagueApps": 17,
+        "cupApps": 13,
+        "cups": 38,
+        "world": null,
+        "inter": {
+          "winner": "INT_MX_AMERICA",
+          "matches": 5
+        }
+      },
+      {
+        "seasons": 10,
+        "year": 2035,
+        "age": 32,
+        "ms": 20288.36741800001,
+        "heap": 330677592,
+        "rss": 743350272,
+        "leagueApps": 19,
+        "cupApps": 11,
+        "cups": 38,
+        "world": null,
+        "inter": {
+          "winner": "FR1_01",
+          "matches": 5
+        }
+      },
+      {
+        "seasons": 11,
+        "year": 2036,
+        "age": 33,
+        "ms": 13961.545584000007,
+        "heap": 342071080,
+        "rss": 891490304,
+        "leagueApps": 22,
+        "cupApps": 18,
+        "cups": 38,
+        "world": null,
+        "inter": {
+          "winner": "INT_SA_HILAL",
+          "matches": 5
+        }
+      },
+      {
+        "seasons": 12,
+        "year": 2037,
+        "age": 34,
+        "ms": 16690.636801000015,
+        "heap": 351495432,
+        "rss": 764702720,
+        "leagueApps": 18,
+        "cupApps": 24,
+        "cups": 39,
+        "world": {
+          "entrants": [
+            "EN1_12",
+            "FR1_01",
+            "IT1_02",
+            "IT1_01",
+            "DE1_01",
+            "ES1_03",
+            "ES1_02",
+            "EN1_13",
+            "NL1_01",
+            "PT1_03",
+            "TR1_03",
+            "DE1_02",
+            "INT_CO_NACIONAL",
+            "INT_EC_LDU",
+            "BR1_19",
+            "INT_AR_RACING",
+            "INT_AR_RIVER",
+            "BR1_17",
+            "INT_SA_HILAL",
+            "INT_SA_AHLI",
+            "KR1_01",
+            "JP1_03",
+            "INT_MA_RAJA",
+            "INT_EG_AHLY",
+            "INT_EG_PYRAMIDS",
+            "INT_MA_WYDAD",
+            "INT_MX_AMERICA",
+            "US1_14",
+            "US1_12",
+            "INT_MX_TIGRES",
+            "INT_PG_HEKARI",
+            "CN1_01"
+          ],
+          "winner": "IT1_01",
+          "matches": 63
+        },
+        "inter": {
+          "winner": "EN1_12",
+          "matches": 5
+        }
+      },
+      {
+        "seasons": 13,
+        "year": 2038,
+        "age": 35,
+        "ms": 16376.575271999987,
+        "heap": 366011672,
+        "rss": 926822400,
+        "leagueApps": 19,
+        "cupApps": 17,
+        "cups": 38,
+        "world": null,
+        "inter": {
+          "winner": "ES1_03",
+          "matches": 5
+        }
+      },
+      {
+        "seasons": 14,
+        "year": 2039,
+        "age": 36,
+        "ms": 20677.787677999993,
+        "heap": 389986848,
+        "rss": 836390912,
+        "leagueApps": 22,
+        "cupApps": 19,
+        "cups": 38,
+        "world": null,
+        "inter": {
+          "winner": "ES1_01",
+          "matches": 5
+        }
+      },
+      {
+        "seasons": 15,
+        "year": 2040,
+        "age": 37,
+        "ms": 14336.046854999964,
+        "heap": 401260856,
+        "rss": 960946176,
+        "leagueApps": 22,
+        "cupApps": 18,
+        "cups": 38,
+        "world": null,
+        "inter": {
+          "winner": "TR1_01",
+          "matches": 5
+        }
+      },
+      {
+        "seasons": 16,
+        "year": 2041,
+        "age": 38,
+        "ms": 14803.428102999984,
+        "heap": 416137608,
+        "rss": 889192448,
+        "leagueApps": 20,
+        "cupApps": 22,
+        "cups": 39,
+        "world": {
+          "entrants": [
+            "ES1_03",
+            "ES1_01",
+            "TR1_01",
+            "EN1_12",
+            "IT1_01",
+            "BE1_01",
+            "FR1_01",
+            "EN1_13",
+            "FR1_03",
+            "DE1_02",
+            "PT1_03",
+            "DE1_01",
+            "INT_AR_BOCA",
+            "BR1_10",
+            "BR1_04",
+            "BR1_12",
+            "INT_AR_RIVER",
+            "INT_EC_LDU",
+            "KR1_01",
+            "JP1_03",
+            "INT_SA_AHLI",
+            "INT_SA_NASSR",
+            "INT_EG_PYRAMIDS",
+            "INT_EG_AHLY",
+            "INT_TN_ESPERANCE",
+            "INT_CD_MAZEMBE",
+            "INT_MX_CRUZ",
+            "US1_12",
+            "INT_MX_PACHUCA",
+            "US1_14",
+            "INT_NZ_AUCKLAND",
+            "CN1_01"
+          ],
+          "winner": "ES1_03",
+          "matches": 63
+        },
+        "inter": {
+          "winner": "ES1_03",
+          "matches": 5
+        }
+      },
+      {
+        "seasons": 17,
+        "year": 2042,
+        "age": 39,
+        "ms": 16193.392923999985,
+        "heap": 436056760,
+        "rss": 988921856,
+        "leagueApps": 22,
+        "cupApps": 17,
+        "cups": 38,
+        "world": null,
+        "inter": {
+          "winner": "DE1_01",
+          "matches": 5
+        }
+      },
+      {
+        "seasons": 18,
+        "year": 2043,
+        "age": 40,
+        "ms": 22254.573872000037,
+        "heap": 457736072,
+        "rss": 935981056,
+        "leagueApps": 18,
+        "cupApps": 17,
+        "cups": 38,
+        "world": null,
+        "inter": {
+          "winner": "FR1_01",
+          "matches": 5
+        }
+      },
+      {
+        "seasons": 19,
+        "year": 2044,
+        "age": 41,
+        "ms": 15773.263527999981,
+        "heap": 248940896,
+        "rss": 796192768,
+        "leagueApps": 20,
+        "cupApps": 18,
+        "cups": 38,
+        "world": null,
+        "inter": {
+          "winner": "EN1_12",
+          "matches": 5
+        }
+      },
+      {
+        "seasons": 20,
+        "year": 2045,
+        "age": 42,
+        "ms": 15179.229729999963,
+        "heap": 484643680,
+        "rss": 955891712,
+        "leagueApps": 22,
+        "cupApps": 19,
+        "cups": 39,
+        "world": {
+          "entrants": [
+            "DE1_01",
+            "FR1_01",
+            "EN1_12",
+            "IT1_01",
+            "ES1_01",
+            "ES1_03",
+            "DE1_04",
+            "EN1_18",
+            "TR1_01",
+            "PT1_03",
+            "BE1_01",
+            "TR1_02",
+            "BR1_12",
+            "INT_AR_RACING",
+            "BR1_19",
+            "BR1_17",
+            "INT_AR_RIVER",
+            "INT_EC_IDV",
+            "JP1_03",
+            "CN1_01",
+            "KR1_01",
+            "INT_SA_HILAL",
+            "INT_EG_PYRAMIDS",
+            "INT_TN_ESPERANCE",
+            "INT_EG_AHLY",
+            "INT_MA_RAJA",
+            "US1_12",
+            "US1_14",
+            "INT_MX_TIGRES",
+            "INT_MX_MONTERREY",
+            "INT_NZ_AUCKLAND",
+            "PT1_01"
+          ],
+          "winner": "IT1_01",
+          "matches": 63
+        },
+        "inter": {
+          "winner": "IT1_01",
+          "matches": 5
+        }
+      }
+    ]
+  },
+  "performance": {
+    "engine": {
+      "baseline": "9b78cbb",
+      "method": "Same input save and RNG seed on 2.6 and 2.7; unchanged existing competition save. Snapshot copy medians, three repetitions; actual complete new career at 1/10/20 seasons.",
+      "unchanged": [
+        {
+          "rounds": 1,
+          "leagueGames": 1,
+          "exact": true
+        },
+        {
+          "rounds": 3,
+          "leagueGames": 3,
+          "exact": true
+        },
+        {
+          "rounds": 5,
+          "leagueGames": 5,
+          "exact": true
+        }
+      ],
+      "snapshots": [
+        {
+          "years": 1,
+          "bytes": 38721184,
+          "legacyCopyMs": 263.3125540000019,
+          "lightCopyMs": 0.03447199999936856,
+          "fullCopyMs": 226.77473499999905
+        },
+        {
+          "years": 10,
+          "bytes": 78061033,
+          "legacyCopyMs": 501.64338399999906,
+          "lightCopyMs": 0.13812900000266382,
+          "fullCopyMs": 254.07591499999762
+        },
+        {
+          "years": 20,
+          "bytes": 119924636,
+          "legacyCopyMs": 722.8400889999975,
+          "lightCopyMs": 0.3654420000020764,
+          "fullCopyMs": 280.3470300000008
+        }
+      ]
+    },
+    "ui": {
+      "url": "http://127.0.0.1:4173/",
+      "method": "Actual complete 1/10/20-season save import; five real menu actions x three repetitions, click handler to two rendered frames. Heap after forced GC; import/save time excluded from menu response. No simulation runs on menu navigation.",
+      "results": [
+        {
+          "seasons": 1,
+          "beforeHeap": 32416312,
+          "afterHeap": 33103932,
+          "timings": [
+            {
+              "selector": "[data-testid=\"player-tab\"]",
+              "ms": 10.600000001490116
+            },
+            {
+              "selector": "[data-testid=\"player-view-training\"]",
+              "ms": 31.5
+            },
+            {
+              "selector": "[data-testid=\"player-view-contract\"]",
+              "ms": 28
+            },
+            {
+              "selector": "[data-testid=\"career-tab\"]",
+              "ms": 29.699999999254942
+            },
+            {
+              "selector": "[data-testid=\"locker-tab\"]",
+              "ms": 31.300000000745058
+            },
+            {
+              "selector": "[data-testid=\"player-tab\"]",
+              "ms": 23.800000000745058
+            },
+            {
+              "selector": "[data-testid=\"player-view-training\"]",
+              "ms": 32.100000001490116
+            },
+            {
+              "selector": "[data-testid=\"player-view-contract\"]",
+              "ms": 29.699999999254942
+            },
+            {
+              "selector": "[data-testid=\"career-tab\"]",
+              "ms": 28.5
+            },
+            {
+              "selector": "[data-testid=\"locker-tab\"]",
+              "ms": 29.899999998509884
+            },
+            {
+              "selector": "[data-testid=\"player-tab\"]",
+              "ms": 31.699999999254942
+            },
+            {
+              "selector": "[data-testid=\"player-view-training\"]",
+              "ms": 31.900000002235174
+            },
+            {
+              "selector": "[data-testid=\"player-view-contract\"]",
+              "ms": 32.100000001490116
+            },
+            {
+              "selector": "[data-testid=\"career-tab\"]",
+              "ms": 31.5
+            },
+            {
+              "selector": "[data-testid=\"locker-tab\"]",
+              "ms": 31.699999999254942
+            }
+          ],
+          "maxMs": 32.100000001490116,
+          "medianMs": 31.300000000745058,
+          "errors": []
+        },
+        {
+          "seasons": 10,
+          "beforeHeap": 66436076,
+          "afterHeap": 66897296,
+          "timings": [
+            {
+              "selector": "[data-testid=\"player-tab\"]",
+              "ms": 19.400000002235174
+            },
+            {
+              "selector": "[data-testid=\"player-view-training\"]",
+              "ms": 26.5
+            },
+            {
+              "selector": "[data-testid=\"player-view-contract\"]",
+              "ms": 34.69999999925494
+            },
+            {
+              "selector": "[data-testid=\"career-tab\"]",
+              "ms": 28.5
+            },
+            {
+              "selector": "[data-testid=\"locker-tab\"]",
+              "ms": 31.200000002980232
+            },
+            {
+              "selector": "[data-testid=\"player-tab\"]",
+              "ms": 9
+            },
+            {
+              "selector": "[data-testid=\"player-view-training\"]",
+              "ms": 27.400000002235174
+            },
+            {
+              "selector": "[data-testid=\"player-view-contract\"]",
+              "ms": 31.800000000745058
+            },
+            {
+              "selector": "[data-testid=\"career-tab\"]",
+              "ms": 31.899999998509884
+            },
+            {
+              "selector": "[data-testid=\"locker-tab\"]",
+              "ms": 30
+            },
+            {
+              "selector": "[data-testid=\"player-tab\"]",
+              "ms": 31.700000002980232
+            },
+            {
+              "selector": "[data-testid=\"player-view-training\"]",
+              "ms": 32.100000001490116
+            },
+            {
+              "selector": "[data-testid=\"player-view-contract\"]",
+              "ms": 31.899999998509884
+            },
+            {
+              "selector": "[data-testid=\"career-tab\"]",
+              "ms": 32.19999999925494
+            },
+            {
+              "selector": "[data-testid=\"locker-tab\"]",
+              "ms": 32.19999999925494
+            }
+          ],
+          "maxMs": 34.69999999925494,
+          "medianMs": 31.700000002980232,
+          "errors": []
+        },
+        {
+          "seasons": 20,
+          "beforeHeap": 102783228,
+          "afterHeap": 103251064,
+          "timings": [
+            {
+              "selector": "[data-testid=\"player-tab\"]",
+              "ms": 21.399999998509884
+            },
+            {
+              "selector": "[data-testid=\"player-view-training\"]",
+              "ms": 27.300000000745058
+            },
+            {
+              "selector": "[data-testid=\"player-view-contract\"]",
+              "ms": 38.399999998509884
+            },
+            {
+              "selector": "[data-testid=\"career-tab\"]",
+              "ms": 23.400000002235174
+            },
+            {
+              "selector": "[data-testid=\"locker-tab\"]",
+              "ms": 30.799999997019768
+            },
+            {
+              "selector": "[data-testid=\"player-tab\"]",
+              "ms": 31.699999999254942
+            },
+            {
+              "selector": "[data-testid=\"player-view-training\"]",
+              "ms": 30.900000002235174
+            },
+            {
+              "selector": "[data-testid=\"player-view-contract\"]",
+              "ms": 34.600000001490116
+            },
+            {
+              "selector": "[data-testid=\"career-tab\"]",
+              "ms": 14.5
+            },
+            {
+              "selector": "[data-testid=\"locker-tab\"]",
+              "ms": 20.5
+            },
+            {
+              "selector": "[data-testid=\"player-tab\"]",
+              "ms": 29.099999997764826
+            },
+            {
+              "selector": "[data-testid=\"player-view-training\"]",
+              "ms": 31.899999998509884
+            },
+            {
+              "selector": "[data-testid=\"player-view-contract\"]",
+              "ms": 32
+            },
+            {
+              "selector": "[data-testid=\"career-tab\"]",
+              "ms": 31.899999998509884
+            },
+            {
+              "selector": "[data-testid=\"locker-tab\"]",
+              "ms": 31.800000000745058
+            }
+          ],
+          "maxMs": 38.399999998509884,
+          "medianMs": 30.900000002235174,
+          "errors": []
+        }
+      ]
+    }
+  },
+  "release": {
+    "zipBytes": 14559688,
+    "zipSha256": "ca487814243a0d27f6cd987815145993b94fcfbd8212aaf426e54605f6ac09f9",
+    "htmlBytes": 19343651,
+    "htmlSha256": "f5d2f4f8126740a88b2e015fc020ceec3132bfe7848d9a8d8979facbb2e069be",
+    "entries": [
+      "Kball.html",
+      "읽어주세요.txt",
+      "FONT-LICENSE.txt"
+    ],
+    "artifactBranch": "kball-playable",
+    "artifactCommit": "68b80d60bd8b111ea73a1677ee31a795ba84b69d",
+    "downloadUrl": "https://github.com/rabbit1245/rabbit1245.github.io/raw/68b80d60bd8b111ea73a1677ee31a795ba84b69d/Kball.zip?download=1",
+    "httpStatus": 200,
+    "downloadedBytes": 14559688,
+    "downloadedSha256": "ca487814243a0d27f6cd987815145993b94fcfbd8212aaf426e54605f6ac09f9",
+    "zipIntegrity": true,
+    "downloadedHTMLMatchesBuild": true
+  },
+  "commercialRecordsUI": {
+    "actualSeasons": 20,
+    "personalAndTeamAwards": 289,
+    "commercialRecords": 20,
+    "commercialSeparateFromPersonal": true,
+    "mobileOverflow": false,
+    "pageErrors": []
+  }
+}

@@ -122,7 +122,7 @@ try{
     await page.getByTestId('new-career').click();await sample(page,`${prefix}-creation-player`);
     await page.getByTestId('next-creation-step').click();await sample(page,`${prefix}-creation-club`);
     await page.getByLabel('국가',{exact:true}).selectOption('대한민국');await page.getByLabel('리그',{exact:true}).selectOption('KR2');await page.getByLabel('시작 구단',{exact:true}).selectOption('KR2_05');
-    assert.equal((await page.locator('.creation-intro .team-badge').textContent()).trim(),'부산','a real club without a crest must show readable fallback text');
+    assert.equal(await page.locator('.creation-intro .team-badge svg').count(),1,'unavailable official crests use a neutral icon');
     await sample(page,`${prefix}-fallback-club-badge`);
     await page.getByTestId('next-creation-step').click();await sample(page,`${prefix}-creation-training-selected-disabled`);
     for(;;){const selected=page.locator('.training-row[aria-pressed="true"]');if(!await selected.count())break;await selected.first().click();}
@@ -136,7 +136,7 @@ try{
     await imported(page,baseline);await sample(page,`${prefix}-baseline-locker-toast`);
     await nav(page,'player');await sample(page,`${prefix}-baseline-attributes`);
     await page.getByTestId('player-view-training').click();await sample(page,`${prefix}-baseline-locked-training`);
-    await page.getByTestId('manual-aging').getByRole('button',{name:'노화',exact:true}).click();await sample(page,`${prefix}-manual-aging-options`);await page.getByRole('button',{name:'−5',exact:true}).click();await sample(page,`${prefix}-manual-aging-preview`);await closeDialog(page);
+    await page.getByTestId('manual-aging').getByRole('button',{name:'노화',exact:true}).click();await sample(page,`${prefix}-manual-aging-options`);await page.getByRole('button',{name:'−5',exact:true}).click();await sample(page,`${prefix}-manual-aging-selected`);await page.getByTestId('manual-aging').getByRole('button',{name:'노화',exact:true}).click();await page.getByRole('button',{name:'부상',exact:true}).click();await sample(page,`${prefix}-manual-injury-options`);await page.getByRole('button',{name:'부상',exact:true}).click();
     await page.getByTestId('competition-details-club').click();await sample(page,`${prefix}-club-competition-details`);await closeDialog(page);
     await page.getByTestId('competition-details-national').click();await page.getByRole('dialog').getByTestId('national-audit').locator('summary').first().click();await sample(page,`${prefix}-national-audit`);await closeDialog(page);
 

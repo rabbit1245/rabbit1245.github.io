@@ -1,14 +1,14 @@
 import {validateCompetitionData} from './competition-validation';
 import { validateCareerExtensions } from './extension-validation';
-import { CLUBS, LEAGUES } from './data';
+import { CLUBS, LEAGUES, INTERNATIONAL_CLUBS, INTERNATIONAL_LEAGUES } from './data';
 import { CORE_STATS, DETAIL_STATS } from './math';
 import type { Career, MatchRecord, PlayerStats, SaveEnvelope, SaveSlot } from './types';
 
 const DATABASE = 'kball-careers';
 const DATABASE_VERSION = 1;
 const MAX_SAVE_BYTES = 256 * 1024 * 1024;
-const clubs = new Map(CLUBS.map(club => [club.id, club]));
-const leagues = new Set(LEAGUES.map(league => league.id));
+const clubs = new Map([...CLUBS,...INTERNATIONAL_CLUBS].map(club => [club.id, club]));
+const leagues = new Set([...LEAGUES,...INTERNATIONAL_LEAGUES].map(league => league.id));
 const positions = new Set(['GK', 'CB', 'LB', 'RB', 'LWB', 'RWB', 'CDM', 'CM', 'CAM', 'LM', 'RM', 'LW', 'RW', 'CF', 'SS', 'ST']);
 const fieldAttributes = ['strength', 'stamina', 'speed', 'agility', 'jumping', 'ballControl', 'dribbling', 'passing', 'crossing', 'shooting', 'heading', 'defending', 'setPieces', 'decisions', 'vision', 'anticipation', 'positioning', 'composure', 'concentration', 'teamwork'];
 const keeperAttributes = ['gkShotStopping', 'gkReflexes', 'gkHandling', 'gkAerialCommand', 'gkOneOnOnes', 'gkPositioning', 'gkDistribution', 'decisions', 'concentration', 'gkDefensiveOrganization'];
@@ -868,7 +868,7 @@ async function checksum(career: Career): Promise<string> {
   return [...new Uint8Array(digest)].map(byte => byte.toString(16).padStart(2, '0')).join('');
 }
 
-async function envelopeFor(career: Career): Promise<SaveEnvelope> {
+export async function prepareEnvelope(career: Career): Promise<SaveEnvelope> {
   const copy = validateCareer(career);
   return { format: 'kball-save', schemaVersion: 1, hash: await checksum(copy), savedAt: new Date().toISOString(), career: copy };
 }
@@ -932,9 +932,9 @@ async function readSlot(id: string): Promise<{ current?: StoredCareer; backup?: 
 
 /** A successful save updates the slot, its previous-good backup, and metadata atomically. */
 async function persistCareer(career: Career, recovery?: RecoverySnapshot): Promise<void> {
-  const validated = validateCareer(career);
+  const envelope=typeof Worker==='undefined'?await prepareEnvelope(career):await (await import('./save-preparation')).prepareSaveOffThread(career);
+  const validated=envelope.career;
   return enqueue(validated.id, async () => {
-    const envelope = await envelopeFor(validated);
     const database = await openDatabase();
     return new Promise<void>((resolve, reject) => {
       const transaction = database.transaction(['slots', 'backups', 'metadata'], 'readwrite');
@@ -1053,7 +1053,7 @@ export async function restoreBackup(id: string): Promise<Career> {
 }
 
 export async function exportCareer(career: Career): Promise<string> {
-  return stringify(await envelopeFor(career));
+  return stringify(await prepareEnvelope(career));
 }
 
 /** Imported saves always become new slots; no existing game or legacy localStorage is overwritten. */

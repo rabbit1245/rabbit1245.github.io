@@ -18,7 +18,7 @@ export default function PlayerStrip({career}: {career: Career}) {
     </div></div>
     <div className="strip-ovr"><span>OVR</span><strong>{p.ovr}</strong><Delta value={p.ovr - career.season.ovrStart}/></div>
     <div className="strip-economics"><span>몸값 <b>{economics ? compactMoney(economics.marketValue) : '미집계'}</b></span>
-      <span>주급 <b>{money(p.wage)}</b></span><small>{economics?.contract.role || '계약 역할 미집계'}</small></div>
+      <span>주급 <b>{compactMoney(p.wage)}</b></span><small>{economics?.contract.role || '계약 역할 미집계'}</small></div>
     <div className="strip-national"><span>국가대표 <b>{status}</b></span><small>{national.teamName}</small></div>
     <div className="strip-condition"><span>체력 <b>{Math.round(p.fitness)}%</b> · 신뢰 <b>{Math.round(career.managerTrust)}%</b></span>
       <small>{p.injuryWeeks > 0 ? `부상 회복 ${p.injuryWeeks}주` : '경기 출전 가능'}</small></div>

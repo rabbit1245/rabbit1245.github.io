@@ -1,9 +1,13 @@
+import {copySystems} from './snapshot';
+import {trackMonthlyLeague} from './extra-honours';
+import {moneyText} from './currency';
+import {syncManualInjury,recordManualAbsences} from './manual-injury';
 import {initializeClubCompetitions,processClubCompetitions,europeanEntries,cupStats} from './club-competitions';
 import { CLUBS, getClub, getLeague } from './data';
 import { ATTRIBUTE_LABELS, FIELD_ATTRIBUTES, GK_ATTRIBUTES, PLAY_STYLES, POSITION_ATTRIBUTES, POSITION_LABELS, overall as calculateOverall } from './attributes';
 import { addStats, clamp, emptyStats, hashSeed, integer, round, seededRandom, sumStats } from './math';
 import { simulateMatch } from './match-engine';
-import { getClubWorldPower, getSeasonClubIds, getWorldClubPlayers, getYouthClubPlayers, processWorldRound, transitionWorldSeason } from './world';
+import { getClubWorldPower, getSeasonClubIds, getWorldClubPlayers, getYouthClubPlayers, processWorldRound, prepareWorldMovements, transitionWorldSeason } from './world';
 import { getLeagueRule } from './league-rules';
 import { archiveNationalSeason, getNationalTotals, processDueNationalWindows } from './national';
 import { applyContract, evaluateAwards, makeContractOffers, payBonus, paySalary, updateLeadership, updateMarketValue, ensureEconomicHistory, beginEconomicSeason, answerCaptainOffer, expireCaptainOffers } from './career-systems';
@@ -15,18 +19,18 @@ import { TALENT_PROFILES } from './talent';
 import type { AttributeKey, Attributes, Career, CreateOptions, Fixture, Intensity, MatchRecord, Player, PlayerStats, SeasonState, SeasonSummary, Standing, Talent, TransferOffer } from './types';
 import type { PresentationEvent } from './revision-types';
 
-export const ENGINE_VERSION = '2.6.0';
+export const ENGINE_VERSION = '2.7.0';
 export const overall = calculateOverall;
 export { addStats, emptyStats, hashSeed, seededRandom } from './math';
 const TALENT_ORDER: Talent[] = ['D','C','B','A','S','SS','SSS'];
 
-function editable(career:Career):Career {
+function editable(career:Career,light=false):Career {
   // One isolated snapshot per command. Rounds mutate this snapshot, never an earlier save.
   const next:Career = {
     ...career, player:{...career.player,attributes:{...career.player.attributes},secondaryPositions:[...career.player.secondaryPositions]},
     season:{...career.season,fixtures:career.season.fixtures.map(f=>({...f})),table:career.season.table.map(row=>({...row})),matches:[...career.season.matches],playerStats:{...career.season.playerStats},attributeStart:{...career.season.attributeStart}},
     history:[...career.history],news:[...career.news],training:[...career.training],transfers:[...career.transfers],offers:career.offers.map(o=>({...o})),awards:[...career.awards],processedCommands:[...career.processedCommands],
-    systems:career.systems?structuredClone(career.systems):undefined,
+    systems:career.systems?copySystems(career.systems,light):undefined,
   };
   initializeSystems(next);
   ensureEconomicHistory(next);
@@ -37,9 +41,10 @@ function editable(career:Career):Career {
   if(next.stage==='season'){next.systems!.pendingChoice=undefined;next.offers=[];}
   return next;
 }
+function currentDate(c:Career):string{const date=seasonDate(c.season);return c.systems?.manualClock&&c.systems.manualClock>date?c.systems.manualClock:date;}
 function touch(career:Career) {
   career.revision++;
-  career.updatedAt=seasonDate(career.season);
+  career.updatedAt=currentDate(career);
   career.news=career.news.slice(0,80);
   if(career.systems)career.systems.events=career.systems.events.slice(-180);
 }
@@ -47,7 +52,7 @@ function news(career:Career,kind:Career['news'][number]['kind'],title:string,bod
   career.news.unshift({id:`news_${career.season.year}_${career.season.week}_${career.revision}_${career.news.length}`,year:career.season.year,week:career.season.week,kind,title,body});
 }
 function present(career:Career,type:PresentationEvent['type'],title:string,body:string,importance:PresentationEvent['importance']='brief') {
-  career.systems!.events.push({id:`event_${career.season.year}_${career.season.week}_${type}_${career.systems!.events.length}`,year:career.season.year,round:career.season.week,type,title,body,importance});
+  career.systems!.events.push({id:`event_${career.season.year}_${career.season.week}_${type}_${career.revision}_${career.systems!.events.length}`,year:career.season.year,round:career.season.week,type,title,body,importance});
 }
 function salary(ovr:number,power:number) {return Math.max(100,Math.round((150+Math.pow(Math.max(0,ovr-30),3)*.3)*clamp(power/76,.45,1.5)/10)*10);}
 
@@ -175,6 +180,7 @@ export function generateOffers(career:Career):TransferOffer[] {
   const next=editable(career);return makeContractOffers(next,'offseason');
 }
 function finishSeason(career:Career) {
+  prepareWorldMovements(career);
   career.season.completed=true;career.stage='offseason';
   const systems=career.systems!;
   processInternationalThrough(career,seasonHalfEndDate(career.season,'second'));
@@ -198,6 +204,7 @@ function playRound(next:Career) {
   const systems=next.systems!;
   next.season.week++;systems.trainingLocked=true;
   systems.phase=next.season.week<=systems.halfRound?'first':'second';
+  syncManualInjury(next,seasonDate(next.season,next.season.week-1));
   const wasInjured=next.player.injuryWeeks>0;
   trainRound(next);
   if(next.season.week%4===0)news(next,'training','훈련 리포트',`선택 훈련과 경기 경험을 나누어 기록합니다. 종합 ${next.player.ovr}.`);
@@ -208,6 +215,7 @@ function playRound(next:Career) {
   for(const fixture of next.season.fixtures.filter(f=>f.round===next.season.week&&!f.played)) {
     const isUser=fixture.homeId===next.player.clubId||fixture.awayId===next.player.clubId;
     const date=fixtureDate(next.season,next.season.week);
+    syncManualInjury(next,date);
     const youth=next.player.squad==='youth';
     const homePlayers=(youth?getYouthClubPlayers:getWorldClubPlayers)(next,fixture.homeId);
     const awayPlayers=(youth?getYouthClubPlayers:getWorldClubPlayers)(next,fixture.awayId);
@@ -224,12 +232,15 @@ function playRound(next:Career) {
     }
   }
   next.season.table=calculateTable(next.season.fixtures,next.season.table.map(r=>r.clubId));
+  trackMonthlyLeague(next,results);
   processWorldRound(next,results);
   updateLeadership(next,'club');
+  syncManualInjury(next,fixtureDate(next.season,next.season.week));
   if(wasInjured)next.player.injuryWeeks=Math.max(0,next.player.injuryWeeks-1);
   paySalary(next,52/next.season.totalWeeks);
   if(next.season.week===systems.halfRound)halfway(next);
   if(next.season.week>=next.season.totalWeeks)finishSeason(next);
+  recordManualAbsences(next);
   touch(next);
 }
 export function advanceCareer(career:Career,weeks=1):Career {
@@ -256,7 +267,7 @@ export function setTraining(career:Career,keys:AttributeKey[],intensity:Intensit
   if(career.stage==='retired')throw new Error('은퇴한 선수는 훈련할 수 없습니다.');
   if(career.stage!=='offseason')throw new Error('시즌 중에는 훈련 계획을 바꿀 수 없습니다. 다음 오프시즌에 설정해 주세요.');
   validateTraining(career.player.position,keys,intensity);
-  const next=editable(career),plan=next.systems!.trainingPlan;
+  const next=editable(career,true),plan=next.systems!.trainingPlan;
   if(plan?.forYear===career.season.year+1&&plan.confirmed&&plan.source!=='legacy')throw new Error('다음 시즌 훈련 계획은 이미 확정했습니다.');
   next.training=[...keys];next.intensity=intensity;
   next.systems!.trainingPlan={forYear:career.season.year+1,confirmed:true,confirmedAtRound:career.season.week,source:'offseason'};
@@ -264,23 +275,25 @@ export function setTraining(career:Career,keys:AttributeKey[],intensity:Intensit
   present(next,'growth','다음 시즌 훈련 확정',`${keys.length}개 능력치에 집중합니다. 시즌 중에는 이 계획을 유지합니다.`);
   touch(next);return next;
 }
-export function manuallyAge(career:Career,amount:1|5|10):Career{
+export function manuallyAge(career:Career,amount:1|5|10,key:AttributeKey):Career{
  if(career.stage==='retired'||![1,5,10].includes(amount))throw new Error('현역 선수에게 -1/-5/-10 중 하나를 적용해 주세요.');
- const next=editable(career),before={...next.player.attributes},ovrBefore=next.player.ovr;
- applyManualAging(next,amount);
- (next.systems!.manualAging??=[]).push({playerId:next.player.id,playerName:next.player.name,id:`manual-aging:${next.id}:${next.revision}`,year:next.season.year,round:next.season.week,date:seasonDate(next.season),amount,before,after:{...next.player.attributes},ovrBefore,ovrAfter:next.player.ovr});
+ if(career.player.attributes[key]===undefined)throw new Error('감소할 능력치를 선택해 주세요.');
+ if(career.systems?.attributeLocks?.includes(key))throw new Error('고정한 능력치는 수동 노화를 적용할 수 없습니다.');
+ const next=editable(career,true),before={...next.player.attributes},ovrBefore=next.player.ovr;
+ applyManualAging(next,amount,key);
+ (next.systems!.manualAging??=[]).push({playerId:next.player.id,playerName:next.player.name,id:`manual-aging:${next.id}:${next.revision}`,year:next.season.year,round:next.season.week,date:currentDate(next),amount,key,before,after:{...next.player.attributes},ovrBefore,ovrAfter:next.player.ovr});
  updateMarketValue(next,'사용자 수동 노화');touch(next);return next;
 }
 export function configureCheats(career:Career,enabled:boolean,freezeAging:boolean):Career{
   if(typeof enabled!=='boolean'||typeof freezeAging!=='boolean')throw new Error('치트 설정이 올바르지 않습니다.');
-  const next=editable(career);next.systems!.cheats={enabled,freezeAging,used:next.systems!.cheats?.used??false};touch(next);return next;
+  const next=editable(career,true);next.systems!.cheats={enabled,freezeAging,used:next.systems!.cheats?.used??false};touch(next);return next;
 }
 export function cheatIncreaseAttribute(career:Career,key:AttributeKey,amount:number):Career{
   if(!career.systems?.cheats?.enabled)throw new Error('설정에서 치트 모드를 켜 주세요.');
   if(career.stage==='retired')throw new Error('은퇴한 선수의 능력치는 변경할 수 없습니다.');
   const allowed=career.player.position==='GK'?GK_ATTRIBUTES:FIELD_ATTRIBUTES;
   if(!allowed.includes(key)||![1,5,10].includes(amount))throw new Error('능력치와 증가량을 확인해 주세요.');
-  const next=editable(career);increaseAttribute(next,key,amount);next.systems!.cheats!.used=true;updateMarketValue(next,'능력치 직접 조정');touch(next);return next;
+  const next=editable(career,true);increaseAttribute(next,key,amount);next.systems!.cheats!.used=true;updateMarketValue(next,'능력치 직접 조정');touch(next);return next;
 }
 export function acceptTransfer(career:Career,offerId:string):Career {
   if(career.stage==='retired')throw new Error('은퇴한 선수는 계약을 체결할 수 없습니다.');
@@ -292,7 +305,7 @@ export function acceptTransfer(career:Career,offerId:string):Career {
   applyContract(next,offer);
   if(next.stage==='offseason')next.transferDecision='signed';
   next.systems!.pendingChoice=undefined;next.offers=[];
-  present(next,offer.type==='renew'?'renewal':'transfer',offer.type==='renew'?'재계약 체결':`${getClub(offer.clubId).name} 이적`,`${offer.years}년 · 주급 €${offer.wage.toLocaleString()} · 구단 간 이적료 €${offer.fee.toLocaleString()}`,'milestone');
+  present(next,offer.type==='renew'?'renewal':'transfer',offer.type==='renew'?'재계약 체결':`${getClub(offer.clubId).name} 이적`,`${offer.years}년 · 주급 ${moneyText(offer.wage)} · 구단 간 이적료 ${moneyText(offer.fee)}`,'milestone');
   if(from!==next.player.clubId){expireCaptainOffers(next,'club');updateMarketValue(next,'새 구단의 리그와 출전 역할');}
   touch(next);return next;
 }
@@ -325,12 +338,12 @@ export function startNextSeason(career:Career):Career {
   const previousSeason=next.season,lastYear=next.season.year,previousOvr=next.player.ovr;
   const entries=europeanEntries(next);
   transitionWorldSeason(next);
-  for(const h of next.history){const report=next.systems!.world.clubs[h.clubId]?.development?.history.find(r=>r.year===h.year);if(h.details&&report)h.details.clubDevelopment=structuredClone(report);}
+  for(const h of next.history){const report=next.systems!.world.clubs[h.clubId]?.development?.history.find(r=>r.year===h.year);if(h.details&&report){const i=next.history.indexOf(h);next.history[i]={...h,details:{...h.details,clubDevelopment:structuredClone(report)}};}}
   if(next.systems?.cheats?.enabled&&next.systems.cheats.freezeAging)next.systems.cheats.used=true;
   else {next.player.age++;}
   const promoted=next.player.squad==='youth'&&(next.player.age>=20||(next.player.age>=17&&next.player.ovr>=getClubWorldPower(next,next.player.clubId)-18));
   if(promoted)next.player.squad='senior';
-  next.player.fitness=100;next.player.morale=clamp(next.player.morale+10,0,100);next.player.injuryWeeks=0;
+  next.player.fitness=100;next.player.morale=clamp(next.player.morale+10,0,100);if(!next.systems?.manualInjuries?.some(r=>!r.returned))next.player.injuryWeeks=0;
   next.season=makeSeason(next.player,lastYear+1,next.season.index+1,next);
   const calendarYear=nextCalendarYear(previousSeason,next.season.leagueId);
   if(calendarYear!==next.season.year)next.season.calendarYear=calendarYear;
@@ -338,17 +351,21 @@ export function startNextSeason(career:Career):Career {
   expireCaptainOffers(next);
   const systems=next.systems!;
   systems.national.formatVersion=2;
+  delete systems.monthlyLeague;
   systems.phase='preseason';systems.halfRound=Math.ceil(next.season.totalWeeks/2);systems.trainingLocked=true;systems.pendingChoice=undefined;
   delete systems.agingReport;
   systems.trainingPlan={forYear:next.season.year,confirmed:true,confirmedAtRound:0,source:systems.trainingPlan?.source??'legacy'};
-  initializeClubCompetitions(next,entries);
+  initializeClubCompetitions(next,entries,decided);
   beginGrowthSeason(next);
   systems.firstHalfSnapshot={attributes:{...next.player.attributes},stats:emptyStats(),ovr:next.player.ovr,value:systems.economics.marketValue,round:0};
   updateMarketValue(next,'새 시즌 소속 리그·전력·연령 변화');beginEconomicSeason(next);updateLeadership(next,'club',true);
   for(const move of systems.world.movements.filter(m=>m.year===next.season.year&&m.clubId===next.player.clubId))present(next,'promotion',move.kind==='promotion'?'상위 리그 승격':'하위 리그 강등',`${getLeague(move.fromLeagueId).name} → ${getLeague(move.toLeagueId).name}. 새 상대·일정·수입·영입 예산을 반영했습니다.`,'milestone');
   if(promoted)present(next,'growth','1군 승격','유소년 단계를 마치고 1군 출전 경쟁을 시작합니다.','milestone');
-  if(next.player.ovr<previousOvr)present(next,'growth','연령에 따른 변화',`종합 ${previousOvr} → ${next.player.ovr}. 신체 변화와 훈련 성과를 나누어 확인하세요.`);
-  touch(next);return next;
+  syncManualInjury(next,seasonDate(next.season,0));
+  touch(next);
+  const injury=next.systems?.manualInjuries?.find(r=>!r.returned);
+  if(injury)skipInjuryPeriod(next,injury.end);
+  return next;
 }
 export function retireCareer(career:Career):Career {
   if(career.stage==='retired')return career;
@@ -370,4 +387,28 @@ export function getCareerTotals(career:Career,scope:'club'|'national'|'all'='all
   if(scope==='club')return club;
   const national=getNationalTotals(career);
   return scope==='national'?national:sumStats([club,national]);
+}
+
+export function setAttributeLock(career:Career,key:AttributeKey,locked:boolean):Career{
+ if(career.stage==='retired'||career.player.attributes[key]===undefined||typeof locked!=='boolean')throw new Error('능력치 고정 설정을 확인해 주세요.');
+ const next=editable(career,true),locks=new Set(next.systems!.attributeLocks??[]);
+ if(locked)locks.add(key);else locks.delete(key);next.systems!.attributeLocks=[...locks];touch(next);return next;
+}
+export function manuallyInjure(career:Career,duration:'half'|'season'):Career{
+ if(career.stage!=='season'||!['half','season'].includes(duration))throw new Error('진행 중인 시즌에서 부상 기간을 선택해 주세요.');
+ if(career.systems?.manualInjuries?.some(r=>!r.returned))throw new Error('현재 수동 부상이 끝난 뒤 다시 적용해 주세요.');
+ const next=editable(career),start=new Date(Date.parse(currentDate(next))+1).toISOString(),end=new Date(Date.parse(start)+(duration==='half'?182:365)*86400000).toISOString();
+ (next.systems!.manualInjuries??=[]).push({id:`manual-injury:${next.id}:${next.revision}`,year:next.season.year,clubId:next.player.clubId,duration,start,end,missed:[]});
+ present(next,'injury',`${duration==='half'?'반 시즌':'한 시즌'} 부상`,`${start.slice(0,10)} ~ ${end.slice(0,10)}. 부상 중 팀 경기는 정상 진행하며 시즌 종료 시 계약·훈련을 결정한 뒤 남은 기간을 이어갑니다.`,'milestone');
+ syncManualInjury(next,start);
+ skipInjuryPeriod(next,end);touch(next);return next;
+}
+
+function skipInjuryPeriod(c:Career,end:string):void{
+ while(c.stage==='season'&&fixtureDate(c.season,c.season.week+1)<end)playRound(c);
+ if(c.stage==='season'&&end<=seasonHalfEndDate(c.season,'second')){
+  processClubCompetitions(c,m=>{applyEffects(c,m);applyMatchExperience(c,m.playerStats);c.lastMatchId=m.id;},date=>processInternationalThrough(c,date),end);
+  processInternationalThrough(c,end);syncManualInjury(c,end);c.systems!.manualClock=end;
+ }
+ recordManualAbsences(c);
 }

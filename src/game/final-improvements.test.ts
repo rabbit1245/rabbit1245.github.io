@@ -24,8 +24,8 @@ function ace(country='프랑스',seed='national-expanded-0'){
  c.systems!.world.players={};c.systems!.world.playerStats={};c.systems!.national=createNational(c);return c;
 }
 test('supported domestic cups and UEFA fields use separate valid rules, balanced opponents and no duplicate European entry',()=>{
- const c=fresh(),cups=cupLedger(c),all=new Set<string>();assert.equal(cups.length,20);assert.equal(DOMESTIC_CUPS.length,17);assert.ok(cups.every(t=>t.fixtures.every(f=>f.date&&Number.isFinite(Date.parse(f.date)))));
- for(const t of cups.filter(t=>t.kind==='continental')){
+ const c=fresh(),cups=cupLedger(c),all=new Set<string>();assert.equal(cups.length,25);assert.equal(DOMESTIC_CUPS.length,17);assert.ok(cups.every(t=>t.fixtures.every(f=>f.date&&Number.isFinite(Date.parse(f.date)))));
+ for(const t of cups.filter(t=>/^(UCL|UEL|UECL):/.test(t.id))){
   assert.equal(t.entrants.length,36);for(const id of t.entrants){assert.ok(!all.has(id));all.add(id);const games=t.fixtures.filter(f=>f.homeId===id||f.awayId===id);assert.equal(games.length,t.leagueRounds);assert.equal(new Set(games.map(f=>f.homeId===id?f.awayId:f.homeId)).size,t.leagueRounds);assert.equal(games.filter(f=>f.homeId===id).length,t.leagueRounds/2);}
  }
  assert.ok(cups.filter(t=>t.kind==='leagueCup').every(t=>['영국','포르투갈','일본'].includes(t.country!)));
@@ -56,11 +56,11 @@ test('European qualification uses actual prior league positions, cup winners and
 });
 test('legacy midseason saves do not receive invented past cup fixtures',()=>{
  const c=fresh();delete c.systems!.clubCompetitions;c.season.week=10;initializeClubCompetitions(c);assert.equal(cupLedger(c).length,0);
- c.season.year++;c.season.week=0;initializeClubCompetitions(c);assert.equal(cupLedger(c).length,20);
+ c.season.year++;c.season.week=0;initializeClubCompetitions(c);assert.equal(cupLedger(c).length,25);
 });
 test('manual aging applies once, floors every attribute at zero, recalculates OVR and survives save/TXT',async()=>{
- for(const amount of [1,5,10] as const){const c=fresh(),before=JSON.stringify(c),changed=executeCommand(c,{type:'manualAging',amount},`manual-${amount}`);assert.equal(JSON.stringify(c),before);assert.equal(changed.player.age,c.player.age);assert.equal(changed.season.week,0);assert.equal(changed.player.ovr,overall(changed.player));for(const key of Object.keys(c.player.attributes) as (keyof typeof c.player.attributes)[])assert.equal(changed.player.attributes[key],Math.max(0,c.player.attributes[key]!-amount));assert.equal(executeCommand(changed,{type:'manualAging',amount},`manual-${amount}`),changed);validateCareer(changed);const loaded=await importCareer(await exportCareer(changed));assert.deepEqual(loaded.systems!.manualAging,changed.systems!.manualAging);assert.match(buildCareerText(changed),/수동 노화 · 최종 통합 검증/);}
- let zero=fresh();for(let i=0;i<10;i++)zero=manuallyAge(zero,10);assert.ok(Object.values(zero.player.attributes).every(v=>v===0));assert.equal(zero.player.ovr,overall(zero.player));validateCareer(zero);
+ for(const amount of [1,5,10] as const){const c=fresh(),before=JSON.stringify(c),changed=executeCommand(c,{type:'manualAging',amount,key:'shooting'},`manual-${amount}`);assert.equal(JSON.stringify(c),before);assert.equal(changed.player.age,c.player.age);assert.equal(changed.season.week,0);assert.equal(changed.player.ovr,overall(changed.player));for(const key of Object.keys(c.player.attributes) as (keyof typeof c.player.attributes)[])assert.equal(changed.player.attributes[key],(key==='shooting'?Math.max(0,c.player.attributes[key]!-amount):c.player.attributes[key]));assert.equal(executeCommand(changed,{type:'manualAging',amount,key:'shooting'},`manual-${amount}`),changed);validateCareer(changed);const loaded=await importCareer(await exportCareer(changed));assert.deepEqual(loaded.systems!.manualAging,changed.systems!.manualAging);assert.match(buildCareerText(changed),/수동 노화 · 최종 통합 검증/);}
+ let zero=fresh();for(let i=0;i<10;i++)zero=manuallyAge(zero,10,'shooting');assert.ok(zero.player.attributes.shooting===0);assert.equal(zero.player.ovr,overall(zero.player));validateCareer(zero);
  const invalid=structuredClone(zero);invalid.systems!.manualAging![0].after.shooting!++;assert.throws(()=>validateCareer(invalid),/노화/);
 });
 test('elite young players can reach seniors while ordinary youth remain U20',()=>{

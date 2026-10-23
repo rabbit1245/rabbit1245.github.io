@@ -1,4 +1,6 @@
 /** Retained FC25 catalogue. Indexed once at module initialization, never per match. */
+import {INTERNATIONAL_CLUBS,INTERNATIONAL_LEAGUES} from './international-clubs';
+export {INTERNATIONAL_CLUBS,INTERNATIONAL_LEAGUES} from './international-clubs';
 import rawCatalogue from './catalog.json';
 import type { Club, League, Position, RosterPlayer } from './types';
 
@@ -25,8 +27,8 @@ export const LEAGUES: League[] = catalogue.leagues.map(([id, name, country, tier
 export const ROSTERS: Record<string, RosterPlayer[]> = Object.fromEntries(
   Object.entries(catalogue.rosters).map(([clubId, players]) => [clubId, players.map(([id, name, position, ovr, age]) => ({ id, name, clubId, position, ovr, age }))]),
 );
-const clubsById = new Map(CLUBS.map(club => [club.id, club]));
-const leaguesById = new Map(LEAGUES.map(league => [league.id, league]));
+const clubsById = new Map([...CLUBS,...INTERNATIONAL_CLUBS].map(club => [club.id, club]));
+const leaguesById = new Map([...LEAGUES,...INTERNATIONAL_LEAGUES].map(league => [league.id, league]));
 
 export const COUNTRY_FLAGS: Record<string, string> = {
   '대한민국': '🇰🇷', '일본': '🇯🇵', '중국': '🇨🇳', '미국': '🇺🇸', '브라질': '🇧🇷',

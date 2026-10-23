@@ -20,7 +20,7 @@ export function seasonHonours(c:Career,year:number){
  const clubId=h?.clubId??season?.matches[0]?.playerClubId??c.player.clubId;
  const completed=h?.completed??season?.completed??false,rank=h?.rank??(season?season.table.findIndex(t=>t.clubId===clubId)+1:0);
  if(completed&&rank===1)titles.push({id:`club:${year}:${clubId}`,year,name:h?.competitionName??season!.competitionName,team:h?.clubName??getClub(clubId).name,scope:'club',apps:h?.stats.apps??season!.playerStats.apps,medal:awards.some(a=>a.category==='team'&&a.clubId===clubId&&a.name.startsWith(h?.competitionName??season!.competitionName))});
- for(const t of cupLedger(c,year)){const own=t.matches[0]?.playerClubId;if(t.winnerId&&own===t.winnerId)titles.push({id:t.id,year,name:t.name,team:getClub(t.winnerId).name,scope:'club',apps:t.matches.reduce((n,m)=>n+m.playerStats.apps,0),medal:awards.some(a=>a.id.startsWith(t.id+':champion:'))});}
+ for(const t of cupLedger(c,year)){if(t.id.startsWith('PLAYOFF:'))continue;const own=t.matches[0]?.playerClubId;if(t.winnerId&&own===t.winnerId)titles.push({id:t.id,year,name:t.name,team:getClub(t.winnerId).name,scope:'club',apps:t.matches.reduce((n,m)=>n+m.playerStats.apps,0),medal:awards.some(a=>a.id.startsWith(t.id+':champion:'))});}
  const addNational=(id:string,name:string,squad:string,apps:number)=>{const finals=[...new Map([...(n?.history.flatMap(h=>h.matches)??[]),...(n?.matches??[])].filter(m=>m.competitionId===id&&m.playerClubId.endsWith(`:${squad}`)&&/\|(group|round32|round16|quarterfinal|semifinal|final|thirdPlace)\|/.test(m.fixtureId)).map(m=>[m.fixtureId,m])).values()];if(finals.length)apps=finals.reduce((sum,m)=>sum+m.playerStats.apps,0);if(!titles.some(t=>t.id===`national:${id}`))titles.push({id:`national:${id}`,year,name,team:`${n?.country??c.player.nationality} ${squad==='U20'?'20세 이하 대표팀':'성인 대표팀'}`,scope:'national',apps,medal:awards.some(a=>isTeamAward(a)&&a.name.includes(name))});};
  for(const row of n?.history??[])if(row.year===year&&row.result==='우승')addNational(row.competitionId,row.competitionName,row.squad,row.stats.apps);
  const matches=[...new Map([...(n?.history.flatMap(h=>h.matches)??[]),...(n?.matches??[])].filter(m=>m.seasonYear===year).map(m=>[m.fixtureId,m])).values()];
@@ -35,5 +35,5 @@ export function seasonHonours(c:Career,year:number){
   const name=a.name.replace(/\s*우승(?:\s*(?:메달|트로피))?$/,'');
   if(!titles.some(t=>t.name===name))titles.push({id:`award:${a.id}`,year,name,team:a.category==='team'?getClub(a.clubId).name:`${n?.country??c.player.nationality} 대표팀`,scope:a.category==='team'?'club':'national',apps:null,medal:true});
  }
- return {year,titles,personal:awards.filter(a=>!isTeamAward(a)),teamAwards:awards.filter(isTeamAward),pending:year===c.season.year&&!c.season.completed&&c.stage==='season'};
+ return {year,titles,personal:awards.filter(a=>!isTeamAward(a)&&a.category!=='commercial'),commercial:awards.filter(a=>a.category==='commercial'),teamAwards:awards.filter(isTeamAward),pending:year===c.season.year&&!c.season.completed&&c.stage==='season'};
 }

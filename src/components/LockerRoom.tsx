@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react';
+import {currencyText} from '../game/currency';
+import { useEffect, useMemo, useState } from 'react';
 import { ArrowLeftRight, ArrowRight, Check, ChevronLeft, ChevronRight, Dumbbell, Play } from 'lucide-react';
 import type { AttributeKey, Career, GameCommand, MatchRecord, Standing } from '../game/types';
 import { ATTRIBUTE_LABELS } from '../game/attributes';
 import { getLeagueRule } from '../game/league-rules';
 import { seasonOverview, seasonClubId } from '../game/season-overview';
-import { average, calendarLabel, compactMoney, Delta, Empty, MatchRow, Modal, money, Panel, seasonLabel, TeamBadge, teamName } from './Shared';
+import { average, calendarLabel, compactMoney, Delta, Empty, MatchRow, Modal, money, Panel, seasonLabel, Money, TeamBadge, teamName } from './Shared';
 import StatsNine from './StatsNine';
 import './LockerRoom.css';
 import LeagueLeaders from './LeagueLeaders';
@@ -28,7 +29,7 @@ function Transfers({career,busy,command,onClose}:Props&{onClose:()=>void}) {
   return <Modal title="계약과 다음 행선지" onClose={onClose} wide>
     <div className="contract-current"><TeamBadge id={p.clubId}/><div><span className="eyebrow">현재 계약</span><strong>{teamName(p.clubId)}</strong><span>{money(p.wage)}/주 · {e?.contract.role||'역할 미집계'} · {e?.contract.signedDate||e?.contract.signedYear||'—'} → {e?.contract.expiresDate||e?.contract.expiresYear||'—'}</span></div><span className="pill">{p.contractYears}년 남음</span></div>
     {career.transferDecision?<div className="notice"><Check size={18}/>다음 시즌 행선지를 확정했습니다. {teamName(p.clubId)}에서 계속합니다.</div>:active?<>
-      <div className="offer-grid">{offers.map(o=><section className="offer" key={o.id}><div className="offer-title"><TeamBadge id={o.clubId}/><span className="pill">{o.type==='renew'?'재계약':'이적 제안'}</span></div><h3>{teamName(o.clubId)}</h3><p className="muted">{o.reason}</p><dl className="detail-list"><div><dt>주급 변화</dt><dd>{money(p.wage)} → <b>{money(o.wage)}</b></dd></div><div><dt>이전 대비</dt><dd><Delta value={Math.round((o.wage-p.wage)/Math.max(1,p.wage)*100)}/> %</dd></div><div><dt>계약 / 역할</dt><dd>{o.years}년 · {o.role}</dd></div><div><dt>구단 간 이적료</dt><dd>{o.type==='renew'?'해당 없음':money(o.fee)}</dd></div><div><dt>효력</dt><dd>다음 시즌</dd></div></dl><button className="button primary full" disabled={busy} onClick={()=>command({type:'transfer',offerId:o.id})}>제안 수락<ArrowRight size={17}/></button></section>)}</div>
+      <div className="offer-grid">{offers.map(o=><section className="offer" key={o.id}><div className="offer-title"><TeamBadge id={o.clubId}/><span className="pill">{o.type==='renew'?'재계약':'이적 제안'}</span></div><h3>{teamName(o.clubId)}</h3><p className="muted">{currencyText(o.reason)}</p><dl className="detail-list"><div><dt>주급 변화</dt><dd><Money value={p.wage}/> → <Money value={o.wage}/></dd></div><div><dt>이전 대비</dt><dd><Delta value={Math.round((o.wage-p.wage)/Math.max(1,p.wage)*100)}/> %</dd></div><div><dt>계약 / 역할</dt><dd>{o.years}년 · {o.role}</dd></div><div><dt>구단 간 이적료</dt><dd>{o.type==='renew'?'해당 없음':<Money value={o.fee}/>}</dd></div><div><dt>효력</dt><dd>다음 시즌</dd></div></dl><button className="button primary full" disabled={busy} onClick={()=>command({type:'transfer',offerId:o.id})}>제안 수락<ArrowRight size={17}/></button></section>)}</div>
       {!offers.length&&<Empty title="도착한 제안이 없습니다">현재 구단에 잔류하고 다음 시즌을 준비할 수 있습니다.</Empty>}
       <div className="modal-actions"><button className="button secondary" disabled={busy} onClick={()=>command({type:'stay'})}>현재 구단에 잔류</button></div>
     </>:<p className="muted">이적과 재계약은 시즌 종료 후 진행합니다.</p>}
@@ -68,7 +69,7 @@ export default function LockerRoom({career,busy,command,onMatch,onTraining,onCar
   const [transfers,setTransfers]=useState(false),[matchPage,setMatchPage]=useState(0),[allMatches,setAllMatches]=useState(false);
   const p=career.player,s=career.season,phase=career.systems?.phase||'preseason';
   useEffect(()=>{setTransfers(false);setMatchPage(0);setAllMatches(false);},[career.id,s.year,career.stage]);
-  const recent=[...s.matches].reverse(),{national,club,combined,detailed}=seasonOverview(career);
+  const recent=useMemo(()=>[...s.matches].reverse(),[career]),{national,club,combined,detailed}=useMemo(()=>seasonOverview(career),[career]);
   const summaries=[['통합',combined],['클럽',club],['국대',national]] as const;
   const next=career.stage==='offseason'?{label:'다음 시즌 시작',command:{type:'nextSeason'} as GameCommand}:phase==='midseason'?{label:'후반기 진행',command:{type:'continueHalf'} as GameCommand}:{label:phase==='second'?'후반기 계속 진행':'전반기 진행',command:{type:'advanceHalf'} as GameCommand};
   const trainingConfirmed=career.systems?.trainingPlan?.forYear===s.year+1&&career.systems.trainingPlan.confirmed;

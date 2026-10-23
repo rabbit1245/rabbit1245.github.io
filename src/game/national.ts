@@ -2,6 +2,7 @@ import {advanceNationalWindow} from './national-expanded';
 import { CLUBS, ROSTERS, getClub, getLeague } from './data';
 import { getLeagueRule } from './league-rules';
 import { fixtureDate, seasonDate,seasonHalfEndDate } from './calendar';
+import {syncManualInjury} from './manual-injury';
 import { simulateMatch } from './match-engine';
 import { addStats, clamp, emptyStats, seededRandom, sumStats } from './math';
 import { nationalityForPlayer, normalizeNationality } from './national-data';
@@ -242,6 +243,7 @@ function syntheticTeam(country: string, squad: Squad, players: Candidate[]): Clu
 }
 function play(career: Career, competition: Competition, homeCountry: string, awayCountry: string, stage: Stage, date: string, label: string): NationalMatch {
   const state = career.systems!.national as State;
+  if(homeCountry===state.country||awayCountry===state.country){syncManualInjury(career,date);if(career.player.injuryWeeks>0){state.status='injured';state.reason=`부상 회복 중 · ${career.player.injuryWeeks}주. 이번 대표팀 경기 출전 제외.`;}else if(state.status==='injured')selection(career,state);}
   const homePlayers = rosterFor(career,homeCountry,state.squad);
   const awayPlayers = rosterFor(career,awayCountry,state.squad);
   const fixture: Fixture = {id:`NAT|${state.squad}|${competition.id}|${stage}|${label}`,round:state.matches.length+1,homeId:teamId(homeCountry,state.squad),awayId:teamId(awayCountry,state.squad),played:false};

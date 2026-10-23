@@ -1,5 +1,6 @@
+import {currencyText} from './game/currency';
 import {careerMatchLedger} from './game/career-text';
-import { useEffect, useRef, useState, type ChangeEvent } from 'react';
+import { useEffect, useMemo, useRef, useState, type ChangeEvent } from 'react';
 import { AlertCircle, ArrowRight, ArrowUpRight, CheckCircle2, Download, FolderOpen, LayoutDashboard, Loader2, Menu, Plus, RotateCcw, Save, Settings2, Shield, SkipForward, Trash2, Trophy, Upload, UserRound, X } from 'lucide-react';
 import type { Career, CreateOptions, GameCommand, MatchRecord, SaveSlot } from './game/types';
 import type { PresentationEvent } from './game/revision-types';
@@ -35,7 +36,7 @@ function Presentation({matches,events,onClose,reduced}:{matches:MatchRecord[];ev
   const items=[...matches.map(m=>({id:m.id,title:`${teamName(m.homeId,m.homeName)} ${m.homeGoals} – ${m.awayGoals} ${teamName(m.awayId,m.awayName)}`,body:`R${m.round} · ${m.playerPlayed?`${m.playerMinutes}분 출전 · 평점 ${m.playerRating.toFixed(1)}${m.playerStats.mom?' · MOM':''}${m.events.some(e=>e.type==='injury')?' · 부상 발생':''}`:'미출전'}`,important:false})),...events.filter(e=>e.importance==='milestone').slice(-2).map(e=>({...e,important:true}))];
   const [index,setIndex]=useState(0);
   useEffect(()=>{if(reduced||!items.length){onClose();return;}const timer=window.setTimeout(()=>{if(index>=items.length-1)onClose();else setIndex(i=>i+1);},items[index]?.important?850:200);return()=>clearTimeout(timer);},[index,reduced]);
-  return <div className="presentation" role="status" aria-live="polite"><span className="eyebrow">시즌의 장면 · 결과 계산 완료</span><div className="presentation-rail">{items.map((r,i)=><i key={r.id} className={i<=index?'done':''}/>)}</div><strong>{items[index]?.title}</strong><p>{items[index]?.body}</p><button className="button secondary small" onClick={onClose}><SkipForward size={15}/>연출 건너뛰기</button></div>;
+  return <div className="presentation" role="status" aria-live="polite"><span className="eyebrow">시즌의 장면 · 결과 계산 완료</span><div className="presentation-rail">{items.map((r,i)=><i key={r.id} className={i<=index?'done':''}/>)}</div><strong>{items[index]?.title}</strong><p>{currencyText(items[index]?.body??'')}</p><button className="button secondary small" onClick={onClose}><SkipForward size={15}/>연출 건너뛰기</button></div>;
 }
 export default function App() {
   const [career, setCareer] = useState<Career | null>(null);
@@ -169,11 +170,13 @@ export default function App() {
     } catch(error) {setError(errorMessage(error));}
   }
   function changeReduced(value:boolean){setReduced(value);try{localStorage.setItem('kball-reduced-motion',String(value));}catch{/* Active for this session. */}}
+  const strip=useMemo(()=>career?<PlayerStrip career={career}/>:null,[career]);
+  const competitions=useMemo(()=>career?<SeasonCompetitions career={career} onMatch={setSelectedMatch}/>:null,[career]);
   return <div className={reduced?'reduce-motion':''}>
     <input ref={fileRef} type="file" hidden accept=".json,application/json" aria-label="K볼 저장 파일 가져오기" onChange={importFile}/>
     {!career?<Landing slots={slots} loading={loading} busy={busy} onNew={requestNewCareer} onLoad={load} onImport={()=>fileRef.current?.click()}/>:<div className="app-shell">
       <header className="app-header"><div className="header-inner"><Brand/><nav className="main-nav" aria-label="주요 화면">{NAVIGATION.map(n=><button key={n.id} data-testid={`${n.id}-tab`} aria-current={page===n.id?'page':undefined} className={page===n.id?'active':''} onClick={()=>navigate(n.id)}><n.icon size={17}/><span>{n.label}{n.id==='player'&&career.systems?.leadership.offers?.some(o=>o.status==='pending')&&<small className="nav-captain-offer">주장 제의</small>}</span></button>)}</nav><div className="header-tools"><span className={`save-status ${saveStatus}`} data-testid="save-status" aria-live="polite">{saveStatus==='saving'?<Loader2 size={13} className="spinner"/>:saveStatus==='error'?<AlertCircle size={13}/>:<CheckCircle2 size={13}/>}<span>{saveStatus==='saved'?'자동 저장됨':saveStatus==='saving'?'저장 중':'저장 실패'}</span></span><button className="icon-button" data-testid="common-menu" aria-label="저장 및 설정 메뉴" onClick={()=>setCommon(true)}><Menu size={21}/></button></div>{toast&&<div className="toast" role="status"><CheckCircle2 size={17}/>{toast}</div>}</div></header>
-      <main className="game-main"><PlayerStrip career={career}/><SeasonCompetitions career={career} onMatch={setSelectedMatch}/><div className="page-title"><h1>{page==='locker'?'라커룸':page==='player'?'선수':'커리어'}</h1><span className="page-context">{calendarLabel(career)} · {phaseLabel(career)} · {career.season.competitionName}</span></div>
+      <main className="game-main">{strip}{competitions}<div className="page-title"><h1>{page==='locker'?'라커룸':page==='player'?'선수':'커리어'}</h1><span className="page-context">{calendarLabel(career)} · {phaseLabel(career)} · {career.season.competitionName}</span></div>
         {error&&<div className="error-banner" role="alert"><AlertCircle size={18}/><span>{error}</span><button className="icon-button" aria-label="오류 알림 닫기" onClick={()=>setError('')}><X size={16}/></button></div>}
         {busy&&<div className="processing" role="status"><Loader2 className="spinner" size={17}/>경기와 성장 기록을 계산하고 있습니다.</div>}
         {page==='locker'&&<LockerRoom career={career} busy={busy} command={command} onMatch={setSelectedMatch} presenting={Boolean(presentation)} onTraining={openTraining} onCareer={openCareer}/>}{page==='player'&&<PlayerPanel career={career} busy={busy} command={command} requestedView={playerView} viewRequest={playerViewRequest}/>} {page==='career'&&<CareerPanel career={career} busy={busy} command={command} onExport={exportFile} onCopy={copyCareer} onMatch={setSelectedMatch} requestedView={careerView}/>}

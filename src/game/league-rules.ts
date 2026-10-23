@@ -34,7 +34,7 @@ export const LEAGUE_RULES: Record<string, LeagueRule> = Object.fromEntries(LEAGU
   let note = '정규 순위에 따른 승강 인원은 게임 모델입니다. 실제 플레이오프·라이선스·리저브팀 자격은 단순화하며 2026 규정으로 검증되지 않았습니다.';
   if (peers.length > 1) note += ' 지역조 승자는 우선 선발하고 남는 승격 자리는 승점/경기·득실/경기로 비교합니다. 강등팀은 비워진 조 자리를 채워 조별 정원을 유지합니다.';
   if (league.id === 'KR1' || league.id === 'KR2') note = 'K1 최하위와 K2 우승은 직접 교환합니다. K1 하위 두 팀과 K2 2·3위는 단판 모델 플레이오프를 치르며 동점이면 K1 잔류입니다. 실제 K2 준플레이오프와 2026 세부 규정은 재현하지 않습니다. K2↔K3는 참가 자격·라이선스 확인 전 자동 승강하지 않습니다.';
-  if (league.id === 'KR3') note = 'K2 참가 자격·라이선스·2026 연결 규정이 검증되지 않아 K2↔K3 자동 승강을 적용하지 않습니다.';
+  if (league.id === 'KR3') note = '2026년부터 K3 우승팀의 해당 연도 K2 라이선스 승인과 승강 결정전 규정이 확인된 경우에만 실제 결정전 결과를 적용합니다. 승인 자료가 없는 시즌은 판정 보류 사유를 남깁니다. K4는 현재 명단에 없어 K3↔K4 일정을 생성하지 않습니다.';
   if (closed) note = 'MLS·USL·MLS NEXT Pro는 서로 다른 폐쇄형 대회로 취급하며 자동 승강하지 않습니다. MLS의 컨퍼런스·플레이오프는 정규리그 모델로 단순화합니다.';
   if (league.id === 'NL2' || league.id === 'NL3') note += ' 프로·아마추어 연결과 리저브팀 자격이 확인되지 않아 2↔3부 자동 승강은 적용하지 않습니다.';
   if (league.country === '일본') note += ' 일본의 2026 특별대회·추춘제 전환은 별도 재현하지 않으며 7월 시작의 정상 시즌 모델을 사용합니다.';
@@ -50,6 +50,7 @@ export const LEAGUE_RULES: Record<string, LeagueRule> = Object.fromEntries(LEAGU
 }));
 
 export function getLeagueRule(id: string): LeagueRule {
+  if(id.startsWith('INT:'))return {id,country:'국제대회 초청',startMonth:7,promotion:0,relegation:0,automatic:false,note:'국내 리그는 미지원 · 국제대회 초청 구단의 국내 성적은 생성하지 않습니다.',sourceUrl:'https://www.fifa.com/',medalApps:1};
   const rule = LEAGUE_RULES[id];
   if (!rule) throw new Error(`알 수 없는 리그 규정입니다: ${id}`);
   return rule;

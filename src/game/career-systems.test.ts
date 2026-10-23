@@ -6,7 +6,7 @@ import { applyContract, awardPositionGroup, createEconomics, createLeadership, b
 import type { Career, MatchRecord, PlayerStats, Position } from './types';
 import type { CompetitorSeason } from './revision-types';
 
-const clubs = CLUBS.filter(c => c.leagueId === 'EN1').slice(0, 4);
+const clubs = CLUBS.filter(c => c.leagueId === 'EN1').slice(0, 8);
 const statistics = (extra: Partial<PlayerStats> = {}): PlayerStats => ({ ...emptyStats(), apps: 30, starts: 30, minutes: 2700, ratingCount: 30, ratingSum: 225, passes: 1000, passesCompleted: 860, ...extra });
 function makeCareer(): Career {
   const career: Career = {
@@ -75,7 +75,7 @@ test('contracts are offered only after the full season and obey actual club budg
   const renewal=makeContractOffers(c,'offseason').find(o=>o.type==='renew')!;
   assert.ok(renewal);assert.equal(renewal.effective,'nextSeason');
   for(const club of Object.values(c.systems!.world.clubs))if(club.id!==c.player.clubId)club.budget=1;
-  assert.equal(makeContractOffers(c,'offseason').filter(o=>o.type==='transfer').length,0);
+  const lowBids=makeContractOffers(c,'offseason').filter(o=>o.type==='transfer');assert.equal(lowBids.length,6);assert.ok(lowBids.every(o=>o.fee<=1),'six low bids must still obey reduced budgets');
   assert.throws(()=>applyContract(c,{...renewal,wage:1_000_000_000}),/예산/);
 });
 
