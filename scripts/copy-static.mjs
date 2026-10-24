@@ -1,5 +1,5 @@
 import { cp, mkdir, writeFile } from 'node:fs/promises';
-import { readdir } from 'node:fs/promises';
+import { readdir, readFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 await mkdir('dist/assets', { recursive: true });
 await cp('assets/crests', 'dist/assets/crests', { recursive: true });
@@ -11,8 +11,12 @@ for (const file of await readdir('.')) {
 await writeFile('dist/.nojekyll', '');
 
 const appAssets = (await readdir('dist/assets')).filter(file => /\.(js|css|woff2)$/.test(file)).sort();
-const cacheVersion = createHash('sha256').update(appAssets.join('|')).digest('hex').slice(0, 16);
-const precache = ['./', './index.html', './favicon.svg', './FONT-LICENSE.txt', ...appAssets.map(file => `./assets/${file}`)];
+const catalogue = JSON.parse(await readFile('src/game/catalog.json','utf8'));
+const crests = catalogue.clubs.map(club=>club[7]).filter(Boolean);
+const cacheHash = createHash('sha256').update(appAssets.join('|'));
+for(const crest of crests)cacheHash.update(await readFile(crest));
+const cacheVersion = cacheHash.digest('hex').slice(0, 16);
+const precache = ['./', './index.html', './favicon.svg', './FONT-LICENSE.txt', './CREST-LICENSE.txt', ...appAssets.map(file => `./assets/${file}`), ...crests.map(file=>`./${file}`)];
 await writeFile('dist/sw.js', `
 const CACHE = 'kball-offline-${cacheVersion}';
 const ASSETS = ${JSON.stringify(precache)};

@@ -5,7 +5,7 @@ import { AlertCircle, ArrowRight, ArrowUpRight, CheckCircle2, Download, FolderOp
 import type { Career, CreateOptions, GameCommand, MatchRecord, SaveSlot } from './game/types';
 import type { PresentationEvent } from './game/revision-types';
 import { CLUBS, DATA_PROVENANCE } from './game/data';
-import { createCareer } from './game/engine';
+import { createCareer, ENGINE_VERSION } from './game/engine';
 import { runGameCommand } from './game/client';
 import { deleteSlot, exportCareer, importCareer, listSlots, loadCareer, restoreBackup, saveCareer } from './game/storage';
 import { sumStats } from './game/math';
@@ -180,7 +180,7 @@ export default function App() {
         {error&&<div className="error-banner" role="alert"><AlertCircle size={18}/><span>{error}</span><button className="icon-button" aria-label="오류 알림 닫기" onClick={()=>setError('')}><X size={16}/></button></div>}
         {busy&&<div className="processing" role="status"><Loader2 className="spinner" size={17}/>경기와 성장 기록을 계산하고 있습니다.</div>}
         {page==='locker'&&<LockerRoom career={career} busy={busy} command={command} onMatch={setSelectedMatch} presenting={Boolean(presentation)} onTraining={openTraining} onCareer={openCareer}/>}{page==='player'&&<PlayerPanel career={career} busy={busy} command={command} requestedView={playerView} viewRequest={playerViewRequest}/>} {page==='career'&&<CareerPanel career={career} busy={busy} command={command} onExport={exportFile} onCopy={copyCareer} onMatch={setSelectedMatch} requestedView={careerView}/>}
-        <footer className="game-footer"><span>K볼 · A FOOTBALL LIFE</span><span>이 브라우저에 자동 저장</span></footer>
+        <footer className="game-footer"><span data-testid="game-version">K볼 {ENGINE_VERSION} · A FOOTBALL LIFE</span><span>이 브라우저에 자동 저장</span></footer>
       </main></div>}
     {!career&&error&&<div className="landing-error error-banner" role="alert"><AlertCircle size={17}/>{error}<button className="icon-button" aria-label="오류 알림 닫기" onClick={()=>setError('')}><X size={15}/></button></div>}
     {creation&&<Creation busy={busy} onCreate={newCareer} onClose={closeCreation}/>}

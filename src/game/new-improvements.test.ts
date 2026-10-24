@@ -19,10 +19,10 @@ import {copySystems} from './snapshot';
 import type {Career,AttributeKey} from './types';
 if(!globalThis.crypto?.subtle)Object.defineProperty(globalThis,'crypto',{value:webcrypto});
 const fresh=(position:'ST'|'GK'='ST')=>createCareer({name:'신규 개선 검증',nationality:'대한민국',age:23,height:183,weight:78,foot:'right',position,talent:'SSS',style:PLAY_STYLES[position][0],clubId:'KR1_01',squad:'senior',difficulty:'realistic',seed:`p27-new-${position}`});
-test('inline aging alters exactly one unlocked field/GK attribute; locks cover training, experience, injury and cheats',async()=>{
+test('inline aging alters one field/GK attribute even while locked; locks still cover automatic changes and cheats',async()=>{
  for(const pos of ['ST','GK'] as const){let c=fresh(pos);const key:AttributeKey=pos==='ST'?'shooting':'gkReflexes',before={...c.player.attributes};
   c=manuallyAge(c,5,key);for(const [k,v]of Object.entries(before))assert.equal(c.player.attributes[k as AttributeKey],k===key?Math.max(0,v!-5):v);assert.equal(c.player.ovr,overall(c.player));
-  c=setAttributeLock(c,key,true);const locked=c.player.attributes[key];assert.throws(()=>manuallyAge(c,1,key),/고정/);
+  c=setAttributeLock(c,key,true);const originalLocked=c.player.attributes[key];c=manuallyAge(c,1,key);const locked=c.player.attributes[key];assert.equal(locked,Math.max(0,originalLocked!-1));assert.ok(c.systems!.attributeLocks!.includes(key));
   c=configureCheats(c,true,false);c=cheatIncreaseAttribute(c,key,10);assert.equal(c.player.attributes[key],locked);
   c.training=[key];c.player.injuryWeeks=10;c.season.week=1;trainRound(c);const stats={...emptyStats(),apps:1,starts:1,minutes:90,ratingCount:1,ratingSum:9,shotsOnTarget:4,saves:8};applyMatchExperience(c,stats);assert.equal(c.player.attributes[key],locked);
   c.season.week=0; // This isolated unit exercise is not a fabricated persisted fixture.

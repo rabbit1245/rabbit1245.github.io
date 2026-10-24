@@ -1,12 +1,13 @@
 import { chromium } from 'playwright';
 import assert from 'node:assert/strict';
-import { mkdir, writeFile, stat } from 'node:fs/promises';
+import { mkdir, writeFile, stat, readFile } from 'node:fs/promises';
 import path from 'node:path';
 
 const baseURL=process.env.KBALL_TEST_URL||'http://127.0.0.1:4173/';
 const output=path.resolve(process.env.KBALL_COLOR_RESULTS_DIR||'test-results/color-audit');
 const baseline=path.resolve(process.env.KBALL_COLOR_BASELINE||'test-results/career-baseline.json');
 const completed=path.resolve(process.env.KBALL_COLOR_COMPLETED||'test-results/career-completed.json');
+const fallbackClub=JSON.parse(await readFile('src/game/catalog.json','utf8')).clubs.find(c=>c[3]==='대한민국'&&!c[7]);
 for(const file of[baseline,completed])await stat(file);
 await mkdir(output,{recursive:true});
 const browser=await chromium.launch({headless:true,executablePath:process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE||'/usr/bin/chromium'});
@@ -121,14 +122,14 @@ try{
     await sample(page,`${prefix}-landing`);await sample(page,`${prefix}-landing-hover`,{hover:page.getByTestId('new-career')});
     await page.getByTestId('new-career').click();await sample(page,`${prefix}-creation-player`);
     await page.getByTestId('next-creation-step').click();await sample(page,`${prefix}-creation-club`);
-    await page.getByLabel('국가',{exact:true}).selectOption('대한민국');await page.getByLabel('리그',{exact:true}).selectOption('KR2');await page.getByLabel('시작 구단',{exact:true}).selectOption('KR2_05');
+    await page.getByLabel('국가',{exact:true}).selectOption('대한민국');await page.getByLabel('리그',{exact:true}).selectOption(fallbackClub[4]);await page.getByLabel('시작 구단',{exact:true}).selectOption(fallbackClub[0]);
     assert.equal(await page.locator('.creation-intro .team-badge svg').count(),1,'unavailable official crests use a neutral icon');
     await sample(page,`${prefix}-fallback-club-badge`);
     await page.getByTestId('next-creation-step').click();await sample(page,`${prefix}-creation-training-selected-disabled`);
     for(;;){const selected=page.locator('.training-row[aria-pressed="true"]');if(!await selected.count())break;await selected.first().click();}
     assert.equal(await page.locator('.training-row').count(),20,'clearing a plan must keep all actual ability values visible');
-    assert.equal(await page.getByTestId('create-career').isDisabled(),true,'an empty plan cannot be submitted');
-    await sample(page,`${prefix}-creation-empty-plan-disabled`);
+    assert.equal(await page.getByTestId('create-career').isDisabled(),false,'an empty plan can be submitted without automatic growth');
+    await sample(page,`${prefix}-creation-empty-plan-enabled`);
     await page.locator('.training-row').first().click();
     assert.equal(await page.locator('.training-row[aria-pressed="true"]').count(),1,'an empty plan can be selected again');
     assert.equal(await page.getByTestId('create-career').isEnabled(),true);

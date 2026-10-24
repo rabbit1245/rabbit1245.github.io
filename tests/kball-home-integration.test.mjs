@@ -51,7 +51,7 @@ try{
  await page.getByTestId('honours-disclosure').locator('summary').click();assert.ok(await page.getByRole('heading',{name:'우승한 대회',exact:true}).isVisible());
  await page.screenshot({path:path.join(output,'home-honours-expanded.png'),fullPage:true});
  assert.equal(await page.getByTestId('quick-training').count(),0,'unconfirmed offseason training has one primary path');
- assert.equal(await page.getByTestId('training-plan').count(),1);assert.equal(await page.getByTestId('advance-half').isDisabled(),true);
+ assert.equal(await page.getByTestId('training-plan').count(),1);assert.equal(await page.getByTestId('advance-half').isDisabled(),!completed.transferDecision);
  await page.getByTestId('league-leaders-more').click();const own=page.getByTestId('league-own-rank');assert.ok((await own.textContent()).includes(completed.player.name));assert.ok((await own.textContent()).includes(`${completed.season.playerStats.goals}골`));
  await page.getByRole('button',{name:'도움',exact:true}).click();assert.ok((await own.textContent()).includes(`${completed.season.playerStats.assists}도움`));
  await page.getByRole('dialog').getByRole('button',{name:'닫기',exact:true}).click();

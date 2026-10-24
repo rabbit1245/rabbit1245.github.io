@@ -73,12 +73,12 @@ export default function LockerRoom({career,busy,command,onMatch,onTraining,onCar
   const summaries=[['통합',combined],['클럽',club],['국대',national]] as const;
   const next=career.stage==='offseason'?{label:'다음 시즌 시작',command:{type:'nextSeason'} as GameCommand}:phase==='midseason'?{label:'후반기 진행',command:{type:'continueHalf'} as GameCommand}:{label:phase==='second'?'후반기 계속 진행':'전반기 진행',command:{type:'advanceHalf'} as GameCommand};
   const trainingConfirmed=career.systems?.trainingPlan?.forYear===s.year+1&&career.systems.trainingPlan.confirmed;
-  const nextBlocked=career.stage==='offseason'&&(!career.transferDecision||!trainingConfirmed);
+  const nextBlocked=career.stage==='offseason'&&!career.transferDecision;
   return <section className="locker-workspace" aria-label="시즌 현황" data-testid="locker-season-overview">
     <div className="locker-overview-heading"><h2>시즌 현황</h2><nav className="locker-shortcuts" aria-label="시즌 빠른 이동">
       {onTraining&&(career.stage!=='offseason'||trainingConfirmed)&&<button className="text-button" data-testid="quick-training" onClick={onTraining}>훈련 계획</button>}
       {onCareer&&<><button className="text-button" data-testid="quick-national" onClick={()=>onCareer('national')}>국가대표</button><button className="text-button" data-testid="quick-awards" onClick={()=>onCareer('awards')}>수상 · 우승</button><button className="text-button" data-testid="quick-seasons" onClick={()=>onCareer('seasons')}>시즌 이력</button></>}
-    </nav>{career.stage==='offseason'&&<span className="preparation-status">계약 {career.transferDecision?'✓':'선택 필요'} · 훈련 {trainingConfirmed?'✓':'선택 필요'}</span>}</div>
+    </nav>{career.stage==='offseason'&&<span className="preparation-status">계약 {career.transferDecision?'✓':'선택 필요'} · 훈련 {trainingConfirmed?(career.training.length?'✓':'선택 없음'):'미확정 · 성장 없이 시작'}</span>}</div>
     <div className="locker-controls"><div className="season-progress"><div><strong>{phaseLabel(career)}</strong><span>{s.week} / {s.totalWeeks}라운드</span></div><div className="season-track"><span style={{width:`${Math.min(100,s.week/Math.max(1,s.totalWeeks)*100)}%`}}/></div></div><div className="action-inline">
       {career.stage!=='retired'&&<button data-testid="advance-half" className="button primary" disabled={busy||nextBlocked} onClick={()=>command(next.command)}><Play size={18}/>{next.label}<ArrowRight size={18}/></button>}
       {career.stage==='offseason'&&<><button className="button secondary" data-testid="transfer-window" disabled={busy} onClick={()=>setTransfers(true)}><ArrowLeftRight size={18}/>이적 · 재계약{career.transferDecision&&<Check size={18}/>}</button>{!trainingConfirmed&&onTraining&&<button className="button secondary" data-testid="training-plan" disabled={busy} onClick={onTraining}><Dumbbell size={17}/>훈련 선택</button>}</>}

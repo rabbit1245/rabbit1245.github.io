@@ -189,7 +189,7 @@ try {
   assert.equal(career.history.length,1);assert.ok(career.season.fixtures.every(f=>f.played));assert.equal(career.history[0].stats.goals,career.history[0].matches.reduce((s,m)=>s+m.playerStats.goals,0));assert.equal(career.systems.growthReports.filter(r=>r.year===initialYear).length,2);
   completed.push('annual-only contracts, one training route, current competitions, locker combined details and reconciled records');
   // An annual training choice creates a new normal snapshot, then backup restore returns to the old plan.
-  assert.equal(await page.getByTestId('advance-half').isDisabled(),true,'offseason requires both contract and training choices');
+  assert.equal(await page.getByTestId('advance-half').isDisabled(),true,'offseason requires a contract decision; training is optional');
   await page.getByTestId('training-plan').click();
   for(const viewport of [{width:1366,height:768},{width:1920,height:1080}]){
     await page.setViewportSize(viewport);await visibleRows(page,'.training-row',20,`${viewport.width} offseason training`);
@@ -208,7 +208,7 @@ try {
   await page.getByTestId('transfer-window').click();const offerIndex=career.offers.findIndex(o=>o.type==='transfer'),selectedOffer=career.offers[offerIndex>=0?offerIndex:0];assert.ok(selectedOffer,'a valid contract should be available');
   const incomeBefore=career.careerIncome;await page.locator('.offer').nth(offerIndex>=0?offerIndex:0).getByRole('button',{name:'제안 수락'}).click();career=await waitState(page,c=>c.id===replicaId&&c.transferDecision==='signed','contract signing');await ready(page);
   assert.equal(career.player.clubId,selectedOffer.clubId);assert.equal(career.player.wage,selectedOffer.wage);assert.equal(career.careerIncome,incomeBefore);assert.equal(career.history[0].clubId,initialClub);await closeDialog(page);
-  assert.equal(await page.getByTestId('advance-half').isDisabled(),true,'a signed contract still waits for the restored, unconfirmed training plan');
+  assert.equal(await page.getByTestId('advance-half').isDisabled(),false,'a signed contract can start the next season without confirming a training plan');
   await page.getByTestId('training-plan').click();await page.getByTestId('confirm-training').click();career=await waitState(page,c=>c.id===replicaId&&c.systems.trainingPlan.confirmed,'next-season training confirmed after backup restore');await ready(page);await navigate(page,'locker');assert.equal(await page.getByTestId('advance-half').isEnabled(),true);
   await page.getByTestId('advance-half').click();career=await waitState(page,c=>c.id===replicaId&&c.season.year>initialYear&&c.season.week===0&&c.stage==='season','next season');await ready(page);assert.equal(career.player.age,21);assert.equal(career.history.length,1);
   await page.reload({waitUntil:'networkidle'});await page.getByRole('button',{name:'이어서 플레이',exact:true}).click();await page.getByRole('heading',{level:1,name:'라커룸',exact:true}).waitFor();await ready(page);assert.equal(await page.evaluate(()=>localStorage.getItem('career24-legacy-test-sentinel')),'preserve-existing-save');

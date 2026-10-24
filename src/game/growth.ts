@@ -21,7 +21,9 @@ export function ensureGrowthTracking(career:Career):GrowthLedger {
   return career.systems.growthLedger!;
 }
 function apply(career:Career,key:AttributeKey,amount:number,cause:GrowthCause):void {
-  if(career.systems?.attributeLocks?.includes(key))return;
+  // Manual aging is an explicit user adjustment; automatic changes still honor locks.
+  if(cause!=='aging'&&career.systems?.attributeLocks?.includes(key))return;
+  if((cause==='training'||cause==='experience'||cause==='development')&&!career.training.includes(key))return;
   const current=career.player.attributes[key];if(current===undefined)return;
   const next=round(clamp(current+amount,0,100)),change=round(next-current);
   if(!change)return;
@@ -46,9 +48,9 @@ export function trainRound(career:Career):void {
   const ceiling=p.ovr>=p.potential?0:clamp((p.potential-p.ovr+4)/12,.025,1.15),availability=injured?.2:1;
   const exposure=.8+.2*clamp(career.season.playerStats.minutes/Math.max(90,(career.season.week-1)*75),0,1);
   for(const key of career.training)apply(career,key,GROWTH[p.talent]*(38/career.season.totalWeeks)*age*ceiling*(career.intensity==='intense'?1.32:1)*availability*ledger.trainingQuality*exposure*(.8+rng()*.4),'training');
-  // Small, bounded maturation affects mental attributes; it never copies the training gain to every attribute.
+  // Maturation can only affect mental attributes explicitly selected for this season.
   if(p.age<=24&&career.season.week%(p.age<=18?3:6)===0&&!injured){
-    const mental=(['decisions','concentration','teamwork'] as AttributeKey[]).filter(k=>p.attributes[k]!==undefined&&!career.training.includes(k)).slice(0,2);
+    const mental=(['decisions','concentration','teamwork'] as AttributeKey[]).filter(k=>p.attributes[k]!==undefined&&career.training.includes(k)).slice(0,2);
     for(const key of mental)cappedGain(career,key,.01,'development',p.age<=18?.12:.06);
   }
   // A long layoff can modestly reduce physical sharpness, recorded separately from missed training.
@@ -58,7 +60,7 @@ export function trainRound(career:Career):void {
   p.ovr=overall(p);p.fitness=clamp(p.fitness+(career.intensity==='intense'?10:19),0,100);
 }
 export function applyMatchExperience(career:Career,stats:PlayerStats):void {
-  if(!stats.apps||!stats.minutes||career.player.ovr>=career.player.potential)return;
+  if(!career.training.length||!stats.apps||!stats.minutes||career.player.ovr>=career.player.potential)return;
   const p=career.player,allowed=p.position==='GK'?GK_ATTRIBUTES:FIELD_ATTRIBUTES,weights=new Map<AttributeKey,number>();
   // Match learning follows position and actions, not a blanket boost to every skill.
   for(const key of allowed)weights.set(key,.18);
@@ -76,7 +78,7 @@ export function applyMatchExperience(career:Career,stats:PlayerStats):void {
   const rating=stats.ratingCount?stats.ratingSum/stats.ratingCount:6.5,form=clamp(.85+(rating-6.5)*.16,.55,1.25);
   const base=.20*(38/career.season.totalWeeks)*Math.min(1,stats.minutes/90)*ceiling*age*talent[p.talent]*trainingQuality(career)*form;
   const cap=(p.age<=18?6:5.2)*Math.min(1,age)*talent[p.talent];
-  for(const [key,weight] of weights)cappedGain(career,key,base*weight,'experience',cap*weight);
+  for(const [key,weight] of weights)if(career.training.includes(key))cappedGain(career,key,base*weight,'experience',cap*weight);
   p.ovr=overall(p);
 }
 export function roleGrowthDescription(career:Career):string {

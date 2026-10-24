@@ -19,7 +19,7 @@ import { TALENT_PROFILES } from './talent';
 import type { AttributeKey, Attributes, Career, CreateOptions, Fixture, Intensity, MatchRecord, Player, PlayerStats, SeasonState, SeasonSummary, Standing, Talent, TransferOffer } from './types';
 import type { PresentationEvent } from './revision-types';
 
-export const ENGINE_VERSION = '2.7.1';
+export const ENGINE_VERSION = '2.7.2';
 export const overall = calculateOverall;
 export { addStats, emptyStats, hashSeed, seededRandom } from './math';
 const TALENT_ORDER: Talent[] = ['D','C','B','A','S','SS','SSS'];
@@ -261,7 +261,7 @@ export function advanceHalf(career:Career):Career {
 function validateTraining(position:Player['position'],keys:AttributeKey[],intensity:Intensity) {
   if(!['balanced','intense','rest'].includes(intensity))throw new Error('올바른 훈련 강도를 선택해 주세요.');
   const allowed=position==='GK'?GK_ATTRIBUTES:FIELD_ATTRIBUTES;
-  if(!Array.isArray(keys)||keys.length<1||keys.length>3||new Set(keys).size!==keys.length||keys.some(key=>!allowed.includes(key)))throw new Error('서로 다른 유효 능력치 1~3개를 선택해 주세요.');
+  if(!Array.isArray(keys)||keys.length>3||new Set(keys).size!==keys.length||keys.some(key=>!allowed.includes(key)))throw new Error('서로 다른 유효 능력치를 최대 3개까지 선택해 주세요. 선택 없이 진행할 수도 있습니다.');
 }
 export function setTraining(career:Career,keys:AttributeKey[],intensity:Intensity):Career {
   if(career.stage==='retired')throw new Error('은퇴한 선수는 훈련할 수 없습니다.');
@@ -272,13 +272,12 @@ export function setTraining(career:Career,keys:AttributeKey[],intensity:Intensit
   next.training=[...keys];next.intensity=intensity;
   next.systems!.trainingPlan={forYear:career.season.year+1,confirmed:true,confirmedAtRound:career.season.week,source:'offseason'};
   next.systems!.trainingLocked=true;
-  present(next,'growth','다음 시즌 훈련 확정',`${keys.length}개 능력치에 집중합니다. 시즌 중에는 이 계획을 유지합니다.`);
+  present(next,'growth','다음 시즌 훈련 확정',keys.length?`${keys.length}개 능력치만 성장합니다. 시즌 중에는 이 계획을 유지합니다.`:'훈련 선택 없이 시작합니다. 이번 시즌 능력치는 자동 성장하지 않습니다.');
   touch(next);return next;
 }
 export function manuallyAge(career:Career,amount:1|5|10,key:AttributeKey):Career{
  if(career.stage==='retired'||![1,5,10].includes(amount))throw new Error('현역 선수에게 -1/-5/-10 중 하나를 적용해 주세요.');
  if(career.player.attributes[key]===undefined)throw new Error('감소할 능력치를 선택해 주세요.');
- if(career.systems?.attributeLocks?.includes(key))throw new Error('고정한 능력치는 수동 노화를 적용할 수 없습니다.');
  const next=editable(career,true),before={...next.player.attributes},ovrBefore=next.player.ovr;
  applyManualAging(next,amount,key);
  (next.systems!.manualAging??=[]).push({playerId:next.player.id,playerName:next.player.name,id:`manual-aging:${next.id}:${next.revision}`,year:next.season.year,round:next.season.week,date:currentDate(next),amount,key,before,after:{...next.player.attributes},ovrBefore,ovrAfter:next.player.ovr});
@@ -333,8 +332,10 @@ export function stayAtClub(career:Career):Career {
 }
 export function startNextSeason(career:Career):Career {
   if(career.stage!=='offseason')throw new Error('현재 시즌을 먼저 마무리해 주세요.');
-  if(career.systems?.trainingPlan&&!career.systems.trainingPlan.confirmed)throw new Error('다음 시즌 훈련 계획을 먼저 확정해 주세요.');
   const decided=career.transferDecision?career:stayAtClub(career),next=editable(decided);
+  // An unconfirmed plan is optional: do not silently carry last season's selection forward.
+  const trainingPlan=career.systems?.trainingPlan;
+  if(trainingPlan?.forYear!==career.season.year+1||!trainingPlan.confirmed||trainingPlan.source!=='offseason')next.training=[];
   const previousSeason=next.season,lastYear=next.season.year,previousOvr=next.player.ovr;
   const entries=europeanEntries(next);
   transitionWorldSeason(next);
@@ -393,6 +394,12 @@ export function setAttributeLock(career:Career,key:AttributeKey,locked:boolean):
  if(career.stage==='retired'||career.player.attributes[key]===undefined||typeof locked!=='boolean')throw new Error('능력치 고정 설정을 확인해 주세요.');
  const next=editable(career,true),locks=new Set(next.systems!.attributeLocks??[]);
  if(locked)locks.add(key);else locks.delete(key);next.systems!.attributeLocks=[...locks];touch(next);return next;
+}
+export function setAllAttributeLocks(career:Career,locked:boolean):Career{
+ if(career.stage==='retired'||typeof locked!=='boolean')throw new Error('전체 능력치 고정 설정을 확인해 주세요.');
+ const next=editable(career,true),allowed=next.player.position==='GK'?GK_ATTRIBUTES:FIELD_ATTRIBUTES;
+ next.systems!.attributeLocks=locked?allowed.filter(key=>next.player.attributes[key]!==undefined):[];
+ touch(next);return next;
 }
 export function manuallyInjure(career:Career,duration:'half'|'season'):Career{
  if(career.stage!=='season'||!['half','season'].includes(duration))throw new Error('진행 중인 시즌에서 부상 기간을 선택해 주세요.');

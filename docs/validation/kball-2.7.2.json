@@ -1,0 +1,153 @@
+{
+  "version": "2.7.2",
+  "baselineCommit": "5611069a98ef23478c850dcc4fb04d088e89b79b",
+  "requests": {
+    "uncheckedAutomaticGrowth": "training/experience/development changes require a selected attribute; earlier ledgers retained",
+    "greenLocks": "solid green lock buttons, pale green rows, persistent state",
+    "optionalTraining": "zero-key creation and confirmation allowed; an unconfirmed/missing/legacy offseason plan starts empty after a contract decision",
+    "logos": "mobile CSS no longer hides table/match badges; all 784 known SVGs precached for web and embedded in portable HTML",
+    "wholePlayerLock": "one atomic command; partial to all locked, second click unlocks all",
+    "manualAging": "explicit -1/-5/-10 overrides locks, floors at zero, retains lock and records exact change"
+  },
+  "validation": {
+    "build": "TypeScript, Vite and portable builds passed",
+    "unitSuite": {
+      "total": 204,
+      "passed": 203,
+      "failed": 0,
+      "skipped": 1,
+      "skippedCase": "existing 30-season generator",
+      "command": "KBALL_SKIP_LONG_TEST=1 npm test"
+    },
+    "finalLegacyPlanRegression": {
+      "tests": 6,
+      "passed": 6,
+      "failed": 0,
+      "log": "/tmp/kball-p272-training-final.log"
+    },
+    "webControls": {
+      "url": "http://127.0.0.1:4173/",
+      "portable": false,
+      "checks": [
+        "A new career starts with zero checked attributes and preserves an empty plan",
+        "Individual locks turn solid green; whole-player locking and unlocking each use one atomic command",
+        "Manual −5 changes exactly the locked target and retains all locks",
+        "Desktop/mobile controls fit and adjusted values plus locks survive reload",
+        "An explicitly empty offseason plan starts the next season and keeps prior records and attributes",
+        "Next season also starts directly without opening or confirming training; old selections are not carried forward"
+      ],
+      "errors": []
+    },
+    "portableControls": {
+      "url": "http://127.0.0.1:4180/Kball.html",
+      "portable": true,
+      "checks": [
+        "A new career starts with zero checked attributes and preserves an empty plan",
+        "Individual locks turn solid green; whole-player locking and unlocking each use one atomic command",
+        "Manual −5 changes exactly the locked target and retains all locks",
+        "Desktop/mobile controls fit and adjusted values plus locks survive reload",
+        "An explicitly empty offseason plan starts the next season and keeps prior records and attributes",
+        "Next season also starts directly without opening or confirming training; old selections are not carried forward"
+      ],
+      "errors": []
+    },
+    "webCrests": {
+      "url": "http://127.0.0.1:4173/",
+      "portable": false,
+      "checks": [
+        "All 784 real crest SVGs decode; 129 explicitly missing crests remain neutral",
+        "AZ and NEC render their exact embedded/file SVG in club selection and all 18 Eredivisie standings rows",
+        "Mobile standings fit, saved career reopens, and the crests persist after reload",
+        "FR1: FR1_01 and every smaller club have visible crests on desktop and mobile",
+        "IT1: IT1_01 and every smaller club have visible crests on desktop and mobile"
+      ],
+      "errors": [],
+      "external": [],
+      "count": 913,
+      "decoded": 784,
+      "neutral": 129
+    },
+    "portableCrests": {
+      "url": "http://127.0.0.1:4180/Kball.html",
+      "portable": true,
+      "checks": [
+        "All 784 real crest SVGs decode; 129 explicitly missing crests remain neutral",
+        "AZ and NEC render their exact embedded/file SVG in club selection and all 18 Eredivisie standings rows",
+        "Mobile standings fit, saved career reopens, and the crests persist after reload",
+        "FR1: FR1_01 and every smaller club have visible crests on desktop and mobile offline",
+        "IT1: IT1_01 and every smaller club have visible crests on desktop and mobile offline"
+      ],
+      "errors": [],
+      "external": [],
+      "count": 913,
+      "decoded": 784,
+      "neutral": 129
+    },
+    "browserIntegration": {
+      "passed": [
+        "1366x768 and 1920x1080 show all 20 abilities and training rows with primary fonts of at least 17px",
+        "creation training, three menus, one-command half progression and identical skipped/reduced-motion results",
+        "all league teams in one modal, actual W/D/L/GF/GA/GD/points and league-only scorer table",
+        "annual-only contracts, one training route, current competitions, locker combined details and reconciled records",
+        "JSON export, independent import slot, checksum rejection and previous-good backup restore",
+        "contract-controlled wage, transfer fees separate from income, next season, reload and retirement totals",
+        "one click downloads one complete UTF-8 career TXT, leaves saves untouched and awards show only own selection",
+        "production offline reload with saved slots",
+        "mobile three-menu navigation, ten goalkeeper abilities, half progression and nine goalkeeper metrics",
+        "mobile full standings retain every team and allow reaching the last points column",
+        "season honours split trophies/personal awards; cheats edit attributes, retain freeze preference and survive reload on desktop/mobile"
+      ],
+      "skipped": [],
+      "pageErrors": []
+    },
+    "offlineWeb": {
+      "url": "http://127.0.0.1:4173/",
+      "preCached": 784,
+      "decodedOffline": 784,
+      "offlineReload": true,
+      "errors": []
+    },
+    "colorAudit": {
+      "screens": 142,
+      "textSamples": 15095,
+      "contrastFailures": 0,
+      "minimumRatio": 4.76,
+      "disabledSamples": 453,
+      "fixedOverlaps": 0,
+      "clippedText": 0,
+      "intentionalScrollable": 134,
+      "verifiedHorizontalScrolls": 1,
+      "pageErrors": 0
+    },
+    "lockContrast": {
+      "whiteOn2e6b3b": 6.398,
+      "text202124Onedf5eb": 14.46
+    },
+    "unchangedCatalogue": true
+  },
+  "crestCoverage": {
+    "domesticClubs": 913,
+    "real": 784,
+    "neutralDomestic": 129,
+    "neutralInternationalGuests": 87,
+    "newCrestAssetsInThisPatch": 0
+  },
+  "evidence": [
+    "kball-2.7.2-ui/training-locks.png",
+    "kball-2.7.2-ui/psg-mobile.png",
+    "kball-2.7.2-ui/inter-mobile.png"
+  ],
+  "delivery": {
+    "version": "2.7.2",
+    "zipBytes": 17168224,
+    "zipSHA256": "19aa55d39320c2e8604f7e90913492533e7c3f535f2d13fc9893d2b475a4b4a1",
+    "htmlBytes": 22792514,
+    "htmlSHA256": "c366731d4a814464ad966e88d848b9b50ba1cb3f1a1f5fad88d2f04db427e843",
+    "commit": "4d41bc350e39f44cd43955c60d655dec1a5832b7",
+    "url": "https://github.com/rabbit1245/rabbit1245.github.io/raw/4d41bc350e39f44cd43955c60d655dec1a5832b7/Kball.zip?download=1",
+    "httpStatus": 200,
+    "downloadVerified": true,
+    "zipIntegrityVerified": true,
+    "htmlMatchesTestedBuild": true
+  }
+}

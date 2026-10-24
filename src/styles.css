@@ -1040,11 +1040,13 @@ input,select { font-size:17px; min-height:38px; padding:7px 10px; border-radius:
   .stat-detail > div { grid-column:auto; }
   .season-summary th,.season-summary td { padding:7px 6px; }
   .match-row { grid-template-columns:30px 25px minmax(0,1fr) 62px 33px; gap:6px; }
-  .match-row > .team-badge,.match-row > svg { display:none; }
+  .match-row > svg { display:none; }
+  .match-row { grid-template-columns:30px 25px 22px minmax(0,1fr) 52px 30px; gap:5px; }
+  .match-row > .team-badge { display:inline-flex; width:22px; min-width:22px; }
   .match-score { font-size:20px; }
   .league-table th,.league-table td { padding:8px; }
   .table-club { gap:6px; }
-  .table-club .team-badge { display:none; }
+  .table-club .team-badge { display:inline-flex; width:22px; min-width:22px; height:25px; }
   .contract-history { grid-template-columns:minmax(0,1fr); }
   .value-three { gap:8px; }
   .value-three .metric { min-width:0; }
@@ -1083,10 +1085,15 @@ input,select { font-size:17px; min-height:38px; padding:7px 10px; border-radius:
 
 /* Inline attribute controls keep the clickable stat separate from its lock. */
 .manual-aging {display:flex;align-items:center;flex-wrap:wrap;gap:6px;}
+.training-header-actions {display:flex;align-items:center;justify-content:flex-end;gap:6px;flex-wrap:wrap;}
 .training-cell {display:flex;min-width:0;align-items:stretch;gap:3px;}
 .training-cell .training-row {flex:1;min-width:0;padding:6px;gap:4px;grid-template-columns:22px minmax(0,1fr) 28px 38px;}
 .attribute-lock {flex:0 0 27px;display:grid;place-items:center;border:1px solid var(--border);background:#fff;border-radius:5px;color:#5f6368;}
-.attribute-lock.locked {color:#285f31;background:#ecf4e8;border-color:#6d8b62;}
+.attribute-lock.locked {color:#fff;background:#2e6b3b;border-color:#2e6b3b;}
+.training-cell .training-row.locked {background:#edf5eb;border-color:#77976f;color:#202124;}
+.training-cell .training-row.locked:disabled {opacity:1;}
+.attribute-lock-all {display:inline-flex;align-items:center;gap:5px;padding:6px 8px;border:1px solid var(--border);border-radius:5px;background:#fff;color:#3c4043;font-size:13px;font-weight:600;}
+.attribute-lock-all[aria-pressed="true"] {background:#2e6b3b;color:#fff;border-color:#2e6b3b;}
 .inline-tool-note {padding:8px 10px;background:#f0f5ed;color:#29422b;border-radius:5px;}
 .training-rows {grid-template-columns:repeat(4,minmax(0,1fr));}
 @media(max-width:1000px){.training-rows{grid-template-columns:repeat(2,minmax(0,1fr));}}

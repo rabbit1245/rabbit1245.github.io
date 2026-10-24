@@ -21,20 +21,20 @@ test('creation preview uses the exact final seed, values, OVR and potential',()=
   assert.deepEqual(previewPlayer({...input,training:['speed'],intensity:'rest'}),preview,'choosing a plan must not reroll the player');
 });
 
-test('selected training dominates bounded maturation and all changes reconcile by cause',()=>{
+test('unselected attributes never mature automatically and every selected gain reconciles by cause',()=>{
   const career=createCareer(options());
   for(let week=1;week<=career.season.totalWeeks;week++){career.season.week=week;trainRound(career);}
   const ledger=ensureGrowthTracking(career);
   assert.ok(ledger.byCause.training.shooting!>2);
   assert.ok(ledger.byCause.training.passing!>2);
-  assert.ok((ledger.byCause.development.decisions??0)>0);
-  for(const key of FIELD_ATTRIBUTES)if(!career.training.includes(key))assert.ok(career.player.attributes[key]!-ledger.baselineAttributes[key]!<=.121,key);
+  assert.deepEqual(ledger.byCause.development,{});
+  for(const key of FIELD_ATTRIBUTES)if(!career.training.includes(key))assert.equal(career.player.attributes[key],ledger.baselineAttributes[key],key);
   assert.deepEqual(ledger.byCause.experience,{});
   reconcile(career);
 });
 
 test('actual minutes and actions give bounded experience while non-participants gain none',()=>{
-  const career=createCareer(options());const before={...career.player.attributes};
+  const career=createCareer(options({training:['passing','vision','decisions']}));const before={...career.player.attributes};
   applyMatchExperience(career,{...emptyStats(),passesCompleted:30,keyPasses:2});
   assert.deepEqual(career.player.attributes,before);
   for(let game=0;game<150;game++)applyMatchExperience(career,{...emptyStats(),apps:1,minutes:90,passesCompleted:30,keyPasses:2});
@@ -85,7 +85,7 @@ test('annual plans confirm once and a new season never automatically decreases p
   assert.throws(()=>setTraining(career,['passing'],'balanced'),/시즌 중/);
   career.stage='offseason';career.season.week=career.season.totalWeeks;career.season.completed=true;
   career.transferDecision='stay';career.systems!.trainingPlan={forYear:2027,confirmed:false,confirmedAtRound:career.season.week,source:'offseason'};
-  assert.throws(()=>startNextSeason(career),/훈련 계획/);
+  const noPlan=startNextSeason(career);assert.deepEqual(noPlan.training,[]);assert.equal(noPlan.stage,'season');
   const confirmed=setTraining(career,['speed'],'balanced');
   assert.equal(career.systems!.trainingPlan.confirmed,false,'commands preserve the prior snapshot');
   assert.throws(()=>setTraining(confirmed,['passing'],'intense'),/이미 확정/);
@@ -97,7 +97,7 @@ test('annual plans confirm once and a new season never automatically decreases p
   beginGrowthSeason(next);reconcile(next);
 });
 
-test('repeated youth-to-peak growth separates talents and depends on actual exposure with world-class S and historical SSS ceilings',t=>{
+test('repeated selected-only youth-to-peak growth separates talents without free growth in unselected abilities',t=>{
   const outputs:Record<string,number[]>={D:[],A:[],S:[],SSS:[]};
   function develop(talent:CreateOptions['talent'],seed:number,position:CreateOptions['position']='ST',playing=true){
     const c=createCareer(options({age:15,talent,position,style:PLAY_STYLES[position][0],clubId:'KR2_01',squad:'senior',seed:`growth-v23-${seed}`,training:position==='ST'?['shooting','positioning','composure']:POSITION_ATTRIBUTES[position].slice(0,3),intensity:playing?'intense':'rest'}));
@@ -114,8 +114,8 @@ test('repeated youth-to-peak growth separates talents and depends on actual expo
   for(const talent of ['D','A','S','SSS'] as const)for(let seed=0;seed<6;seed++)outputs[talent].push(develop(talent,seed).player.ovr);
   const mean=(values:number[])=>values.reduce((sum,v)=>sum+v,0)/values.length;
   assert.ok(mean(outputs.D)<mean(outputs.A)&&mean(outputs.A)<mean(outputs.S)&&mean(outputs.S)<mean(outputs.SSS),JSON.stringify(outputs));
-  assert.ok(outputs.S.every(v=>v>=86&&v<=93),'regular full-match development supports the requested world-class S tier');
-  const bench=develop('S',0,'ST',false);assert.ok(bench.player.ovr<Math.min(...outputs.S)-10,'a talent label alone grants no match learning');
-  const positions=(['CB','GK'] as const).map(position=>{const c=develop('S',0,position);assert.ok(c.player.ovr>c.season.ovrStart+15);assert.ok(c.player.ovr<=c.player.potential);return {position,ovr:c.player.ovr};});
+  assert.ok(outputs.S.every(v=>v<=93),'a fixed three-stat plan respects the talent ceiling without free growth elsewhere');
+  const bench=develop('S',0,'ST',false);assert.ok(bench.player.ovr<Math.min(...outputs.S),'a talent label alone grants no match learning');
+  const positions=(['CB','GK'] as const).map(position=>{const c=develop('S',0,position);assert.ok(c.player.ovr>c.season.ovrStart);assert.ok(c.player.ovr<=c.player.potential);return {position,ovr:c.player.ovr};});
   t.diagnostic(JSON.stringify({controlledGrowth15to28:outputs,benchS:bench.player.ovr,positions}));
 });

@@ -81,6 +81,7 @@ try {
   console.log('Verified: AZ, NEC and all Eredivisie standings crests');
   await page.setViewportSize({width: 390, height: 844});
   assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1));
+  assert.ok(await table.locator('.team-badge img').evaluateAll(images=>images.every(image=>image.getBoundingClientRect().width>0&&image.getBoundingClientRect().height>0)), 'Mobile CSS must not hide real club crests');
   await page.screenshot({path: `${out}/eredivisie-mobile.png`});
   await page.getByRole('dialog').getByRole('button', {name: '닫기', exact: true}).click();
   await context.setOffline(false);
@@ -107,6 +108,29 @@ try {
   }, selected);
   await gallery.locator('img').evaluateAll(images => Promise.all(images.map(image => image.decode())));
   await gallery.screenshot({path: `${out}/added-crests.png`, fullPage: true}); await gallery.close();
+  // Big clubs and smaller opponents must be visible, not merely present in the DOM.
+  for(const [id,country,league] of [['FR1_01','프랑스','FR1'],['IT1_01','이탈리아','IT1']]) {
+    const sideContext=await browser.newContext({viewport:{width:1366,height:768},reducedMotion:'reduce'}),side=await sideContext.newPage();
+    side.setDefaultTimeout(45000);side.on('pageerror',error=>errors.push(String(error)));
+    await side.goto(url,{waitUntil:'networkidle'});if(portable)await sideContext.setOffline(true);
+    await side.getByTestId('new-career').click();const d=side.getByRole('dialog');await d.getByTestId('next-creation-step').click();
+    await d.getByLabel('국가',{exact:true}).selectOption(country);await d.getByLabel('리그',{exact:true}).selectOption(league);
+    await d.getByLabel('시작 구단',{exact:true}).selectOption(id);await d.getByLabel('시작 소속',{exact:true}).selectOption('senior');
+    await d.getByTestId('next-creation-step').click();await d.getByTestId('create-career').click();
+    await side.getByTestId('save-status').filter({hasText:'자동 저장됨'}).waitFor({state:'attached'});await side.locator('.processing').waitFor({state:'hidden'});
+    await side.getByTestId('standings-more').click();const t=side.getByTestId('full-standings');
+    assert.equal(await t.locator('tbody tr').count(),clubs.filter(club=>club[4]===league).length);
+    const asset=assets.find(asset=>asset.id===id);assert.equal(await t.locator(`tr[data-club-id="${id}"] img`).getAttribute('src'),portable?asset.data:asset.source);
+    for(const width of [1366,390]) {
+      await side.setViewportSize({width,height:844});
+      assert.ok(await t.locator('.team-badge img').evaluateAll(images=>Promise.all(images.map(async image=>{await image.decode();const r=image.getBoundingClientRect();return r.width>0&&r.height>0;})).then(results=>results.every(Boolean))),`${league} ${width}: all crests must be visible`);
+      assert.ok(await side.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
+      await side.screenshot({path:`${out}/${league}-${width}.png`});
+    }
+    checks.push(`${league}: ${id} and every smaller club have visible crests on desktop and mobile${portable?' offline':''}`);
+    await sideContext.close();
+  }
+  assert.deepEqual(errors,[]);
   await writeFile(`${out}/results.json`, JSON.stringify({url, portable, checks, errors, external,
     count: decoded.length, decoded: decoded.filter(row => row.ok).length, neutral: decoded.filter(row => row.neutral).length, results: decoded}, null, 2));
   console.log(JSON.stringify({url, checks, decoded: 784, neutral: 129, errors, external}));
