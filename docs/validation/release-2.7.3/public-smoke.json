@@ -1,0 +1,11 @@
+{
+  "url": "http://127.0.0.1:4181/Kball.html",
+  "checks": [
+    "inline aging decreases only clicked attribute, without a popup or round progression",
+    "attribute locks persist after reload while manual aging stays available",
+    "mobile aging, locks and injury choices fit without dialogs or horizontal overflow",
+    "contract and market values use KRW with Korean units",
+    "Korean TXT contains requested career records without control logs"
+  ],
+  "errors": []
+}

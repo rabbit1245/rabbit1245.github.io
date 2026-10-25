@@ -1,6 +1,6 @@
 # K볼 2.7.3
 
-2026-10-25 · 최종 검수 완료. 사용자의 배포 보류 해제와 최종 검수·배포 요청에 따라 기존 다운로드 브랜치 `kball-playable`의 ZIP을 갱신합니다. 소스는 기존 `codex/kball-white-green-20261021` 브랜치에 보관합니다.
+2026-10-25 · 최종 검수·다운로드판 배포 완료. 사용자의 배포 보류 해제와 최종 검수·배포 요청에 따라 기존 다운로드 브랜치 `kball-playable`의 ZIP을 갱신했습니다. 소스는 기존 `codex/kball-white-green-20261021` 브랜치에 보관합니다.
 
 ## 반영한 변경
 
@@ -27,6 +27,10 @@
 ZIP SHA-256: `9eb65c523c39690f29b096e27d5a82dcee4a6661f8052af5c63f8de3f30f758b` · 17174972바이트.
 
 관리형 브라우저는 직접 `file://` 이동을 차단하므로 단일 HTML은 동일한 파일을 localhost HTTP로 전달해 검사합니다. 네트워크를 끈 상태의 경기·저장·재실행과 Blob Worker를 검사하며 Windows Edge의 직접 로컬 실행 검증과 구별합니다.
+
+[K볼 2.7.3 ZIP 다운로드](https://github.com/rabbit1245/rabbit1245.github.io/raw/7f3b3770e406ad4172622d685b95e8075d519f1c/Kball.zip?download=1)
+
+공개 주소에서 HTTP 200으로 내려받은 17,174,972바이트 ZIP의 해시·CRC·동봉 HTML이 검수 파일과 일치했습니다. 실제 내려받은 HTML로 수동 노화·잠금 재실행·모바일·원화·한국어 TXT 5항목을 다시 확인했고 브라우저 오류는 0건입니다. [공개 파일 검증](validation/release-2.7.3/public-download.json) · [실제 다운로드판 실행](validation/release-2.7.3/public-smoke.json).
 
 ## 파일과 이전 저장
 
