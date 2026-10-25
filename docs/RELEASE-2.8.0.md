@@ -1,6 +1,6 @@
 # K볼 2.8.0
 
-2026-10-25. 사용자 요청에 따라 기존 배포 보류를 해제하고 플레이스타일·OVR·경기·저장·수상·은퇴 기록 개선을 통합한다. 최종 배포 주소와 검수 결과는 아래에 기록한다.
+2026-10-25 · 배포 완료. 사용자 요청에 따라 기존 배포 보류를 해제하고 플레이스타일·OVR·경기·저장·수상·은퇴 기록 개선을 통합했다.
 
 ## 플레이스타일과 실제 성장
 
@@ -68,4 +68,10 @@ OVR = round(min(120, 100 + 4×선택 개수, B + (120-B)×M))
 
 ZIP **17,268,761바이트** · SHA-256 `bc5d4f40c8e8222c78ad866d896b1926071f81addf04ed6ed8c891b51e5c960c`.
 
-공개 파일은 검수한 HTML·ZIP과 같은 바이트로 기존 `kball-playable` 브랜치에 배포하며, 공개 다운로드 후 해시와 실행 결과를 추가한다.
+[K볼 2.8.0 ZIP 다운로드](https://github.com/rabbit1245/rabbit1245.github.io/raw/78b4eab2bef5aad06387587a8ce2d596409c06b7/Kball.zip?download=1)
+
+기존 `kball-playable` 브랜치의 HTML·ZIP·해시·실행 안내를 갱신했다. 공개 주소에서 HTTP 200·`application/zip`으로 받은 17,268,761바이트 ZIP의 SHA-256·CRC·동봉 HTML이 검수 파일과 일치했다. 실제 내려받은 HTML에서 120 도달·삭제·재선택·잠금·수동 노화·저장 재실행·GK·모바일·오프라인 검사를 다시 통과했고 브라우저 오류는 0건이다.
+
+소스 구현: `b53ad291cc23fa367d264bbf482e944d7a666ceb` · 다운로드 배포: `78b4eab2bef5aad06387587a8ce2d596409c06b7`.
+
+[공개 다운로드 검증](validation/release-2.8.0/public-download.json) · [실제 다운로드판 실행](validation/release-2.8.0/public-smoke.json) · [20시즌 조작·기록 보존](validation/release-2.8.0/long-ui.json).

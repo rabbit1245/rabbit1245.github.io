@@ -1,6 +1,6 @@
 {
   "version": "2.8.0",
-  "status": "validated; awaiting publication",
+  "status": "published and public download verified",
   "unit": {
     "passed": 253,
     "failed": 0,
@@ -76,5 +76,29 @@
     "mobileOverflow": false,
     "reload": true,
     "pageErrors": []
+  },
+  "sourceCommit": "b53ad291cc23fa367d264bbf482e944d7a666ceb",
+  "artifactCommit": "78b4eab2bef5aad06387587a8ce2d596409c06b7",
+  "publicDownload": {
+    "url": "https://github.com/rabbit1245/rabbit1245.github.io/raw/78b4eab2bef5aad06387587a8ce2d596409c06b7/Kball.zip?download=1",
+    "artifactCommit": "78b4eab2bef5aad06387587a8ce2d596409c06b7",
+    "httpStatus": 200,
+    "contentType": "application/zip",
+    "bytes": 17268761,
+    "sha256": "bc5d4f40c8e8222c78ad866d896b1926071f81addf04ed6ed8c891b51e5c960c",
+    "zipCrc": true,
+    "htmlEqualsVerifiedBuild": true
+  },
+  "publicSmoke": {
+    "url": "http://127.0.0.1:4181/Kball.html",
+    "portable": true,
+    "offlinePortable": true,
+    "checks": [
+      "20 field skills, initially collapsed, no instant gain and sixth choice disabled",
+      "Actual 110 skill values produce 120; deletion preserves the old value and reacquisition gives no instant OVR",
+      "Locks, explicit aging, zero training, durable reload and mobile layout preserved",
+      "10 correctly mapped GK skills, no field-only skills and mobile layout"
+    ],
+    "errors": []
   }
 }
