@@ -1,3 +1,4 @@
+import {playingAbility} from './attributes';
 import { CLUBS, ROSTERS } from './data';
 import { clamp, emptyStats, integer, round, seededRandom } from './math';
 import type { MatchOptions, MatchParticipant, MatchPerformance } from './revision-types';
@@ -13,7 +14,12 @@ const SHOTS:Record<Position,number>={GK:.025,CB:.55,LB:.65,RB:.65,LWB:.9,RWB:.9,
 const PASSES:Record<Position,number>={GK:19,CB:43,LB:39,RB:39,LWB:38,RWB:38,CDM:52,CM:57,CAM:46,LM:37,RM:37,LW:29,RW:29,CF:29,SS:26,ST:23};
 const CREATION_ROLE:Record<Position,number>={GK:.03,CB:.2,LB:.85,RB:.85,LWB:1.1,RWB:1.1,CDM:.75,CM:1.45,CAM:2.4,LM:1.8,RM:1.8,LW:1.8,RW:1.8,CF:1.75,SS:1.75,ST:1.4};
 // World NPCs carry a validated 1–100 OVR rather than thirty identical attribute entries.
-const ability=(p:MatchParticipant,key:AttributeKey)=>p.attributes?clamp(p.attributes[key]??p.ovr,1,100):p.ovr;
+const ability=(p:MatchParticipant,key:AttributeKey)=>{
+ if(!p.attributes)return p.ovr;
+ const raw=p.attributes[key];if(raw!==undefined)return clamp(raw,1,110);
+ // Missing GK physical/field traits use actual keeper ability, never the 120 display conversion.
+ return clamp(p.ovr>100?playingAbility({...p,attributes:p.attributes,style:'style'in p?String(p.style):'',ovr:undefined}):p.ovr,1,110);
+};
 const duration=(p:Actor)=>Math.max(0,p.to-p.from)/90;
 const roundedCount=(mean:number,rng:()=>number)=>Math.max(0,Math.floor(mean+rng()));
 const group=(p:Position)=>p==='GK'?0:DEFENCE.has(p)?1:MIDFIELD.has(p)?2:3;
@@ -93,7 +99,7 @@ function sampleActions(actor:Actor,opponentPower:number,rng:()=>number,emit:(typ
   const success=(attempts:number,probability:number)=>Math.min(attempts,roundedCount(attempts*clamp(probability,.03,.98),rng));
   const resistance=(opponentPower-65)*.0015;
   const lateMinutes=Math.max(0,actor.to-Math.max(60,actor.from));
-  const lateEnergy=.48+a('stamina')*.0052;
+  const lateEnergy=Math.min(1,.48+a('stamina')*.0052);
   const endurance=1-(1-lateEnergy)*lateMinutes/Math.max(1,actor.minutes);
   s.apps=actor.minutes>0?1:0;s.starts=actor.started?1:0;s.minutes=actor.minutes;s.detailedApps=1;
   if(actor.position==='GK'){
@@ -177,7 +183,7 @@ function tacticalImpact(team:Team):{supply:number;coverage:number}{
     const defense=ability(actor,'defending')*.32+ability(actor,'anticipation')*.23+ability(actor,'positioning')*.2+ability(actor,'concentration')*.15+ability(actor,'decisions')*.1;
     defensiveEdge+=(defense-team.power)*weight*duration(actor);
   }
-  return {supply:clamp(1+creationEdge*.09,.78,1.28)*(1+team.leadership*.45),coverage:clamp(1-defensiveEdge*.005,.78,1.22)*(1-team.leadership)};
+  return {supply:clamp(1+creationEdge*.11,.76,1.32)*(1+team.leadership*.45),coverage:clamp(1-defensiveEdge*.006,.75,1.25)*(1-team.leadership)};
 }
 
 /** Pure seeded match simulation. Full worlds use the same action checks with compressed event output. */
@@ -193,10 +199,10 @@ export function simulateMatch(career:Career,fixture:Fixture,options:MatchOptions
   const available=p.injuryWeeks<=0&&p.fitness>=25;
   const selection=options.forceSelection?{...options.forceSelection}:{from:0,to:0,started:false};
   if(!options.forceSelection&&userTeam&&available){
-    const startProbability=clamp(.48+(p.ovr-ownClub.power)*.025+(career.managerTrust-50)*.004+(p.form-60)*.002,.04,.96);
+    const startProbability=clamp(.48+(playingAbility(p)-ownClub.power)*.025+(career.managerTrust-50)*.004+(p.form-60)*.002,.04,.96);
     selection.started=selectRng()<startProbability;
     if(selection.started){selection.from=0;selection.to=selectRng()<.36?integer(selectRng,62,84):90;}
-    else if(selectRng()<clamp(.66+(p.ovr-ownClub.power)*.012,.15,.9)){selection.from=integer(selectRng,55,80);selection.to=90;}
+    else if(selectRng()<clamp(.66+(playingAbility(p)-ownClub.power)*.012,.15,.9)){selection.from=integer(selectRng,55,80);selection.to=90;}
   }
   selection.from=clamp(Math.floor(selection.from),0,90);selection.to=clamp(Math.floor(selection.to),selection.from,90);
   if(!userTeam||(!available&&!options.forceSelection)){selection.from=0;selection.to=0;selection.started=false;}
@@ -264,7 +270,7 @@ export function simulateMatch(career:Career,fixture:Fixture,options:MatchOptions
           for(let i=0;i<creators.length;i++){pick-=weights[i];if(pick<=0){creator=creators[i];break;}}
           if(creator){creator.stats.keyPasses=(creator.stats.keyPasses??0)+1;if(detailed)emit('keyPass',creator,minute,'동료의 슈팅으로 연결한 패스',shotId);}
         }
-        const late=minute>60?(.62+a('stamina')*.0038):1;
+        const late=minute>60?Math.min(1,.62+a('stamina')*.0038):1;
         const aim=clamp((.12+a('shooting')*.0042+a('composure')*.0015+a('setPieces')*(shotType==='setPiece'||shotType==='penalty'?.003:.00045)+(shotType==='header'?a('heading')*.0033:0))*late,.07,.96);
         const onTarget=shotRng()<(shotType==='penalty'?Math.max(.78,aim):aim);
         if(!onTarget)continue;

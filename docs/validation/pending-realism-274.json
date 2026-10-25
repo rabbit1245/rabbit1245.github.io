@@ -1,0 +1,135 @@
+{
+  "version": "2.7.4-dev.1",
+  "date": "2026-10-25",
+  "status": "local implementation and validation; deployment explicitly held by user",
+  "regression": {
+    "pass": 239,
+    "fail": 0,
+    "skipped": 1,
+    "skippedCase": "new full 30-season generation"
+  },
+  "nativeThreeSeasons": {
+    "method": "Actual complete world, club cups and national windows, no forced results or selections. A fixed 90 player is locked; historical matches, stats, awards, attributes and finances must remain identical; earned club-development metadata added at year transition is excluded from the hash.",
+    "results": [
+      {
+        "year": 1,
+        "age": 25,
+        "ovr": 90,
+        "rank": 1,
+        "leagueGoals": 15,
+        "leagueAssists": 12,
+        "nationalApps": 8,
+        "eligibleNow": true,
+        "ballonRank": 17,
+        "awards": [
+          "세리에 A 올해의 팀 · AIC",
+          "세리에 A 우승 메달",
+          "K볼 선정 · 세리에 A 올해의 신인"
+        ],
+        "recordHash": "d69cea0d4152acfd46d7ca7fafebdbeb0a81b080468b314fed410b24da484b2c"
+      },
+      {
+        "year": 2,
+        "age": 26,
+        "ovr": 90,
+        "rank": 1,
+        "leagueGoals": 23,
+        "leagueAssists": 14,
+        "nationalApps": 19,
+        "eligibleNow": true,
+        "ballonRank": 4,
+        "awards": [
+          "세리에 A 득점왕 · Capocannoniere",
+          "세리에 A 시즌 MVP",
+          "세리에 A 올해의 팀 · AIC",
+          "세리에 A 우승 메달",
+          "K볼 선정 · 구단 올해의 선수",
+          "K볼 선정 · 구단 팬 선정 올해의 선수",
+          "K볼 선정 · 구단 선수단 선정 올해의 선수",
+          "K볼 선정 · 구단 올해의 공격수",
+          "K볼 선정 · 세리에 A 2027-08 이달의 선수",
+          "K볼 선정 · 세리에 A 2028-04 이달의 선수",
+          "K볼 선정 · 구단 유니폼 판매 예상 1위",
+          "FIFPRO 월드 11",
+          "수페르코파 이탈리아나 우승 메달"
+        ],
+        "recordHash": "d69cea0d4152acfd46d7ca7fafebdbeb0a81b080468b314fed410b24da484b2c"
+      },
+      {
+        "year": 3,
+        "age": 27,
+        "ovr": 90,
+        "rank": 1,
+        "leagueGoals": 16,
+        "leagueAssists": 10,
+        "nationalApps": 27,
+        "eligibleNow": true,
+        "ballonRank": 6,
+        "awards": [
+          "세리에 A 올해의 팀 · AIC",
+          "세리에 A 우승 메달",
+          "K볼 선정 · 구단 올해의 선수",
+          "K볼 선정 · 구단 팬 선정 올해의 선수",
+          "K볼 선정 · 구단 선수단 선정 올해의 선수",
+          "K볼 선정 · 구단 올해의 공격수",
+          "K볼 선정 · 포르투갈 국가대표 올해의 선수",
+          "K볼 선정 · 구단 유니폼 판매 예상 1위"
+        ],
+        "recordHash": "d69cea0d4152acfd46d7ca7fafebdbeb0a81b080468b314fed410b24da484b2c"
+      }
+    ]
+  },
+  "clubBalance": {
+    "method": "Six paired 12-season isolated league runs: three ST and three LWB seeds, ability 90, all 90-minute appearances; cups, national windows and promotion/relegation excluded only from this experiment. Original club base and player attributes stay identical.",
+    "before": {
+      "finalSeasonMeanPower": 78.26,
+      "finalSeasonMeanRank": 4.33,
+      "finalSeasonMeanPoints": 66.17,
+      "titlesOver72LeagueSeasons": 2
+    },
+    "after": {
+      "finalSeasonMeanPower": 84.19,
+      "finalSeasonMeanRank": 3.5,
+      "finalSeasonMeanPoints": 75,
+      "titlesOver72LeagueSeasons": 7
+    }
+  },
+  "legacyThirtySeason": {
+    "source": "/workspace/rabbit1245.github.io/test-results/long-career-30-seasons.json",
+    "saveBytes": 81104879,
+    "txtBytes": 86425,
+    "seasons": 30,
+    "clubMatches": 1020,
+    "nationalMatches": 108,
+    "newSeasonSnapshots": 30,
+    "downloads": 1,
+    "bom": true,
+    "crlf": true,
+    "rawJSON": false,
+    "annualAndCareerTotalsReconcile": true,
+    "eventTimelinesOmitted": true,
+    "readOnlyDownload": true,
+    "retirementSeasonMarked": true,
+    "mobileOverflow": false,
+    "reload": true,
+    "pageErrors": []
+  },
+  "ui": {
+    "url": "http://127.0.0.1:4173/",
+    "source": "/workspace/kball-pending-274/native-year-1.json",
+    "version": "2.7.4-dev.1",
+    "nationalAssessment": "현재 팀 내 평가 · 포르투갈 대표팀\n\n팀 위상 · 주전 실력\n전력 85.1\n\n예상 주전 평균 OVR 85.1\n\n내 실력 · 팀 내 경쟁\nOVR 90 · 1위\n\n주장단 후보 5위\n\n최근 경기 성적\n평점 7.20\n\n8경기 · 499분\n\n나이 · 리더십\n25세 · 69\n\n실제 연령과 동료 경쟁을 함께 평가\n\n근속 · 신뢰\n0시즌 · 6%\n\n해당 팀 통산 8경기 출전\n\n주장단 평가\n제의 기준 미충족\n\n팀 위상에 맞는 실력과 꾸준한 출전 필요\n\n현재 팀에서 최소 한 시즌의 근속과 동료의 신뢰가 필요합니다.\n팀 신뢰 6%: 꾸준한 활약으로 신뢰를 더 쌓아야 합니다.\n실력·성과·연령·리더십을 합친 주장단 후보 5위입니다.",
+    "actualNationalStatus": "🇵🇹\n현재 성인 대표팀 상태\n\n포르투갈 성인 대표 발탁 · 같은 포지션군 1위. 능력치·소속 리그 수준·출전시간·평점·컨디션을 종합했습니다.",
+    "leagueTeamOfYearVisible": true,
+    "reload": true,
+    "annualRecordPreserved": true,
+    "mobileOverflow": false,
+    "errors": []
+  },
+  "typecheckAndLocalBuild": true,
+  "sourcePushed": false,
+  "newPlayableHTMLOrZIPGenerated": false,
+  "publishedVersion": "2.7.3",
+  "publishedArtifactCommit": "7f3b3770e406ad4172622d685b95e8075d519f1c",
+  "publishedZIPUnchangedSHA256": "9eb65c523c39690f29b096e27d5a82dcee4a6661f8052af5c63f8de3f30f758b"
+}

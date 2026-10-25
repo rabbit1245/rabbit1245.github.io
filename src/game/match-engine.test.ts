@@ -48,7 +48,7 @@ test('paired complete league schedules turn individual actions into different po
 
 test('a weak club’s 30-to-40-goal striker is included in actual scores and improves earned season points',t=>{
   const ids=[home.id,...Array.from({length:19},(_,i)=>`weak-test-${i}`)],output=[];
-  for(const ability of [25,95]){
+  for(const ability of [25,90,95]){
     let points=0,ranks=0;const goals=[];
     for(let seed=0;seed<8;seed++){
       const input=career('ST');input.seed=`weak-season-${seed}`;input.player.attributes=Object.fromEntries(FIELD_ATTRIBUTES.map(k=>[k,ability]));
@@ -65,7 +65,7 @@ test('a weak club’s 30-to-40-goal striker is included in actual scores and imp
     }
     output.push({ability,meanPoints:points/8,meanRank:ranks/8,goals});
   }
-  assert.ok(output[1].goals.some(g=>g>=30&&g<=40),JSON.stringify(output));assert.ok(output[1].meanPoints>output[0].meanPoints,JSON.stringify(output));assert.ok(output[1].meanRank<output[0].meanRank,JSON.stringify(output));t.diagnostic(JSON.stringify({weakClubEight38GameSeasons:output}));
+  assert.ok(output[1].goals.some(g=>g>=30&&g<=40),JSON.stringify(output));assert.ok(output[2].meanPoints>output[0].meanPoints,JSON.stringify(output));assert.ok(output[2].meanRank<output[0].meanRank,JSON.stringify(output));t.diagnostic(JSON.stringify({weakClubEight38GameSeasons:output}));
 });
 
 test('seed replay is pure, and output verbosity does not change any performance',()=>{

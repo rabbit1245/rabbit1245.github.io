@@ -1,0 +1,22 @@
+[
+  {
+    "url": "https://ballondor.com/news/posts/check-all-the-criteria-and-full-regulations-to-understand-ballon-dor-2026-trophy",
+    "error": "<urlopen error Tunnel connection failed: 403 Forbidden>",
+    "verified": false
+  },
+  {
+    "url": "https://www.uefa.com/uefachampionsleague/news/029d-1ec2c3cf6f25-45f93870ea1c-1000--2025-ballon-d-or-ceremony-when-and-where-all-the-nominees-h/",
+    "error": "<urlopen error Tunnel connection failed: 403 Forbidden>",
+    "verified": false
+  },
+  {
+    "url": "https://www.fifpro.org/en/world-11",
+    "error": "<urlopen error Tunnel connection failed: 403 Forbidden>",
+    "verified": false
+  },
+  {
+    "url": "https://inside.fifa.com/official-documents/annual-report/2025/2025-at-a-glance/fifa-best-awards-2025",
+    "error": "<urlopen error Tunnel connection failed: 403 Forbidden>",
+    "verified": false
+  }
+]

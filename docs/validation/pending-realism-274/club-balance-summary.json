@@ -1,0 +1,15 @@
+{
+  "method": "Six paired 12-season isolated league runs: three ST and three LWB seeds, ability 90, all 90-minute appearances; cups, national windows and promotion/relegation excluded only from this experiment. Original club base and player attributes stay identical.",
+  "before": {
+    "finalSeasonMeanPower": 78.26,
+    "finalSeasonMeanRank": 4.33,
+    "finalSeasonMeanPoints": 66.17,
+    "titlesOver72LeagueSeasons": 2
+  },
+  "after": {
+    "finalSeasonMeanPower": 84.19,
+    "finalSeasonMeanRank": 3.5,
+    "finalSeasonMeanPoints": 75,
+    "titlesOver72LeagueSeasons": 7
+  }
+}

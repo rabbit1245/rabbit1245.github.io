@@ -1,0 +1,66 @@
+{
+  "method": "Declared opaque CSS colors in normal, selected and disabled skill cards; default opacity is 1. Existing full-game 17px primary text and layout checks remain in browser E2E.",
+  "minimumContrast": 5.223800997986888,
+  "pairs": [
+    {
+      "name": "primary",
+      "text": "202124",
+      "background": "ffffff",
+      "contrast": 16.098951261824404
+    },
+    {
+      "name": "primary-selected",
+      "text": "202124",
+      "background": "f1f6eb",
+      "contrast": 14.65931634879861
+    },
+    {
+      "name": "secondary",
+      "text": "424a42",
+      "background": "ffffff",
+      "contrast": 9.170980901055778
+    },
+    {
+      "name": "secondary-selected",
+      "text": "424a42",
+      "background": "f1f6eb",
+      "contrast": 8.350873797361345
+    },
+    {
+      "name": "english",
+      "text": "4c5548",
+      "background": "ffffff",
+      "contrast": 7.776983767974716
+    },
+    {
+      "name": "english-selected",
+      "text": "4c5548",
+      "background": "f1f6eb",
+      "contrast": 7.081533662665031
+    },
+    {
+      "name": "button",
+      "text": "263b20",
+      "background": "ffffff",
+      "contrast": 12.14675664573835
+    },
+    {
+      "name": "button-selected",
+      "text": "263b20",
+      "background": "e3efda",
+      "contrast": 10.194698000575512
+    },
+    {
+      "name": "button-disabled",
+      "text": "626862",
+      "background": "f4f5f3",
+      "contrast": 5.223800997986888
+    },
+    {
+      "name": "counter",
+      "text": "36542a",
+      "background": "ffffff",
+      "contrast": 8.542082473375014
+    }
+  ]
+}

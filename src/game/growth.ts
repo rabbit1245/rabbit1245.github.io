@@ -3,6 +3,7 @@ import { clamp,round,seededRandom } from './math';
 import type { AttributeKey,Career,PlayerStats,Talent } from './types';
 import type { GrowthCause,GrowthLedger } from './revision-types';
 import { growthAgeFactor } from './talent';
+import {attributeCap} from './play-skills';
 
 const GROWTH:Record<Talent,number>={D:.055,C:.075,B:.105,A:.14,S:.18,SS:.215,SSS:.25};
 export function trainingQuality(career:Career):number {
@@ -22,17 +23,27 @@ export function ensureGrowthTracking(career:Career):GrowthLedger {
 }
 function apply(career:Career,key:AttributeKey,amount:number,cause:GrowthCause):void {
   // Manual aging is an explicit user adjustment; automatic changes still honor locks.
-  if(cause!=='aging'&&career.systems?.attributeLocks?.includes(key))return;
+  if(cause!=='aging'&&cause!=='skillChange'&&career.systems?.attributeLocks?.includes(key))return;
   if((cause==='training'||cause==='experience'||cause==='development')&&!career.training.includes(key))return;
   const current=career.player.attributes[key];if(current===undefined)return;
-  const next=round(clamp(current+amount,0,100)),change=round(next-current);
+  const next=round(clamp(current+amount,0,attributeCap(career.player,key))),change=round(next-current);
   if(!change)return;
   career.player.attributes[key]=next;
   const ledger=ensureGrowthTracking(career),row=ledger.byCause[cause]??(ledger.byCause[cause]={});row[key]=round((row[key]??0)+change);
 }
+/** Explicit removal ends excess mastery; its former value remains in the skill-change ledger. */
+export function removeSkillMastery(career:Career,key:AttributeKey):void{const value=career.player.attributes[key]??0;if(value>100)apply(career,key,100-value,'skillChange');}
+function growthCeiling(c:Career,key:AttributeKey):number{
+ const p=c.player,ordinary=p.playSkills?.length?overall({...p,playSkills:[]}):p.ovr,normal=ordinary>=p.potential?0:clamp((p.potential-ordinary+4)/12,.025,1.15);
+ if(!p.playSkills?.includes(key))return normal;
+ // Learned mastery is separate from ordinary potential; talent and age still govern its pace.
+ const aptitude:Record<Talent,number>={D:.002,C:.004,B:.006,A:.009,S:.015,SS:.045,SSS:.12};
+ const mastery=aptitude[p.talent]*clamp((110-(p.attributes[key]??0)+4)/12,.35,1.15);
+ return (p.attributes[key]??0)<100?Math.max(normal,mastery):mastery;
+}
 export function increaseAttribute(career:Career,key:AttributeKey,amount:number):void{
   apply(career,key,amount,'cheat');career.player.ovr=overall(career.player);
-  career.player.potential=Math.max(career.player.potential,career.player.ovr);
+  career.player.potential=Math.min(100,Math.max(career.player.potential,career.player.ovr));
 }
 function cappedGain(career:Career,key:AttributeKey,amount:number,cause:'experience'|'development',cap:number):void {
   const prior=ensureGrowthTracking(career).byCause[cause][key]??0;
@@ -45,9 +56,9 @@ export function trainRound(career:Career):void {
   if(career.intensity==='rest'){p.fitness=clamp(p.fitness+27,0,100);p.morale=clamp(p.morale+1,0,100);return;}
   const rng=seededRandom(`${career.seed}|training|${career.season.year}|${career.season.week}`);
   const age=growthAgeFactor(p);
-  const ceiling=p.ovr>=p.potential?0:clamp((p.potential-p.ovr+4)/12,.025,1.15),availability=injured?.2:1;
+  const availability=injured?.2:1;
   const exposure=.8+.2*clamp(career.season.playerStats.minutes/Math.max(90,(career.season.week-1)*75),0,1);
-  for(const key of career.training)apply(career,key,GROWTH[p.talent]*(38/career.season.totalWeeks)*age*ceiling*(career.intensity==='intense'?1.32:1)*availability*ledger.trainingQuality*exposure*(.8+rng()*.4),'training');
+  for(const key of career.training)apply(career,key,GROWTH[p.talent]*(38/career.season.totalWeeks)*age*growthCeiling(career,key)*(career.intensity==='intense'?1.32:1)*availability*ledger.trainingQuality*exposure*(.8+rng()*.4),'training');
   // Maturation can only affect mental attributes explicitly selected for this season.
   if(p.age<=24&&career.season.week%(p.age<=18?3:6)===0&&!injured){
     const mental=(['decisions','concentration','teamwork'] as AttributeKey[]).filter(k=>p.attributes[k]!==undefined&&career.training.includes(k)).slice(0,2);
@@ -60,7 +71,7 @@ export function trainRound(career:Career):void {
   p.ovr=overall(p);p.fitness=clamp(p.fitness+(career.intensity==='intense'?10:19),0,100);
 }
 export function applyMatchExperience(career:Career,stats:PlayerStats):void {
-  if(!career.training.length||!stats.apps||!stats.minutes||career.player.ovr>=career.player.potential)return;
+  if(!career.training.length||!stats.apps||!stats.minutes)return;
   const p=career.player,allowed=p.position==='GK'?GK_ATTRIBUTES:FIELD_ATTRIBUTES,weights=new Map<AttributeKey,number>();
   // Match learning follows position and actions, not a blanket boost to every skill.
   for(const key of allowed)weights.set(key,.18);
@@ -74,11 +85,11 @@ export function applyMatchExperience(career:Career,stats:PlayerStats):void {
   if(stats.saves>0){add('gkShotStopping',.45);add('gkReflexes',.35);add('gkPositioning',.3);}
   if(stats.minutes>=60){add('stamina',.2);add('decisions',.25);}
   const talent:Record<Talent,number>={D:.45,C:.58,B:.74,A:.9,S:1.15,SS:1.35,SSS:1.55};
-  const ceiling=clamp((p.potential-p.ovr+4)/12,.025,1.15),age=growthAgeFactor(p);
+  const age=growthAgeFactor(p);
   const rating=stats.ratingCount?stats.ratingSum/stats.ratingCount:6.5,form=clamp(.85+(rating-6.5)*.16,.55,1.25);
-  const base=.20*(38/career.season.totalWeeks)*Math.min(1,stats.minutes/90)*ceiling*age*talent[p.talent]*trainingQuality(career)*form;
+  const base=.20*(38/career.season.totalWeeks)*Math.min(1,stats.minutes/90)*age*talent[p.talent]*trainingQuality(career)*form;
   const cap=(p.age<=18?6:5.2)*Math.min(1,age)*talent[p.talent];
-  for(const [key,weight] of weights)if(career.training.includes(key))cappedGain(career,key,base*weight,'experience',cap*weight);
+  for(const [key,weight] of weights)if(career.training.includes(key))cappedGain(career,key,base*weight*growthCeiling(career,key),'experience',cap*weight);
   p.ovr=overall(p);
 }
 export function roleGrowthDescription(career:Career):string {

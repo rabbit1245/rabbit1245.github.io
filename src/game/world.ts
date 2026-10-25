@@ -1,10 +1,11 @@
+import {playingAbility} from './attributes';
 import {reviewK3Promotion} from './korean-promotion';
 import {internationalRoster} from './international-clubs';
 import {compactMoney} from './currency';
 import { CLUBS, LEAGUES, ROSTERS, ROSTER_CALIBRATION, getClub, getLeague } from './data';
 import { ALL_STATS, clamp, emptyStats, hashSeed, integer, round, seededRandom } from './math';
 import { getLeagueRule } from './league-rules';
-import { nationalityForPlayer } from './national-data';
+import { nationalityForPlayer,currentNationality } from './national-data';
 import { simulateMatch } from './match-engine';
 import { assessClubSeason,beginClubDevelopment } from './club-development';
 import type { Career, Fixture, MatchRecord, Position, Standing } from './types';
@@ -55,7 +56,7 @@ function seasonRevenue(club: ClubWorld): number {
 
 function userWorldPlayer(career: Career): WorldPlayer {
   const player=career.player;
-  return {id:player.id,clubId:player.clubId,name:player.name,position:player.position,age:player.age,ovr:player.ovr,potential:player.potential,injuryWeeks:player.injuryWeeks,nationality:player.nationality,leadership:Math.round((player.attributes.teamwork??55)*.6+(player.attributes.composure??55)*.4)};
+  return {id:player.id,clubId:player.clubId,name:player.name,position:player.position,age:player.age,ovr:player.ovr,potential:player.potential,injuryWeeks:player.injuryWeeks,nationality:player.nationality,leadership:Math.round(clamp((player.attributes.teamwork??55)*.6+(player.attributes.composure??55)*.4,0,100))};
 }
 
 function syncUser(career: Career, world: WorldState): void {
@@ -72,18 +73,18 @@ function syncUser(career: Career, world: WorldState): void {
 const averagePower=(values:number[],n:number)=>values.slice(0,n).reduce((sum,v)=>sum+v,0)/Math.max(1,Math.min(n,values.length));
 const weightedPower=(values:number[])=>averagePower(values,11)*.82+averagePower(values,18)*.18;
 const basePowers=new Map(CLUBS.map(club=>[club.id,round(weightedPower(ROSTERS[club.id].map(p=>p.ovr).sort((a,b)=>b-a)))]));
-/** The club keeps its identity. Prestige moves by at most +/-3 team points; funded investment
- * adds at most 6 more, gradually. NPC replacement generations cannot redefine the club's scale.
+/** The original club scale stays fixed. Sustained results and funded investment can build a new era;
+ * inflated replacement NPC ratings still cannot redefine the club's scale.
  */
 const seasonForms=new WeakMap<WorldState,{year:number;seed:string;values:Map<string,number>}>();
 function teamBase(career:Career,world:WorldState,club:ClubWorld):number {
   const d=club.development,base=d?.basePower??basePowers.get(club.id)!;
-  const progress=clamp(((d?.prestige??base)-base)*.3,-3,3);
+  const progress=clamp(((d?.prestige??base)-base)*.35,-3,6);
   let cache=seasonForms.get(world);
   if(!cache||cache.year!==world.year||cache.seed!==career.seed){cache={year:world.year,seed:career.seed,values:new Map()};seasonForms.set(world,cache);}
   let form=cache.values.get(club.id);
   if(form===undefined){const rng=seededRandom(`${career.seed}|club-season-form|${world.year}|${club.id}`);form=(rng()+rng()-1)*2;cache.values.set(club.id,form);}
-  return base+progress+clamp(d?.investmentPower??0,0,6)+form;
+  return base+progress+clamp(d?.investmentPower??0,0,22)+form;
 }
 
 function squadStrength(career: Career, world: WorldState, club: ClubWorld) {
@@ -95,7 +96,7 @@ function squadStrength(career: Career, world: WorldState, club: ClubWorld) {
   const anchored=(world.rosterVersion??1)>=2,base=anchored?teamBase(career,world,club):0;
   const npc=players.filter(p=>p.id!==career.player.id).map(p=>p.ovr).sort((a,b)=>b-a);
   const offset=anchored?base-weightedPower(npc):0;
-  const effective=(p:WorldPlayer)=>p.id===career.player.id?p.ovr:clamp(p.ovr+offset,25,99);
+  const effective=(p:WorldPlayer)=>p.id===career.player.id?playingAbility(career.player):clamp(p.ovr+offset,25,99);
   const full=players.map(effective).sort((a,b)=>b-a);
   const available=players.map(p=>effective(p)-(p.injuryWeeks>0?12:0)).sort((a,b)=>b-a);
   const healthyPower=weightedPower(full),rawPower=weightedPower(available),injuryImpact=healthyPower-rawPower;
@@ -181,6 +182,14 @@ export function getClubRatingOffset(career:Career,id:string):number {
   return teamBase(career,world,club)-weightedPower(npcs);
 }
 
+/** One playing-ability scale for club and international comparisons. Cache only within a query. */
+export function worldPlayerAbility(career:Career,player:Pick<WorldPlayer,'id'|'clubId'|'ovr'>,offsets=new Map<string,number>()):number {
+  if(player.id===career.player.id)return round(playingAbility(career.player));
+  let offset=offsets.get(player.clubId);
+  if(offset===undefined){offset=getClubRatingOffset(career,player.clubId);offsets.set(player.clubId,offset);}
+  return round(clamp(player.ovr+offset,25,99));
+}
+
 /** Persistent, healthy squad members. The match engine selects its own XI and substitutions. */
 export function getWorldClubPlayers(career: Career, clubId: string): MatchParticipant[] {
   const world=career.systems?.world, club=world?.clubs[clubId];
@@ -190,7 +199,7 @@ export function getWorldClubPlayers(career: Career, clubId: string): MatchPartic
   return ids.flatMap(id => {
     const player=id===career.player.id ? userWorldPlayer(career) : world.players[id];
     if (!player || player.injuryWeeks>0 || id===career.player.id && career.player.squad!=='senior') return [];
-    return [{id:player.id,name:player.name,position:player.position,ovr:id===career.player.id?player.ovr:round(clamp(player.ovr+offset,25,99)),nationality:player.nationality,clubId,
+    return [{id:player.id,name:player.name,position:player.position,ovr:id===career.player.id?round(playingAbility(career.player)):round(clamp(player.ovr+offset,25,99)),nationality:currentNationality(player),clubId,
       ...(id===career.player.id ? {attributes:career.player.attributes} : {})}];
   }).sort((a,b)=>b.ovr-a.ovr || a.id.localeCompare(b.id));
 }
@@ -240,7 +249,7 @@ function updateAvailability(career: Career, world: WorldState, clubIds: string[]
       if (playerId===career.player.id) continue;
       const player=world.players[playerId];
       if (!player) continue;
-      if (player.injuryWeeks>0) player.injuryWeeks--;
+      if (player.injuryWeeks>0) {const e=career.systems?.achievementEvidence;if(e?.year===career.season.year)e.injuredRounds[playerId]=(e.injuredRounds[playerId]??0)+1;player.injuryWeeks--;}
       else if (rng()<.0035) player.injuryWeeks=integer(rng,2,10);
     }
     refreshClub(career,world,club);
@@ -375,12 +384,17 @@ export function prepareWorldMovements(c:Career):void{
  }
 }
 
+function recruitNationality(career:Career,club:ClubWorld,year:number,salt:string):string{
+  const roster=ROSTERS[club.id]??[],country=getClub(club.id).country;
+  const rng=seededRandom(`${career.seed}|recruit-nationality|${year}|${club.id}|${salt}`);
+  const source=roster[Math.floor(rng()*roster.length)];return source?nationalityForPlayer(source.id,country):country;
+}
 function recruit(career: Career, world: WorldState, club: ClubWorld, position: WorldPlayer['position'], nextYear: number, serial: number): void {
   const rng=seededRandom(`${career.seed}|recruit|${nextYear}|${club.id}|${serial}`);
   const tier=getLeague(club.leagueId).tier, age=integer(rng,18,24);
   const quality=round(clamp(club.power+integer(rng,-5,2)+(club.budget>club.revenue*.25?1:0)-Math.max(0,tier-1)*.25,30,93));
   const id=`regen_${club.id}_${nextYear}_${serial}`;
-  world.players[id]={id,clubId:club.id,joinedYear:nextYear,name:`유망주 ${hashSeed(id).toString(36).slice(0,4).toUpperCase()} (가상)`,position,age,ovr:quality,potential:clamp(quality+integer(rng,3,10),quality,97),injuryWeeks:0,nationality:nationalityForPlayer(id,getClub(club.id).country),leadership:integer(rng,35,72)};
+  world.players[id]={id,clubId:club.id,joinedYear:nextYear,name:`유망주 ${hashSeed(id).toString(36).slice(0,4).toUpperCase()} (가상)`,position,age,ovr:quality,potential:clamp(quality+integer(rng,3,10),quality,97),injuryWeeks:0,nationality:recruitNationality(career,club,nextYear,String(serial)),leadership:integer(rng,35,72)};
   club.rosterIds.push(id);
 }
 
@@ -443,7 +457,7 @@ export function transitionWorldSeason(career: Career): void {
       if(target&&available-spent>=fee&&club.rosterIds.length<40){
         const quality=round(clamp(Math.max(target.ovr+1,club.power+Math.min(4,performance.bonus/Math.max(1,oldRevenue)*24)),25,93));
         const id=`success_${club.id}_${nextYear}`;
-        world.players[id]={id,clubId:club.id,name:`${getClub(club.id).name} 보강 선수 (가상)`,position:target.position,age:23,ovr:quality,potential:Math.min(97,quality+5),injuryWeeks:0,nationality:getClub(club.id).country,leadership:55};
+        world.players[id]={id,clubId:club.id,name:`${getClub(club.id).name} 보강 선수 (가상)`,position:target.position,age:23,ovr:quality,potential:Math.min(97,quality+5),injuryWeeks:0,nationality:recruitNationality(career,club,nextYear,'success'),leadership:55};
         const released=club.rosterIds.filter(x=>x!==career.player.id).map(x=>world.players[x]).filter(row=>row?.position===target.position).sort((a,b)=>a.ovr-b.ovr||b.age-a.age)[0];
         if(released){club.rosterIds=club.rosterIds.filter(x=>x!==released.id);delete world.players[released.id];}
         club.rosterIds.push(id);spent+=fee;performance.recruits=1;
@@ -466,8 +480,11 @@ export function transitionWorldSeason(career: Career): void {
     // Funded recruitment/development changes the anchored team scale gradually.
     // This is bounded and depreciates; inflated replacement NPC ratings cannot bypass it.
     const previousInvestment=club.development.investmentPower??0;
-    const investment=completedLeagues.has(performance.leagueId)?Math.min(.7,performance.reinvestment/Math.max(1,oldRevenue)*18/Math.pow(getLeague(performance.leagueId).tier,1.5)):0;
-    club.development.investmentPower=round(clamp(previousInvestment*.97+investment,0,6),3);
+    const base=club.development.basePower,ceiling=Math.max(6,Math.min(22,92-base));
+    const room=clamp((94-club.power)/20,.12,1);
+    const investment=completedLeagues.has(performance.leagueId)?Math.min(1.4,performance.reinvestment/Math.max(1,oldRevenue)*22/Math.pow(getLeague(performance.leagueId).tier,1.25))*room:0;
+    // Existing investment is retained across updates. High-level squads face smaller marginal gains.
+    club.development.investmentPower=round(clamp(previousInvestment*.98+investment,0,Math.max(previousInvestment,ceiling)),3);
     refreshClub(career,world,club);
     performance.afterPower=club.power;
     if(completedLeagues.has(performance.leagueId))club.development.history=[...club.development.history.filter(r=>r.year!==performance.year),performance].slice(-5);

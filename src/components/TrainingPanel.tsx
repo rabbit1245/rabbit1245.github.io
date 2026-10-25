@@ -1,4 +1,5 @@
 import ManualAging,{InjuryControl} from './ManualAging';
+import PlaySkills from './PlaySkills';
 import { useEffect, useState } from 'react';
 import { ArrowLeft, Check, CheckCircle2, LockKeyhole, LockKeyholeOpen } from 'lucide-react';
 import type { AttributeKey, Attributes, Career, GameCommand, Intensity } from '../game/types';
@@ -29,6 +30,7 @@ export default function TrainingPanel({career,busy,command,onClose}:{career:Care
       <p className="fine-print">초록색 잠금은 자동 성장·부상 저하·치트 조정을 막습니다. 수동 노화·부상 처리는 잠금 중에도 가능합니다. 나이만으로 능력치가 감소하지 않습니다.</p>
       <div className="training-summary"><span>선택한 훈련</span><strong>{keys.length?keys.map(k=>`${ATTRIBUTE_LABELS[k]} ${Math.round(career.player.attributes[k]??0)}`).join(' · '):'선택 없음 · 자동 성장 없음'}</strong></div>
       <div className="training-bottom"><label className="field"><span>훈련 강도</span><select aria-label="강도" disabled={!editable||busy} value={intensity} onChange={e=>setIntensity(e.target.value as Intensity)}><option value="balanced">균형</option><option value="intense">집중 · 부상 위험 증가</option><option value="rest">회복 우선</option></select></label><p className="muted">집중훈련은 선택한 능력치에 적용됩니다. 출전·환경·부상·나이에 따라 성장 폭이 달라집니다.</p><div className="action-inline">{onClose&&<button className="button secondary" onClick={onClose}><ArrowLeft size={17}/>돌아가기</button>}{editable&&<button className="button primary" data-testid="confirm-training" disabled={busy} onClick={()=>command({type:'training',keys,intensity})}><CheckCircle2 size={18}/>다음 시즌 계획 확정</button>}</div></div>
+      <PlaySkills career={career} busy={busy} command={command}/>
       {!!career.systems?.manualInjuries?.length&&<details className="injury-history"><summary>수동 부상 이력 {career.systems.manualInjuries.length}회</summary>{[...career.systems.manualInjuries].reverse().slice(0,12).map(r=><p key={r.id}>{r.year}년 · {r.duration==='half'?'반 시즌':'한 시즌'} · {r.pendingNextSeason?'다음 시즌 시작일부터':`${r.start.slice(0,10)} ~ ${r.end.slice(0,10)}`} · {r.pendingNextSeason?'예약됨':r.returned?'복귀 완료':'회복 중'} · 클럽 {r.missed.filter(m=>m.scope==='club').length} / 국대 {r.missed.filter(m=>m.scope==='national').length}경기 결장 · 이번 시즌 실제 리그 출전 {career.season.playerStats.apps}경기</p>)}</details>}
     </div>
   </Panel>;

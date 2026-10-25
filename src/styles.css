@@ -1127,3 +1127,9 @@ input,select { font-size:17px; min-height:38px; padding:7px 10px; border-radius:
  .training-panel>.panel-body>.fine-print{font-size:13px;line-height:1.4;}
  .training-header-actions .manual-aging-options{margin:0;}
 }
+
+.play-skills{margin-top:20px;border-top:1px solid #d8ded8;padding-top:16px;color:#202124}.play-skills summary{cursor:pointer;font-weight:700;padding:10px 0}.play-skills summary span{margin-left:12px;color:#36542a}.play-skills>p{font-size:13px;line-height:1.65;color:#424a42}.play-skill-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}.play-skill{padding:14px;border:1px solid #d8ded8;border-radius:8px;background:#fff;display:flex;flex-direction:column;gap:9px;min-width:0}.play-skill.selected{border-color:#769560;background:#f1f6eb}.play-skill strong{font-size:16px;color:#202124}.play-skill strong span{font-size:12px;font-weight:400;color:#4c5548}.play-skill small{font-size:12px;line-height:1.5;color:#424a42}.play-skill button{border:1px solid #899982;border-radius:5px;padding:8px;background:#fff;color:#263b20;cursor:pointer}.play-skill.selected button{background:#e3efda}.play-skill button:disabled{color:#626862;background:#f4f5f3;cursor:default}.ovr-levels{margin-top:16px}.ovr-levels table{width:100%;font-size:12px}.ovr-levels td{white-space:normal;padding:8px;line-height:1.6}.ovr-levels summary{cursor:pointer;font-weight:600;padding:8px 0}
+
+.play-skills:not([open]){margin-top:4px;padding-top:0}.play-skills:not([open])>summary{padding:4px 0;font-size:14px;line-height:20px}@media(min-width:1200px) and (max-height:850px){.training-panel .training-cell .training-row{min-height:38px;padding:4px 6px}}
+
+@media(min-width:1200px) and (max-height:850px){.training-panel .play-skills:not([open]){margin-top:0}}

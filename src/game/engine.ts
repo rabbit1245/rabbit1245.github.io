@@ -1,4 +1,7 @@
+import {beginAchievementSeason} from './achievement-evidence';
 import {copySystems} from './snapshot';
+import {playSkillDefinitions,playSkillNames} from './play-skills';
+import {removeSkillMastery} from './growth';
 import {trackMonthlyLeague} from './extra-honours';
 import {moneyText} from './currency';
 import {syncManualInjury,recordManualAbsences,activatePendingInjury} from './manual-injury';
@@ -19,7 +22,7 @@ import { TALENT_PROFILES } from './talent';
 import type { AttributeKey, Attributes, Career, CreateOptions, Fixture, GameProgress, Intensity, MatchRecord, Player, PlayerStats, SeasonState, SeasonSummary, Standing, Talent, TransferOffer } from './types';
 import type { PresentationEvent } from './revision-types';
 
-export const ENGINE_VERSION = '2.7.3';
+export const ENGINE_VERSION = '2.8.0';
 export const overall = calculateOverall;
 export { addStats, emptyStats, hashSeed, seededRandom } from './math';
 const TALENT_ORDER: Talent[] = ['D','C','B','A','S','SS','SSS'];
@@ -129,6 +132,7 @@ export function createCareer(options:CreateOptions):Career {
   initializeSystems(career,false);
   initializeClubCompetitions(career);
   beginGrowthSeason(career);
+  beginAchievementSeason(career);
   career.systems!.trainingPlan={forYear:career.season.year,confirmed:true,confirmedAtRound:0,source:'creation'};
   career.systems!.trainingLocked=true;
   const startDate=new Date(Date.UTC(2026,getLeagueRule(career.season.leagueId).startMonth-1,1)).toISOString();career.createdAt=startDate;career.updatedAt=startDate;
@@ -288,6 +292,23 @@ export function configureCheats(career:Career,enabled:boolean,freezeAging:boolea
   if(typeof enabled!=='boolean'||typeof freezeAging!=='boolean')throw new Error('치트 설정이 올바르지 않습니다.');
   const next=editable(career,true);next.systems!.cheats={enabled,freezeAging,used:next.systems!.cheats?.used??false};touch(next);return next;
 }
+export function setPlaySkill(career:Career,key:AttributeKey,selected:boolean):Career{
+ if(career.stage==='retired')throw new Error('은퇴한 선수의 플레이스킬은 변경할 수 없습니다.');
+ if(typeof selected!=='boolean'||!playSkillDefinitions(career.player.position).some(s=>s.key===key))throw new Error('포지션에 맞는 플레이스킬을 선택해 주세요.');
+ const prior=career.player.playSkills??[];
+ if(prior.length>5)throw new Error('기존 스킬 선택이 5개를 초과합니다. 원본 백업을 보존하고 선택을 복구해 주세요.');
+ if(prior.includes(key)===selected){const next=editable(career,true);touch(next);return next;}
+ if(selected&&prior.length>=5)throw new Error('플레이스킬은 최대 5개까지 선택할 수 있습니다.');
+ const next=editable(career,true),before=next.player.attributes[key]??0;
+ next.player.playSkills=selected?[...prior,key]:prior.filter(k=>k!==key);
+ if(!selected)removeSkillMastery(next,key);
+ const year=next.season.year+(next.stage==='offseason'?1:0);
+ next.systems!.playSkillChanges=[...(next.systems!.playSkillChanges??[]),{year,round:next.season.week,key,selected,before,after:next.player.attributes[key]??0,position:next.player.position}];
+ next.player.ovr=overall(next.player);
+ present(next,'growth',selected?'플레이스킬 선택':'플레이스킬 삭제',`${playSkillNames(next.player.position,[key])[0]} · ${selected?'성장 상한 110 해제 · 현재 능력 유지':'선택 해제 · 이전 숙련 기록 보존'}`);
+ if(!selected&&before>100)updateMarketValue(next,'플레이스킬 초과 숙련 종료');
+ touch(next);return next;
+}
 export function cheatIncreaseAttribute(career:Career,key:AttributeKey,amount:number):Career{
   if(!career.systems?.cheats?.enabled)throw new Error('설정에서 치트 모드를 켜 주세요.');
   if(career.stage==='retired')throw new Error('은퇴한 선수의 능력치는 변경할 수 없습니다.');
@@ -360,6 +381,7 @@ export function startNextSeason(career:Career,onProgress?:(p:GameProgress)=>void
   systems.trainingPlan={forYear:next.season.year,confirmed:true,confirmedAtRound:0,source:systems.trainingPlan?.source??'legacy'};
   initializeClubCompetitions(next,entries,decided);
   beginGrowthSeason(next);
+  beginAchievementSeason(next);
   systems.firstHalfSnapshot={attributes:{...next.player.attributes},stats:emptyStats(),ovr:next.player.ovr,value:systems.economics.marketValue,round:0};
   updateMarketValue(next,'새 시즌 소속 리그·전력·연령 변화');beginEconomicSeason(next);updateLeadership(next,'club',true);
   for(const move of systems.world.movements.filter(m=>m.year===next.season.year&&m.clubId===next.player.clubId))present(next,'promotion',move.kind==='promotion'?'상위 리그 승격':'하위 리그 강등',`${getLeague(move.fromLeagueId).name} → ${getLeague(move.toLeagueId).name}. 새 상대·일정·수입·영입 예산을 반영했습니다.`,'milestone');

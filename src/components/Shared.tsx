@@ -1,3 +1,4 @@
+import {awardForDisplay} from '../game/award-rules';
 import {money as formatMoney,compactMoney as compact,EUR_KRW} from '../game/currency';
 import {cupStats} from '../game/club-competitions';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
@@ -43,6 +44,6 @@ export function clubTotal(career: Career) { return sumStats([cupStats(career),..
 export function nationalTotal(career: Career) { return sumStats(nationalMatchLedger(career).map(match => match.playerStats)); }
 export const STAT_LABELS: Partial<Record<keyof PlayerStats, string>> = { apps:'출전', starts:'선발', minutes:'출전 시간', goals:'득점', assists:'도움', shots:'슈팅', shotsOnTarget:'유효 슈팅', passes:'패스 시도', passesCompleted:'패스 성공', keyPasses:'키패스', dribbleAttempts:'드리블 시도', dribblesCompleted:'드리블 성공', tackles:'태클 성공', tackleAttempts:'태클 시도', interceptions:'인터셉트', aerialAttempts:'공중볼 시도', aerialWon:'공중볼 승리', saves:'선방', shotsFaced:'상대 유효 슈팅', goalsConceded:'실점', cleanSheets:'클린시트', oneOnOneAttempts:'일대일 시도', oneOnOneSaves:'일대일 선방', penaltiesFaced:'상대 페널티', penaltiesSaved:'페널티 선방', crossesFaced:'상대 크로스', crossesCaught:'크로스 포구', sweepingAttempts:'스위핑 시도', sweepingSuccesses:'스위핑 성공', buildUpPasses:'빌드업 패스 시도', buildUpCompleted:'빌드업 패스 성공', longKicks:'롱킥 시도', longKicksCompleted:'롱킥 성공', handlingAttempts:'공 처리 시도', handlingSuccesses:'공 처리 성공', lateActions:'후반 행동', lateSuccesses:'후반 성공', mom:'MOM' };
 
-export const visibleAwards = (awards: Award[]) => awards.filter(a => a.category!=='commercial'&&!/^K볼 (성장상|시즌 베스트|라이징 스타)$/.test(a.name) && a.name !== '구단 득점왕');
+export const visibleAwards = (awards: Award[]) => awards.filter(a => a.category!=='commercial'&&!/^K볼 (성장상|시즌 베스트|라이징 스타)$/.test(a.name) && a.name !== '구단 득점왕').map(awardForDisplay);
 
 export function calendarLabel(career:Career,year=career.season.year) { const season=year===career.season.year?career.season:career.history.find(h=>h.year===year);const displayYear=season?.calendarYear??year;return season&&getLeagueRule(season.leagueId).startMonth===1?String(displayYear):seasonLabel(displayYear); }

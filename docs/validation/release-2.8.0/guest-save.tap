@@ -1,0 +1,150 @@
+TAP version 13
+# Subtest: distinct global awards retain organisers, own eligibility and year results without fake nominee screens
+ok 1 - distinct global awards retain organisers, own eligibility and year results without fake nominee screens
+  ---
+  duration_ms: 472.012266
+  ...
+# Subtest: European Golden Shoe uses league goals and coefficients alone, excludes second divisions and non-Europe
+ok 2 - European Golden Shoe uses league goals and coefficients alone, excludes second divisions and non-Europe
+  ---
+  duration_ms: 345.972886
+  ...
+# Subtest: ability participates in subjective votes but cannot replace performance, appearances or eligibility
+ok 3 - ability participates in subjective votes but cannot replace performance, appearances or eligibility
+  ---
+  duration_ms: 313.188912
+  ...
+# Subtest: narrative achievements require evidence, diminish overlapping titles, cap at ten, and do not invent a drought
+ok 4 - narrative achievements require evidence, diminish overlapping titles, cap at ten, and do not invent a drought
+  ---
+  duration_ms: 326.499661
+  ...
+# Subtest: historical league records exclude cup goals and old award IDs/data survive display renaming
+ok 5 - historical league records exclude cup goals and old award IDs/data survive display renaming
+  ---
+  duration_ms: 313.171009
+  ...
+# Subtest: equal output in a lower division is weighted below top-flight output in global awards
+ok 6 - equal output in a lower division is weighted below top-flight output in global awards
+  ---
+  duration_ms: 320.696137
+  ...
+# Subtest: real simulated international guests can be saved as award candidates; forged guest identities remain invalid
+ok 7 - real simulated international guests can be saved as award candidates; forged guest identities remain invalid
+  ---
+  duration_ms: 695.610156
+  ...
+# Subtest: career-long national team results exceed one-season limits while every score still validates
+ok 8 - career-long national team results exceed one-season limits while every score still validates
+  ---
+  duration_ms: 7582.020429
+  ...
+# Subtest: original v1 envelopes retain their checksum and all legacy fields through load, export and import
+ok 9 - original v1 envelopes retain their checksum and all legacy fields through load, export and import
+  ---
+  duration_ms: 39.787256
+  ...
+# Subtest: published v2 envelopes preserve their checksum and do not invent new improvement ledgers while loading
+ok 10 - published v2 envelopes preserve their checksum and do not invent new improvement ledgers while loading
+  ---
+  duration_ms: 1604.005282
+  ...
+# Subtest: contract snapshots reconcile renewals, transfers and known season-opening values without inventing previous terms
+ok 11 - contract snapshots reconcile renewals, transfers and known season-opening values without inventing previous terms
+  ---
+  duration_ms: 3514.49705
+  ...
+# Subtest: dated national windows reject malformed cursors, future periods and duplicate callups while keeping old processed keys
+ok 12 - dated national windows reject malformed cursors, future periods and duplicate callups while keeping old processed keys
+  ---
+  duration_ms: 1073.077742
+  ...
+# Subtest: legacy detail fields remain optional while malformed and future detailed records are rejected
+ok 13 - legacy detail fields remain optional while malformed and future detailed records are rejected
+  ---
+  duration_ms: 9.87314
+  ...
+# Subtest: v2 saves validate world membership, international scope, references and separate income ledgers
+ok 14 - v2 saves validate world membership, international scope, references and separate income ledgers
+  ---
+  duration_ms: 4225.319589
+  ...
+# Subtest: IndexedDB round trip preserves Korean names, match ledgers and selected training
+ok 15 - IndexedDB round trip preserves Korean names, match ledgers and selected training
+  ---
+  duration_ms: 10.881551
+  ...
+# Subtest: autosaves atomically retain a previous-good backup and identical saves do not replace it
+ok 16 - autosaves atomically retain a previous-good backup and identical saves do not replace it
+  ---
+  duration_ms: 42.616262
+  ...
+# Subtest: a damaged current slot can be recovered without displacing its previous-good backup
+ok 17 - a damaged current slot can be recovered without displacing its previous-good backup
+  ---
+  duration_ms: 29.370824
+  ...
+# Subtest: stale autosaves and equal-revision conflicting branches cannot overwrite a slot
+ok 18 - stale autosaves and equal-revision conflicting branches cannot overwrite a slot
+  ---
+  duration_ms: 24.745033
+  ...
+# Subtest: another tab changing a slot is detected even when a local branch has a higher revision
+ok 19 - another tab changing a slot is detected even when a local branch has a higher revision
+  ---
+  duration_ms: 15.819505
+  ...
+# Subtest: JSON import validates its checksum and creates a separate slot without changing its simulation seed
+ok 20 - JSON import validates its checksum and creates a separate slot without changing its simulation seed
+  ---
+  duration_ms: 22.887377
+  ...
+# Subtest: edited, truncated, future-version and prototype-poisoned save files are rejected
+ok 21 - edited, truncated, future-version and prototype-poisoned save files are rejected
+  ---
+  duration_ms: 8.379447
+  ...
+# Subtest: damaged statistics, league tables and shot-to-goal references are rejected before writing
+ok 22 - damaged statistics, league tables and shot-to-goal references are rejected before writing
+  ---
+  duration_ms: 19.642322
+  ...
+# Subtest: the first editable command upgrades legacy systems without rewriting old match metrics or income
+ok 23 - the first editable command upgrades legacy systems without rewriting old match metrics or income
+  ---
+  duration_ms: 1809.581799
+  ...
+# Subtest: a continued v1 career retains old match coverage and saves new detailed matches beside it
+ok 24 - a continued v1 career retains old match coverage and saves new detailed matches beside it
+  ---
+  duration_ms: 11061.154757
+  ...
+# Subtest: only explicitly named club reserve snapshots may lack a persistent world roster entry
+ok 25 - only explicitly named club reserve snapshots may lack a persistent world roster entry
+  ---
+  duration_ms: 1415.320767
+  ...
+# Subtest: historical award snapshots survive retirement of the ranked NPC without relaxing live references
+ok 26 - historical award snapshots survive retirement of the ranked NPC without relaxing live references
+  ---
+  duration_ms: 2383.587135
+  ...
+# Subtest: actual international goalkeeper matches and their attempt denominators survive export/import
+ok 27 - actual international goalkeeper matches and their attempt denominators survive export/import
+  ---
+  duration_ms: 8785.802896
+  ...
+# Subtest: deleting a slot also deletes its backup and blocks a delayed autosave from reviving it
+ok 28 - deleting a slot also deletes its backup and blocks a delayed autosave from reviving it
+  ---
+  duration_ms: 14.859022
+  ...
+1..28
+# tests 28
+# suites 0
+# pass 28
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 44685.577651

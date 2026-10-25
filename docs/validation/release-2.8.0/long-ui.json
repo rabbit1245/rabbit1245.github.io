@@ -1,0 +1,16 @@
+{
+  "url": "http://127.0.0.1:4180/Kball.html",
+  "source": "test-results/release-2.8.0/career-year-20.json",
+  "seasons": 20,
+  "skillClicks": 20,
+  "medianMs": 198.24973899999895,
+  "maxMs": 271.9453809999977,
+  "historyHash": "127fa3eb8387a595c8917f42394c2a086bf35c12ffa4c74dd17ef45cbb1afab3",
+  "historyUnchanged": true,
+  "skillsRestoredAfterReload": true,
+  "annualAcquisitionAndRemoval": true,
+  "noSkillsInIdentity": true,
+  "noNarrativeOutput": true,
+  "mobileOverflow": false,
+  "errors": []
+}

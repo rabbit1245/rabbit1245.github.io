@@ -4,10 +4,11 @@ import { mkdir,readFile,writeFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import path from 'node:path';
 
+const expectedSeasons=Number(process.env.KBALL_EXPECTED_SEASONS||30);
 const source=path.resolve(process.env.KBALL_LONG_SAVE||'test-results/long-career-30-seasons.json');
 const output=path.resolve(process.env.KBALL_TEST_RESULTS_DIR||'test-results/pending-retirement/long-txt');
 const envelope=JSON.parse(await readFile(source,'utf8')),career=envelope.career;
-assert.equal(career.stage,'retired');assert.equal(career.history.length,30);await mkdir(output,{recursive:true});
+assert.equal(career.stage,'retired');assert.equal(career.history.length,expectedSeasons);await mkdir(output,{recursive:true});
 const browser=await chromium.launch({headless:true,executablePath:process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE||'/usr/bin/chromium'}),errors=[],downloads=[];
 const page=await browser.newPage({viewport:{width:1366,height:768},acceptDownloads:true});page.setDefaultTimeout(180_000);page.on('pageerror',e=>errors.push(String(e)));page.on('download',d=>downloads.push(d));
 try{
@@ -20,11 +21,11 @@ try{
   assert.deepEqual(await savedRecord(),beforeRecord,'TXT export keeps the imported slot ID, revision and save checksum unchanged');
   assert.equal(downloads.length,1);assert.equal(download.suggestedFilename(),`K볼_${career.player.name}_은퇴커리어.txt`);
   const target=path.join(output,download.suggestedFilename());await download.saveAs(target);const bytes=await readFile(target),text=bytes.toString('utf8');assert.equal(text.charCodeAt(0),0xfeff);assert.ok(!/(?<!\r)\n/.test(text));
-  assert.equal((text.match(/\[\d{4}시즌\]/g)??[]).length,30);
+  assert.equal((text.match(/\[\d{4}시즌\]/g)??[]).length,expectedSeasons);
   assert.doesNotMatch(text,/"profile"|"byCause"|"playerId"|"schemaVersion"|原本|L\. 원본 보존/);
   for(const h of career.history){assert.ok(text.includes(`[${h.year}시즌]`));assert.ok(text.includes(`${h.competitionName}`));}
   // Team medals share their title row instead of repeating the same win.
-  for(const a of career.awards.filter(a=>a.category!=='commercial'))assert.ok(text.includes(a.name.replace(/\s*(?:메달|트로피)$/,'')),a.name);
+  for(const a of career.awards.filter(a=>a.category!=='commercial'))assert.ok(text.includes(a.name.replace(/^K볼 선정/,/club|commercial/.test(a.category??'')?'클럽 선정':'언론 선정').replace(/\s*(?:메달|트로피)$/, '')),a.name);
   const cups=[...(career.systems.clubCompetitions?.history??[]),...(career.systems.clubCompetitions?.current??[])];
   const dedupe=ms=>[...new Map(ms.map(m=>[m.fixtureId||m.id,m])).values()];
   const club=dedupe([...career.history.flatMap(h=>h.matches),...career.season.matches,...cups.flatMap(t=>t.matches)]);
@@ -51,7 +52,8 @@ try{
   await page.getByTestId('career-view-retirement').click();await page.getByTestId('retirement-record').waitFor();
   assert.ok((await page.locator('.retirement-facts').first().innerText()).includes('은퇴나이'));
   assert.doesNotMatch(await page.locator('.retirement-facts').first().innerText(),/\$|€/,'retirement identity uses readable Korean units without a stray currency prefix');
-  assert.doesNotMatch(await page.locator('.retirement-facts').first().innerText(),/인기·상업|누적 주급|이적료/);
+  assert.doesNotMatch(await page.locator('.retirement-facts').first().innerText(),/인기·상업|누적 주급|이적료|능력점수/);
+  assert.doesNotMatch(text.slice(0,text.indexOf('B. 통산')),/능력점수:/);
   const retirementSeason=page.getByTestId(`retirement-season-${career.retiredYear??career.season.year}`);await retirementSeason.locator('summary').first().click();assert.ok((await retirementSeason.innerText()).includes('은퇴'));
   await page.screenshot({path:path.join(output,'retirement-desktop.png')});await page.setViewportSize({width:390,height:844});assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
   await page.screenshot({path:path.join(output,'retirement-mobile.png')});

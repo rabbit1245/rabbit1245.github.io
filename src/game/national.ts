@@ -1,11 +1,14 @@
+import {captureNationalPower} from './achievement-evidence';
+import {playingAbility} from './attributes';
 import {advanceNationalWindow} from './national-expanded';
 import { CLUBS, ROSTERS, getClub, getLeague } from './data';
 import { getLeagueRule } from './league-rules';
 import { fixtureDate, seasonDate,seasonHalfEndDate } from './calendar';
 import {syncManualInjury} from './manual-injury';
+import {worldPlayerAbility} from './world';
 import { simulateMatch } from './match-engine';
 import { addStats, clamp, emptyStats, seededRandom, sumStats } from './math';
-import { nationalityForPlayer, normalizeNationality } from './national-data';
+import { nationalityForPlayer, normalizeNationality,currentNationality } from './national-data';
 import type { MatchParticipant, NationalSeason, NationalState } from './revision-types';
 import type { Career, Club, Fixture, MatchRecord, PlayerStats, Position, RosterPlayer } from './types';
 
@@ -50,12 +53,13 @@ for (const club of CLUBS) for (const player of ROSTERS[club.id] ?? []) {
   pool.push(player); rosterByCountry.set(country, pool);
 }
 const group = (position: Position) => position === 'GK' ? 'GK' : ['CB','LB','RB','LWB','RWB'].includes(position) ? 'DEF' : ['CDM','CM','CAM','LM','RM'].includes(position) ? 'MID' : 'ATT';
-const quotas = { GK: 3, DEF: 8, MID: 7, ATT: 5 };
+const quotas = { GK: 3, DEF: 8, MID: 8, ATT: 7 };
 const firstEleven: Position[] = ['GK','LB','CB','CB','RB','CDM','CM','CAM','LW','RW','ST'];
 export function nationalSquadFor(career:Career):Squad{
  if(career.player.age>20)return 'senior';
- const peers=Object.values(career.systems?.world.players??{}).filter(p=>normalizeNationality(p.nationality)===normalizeNationality(career.player.nationality)&&group(p.position)===group(career.player.position)).map(p=>p.ovr).sort((a,b)=>b-a);
- return career.player.age>=17&&career.player.ovr>=Math.max(75,(peers[2]??75)-3)?'senior':'U20';
+ const offsets=new Map<string,number>();
+ const peers=Object.values(career.systems?.world.players??{}).filter(p=>p.id!==career.player.id&&p.age<=40&&currentNationality(p)===normalizeNationality(career.player.nationality)&&group(p.position)===group(career.player.position)).map(p=>worldPlayerAbility(career,p,offsets)).sort((a,b)=>b-a);
+ return career.player.age>=17&&playingAbility(career.player)>=Math.max(75,(peers[2]??75)-3)?'senior':'U20';
 }
 const squadFor=(career:Career):Squad=>career.systems?.national&&career.systems.national.formatVersion!==2?(career.player.age<=20?'U20':'senior'):nationalSquadFor(career);
 const teamId = (country: string, squad: Squad) => `NAT:${country}:${squad}`;
@@ -117,6 +121,7 @@ function poolFor(career: Career, country: string, squad: Squad): Candidate[] {
   const world = career.systems?.world;
   const hasPersistentPlayers = !!world && Object.keys(world.players).length>0;
   const pool: Candidate[] = [];
+  const offsets=new Map<string,number>();
   for (const row of rosterByCountry.get(country) ?? []) {
     const persistent = world?.players[row.id];
     if(hasPersistentPlayers&&!persistent)continue; // Retired world players must not reappear.
@@ -124,24 +129,25 @@ function poolFor(career: Career, country: string, squad: Squad): Candidate[] {
     if (squad === 'U20' && age > 20) continue;
     if (squad === 'senior' && age > 40) continue;
     const clubId = persistent?.clubId ?? row.clubId;
-    const ovr = persistent?.ovr ?? row.ovr;
+    const ovr = worldPlayerAbility(career,persistent??row,offsets);
     pool.push({id:row.id,name:row.name,position:row.position,ovr,age,clubId,nationality:country,injured:(persistent?.injuryWeeks ?? 0)>0,score:scoreCandidate(career,row.id,ovr,clubId,false)});
   }
   // Academy arrivals added by the persistent world are eligible too; the static index
   // remains the source for retained players, including those who move abroad.
   for (const row of Object.values(world?.players ?? {})) {
-    if(retainedRosterIds.has(row.id)||row.id===career.player.id||normalizeNationality(row.nationality)!==country)continue;
+    if(retainedRosterIds.has(row.id)||row.id===career.player.id||currentNationality(row)!==country)continue;
     if((squad==='U20'&&row.age>20)||(squad==='senior'&&row.age>40))continue;
-    pool.push({id:row.id,name:row.name,position:row.position,ovr:row.ovr,age:row.age,clubId:row.clubId,nationality:country,injured:row.injuryWeeks>0,score:scoreCandidate(career,row.id,row.ovr,row.clubId,false)});
+    const ovr=worldPlayerAbility(career,row,offsets);
+    pool.push({id:row.id,name:row.name,position:row.position,ovr,age:row.age,clubId:row.clubId,nationality:country,injured:row.injuryWeeks>0,score:scoreCandidate(career,row.id,ovr,row.clubId,false)});
   }
   if (normalizeNationality(career.player.nationality) === country && (squadFor(career) === squad || career.systems?.national.squad===squad&&squad==='U20'&&career.player.age<=21)) {
     const p = career.player;
-    pool.push({id:p.id,name:p.name,position:p.position,ovr:p.ovr,attributes:p.attributes,age:p.age,clubId:p.clubId,nationality:country,injured:p.injuryWeeks>0,score:scoreCandidate(career,p.id,p.ovr,p.clubId,true)});
+    pool.push({id:p.id,name:p.name,position:p.position,ovr:Math.round(playingAbility(p)),attributes:p.attributes,age:p.age,clubId:p.clubId,nationality:country,injured:p.injuryWeeks>0,score:scoreCandidate(career,p.id,playingAbility(p),p.clubId,true)});
   }
   // A country with no retained eligible goalkeeper/position must still field a legal XI.
   // Only missing position-group depth is generated, and every such name is explicitly virtual.
   const baseline = (countryPower[country] ?? 68) - (squad === 'U20' ? 12 : 0);
-  const necessary = { GK: 2, DEF: 5, MID: 4, ATT: 3 };
+  const necessary = quotas;
   const template: Record<keyof typeof necessary, Position[]> = { GK:['GK'],DEF:['LB','CB','CB','RB','CB'],MID:['CDM','CM','CAM','CM'],ATT:['LW','RW','ST'] };
   for (const key of Object.keys(necessary) as (keyof typeof necessary)[]) {
     const missing = necessary[key] - pool.filter(player=>group(player.position)===key && !player.injured).length;
@@ -159,18 +165,26 @@ function rosterFor(career: Career, country: string, squad: Squad): Candidate[] {
   const cache=country!==normalizeNationality(career.player.nationality)?windowRosters.get(career):undefined,key=`${country}:${squad}`;
   const cached=cache?.get(key);if(cached)return cached;
   const pool = poolFor(career,country,squad).filter(player=>!player.injured);
-  const roster: Candidate[] = [];
-  for (const key of Object.keys(quotas) as (keyof typeof quotas)[]) roster.push(...pool.filter(player=>group(player.position)===key).slice(0,quotas[key]));
-  // Stable lineup order supplies a balanced XI even when squad positional labels differ.
-  const available = [...roster];
-  const ordered: Candidate[] = [];
-  for (const position of firstEleven) {
-    const index = available.findIndex(p=>p.position===position);
-    const groupIndex = index>=0 ? index : available.findIndex(p=>group(p.position)===group(position));
-    if (groupIndex>=0) ordered.push(...available.splice(groupIndex,1));
+  const roster:Candidate[]=[],used=new Set<string>();
+  const family=(p:Position)=>['ST','CF','SS'].includes(p)?'striker':['LB','LWB'].includes(p)?'leftBack':['RB','RWB'].includes(p)?'rightBack':p;
+  const take=(position:Position)=>{
+    const kind=group(position);if(roster.filter(p=>group(p.position)===kind).length>=quotas[kind])return;
+    const available=pool.filter(p=>!used.has(p.id)&&group(p.position)===kind);
+    const match=available.filter(p=>family(p.position)===family(position));
+    const next=(match.length?match:available)[0];if(next){used.add(next.id);roster.push(next);}
+  };
+  // Pick a real XI first, then cover both wings, centre-forward and defensive/midfield replacements.
+  firstEleven.forEach(take);
+  (['GK','GK','CB','LB','RB','CDM','CM','CAM','LW','RW','ST'] as Position[]).forEach(take);
+  for(const kind of Object.keys(quotas) as (keyof typeof quotas)[])for(const p of pool.filter(p=>group(p.position)===kind)){
+    if(roster.filter(p=>group(p.position)===kind).length>=quotas[kind])break;
+    if(!used.has(p.id)){used.add(p.id);roster.push(p);}
   }
-  const result=[...ordered,...available];cache?.set(key,result);return result;
+  cache?.set(key,roster);return roster;
 }
+
+/** The actual available call-up squad, in balanced starting-XI order. No historical records are changed. */
+export function nationalSquadPlayers(career:Career,country:string,squad:Squad):MatchParticipant[]{return rosterFor(career,normalizeNationality(country),squad);}
 function selection(career: Career, state: NationalState): Candidate[] {
   const roster = rosterFor(career,state.country,state.squad);
   const p = career.player;
@@ -246,10 +260,12 @@ function play(career: Career, competition: Competition, homeCountry: string, awa
   if(homeCountry===state.country||awayCountry===state.country){syncManualInjury(career,date);if(career.player.injuryWeeks>0){state.status='injured';state.reason=`부상 회복 중 · ${career.player.injuryWeeks}주. 이번 대표팀 경기 출전 제외.`;}else if(state.status==='injured')selection(career,state);}
   const homePlayers = rosterFor(career,homeCountry,state.squad);
   const awayPlayers = rosterFor(career,awayCountry,state.squad);
+  captureNationalPower(career,competition.id,homeCountry,syntheticTeam(homeCountry,state.squad,homePlayers).power);
+  captureNationalPower(career,competition.id,awayCountry,syntheticTeam(awayCountry,state.squad,awayPlayers).power);
   const fixture: Fixture = {id:`NAT|${state.squad}|${competition.id}|${stage}|${label}`,round:state.matches.length+1,homeId:teamId(homeCountry,state.squad),awayId:teamId(awayCountry,state.squad),played:false};
   const isOwn = homeCountry===state.country || awayCountry===state.country;
   const called = isOwn && state.status==='called' && career.player.injuryWeeks===0;
-  const match = simulateMatch(isOwn?{...career,managerTrust:Math.max(career.managerTrust,career.player.ovr>=nationalRosterPower(career,state.country,state.squad)?90:65)}:career,fixture,{home:syntheticTeam(homeCountry,state.squad,homePlayers),away:syntheticTeam(awayCountry,state.squad,awayPlayers),homePlayers,awayPlayers,scope:'national',competitionId:competition.id,date,userParticipates:called,neutralVenue:!['qualifying','friendly'].includes(stage)});
+  const match = simulateMatch(isOwn?{...career,managerTrust:Math.max(career.managerTrust,playingAbility(career.player)>=nationalRosterPower(career,state.country,state.squad)?90:65)}:career,fixture,{home:syntheticTeam(homeCountry,state.squad,homePlayers),away:syntheticTeam(awayCountry,state.squad,awayPlayers),homePlayers,awayPlayers,scope:'national',competitionId:competition.id,date,userParticipates:called,neutralVenue:!['qualifying','friendly'].includes(stage)});
   if (['round32','round16','quarterfinal','semifinal','final','thirdPlace'].includes(stage) && match.homeGoals===match.awayGoals) resolveNationalShootout(career,match);
   match.playerClubId = isOwn ? teamId(state.country,state.squad) : match.homeId;
   if (isOwn) {
@@ -263,7 +279,7 @@ function play(career: Career, competition: Competition, homeCountry: string, awa
       state.fatigue = Math.round(100-career.player.fitness);
       if (career.player.injuryWeeks>0) {state.status='injured';state.reason=`대표팀 경기 중 부상 · 회복 ${career.player.injuryWeeks}주. 소속팀 계약은 유지됩니다.`;}
     }
-  } else (state.teamResults ??= []).push(state.formatVersion===2&&!match.shootout?{...match,events:match.events.filter(e=>e.type==='goal'||e.type==='red'||e.type==='yellow'||match.events.some(g=>g.type==='goal'&&g.relatedId===e.id)),performers:undefined,momPlayerId:undefined,effects:undefined,metricsVersion:undefined}:match);
+  } else (state.teamResults ??= []).push(state.formatVersion===2&&!match.shootout&&stage!=='final'?{...match,events:match.events.filter(e=>e.type==='goal'||e.type==='red'||e.type==='yellow'||match.events.some(g=>g.type==='goal'&&g.relatedId===e.id)),performers:undefined,momPlayerId:undefined,effects:undefined,metricsVersion:undefined}:match);
   if(state.formatVersion===2&&!['qualifying','friendly'].includes(stage)){state.tournamentStats??={};const map=state.tournamentStats[competition.id]??(state.tournamentStats[competition.id]={});for(const p of match.performers??[]){const row=map[p.id]??(map[p.id]={id:p.id,name:p.name,position:p.position,stats:emptyStats()});addStats(row.stats,p.stats);}}
   for (const performer of match.performers ?? []) {
     const competitor = career.systems!.world.playerStats[performer.id];

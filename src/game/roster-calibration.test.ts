@@ -79,5 +79,5 @@ test('club base power survives inflated replacement generations while the user k
  assert.ok(getWorldClubPlayers(c,id).every(p=>p.ovr<80),'matches must use the same bounded club scale');
  assert.ok(getClubWorldPower(c,'ES1_01')>before+8);
  w.clubs[id].development!.prestige=99;
- assert.ok(getClubWorldPower(c,id)-before<=3.01,'cumulative success has a bounded team effect');
+ assert.ok(getClubWorldPower(c,id)-before<=6.01,'cumulative success has a bounded team effect');
 });

@@ -94,7 +94,7 @@ function Retirement({career}:{career:Career}) {
     <span className="eyebrow">은퇴 · {career.retiredYear??career.season.year}시즌</span><h2>{p.name}의 은퇴 기록</h2>
     <div className="retirement-facts">
       <span>국적 <b>{p.nationality}</b></span><span>신체정보 <b>{p.height}cm / {p.weight}kg · {{right:'오른발',left:'왼발',both:'양발'}[p.foot]}</b></span>
-      <span>팀 <b>{teamName(p.clubId)}</b></span><span>능력점수 <b>{p.ovr}</b></span><span>은퇴나이 <b>{p.age}세</b></span>
+      <span>팀 <b>{teamName(p.clubId)}</b></span><span>은퇴나이 <b>{p.age}세</b></span>
       <span>포지션 <b>{POSITION_LABELS[p.position]}</b></span><span>세부 역할 <b>{p.style}</b></span>
       <span>부 포지션 <b>{p.secondaryPositions.map(k=>POSITION_LABELS[k]).join(', ')||'없음'}</b></span>
     </div>
@@ -106,7 +106,9 @@ function Retirement({career}:{career:Career}) {
     <h3>연도별 기록</h3>{[...seasons].reverse().map(h=><DeferredDetails className="retirement-record-section" key={h.year} testId={`retirement-season-${h.year}`} summary={`${h.year}시즌 · ${h.clubName} · ${h.status}`}>{()=> <>
       <div className="retirement-facts"><span>소속팀 <b>{h.clubName}</b></span><span>몸값 <b>{h.value}</b></span><span>주급 <b>{h.wage}</b></span>
         <span>능력점수 <b>{h.ovrStart} → {h.ovrEnd}</b></span><span>주장/부주장 <b>{h.leadership}</b></span><span>부상 유무 <b>{h.injury}</b></span></div>
+      {!!h.playSkills.length&&<p>플레이스타일: {h.playSkills.join(' / ')}</p>}
       <p>팀 수상: {h.teamAwards.join(' / ')||'없음'}</p>
+      {!!h.awardResults.length&&<p>개인상 평가 결과: {h.awardResults.join(' / ')}</p>}
       <ul>{h.results.map((r,i)=><li key={i}>{r}</li>)}</ul><p>개인 수상: {h.personal.map(a=>a.name).join(' / ')||'없음'}</p>
       <DeferredDetails summary="시즌 통합 세부 스탯 · 개수와 성공률">{()=>stats(h.stats,h.matches)}</DeferredDetails>
       <h4>결승 기록</h4>{!h.finals.length&&<p>결승 진출 기록 없음</p>}{h.finals.map((f,i)=><div className="retirement-final" key={i}>

@@ -1,3 +1,4 @@
+import {awardForDisplay} from './award-rules';
 import {cupLedger} from './club-competitions';
 import {getClub,getLeague} from './data';
 import type {Award,Career} from './types';
@@ -35,5 +36,5 @@ export function seasonHonours(c:Career,year:number){
   const name=a.name.replace(/\s*우승(?:\s*(?:메달|트로피))?$/,'');
   if(!titles.some(t=>t.name===name))titles.push({id:`award:${a.id}`,year,name,team:a.category==='team'?getClub(a.clubId).name:`${n?.country??c.player.nationality} 대표팀`,scope:a.category==='team'?'club':'national',apps:null,medal:true});
  }
- return {year,titles,personal:awards.filter(a=>!isTeamAward(a)&&a.category!=='commercial'),commercial:awards.filter(a=>a.category==='commercial'),teamAwards:awards.filter(isTeamAward),pending:year===c.season.year&&!c.season.completed&&c.stage==='season'};
+ return {year,titles,personal:awards.filter(a=>!isTeamAward(a)&&a.category!=='commercial').map(awardForDisplay),commercial:awards.filter(a=>a.category==='commercial'),teamAwards:awards.filter(isTeamAward),pending:year===c.season.year&&!c.season.completed&&c.stage==='season'};
 }

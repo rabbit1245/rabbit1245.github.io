@@ -1,0 +1,12 @@
+{
+  "url": "http://127.0.0.1:4180/Kball.html",
+  "portable": true,
+  "offlinePortable": true,
+  "checks": [
+    "20 field skills, initially collapsed, no instant gain and sixth choice disabled",
+    "Actual 110 skill values produce 120; deletion preserves the old value and reacquisition gives no instant OVR",
+    "Locks, explicit aging, zero training, durable reload and mobile layout preserved",
+    "10 correctly mapped GK skills, no field-only skills and mobile layout"
+  ],
+  "errors": []
+}

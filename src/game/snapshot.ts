@@ -10,6 +10,7 @@ export function copySystems(s:CareerSystems,light=false):CareerSystems{
  next.world=structuredClone(s.world);
  if(s.clubCompetitions){const {current,history,...state}=s.clubCompetitions;next.clubCompetitions={...state,history:[...history],current:current.map(t=>{const {matches,...mutable}=t;return {...structuredClone(mutable),matches:[...matches]};})};}
  if(s.manualInjuries)next.manualInjuries=structuredClone(s.manualInjuries);
+ if(s.achievementEvidence)next.achievementEvidence=structuredClone(s.achievementEvidence);
  if(s.monthlyLeague)next.monthlyLeague=structuredClone(s.monthlyLeague);
  return next;
 }

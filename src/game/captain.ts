@@ -1,8 +1,9 @@
+import {playingAbility} from './attributes';
 import {cupMatches} from './club-competitions';
 import { getClub } from './data';
 import { clamp,round,sumStats } from './math';
-import { normalizeNationality } from './national-data';
-import { getClubRatingOffset } from './world';
+import { getClubRatingOffset,worldPlayerAbility } from './world';
+import {nationalSquadPlayers} from './national';
 import type { Career,MatchRecord,PlayerStats } from './types';
 import type { CaptainAssessment,CaptainOffer } from './revision-types';
 
@@ -19,21 +20,22 @@ export function getCaptainAssessment(c:Career,scope:Scope):CaptainAssessment{
   const p=c.player,l=c.systems!.leadership,n=c.systems!.national,world=c.systems!.world;
   const junior=scope==='club'?p.squad==='youth':n.squad==='U20',teamId=scope==='club'?p.clubId:`NAT:${n.country}:${n.squad}`;
   const offset=scope==='club'&&!junior?getClubRatingOffset(c,p.clubId):0;
-  const peers=Object.values(world.players).filter(w=>w.id!==p.id&&(scope==='club'?w.clubId===p.clubId:normalizeNationality(w.nationality)===normalizeNationality(n.country))&&(scope==='national'?(junior?w.age<=20:w.age>20):!junior||w.age<=21)).map(row=>({...row,ovr:clamp(row.ovr+offset,25,99)}));
-  const strongest=[...peers].sort((a,b)=>b.ovr-a.ovr).slice(0,11);
+  const nationalRoster=scope==='national'?nationalSquadPlayers(c,n.country,n.squad):undefined,selected=new Set(nationalRoster?.map(p=>p.id)),offsets=new Map<string,number>();
+  const peers=Object.values(world.players).filter(w=>w.id!==p.id&&(scope==='club'?w.clubId===p.clubId:selected.has(w.id))&&(scope==='national'||!junior||w.age<=21)).map(row=>({...row,ovr:scope==='national'?worldPlayerAbility(c,row,offsets):clamp(row.ovr+offset,25,99)}));
+  const strongest=nationalRoster?.slice(0,11)??[...peers].sort((a,b)=>b.ovr-a.ovr).slice(0,11);
   const squadOvr=strongest.length?strongest.reduce((sum,w)=>sum+w.ovr,0)/strongest.length:scope==='club'?(world.clubs[p.clubId]?.power??getClub(p.clubId).power):65;
   const teamPower=scope==='club'&&!junior?world.clubs[p.clubId]?.power??squadOvr:squadOvr;
   const all=records(c,scope),recent=all.slice(-12),stats=sumStats(recent.map(m=>m.playerStats));
   const tenure=scope==='club'?Math.max(0,c.season.year-l.clubSinceYear):Math.max(0,new Set(all.map(m=>m.seasonYear)).size-1);
   const trust=scope==='club'?c.managerTrust:n.reputation,rating=average(stats);
-  const abilityRank=1+peers.filter(w=>w.ovr>p.ovr).length;
+  const ownAbility=playingAbility(p),abilityRank=1+peers.filter(w=>w.ovr>ownAbility).length;
   const abilityFloor=Math.max(squadOvr-7,teamPower-9),captainFloor=Math.max(squadOvr-3,teamPower-5);
   // Compare the same recorded season and weights for everyone. NPC tenure/trust
   // is not recorded, so those remain eligibility gates instead of user bonuses.
   const current=all.filter(m=>m.seasonYear===c.season.year);
   const seasonStats=sumStats((current.length?current:all.slice(-35)).map(m=>m.playerStats));
   const candidateScore=(leadership:number,ovr:number,age:number,s?:PlayerStats)=>leadership*.42+ovr*.22+clamp((age-18)*.3,0,4)+(s?clamp((average(s)-6)*9,0,20)*.45+clamp(s.minutes/900,0,1)*6:0);
-  const rawScore=candidateScore(l.trait*.8+(p.attributes.teamwork??p.attributes.decisions??50)*.2,p.ovr,p.age,seasonStats),score=round(rawScore,2);
+  const rawScore=candidateScore(l.trait*.8+(p.attributes.teamwork??p.attributes.decisions??50)*.2,ownAbility,p.age,seasonStats),score=round(rawScore,2);
   const candidateRank=1+peers.filter(w=>{const row=world.playerStats[w.id],s=scope==='national'?row?.nationalStats:row?.stats;return candidateScore(w.leadership,w.ovr,w.age,s)>rawScore;}).length;
   const reasons:string[]=[];
   if(scope==='club'&&p.squad==='youth')reasons.push('유소년 단계에서는 성인 클럽 주장 제의를 하지 않습니다. 1군에서 실력과 출전 경력을 쌓아야 합니다.');
@@ -42,12 +44,12 @@ export function getCaptainAssessment(c:Career,scope:Scope):CaptainAssessment{
   if(tenure<1&&!(abilityRank<=2&&all.length>=12&&rating>=7&&(p.attributes.teamwork??0)>=80))reasons.push('현재 팀에서 최소 한 시즌의 근속과 동료의 신뢰가 필요합니다.');
   if(all.length<(junior?8:scope==='club'?15:8))reasons.push(`현재 팀 실제 출전 ${all.length}경기: 충분한 출전 경력이 필요합니다.`);
   if(stats.apps<(scope==='club'?6:4)||stats.minutes<(scope==='club'?360:240)||rating<6.5)reasons.push('최근 실제 출전 시간과 평균 평점 6.50 이상의 성과가 필요합니다.');
-  if(p.ovr<abilityFloor||abilityRank>Math.max(11,Math.ceil((peers.length+1)*.55)))reasons.push(`팀 전력 ${round(teamPower,1)}·주전 평균 ${round(squadOvr,1)}에 맞는 실력이 필요합니다. 현재 OVR ${p.ovr}, 팀 내 ${abilityRank}위입니다.`);
+  if(ownAbility<abilityFloor||abilityRank>Math.max(11,Math.ceil((peers.length+1)*.55)))reasons.push(`팀 전력 ${round(teamPower,1)}·주전 평균 ${round(squadOvr,1)}에 맞는 실력이 필요합니다. 현재 OVR ${p.ovr}, 팀 내 ${abilityRank}위입니다.`);
   if(l.trait<(junior?58:65))reasons.push(`리더십 ${l.trait}: 주장단이 요구하는 수준에 아직 부족합니다.`);
   if(trust<65)reasons.push(`팀 신뢰 ${Math.round(trust)}%: 꾸준한 활약으로 신뢰를 더 쌓아야 합니다.`);
   if(candidateRank>2)reasons.push(`실력·성과·연령·리더십을 합친 주장단 후보 ${candidateRank}위입니다.`);
   const eligible=!reasons.length;
-  const captain=eligible&&(tenure>=(junior?1:2)||abilityRank<=2&&(p.attributes.teamwork??0)>=85&&rating>=7.2)&&all.length>=(scope==='club'?junior?16:40:16)&&l.trait>=(junior?68:75)&&p.ovr>=captainFloor&&rating>=6.8&&candidateRank===1;
+  const captain=eligible&&(tenure>=(junior?1:2)||abilityRank<=2&&(p.attributes.teamwork??0)>=85&&rating>=7.2)&&all.length>=(scope==='club'?junior?16:40:16)&&l.trait>=(junior?68:75)&&ownAbility>=captainFloor&&rating>=6.8&&candidateRank===1;
   const eligibleRole=captain?'captain':eligible?'vice':'none';
   if(eligible)reasons.push(`현재 팀 주전 수준의 실력과 최근 평점 ${rating.toFixed(2)}, ${p.age}세·리더십 ${l.trait}·근속 ${tenure}시즌을 종합해 ${captain?'주장':'부주장'} 후보로 평가했습니다.`);
   return {scope,teamId,eligibleRole,teamPower:round(teamPower,1),squadOvr:round(squadOvr,1),playerOvr:p.ovr,abilityRank,candidateRank,age:p.age,leadership:l.trait,tenure,apps:all.length,recentApps:stats.apps,recentMinutes:stats.minutes,rating:round(rating,2),trust:round(trust,2),score,reasons};

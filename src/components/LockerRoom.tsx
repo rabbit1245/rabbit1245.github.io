@@ -17,8 +17,8 @@ type Props = {career:Career;busy:boolean;command:(command:GameCommand)=>void};
 export function phaseLabel(c:Career) { return c.stage==='retired'?'은퇴':c.stage==='offseason'?'시즌 결산':({preseason:'시즌 준비',first:'전반기',midseason:'중간 정비',second:'후반기',review:'시즌 결산',retired:'은퇴'} as const)[c.systems?.phase || (c.season.week===0?'preseason':'first')]; }
 export function GrowthCard({report}:{report:GrowthReport}) {
   const [page,setPage]=useState(0),ledger=report.growth;
-  const causes:GrowthCause[]=['training','experience','development','injury','aging',...(ledger?.byCause.cheat?['cheat' as const]:[])];
-  const causeLabels={training:'훈련',experience:'출전 경험',development:'발달',injury:'부상',aging:'노화',cheat:'직접 조정'};
+  const causes:GrowthCause[]=['training','experience','development','injury','aging',...(ledger?.byCause.cheat?['cheat' as const]:[]),...(ledger?.byCause.skillChange?['skillChange' as const]:[])];
+  const causeLabels={training:'훈련',experience:'출전 경험',development:'발달',injury:'부상',aging:'노화',cheat:'직접 조정',skillChange:'스킬 삭제'};
   useEffect(()=>setPage(0),[report.year,report.half]);
   const changes=Object.entries(report.endAttributes).map(([key,value])=>({key:key as AttributeKey,from:report.startAttributes[key as AttributeKey]??value??0,to:value??0,delta:(value??0)-(report.startAttributes[key as AttributeKey]??value??0)}));
   const rows=changes.slice(page*6,page*6+6),pages=Math.max(1,Math.ceil(changes.length/6));

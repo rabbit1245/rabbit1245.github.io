@@ -1,9 +1,11 @@
+import type {Award} from './types';
 /** Real award names and organisers. Numerical voting below is a game model, never an official vote. */
-export const AWARD_MODEL_VERSION='kball-awards-2.6';
+export const AWARD_MODEL_VERSION='kball-awards-2.8';
 export const AWARD_VERIFICATION_NOTE='게임 경기 기록으로 선정하는 모형입니다. 대상 연도의 공식 규정·평가 기간을 모두 검증한 결과는 아닙니다.';
 export interface AwardRule {
   id: string; name: string; organiser: string; criterion: string; sourceUrl: string;
   metric: 'goals'|'assists'|'cleanSheets'|'performance'|'eleven';
+  official?: boolean;
   tieBreak?: 'fewerAppsThenMinutes'|'unresolved';
   formation?: { defenders: number; midfielders: number; forwards: number };
 }
@@ -40,3 +42,21 @@ export const FIFA_TOURNAMENT_AWARD_RULES = {
   goldenBall: { id: 'golden-ball', name: '골든 볼', organiser: 'FIFA', sourceUrl: 'https://www.fifa.com/', criterion: '실제 상은 대회 최우수 선수 선정입니다. 게임에서는 실제 본선의 평점·역할별 경기 기여·징계로 투표를 모형화하며, 능력치는 점수에 넣지 않습니다.' },
   goldenGlove: { id: 'golden-glove', name: '골든 글러브', organiser: 'FIFA', sourceUrl: 'https://www.fifa.com/', criterion: '실제 상은 대회 최우수 골키퍼 선정입니다. 게임에서는 실제 본선 골키퍼들의 선방·선방률·무실점·평점·징계로 투표를 모형화합니다.' },
 };
+
+/** Every league has a season team; unverified award names stay explicitly K볼 selections. */
+export function leagueAwardRules(id:string,name:string):AwardRule[]{
+ const rules=LEAGUE_AWARD_RULES[id]??[];
+ if(rules.some(r=>r.metric==='eleven'))return rules;
+ const official=id==='IT1';
+ return [...rules,...(official?[{id:'season-mvp',name:'세리에 A 시즌 MVP',organiser:'Lega Serie A',sourceUrl:'https://www.legaseriea.it/',metric:'performance' as const,criterion:'실제 리그 출전·포지션별 활약·팀 성적을 비교하는 시즌 투표 모형.'}]:[]),{
+  id:official?'aic-team':'season-eleven',name:official?'세리에 A 올해의 팀 · AIC':`언론 선정 · ${name} 베스트 11`,organiser:official?'Associazione Italiana Calciatori':'언론 평가 모형',sourceUrl:official?'https://www.assocalciatori.it/':'https://github.com/rabbit1245/rabbit1245.github.io',metric:'eleven',formation:{defenders:4,midfielders:3,forwards:3},official,
+  criterion:'해당 리그 기록만으로 GK 1·DF 4·MF 3·FW 3을 비교합니다. 컵·국대 기록은 제외하며 실제 투표와 평가 일정은 게임 모형입니다.'
+ }];
+}
+
+/** Preserve old adjudications and IDs, updating presentation only. */
+export function awardForDisplay(a:Award):Award{
+ if(!a.name.startsWith('K볼 선정'))return a;
+ const club=/club|commercial/.test(a.category??'');
+ return {...a,name:a.name.replace(/^K볼 선정/,club?'클럽 선정':'언론 선정'),organiser:club?'클럽 평가 모형':'언론 평가 모형',official:false};
+}

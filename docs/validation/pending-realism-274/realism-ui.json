@@ -1,0 +1,12 @@
+{
+  "url": "http://127.0.0.1:4173/",
+  "source": "/workspace/kball-pending-274/native-year-1.json",
+  "version": "2.7.4-dev.1",
+  "nationalAssessment": "현재 팀 내 평가 · 포르투갈 대표팀\n\n팀 위상 · 주전 실력\n전력 85.1\n\n예상 주전 평균 OVR 85.1\n\n내 실력 · 팀 내 경쟁\nOVR 90 · 1위\n\n주장단 후보 5위\n\n최근 경기 성적\n평점 7.20\n\n8경기 · 499분\n\n나이 · 리더십\n25세 · 69\n\n실제 연령과 동료 경쟁을 함께 평가\n\n근속 · 신뢰\n0시즌 · 6%\n\n해당 팀 통산 8경기 출전\n\n주장단 평가\n제의 기준 미충족\n\n팀 위상에 맞는 실력과 꾸준한 출전 필요\n\n현재 팀에서 최소 한 시즌의 근속과 동료의 신뢰가 필요합니다.\n팀 신뢰 6%: 꾸준한 활약으로 신뢰를 더 쌓아야 합니다.\n실력·성과·연령·리더십을 합친 주장단 후보 5위입니다.",
+  "actualNationalStatus": "🇵🇹\n현재 성인 대표팀 상태\n\n포르투갈 성인 대표 발탁 · 같은 포지션군 1위. 능력치·소속 리그 수준·출전시간·평점·컨디션을 종합했습니다.",
+  "leagueTeamOfYearVisible": true,
+  "reload": true,
+  "annualRecordPreserved": true,
+  "mobileOverflow": false,
+  "errors": []
+}

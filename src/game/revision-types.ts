@@ -38,14 +38,16 @@ export interface ClubTournament {format?:'groups'|'intercontinental'|'super';gro
 export interface ClubCompetitions {version:1;year:number;current:ClubTournament[];history:ClubTournament[];}
 export interface ManualAging {key?:AttributeKey;playerId?:string;playerName?:string;id:string;year:number;round:number;date:string;amount:1|5|10;before:Attributes;after:Attributes;ovrBefore:number;ovrAfter:number;}
 export interface ManualInjury {id:string;year:number;clubId:string;duration:'half'|'season';start:string;end:string;pendingNextSeason?:boolean;returned?:string;missed:{fixtureId:string;year:number;scope:'club'|'national'}[];}
-export type GrowthCause='training'|'experience'|'development'|'injury'|'aging'|'cheat';
-export type GrowthBreakdown=Record<Exclude<GrowthCause,'cheat'>,Attributes>&{cheat?:Attributes};
+export type GrowthCause='training'|'experience'|'development'|'injury'|'aging'|'cheat'|'skillChange';
+export type GrowthBreakdown=Record<Exclude<GrowthCause,'cheat'|'skillChange'>,Attributes>&{cheat?:Attributes;skillChange?:Attributes};
 export interface GrowthLedger {year:number;baselineAttributes:Attributes;trackedFromRound:number;byCause:GrowthBreakdown;injuredRounds:number;trainingQuality:number;legacy:boolean}
 export interface AgingReport {year:number;startAttributes:Attributes;endAttributes:Attributes;changes:Attributes;ovrStart:number;ovrEnd:number}
 export interface TrainingPlan {forYear:number;confirmed:boolean;confirmedAtRound:number;source:'creation'|'offseason'|'legacy'}
 export interface GrowthReport { year: number; half: 'first'|'season'; fromRound: number; toRound: number; startAttributes: Attributes; endAttributes: Attributes; ovrStart: number; ovrEnd: number; stats: PlayerStats; previousStats: PlayerStats; valueStart: number; valueEnd: number; context: string; growth?:GrowthLedger; offseasonAging?:AgingReport }
 export interface PresentationEvent { id: string; year: number; round: number; type: 'mom'|'injury'|'national'|'transfer'|'renewal'|'captain'|'award'|'growth'|'promotion'|'retirement'; title: string; body: string; importance: 'brief'|'decision'|'milestone' }
 export interface CareerSystems {
+  achievementEvidence?:import('./achievement-evidence').AchievementEvidence;
+  playSkillChanges?:import('./play-skills').PlaySkillChange[];
   manualClock?:string; monthlyLeague?:import('./extra-honours').MonthlyLedger; clubCompetitions?:ClubCompetitions; manualAging?:ManualAging[]; attributeLocks?:AttributeKey[]; manualInjuries?:ManualInjury[];
   version: 2; growthModelVersion?:2; cheats?:{enabled:boolean;freezeAging:boolean;used:boolean}; growthLedger?:GrowthLedger; agingReport?:AgingReport; trainingPlan?:TrainingPlan; world: WorldState; national: NationalState; economics: Economics; leadership: Leadership;
   phase: 'preseason'|'first'|'midseason'|'second'|'review'|'retired'; halfRound: number; trainingLocked: boolean;

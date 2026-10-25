@@ -1,0 +1,457 @@
+{
+  "method": "Full actual world, cups and national windows. SSS starts at age 16, no cheats, no forced selections/results, 3 selected training attributes rotate each season. Shooting skill is removed in season 11 and reacquired in season 13. Original historical data hashes exclude only the earned development metadata attached at transition.",
+  "reached120": true,
+  "results": [
+    {
+      "elapsedMs": 32147,
+      "heapMB": 177,
+      "season": 1,
+      "year": 2026,
+      "age": 16,
+      "ovr": 62,
+      "rank": 10,
+      "goals": 1,
+      "assists": 0,
+      "caps": 0,
+      "skills": [
+        "스나이퍼",
+        "섀도우",
+        "아이스맨",
+        "벨벳",
+        "인터셉터"
+      ],
+      "awards": [],
+      "injuredRounds": 0
+    },
+    {
+      "elapsedMs": 28131,
+      "heapMB": 271,
+      "season": 2,
+      "year": 2027,
+      "age": 17,
+      "ovr": 68,
+      "rank": 4,
+      "goals": 2,
+      "assists": 0,
+      "caps": 9,
+      "skills": [
+        "스나이퍼",
+        "섀도우",
+        "아이스맨",
+        "벨벳",
+        "인터셉터"
+      ],
+      "awards": [],
+      "injuredRounds": 0
+    },
+    {
+      "elapsedMs": 20484,
+      "heapMB": 851,
+      "season": 3,
+      "year": 2028,
+      "age": 18,
+      "ovr": 77,
+      "rank": 8,
+      "goals": 5,
+      "assists": 0,
+      "caps": 20,
+      "skills": [
+        "스나이퍼",
+        "섀도우",
+        "아이스맨",
+        "벨벳",
+        "인터셉터"
+      ],
+      "awards": [],
+      "injuredRounds": 0
+    },
+    {
+      "elapsedMs": 26262,
+      "heapMB": 301,
+      "season": 4,
+      "year": 2029,
+      "age": 19,
+      "ovr": 86,
+      "rank": 10,
+      "goals": 6,
+      "assists": 2,
+      "caps": 30,
+      "skills": [
+        "스나이퍼",
+        "섀도우",
+        "아이스맨",
+        "벨벳",
+        "인터셉터"
+      ],
+      "awards": [
+        "클럽 선정 · 구단 올해의 유망주"
+      ],
+      "injuredRounds": 0
+    },
+    {
+      "elapsedMs": 21301,
+      "heapMB": 984,
+      "season": 5,
+      "year": 2030,
+      "age": 20,
+      "ovr": 92,
+      "rank": 12,
+      "goals": 9,
+      "assists": 0,
+      "caps": 31,
+      "skills": [
+        "스나이퍼",
+        "섀도우",
+        "아이스맨",
+        "벨벳",
+        "인터셉터"
+      ],
+      "awards": [],
+      "injuredRounds": 5
+    },
+    {
+      "elapsedMs": 19087,
+      "heapMB": 728,
+      "season": 6,
+      "year": 2031,
+      "age": 21,
+      "ovr": 98,
+      "rank": 12,
+      "goals": 13,
+      "assists": 1,
+      "caps": 36,
+      "skills": [
+        "스나이퍼",
+        "섀도우",
+        "아이스맨",
+        "벨벳",
+        "인터셉터"
+      ],
+      "awards": [
+        "클럽 선정 · 구단 올해의 해결사"
+      ],
+      "injuredRounds": 0
+    },
+    {
+      "elapsedMs": 25492,
+      "heapMB": 365,
+      "season": 7,
+      "year": 2032,
+      "age": 22,
+      "ovr": 103,
+      "rank": 7,
+      "goals": 16,
+      "assists": 1,
+      "caps": 44,
+      "skills": [
+        "스나이퍼",
+        "섀도우",
+        "아이스맨",
+        "벨벳",
+        "인터셉터"
+      ],
+      "awards": [
+        "2032 UEFA 유로 득점왕",
+        "클럽 선정 · 구단 올해의 유망주",
+        "언론 선정 · 프리미어리그 2033-04 이달의 유망주",
+        "카라바오컵 우승 메달"
+      ],
+      "injuredRounds": 2
+    },
+    {
+      "elapsedMs": 24047,
+      "heapMB": 366,
+      "season": 8,
+      "year": 2033,
+      "age": 23,
+      "ovr": 107,
+      "rank": 8,
+      "goals": 7,
+      "assists": 2,
+      "caps": 50,
+      "skills": [
+        "스나이퍼",
+        "섀도우",
+        "아이스맨",
+        "벨벳",
+        "인터셉터"
+      ],
+      "awards": [
+        "클럽 선정 · 구단 올해의 해결사"
+      ],
+      "injuredRounds": 2
+    },
+    {
+      "elapsedMs": 21911,
+      "heapMB": 397,
+      "season": 9,
+      "year": 2034,
+      "age": 24,
+      "ovr": 111,
+      "rank": 8,
+      "goals": 11,
+      "assists": 2,
+      "caps": 59,
+      "skills": [
+        "스나이퍼",
+        "섀도우",
+        "아이스맨",
+        "벨벳",
+        "인터셉터"
+      ],
+      "awards": [
+        "UEFA 유로파리그 우승 메달"
+      ],
+      "injuredRounds": 0
+    },
+    {
+      "elapsedMs": 20906,
+      "heapMB": 402,
+      "season": 10,
+      "year": 2035,
+      "age": 25,
+      "ovr": 115,
+      "rank": 5,
+      "goals": 11,
+      "assists": 2,
+      "caps": 68,
+      "skills": [
+        "스나이퍼",
+        "섀도우",
+        "아이스맨",
+        "벨벳",
+        "인터셉터"
+      ],
+      "awards": [
+        "클럽 선정 · 구단 올해의 공격수",
+        "클럽 선정 · 구단 올해의 해결사"
+      ],
+      "injuredRounds": 0
+    },
+    {
+      "elapsedMs": 27830,
+      "heapMB": 503,
+      "season": 11,
+      "year": 2036,
+      "age": 26,
+      "ovr": 110,
+      "rank": 5,
+      "goals": 12,
+      "assists": 1,
+      "caps": 70,
+      "skills": [
+        "섀도우",
+        "아이스맨",
+        "벨벳",
+        "인터셉터"
+      ],
+      "awards": [
+        "클럽 선정 · 구단 올해의 해결사"
+      ],
+      "injuredRounds": 6
+    },
+    {
+      "elapsedMs": 23340,
+      "heapMB": 348,
+      "season": 12,
+      "year": 2037,
+      "age": 27,
+      "ovr": 112,
+      "rank": 6,
+      "goals": 14,
+      "assists": 0,
+      "caps": 80,
+      "skills": [
+        "섀도우",
+        "아이스맨",
+        "벨벳",
+        "인터셉터"
+      ],
+      "awards": [
+        "클럽 선정 · 구단 올해의 해결사",
+        "FA컵 우승 메달"
+      ],
+      "injuredRounds": 4
+    },
+    {
+      "elapsedMs": 27910,
+      "heapMB": 537,
+      "season": 13,
+      "year": 2038,
+      "age": 28,
+      "ovr": 112,
+      "rank": 12,
+      "goals": 11,
+      "assists": 2,
+      "caps": 90,
+      "skills": [
+        "섀도우",
+        "아이스맨",
+        "벨벳",
+        "인터셉터",
+        "스나이퍼"
+      ],
+      "awards": [
+        "FA컵 우승 메달"
+      ],
+      "injuredRounds": 0
+    },
+    {
+      "elapsedMs": 24254,
+      "heapMB": 558,
+      "season": 14,
+      "year": 2039,
+      "age": 29,
+      "ovr": 115,
+      "rank": 2,
+      "goals": 21,
+      "assists": 3,
+      "caps": 98,
+      "skills": [
+        "섀도우",
+        "아이스맨",
+        "벨벳",
+        "인터셉터",
+        "스나이퍼"
+      ],
+      "awards": [
+        "UEFA 유로파리그 우승 메달"
+      ],
+      "injuredRounds": 0
+    },
+    {
+      "elapsedMs": 29684,
+      "heapMB": 571,
+      "season": 15,
+      "year": 2040,
+      "age": 30,
+      "ovr": 117,
+      "rank": 4,
+      "goals": 24,
+      "assists": 1,
+      "caps": 98,
+      "skills": [
+        "섀도우",
+        "아이스맨",
+        "벨벳",
+        "인터셉터",
+        "스나이퍼"
+      ],
+      "awards": [
+        "클럽 선정 · 구단 올해의 해결사"
+      ],
+      "injuredRounds": 0
+    },
+    {
+      "elapsedMs": 21597,
+      "heapMB": 591,
+      "season": 16,
+      "year": 2041,
+      "age": 31,
+      "ovr": 118,
+      "rank": 7,
+      "goals": 16,
+      "assists": 1,
+      "caps": 98,
+      "skills": [
+        "섀도우",
+        "아이스맨",
+        "벨벳",
+        "인터셉터",
+        "스나이퍼"
+      ],
+      "awards": [],
+      "injuredRounds": 4
+    },
+    {
+      "elapsedMs": 23438,
+      "heapMB": 611,
+      "season": 17,
+      "year": 2042,
+      "age": 32,
+      "ovr": 119,
+      "rank": 4,
+      "goals": 15,
+      "assists": 1,
+      "caps": 98,
+      "skills": [
+        "섀도우",
+        "아이스맨",
+        "벨벳",
+        "인터셉터",
+        "스나이퍼"
+      ],
+      "awards": [
+        "클럽 선정 · 구단 올해의 해결사"
+      ],
+      "injuredRounds": 1
+    },
+    {
+      "elapsedMs": 20536,
+      "heapMB": 618,
+      "season": 18,
+      "year": 2043,
+      "age": 33,
+      "ovr": 120,
+      "rank": 4,
+      "goals": 19,
+      "assists": 0,
+      "caps": 98,
+      "skills": [
+        "섀도우",
+        "아이스맨",
+        "벨벳",
+        "인터셉터",
+        "스나이퍼"
+      ],
+      "awards": [],
+      "injuredRounds": 0
+    },
+    {
+      "elapsedMs": 30390,
+      "heapMB": 706,
+      "season": 19,
+      "year": 2044,
+      "age": 34,
+      "ovr": 120,
+      "rank": 8,
+      "goals": 12,
+      "assists": 1,
+      "caps": 98,
+      "skills": [
+        "섀도우",
+        "아이스맨",
+        "벨벳",
+        "인터셉터",
+        "스나이퍼"
+      ],
+      "awards": [],
+      "injuredRounds": 0
+    },
+    {
+      "elapsedMs": 22009,
+      "heapMB": 493,
+      "season": 20,
+      "year": 2045,
+      "age": 35,
+      "ovr": 120,
+      "rank": 5,
+      "goals": 15,
+      "assists": 2,
+      "caps": 98,
+      "skills": [
+        "섀도우",
+        "아이스맨",
+        "벨벳",
+        "인터셉터",
+        "스나이퍼"
+      ],
+      "awards": [
+        "클럽 선정 · 구단 올해의 공격수",
+        "클럽 선정 · 구단 올해의 해결사",
+        "UEFA 유로파리그 우승 메달"
+      ],
+      "injuredRounds": 11
+    }
+  ]
+}

@@ -1,0 +1,71 @@
+{
+  "method": "Actual complete world, club cups and national windows, no forced results or selections. A fixed 90 player is locked; historical matches, stats, awards, attributes and finances must remain identical; earned club-development metadata added at year transition is excluded from the hash.",
+  "results": [
+    {
+      "year": 1,
+      "age": 25,
+      "ovr": 90,
+      "rank": 1,
+      "leagueGoals": 15,
+      "leagueAssists": 12,
+      "nationalApps": 8,
+      "eligibleNow": true,
+      "ballonRank": 17,
+      "awards": [
+        "세리에 A 올해의 팀 · AIC",
+        "세리에 A 우승 메달",
+        "K볼 선정 · 세리에 A 올해의 신인"
+      ],
+      "recordHash": "d69cea0d4152acfd46d7ca7fafebdbeb0a81b080468b314fed410b24da484b2c"
+    },
+    {
+      "year": 2,
+      "age": 26,
+      "ovr": 90,
+      "rank": 1,
+      "leagueGoals": 23,
+      "leagueAssists": 14,
+      "nationalApps": 19,
+      "eligibleNow": true,
+      "ballonRank": 4,
+      "awards": [
+        "세리에 A 득점왕 · Capocannoniere",
+        "세리에 A 시즌 MVP",
+        "세리에 A 올해의 팀 · AIC",
+        "세리에 A 우승 메달",
+        "K볼 선정 · 구단 올해의 선수",
+        "K볼 선정 · 구단 팬 선정 올해의 선수",
+        "K볼 선정 · 구단 선수단 선정 올해의 선수",
+        "K볼 선정 · 구단 올해의 공격수",
+        "K볼 선정 · 세리에 A 2027-08 이달의 선수",
+        "K볼 선정 · 세리에 A 2028-04 이달의 선수",
+        "K볼 선정 · 구단 유니폼 판매 예상 1위",
+        "FIFPRO 월드 11",
+        "수페르코파 이탈리아나 우승 메달"
+      ],
+      "recordHash": "d69cea0d4152acfd46d7ca7fafebdbeb0a81b080468b314fed410b24da484b2c"
+    },
+    {
+      "year": 3,
+      "age": 27,
+      "ovr": 90,
+      "rank": 1,
+      "leagueGoals": 16,
+      "leagueAssists": 10,
+      "nationalApps": 27,
+      "eligibleNow": true,
+      "ballonRank": 6,
+      "awards": [
+        "세리에 A 올해의 팀 · AIC",
+        "세리에 A 우승 메달",
+        "K볼 선정 · 구단 올해의 선수",
+        "K볼 선정 · 구단 팬 선정 올해의 선수",
+        "K볼 선정 · 구단 선수단 선정 올해의 선수",
+        "K볼 선정 · 구단 올해의 공격수",
+        "K볼 선정 · 포르투갈 국가대표 올해의 선수",
+        "K볼 선정 · 구단 유니폼 판매 예상 1위"
+      ],
+      "recordHash": "d69cea0d4152acfd46d7ca7fafebdbeb0a81b080468b314fed410b24da484b2c"
+    }
+  ]
+}

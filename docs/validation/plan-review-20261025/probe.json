@@ -1,0 +1,4343 @@
+{
+  "scope": "Read-only source probes, controlled synthetic fixtures; no game source or public artifact changed. Proposed formula is not implemented.",
+  "sourceChecks": {
+    "fieldMappings": 20,
+    "gkMappings": 10,
+    "uniqueAttributeKeys": 28
+  },
+  "formulaCases": [
+    {
+      "position": "GK",
+      "style": "스위퍼 키퍼",
+      "selected": [
+        "gkOneOnOnes",
+        "gkDistribution",
+        "gkShotStopping",
+        "gkReflexes",
+        "decisions"
+      ],
+      "others90": {
+        "rawBase": 96.19124797406806,
+        "rawOvr": 116.19124797406806,
+        "displayOvr": 116
+      },
+      "others95": {
+        "rawBase": 98.09562398703403,
+        "rawOvr": 118.09562398703403,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000001,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "GK",
+      "style": "슛 스토퍼",
+      "selected": [
+        "gkShotStopping",
+        "gkReflexes",
+        "gkOneOnOnes",
+        "gkHandling",
+        "gkAerialCommand"
+      ],
+      "others90": {
+        "rawBase": 96.839546191248,
+        "rawOvr": 116.839546191248,
+        "displayOvr": 117
+      },
+      "others95": {
+        "rawBase": 98.41977309562401,
+        "rawOvr": 118.41977309562401,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000003,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "GK",
+      "style": "빌드업 키퍼",
+      "selected": [
+        "gkHandling",
+        "gkDistribution",
+        "gkShotStopping",
+        "decisions",
+        "gkReflexes"
+      ],
+      "others90": {
+        "rawBase": 96.35332252836307,
+        "rawOvr": 116.35332252836307,
+        "displayOvr": 116
+      },
+      "others95": {
+        "rawBase": 98.17666126418155,
+        "rawOvr": 118.17666126418155,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000003,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "GK",
+      "style": "공중 지배자",
+      "selected": [
+        "gkAerialCommand",
+        "gkHandling",
+        "gkPositioning",
+        "gkShotStopping",
+        "gkReflexes"
+      ],
+      "others90": {
+        "rawBase": 96.7585089141005,
+        "rawOvr": 116.7585089141005,
+        "displayOvr": 117
+      },
+      "others95": {
+        "rawBase": 98.37925445705025,
+        "rawOvr": 118.37925445705025,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000001,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "GK",
+      "style": "배급형 키퍼",
+      "selected": [
+        "gkHandling",
+        "gkDistribution",
+        "gkShotStopping",
+        "decisions",
+        "gkReflexes"
+      ],
+      "others90": {
+        "rawBase": 96.35332252836307,
+        "rawOvr": 116.35332252836307,
+        "displayOvr": 116
+      },
+      "others95": {
+        "rawBase": 98.17666126418155,
+        "rawOvr": 118.17666126418155,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000003,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "GK",
+      "style": "반사신경형 키퍼",
+      "selected": [
+        "gkShotStopping",
+        "gkReflexes",
+        "gkOneOnOnes",
+        "gkHandling",
+        "gkAerialCommand"
+      ],
+      "others90": {
+        "rawBase": 96.839546191248,
+        "rawOvr": 116.839546191248,
+        "displayOvr": 117
+      },
+      "others95": {
+        "rawBase": 98.41977309562401,
+        "rawOvr": 118.41977309562401,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000003,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "GK",
+      "style": "페널티 전문가",
+      "selected": [
+        "gkShotStopping",
+        "gkReflexes",
+        "gkOneOnOnes",
+        "gkHandling",
+        "gkAerialCommand"
+      ],
+      "others90": {
+        "rawBase": 96.839546191248,
+        "rawOvr": 116.839546191248,
+        "displayOvr": 117
+      },
+      "others95": {
+        "rawBase": 98.41977309562401,
+        "rawOvr": 118.41977309562401,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000003,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "GK",
+      "style": "수비 조율자",
+      "selected": [
+        "gkPositioning",
+        "gkShotStopping",
+        "gkReflexes",
+        "gkDefensiveOrganization",
+        "concentration"
+      ],
+      "others90": {
+        "rawBase": 95.78606158833064,
+        "rawOvr": 115.78606158833064,
+        "displayOvr": 116
+      },
+      "others95": {
+        "rawBase": 97.89303079416533,
+        "rawOvr": 117.89303079416533,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "GK",
+      "style": "전통형 골키퍼",
+      "selected": [
+        "gkAerialCommand",
+        "gkHandling",
+        "gkPositioning",
+        "gkShotStopping",
+        "gkReflexes"
+      ],
+      "others90": {
+        "rawBase": 96.7585089141005,
+        "rawOvr": 116.7585089141005,
+        "displayOvr": 117
+      },
+      "others95": {
+        "rawBase": 98.37925445705025,
+        "rawOvr": 118.37925445705025,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000001,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "GK",
+      "style": "공격형 골키퍼",
+      "selected": [
+        "gkOneOnOnes",
+        "gkDistribution",
+        "gkShotStopping",
+        "gkReflexes",
+        "decisions"
+      ],
+      "others90": {
+        "rawBase": 96.19124797406806,
+        "rawOvr": 116.19124797406806,
+        "displayOvr": 116
+      },
+      "others95": {
+        "rawBase": 98.09562398703403,
+        "rawOvr": 118.09562398703403,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000001,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "CB",
+      "style": "스토퍼",
+      "selected": [
+        "defending",
+        "strength",
+        "positioning",
+        "anticipation",
+        "heading"
+      ],
+      "others90": {
+        "rawBase": 95.54929577464792,
+        "rawOvr": 115.54929577464792,
+        "displayOvr": 116
+      },
+      "others95": {
+        "rawBase": 97.7746478873239,
+        "rawOvr": 117.7746478873239,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000003,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "CB",
+      "style": "커버형 수비수",
+      "selected": [
+        "defending",
+        "anticipation",
+        "positioning",
+        "strength",
+        "heading"
+      ],
+      "others90": {
+        "rawBase": 95.94366197183102,
+        "rawOvr": 115.94366197183102,
+        "displayOvr": 116
+      },
+      "others95": {
+        "rawBase": 97.97183098591542,
+        "rawOvr": 117.97183098591542,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000003,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "CB",
+      "style": "볼 플레이잉 수비수",
+      "selected": [
+        "defending",
+        "decisions",
+        "positioning",
+        "anticipation",
+        "strength"
+      ],
+      "others90": {
+        "rawBase": 95.16901408450707,
+        "rawOvr": 115.16901408450707,
+        "displayOvr": 115
+      },
+      "others95": {
+        "rawBase": 97.58450704225345,
+        "rawOvr": 117.58450704225345,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000003,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "CB",
+      "style": "리베로",
+      "selected": [
+        "defending",
+        "decisions",
+        "positioning",
+        "anticipation",
+        "strength"
+      ],
+      "others90": {
+        "rawBase": 95.16901408450707,
+        "rawOvr": 115.16901408450707,
+        "displayOvr": 115
+      },
+      "others95": {
+        "rawBase": 97.58450704225345,
+        "rawOvr": 117.58450704225345,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000003,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "CB",
+      "style": "공중볼 수비수",
+      "selected": [
+        "heading",
+        "strength",
+        "jumping",
+        "defending",
+        "positioning"
+      ],
+      "others90": {
+        "rawBase": 95.73239436619721,
+        "rawOvr": 115.73239436619721,
+        "displayOvr": 116
+      },
+      "others95": {
+        "rawBase": 97.86619718309852,
+        "rawOvr": 117.86619718309852,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000003,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "CB",
+      "style": "대인 마커",
+      "selected": [
+        "defending",
+        "strength",
+        "positioning",
+        "anticipation",
+        "heading"
+      ],
+      "others90": {
+        "rawBase": 95.54929577464792,
+        "rawOvr": 115.54929577464792,
+        "displayOvr": 116
+      },
+      "others95": {
+        "rawBase": 97.7746478873239,
+        "rawOvr": 117.7746478873239,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000003,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "CB",
+      "style": "수비 리더",
+      "selected": [
+        "defending",
+        "decisions",
+        "positioning",
+        "anticipation",
+        "strength"
+      ],
+      "others90": {
+        "rawBase": 95.16901408450707,
+        "rawOvr": 115.16901408450707,
+        "displayOvr": 115
+      },
+      "others95": {
+        "rawBase": 97.58450704225345,
+        "rawOvr": 117.58450704225345,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000003,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "CB",
+      "style": "빌드업 수비수",
+      "selected": [
+        "defending",
+        "decisions",
+        "positioning",
+        "anticipation",
+        "strength"
+      ],
+      "others90": {
+        "rawBase": 95.16901408450707,
+        "rawOvr": 115.16901408450707,
+        "displayOvr": 115
+      },
+      "others95": {
+        "rawBase": 97.58450704225345,
+        "rawOvr": 117.58450704225345,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000003,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "CB",
+      "style": "전진형 수비수",
+      "selected": [
+        "defending",
+        "positioning",
+        "decisions",
+        "anticipation",
+        "strength"
+      ],
+      "others90": {
+        "rawBase": 94.69014084507045,
+        "rawOvr": 114.69014084507045,
+        "displayOvr": 115
+      },
+      "others95": {
+        "rawBase": 97.34507042253514,
+        "rawOvr": 117.34507042253514,
+        "displayOvr": 117
+      },
+      "others100": {
+        "rawBase": 100.00000000000003,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "CB",
+      "style": "안정형 센터백",
+      "selected": [
+        "defending",
+        "anticipation",
+        "positioning",
+        "strength",
+        "heading"
+      ],
+      "others90": {
+        "rawBase": 95.94366197183102,
+        "rawOvr": 115.94366197183102,
+        "displayOvr": 116
+      },
+      "others95": {
+        "rawBase": 97.97183098591542,
+        "rawOvr": 117.97183098591542,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000003,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "LB",
+      "style": "수비형 풀백",
+      "selected": [
+        "defending",
+        "positioning",
+        "anticipation",
+        "speed",
+        "stamina"
+      ],
+      "others90": {
+        "rawBase": 95.8028169014085,
+        "rawOvr": 115.8028169014085,
+        "displayOvr": 116
+      },
+      "others95": {
+        "rawBase": 97.9014084507042,
+        "rawOvr": 117.9014084507042,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000006,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "LB",
+      "style": "오버래핑 풀백",
+      "selected": [
+        "stamina",
+        "speed",
+        "positioning",
+        "defending",
+        "crossing"
+      ],
+      "others90": {
+        "rawBase": 95.94366197183105,
+        "rawOvr": 115.94366197183105,
+        "displayOvr": 116
+      },
+      "others95": {
+        "rawBase": 97.97183098591546,
+        "rawOvr": 117.97183098591546,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000006,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "LB",
+      "style": "인버티드 풀백",
+      "selected": [
+        "passing",
+        "positioning",
+        "speed",
+        "stamina",
+        "defending"
+      ],
+      "others90": {
+        "rawBase": 95.39436619718315,
+        "rawOvr": 115.39436619718315,
+        "displayOvr": 115
+      },
+      "others95": {
+        "rawBase": 97.6971830985915,
+        "rawOvr": 117.6971830985915,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000004,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "LB",
+      "style": "플레이메이커형 풀백",
+      "selected": [
+        "passing",
+        "speed",
+        "stamina",
+        "defending",
+        "positioning"
+      ],
+      "others90": {
+        "rawBase": 95.00000000000004,
+        "rawOvr": 115.00000000000004,
+        "displayOvr": 115
+      },
+      "others95": {
+        "rawBase": 97.49999999999996,
+        "rawOvr": 117.49999999999996,
+        "displayOvr": 117
+      },
+      "others100": {
+        "rawBase": 100.00000000000006,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "LB",
+      "style": "왕복형 풀백",
+      "selected": [
+        "stamina",
+        "speed",
+        "positioning",
+        "defending",
+        "crossing"
+      ],
+      "others90": {
+        "rawBase": 95.94366197183105,
+        "rawOvr": 115.94366197183105,
+        "displayOvr": 116
+      },
+      "others95": {
+        "rawBase": 97.97183098591546,
+        "rawOvr": 117.97183098591546,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000006,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "LB",
+      "style": "크로스 전문가",
+      "selected": [
+        "speed",
+        "stamina",
+        "crossing",
+        "defending",
+        "positioning"
+      ],
+      "others90": {
+        "rawBase": 95.94366197183103,
+        "rawOvr": 115.94366197183103,
+        "displayOvr": 116
+      },
+      "others95": {
+        "rawBase": 97.97183098591543,
+        "rawOvr": 117.97183098591543,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000004,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "LB",
+      "style": "대인 수비형 풀백",
+      "selected": [
+        "defending",
+        "stamina",
+        "speed",
+        "positioning",
+        "crossing"
+      ],
+      "others90": {
+        "rawBase": 95.46478873239441,
+        "rawOvr": 115.46478873239441,
+        "displayOvr": 115
+      },
+      "others95": {
+        "rawBase": 97.73239436619713,
+        "rawOvr": 117.73239436619713,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000004,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "LB",
+      "style": "볼 운반형 풀백",
+      "selected": [
+        "passing",
+        "speed",
+        "stamina",
+        "defending",
+        "positioning"
+      ],
+      "others90": {
+        "rawBase": 94.83098591549302,
+        "rawOvr": 114.83098591549302,
+        "displayOvr": 115
+      },
+      "others95": {
+        "rawBase": 97.41549295774645,
+        "rawOvr": 117.41549295774645,
+        "displayOvr": 117
+      },
+      "others100": {
+        "rawBase": 100.00000000000006,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "LB",
+      "style": "언더래핑 풀백",
+      "selected": [
+        "stamina",
+        "speed",
+        "positioning",
+        "defending",
+        "crossing"
+      ],
+      "others90": {
+        "rawBase": 95.94366197183105,
+        "rawOvr": 115.94366197183105,
+        "displayOvr": 116
+      },
+      "others95": {
+        "rawBase": 97.97183098591546,
+        "rawOvr": 117.97183098591546,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000006,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "LB",
+      "style": "전통형 풀백",
+      "selected": [
+        "speed",
+        "stamina",
+        "defending",
+        "positioning",
+        "crossing"
+      ],
+      "others90": {
+        "rawBase": 95.94366197183103,
+        "rawOvr": 115.94366197183103,
+        "displayOvr": 116
+      },
+      "others95": {
+        "rawBase": 97.97183098591545,
+        "rawOvr": 117.97183098591545,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000006,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "RB",
+      "style": "수비형 풀백",
+      "selected": [
+        "defending",
+        "positioning",
+        "anticipation",
+        "speed",
+        "stamina"
+      ],
+      "others90": {
+        "rawBase": 95.8028169014085,
+        "rawOvr": 115.8028169014085,
+        "displayOvr": 116
+      },
+      "others95": {
+        "rawBase": 97.9014084507042,
+        "rawOvr": 117.9014084507042,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000006,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "RB",
+      "style": "오버래핑 풀백",
+      "selected": [
+        "stamina",
+        "speed",
+        "positioning",
+        "defending",
+        "crossing"
+      ],
+      "others90": {
+        "rawBase": 95.94366197183105,
+        "rawOvr": 115.94366197183105,
+        "displayOvr": 116
+      },
+      "others95": {
+        "rawBase": 97.97183098591546,
+        "rawOvr": 117.97183098591546,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000006,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "RB",
+      "style": "인버티드 풀백",
+      "selected": [
+        "passing",
+        "positioning",
+        "speed",
+        "stamina",
+        "defending"
+      ],
+      "others90": {
+        "rawBase": 95.39436619718315,
+        "rawOvr": 115.39436619718315,
+        "displayOvr": 115
+      },
+      "others95": {
+        "rawBase": 97.6971830985915,
+        "rawOvr": 117.6971830985915,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000004,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "RB",
+      "style": "플레이메이커형 풀백",
+      "selected": [
+        "passing",
+        "speed",
+        "stamina",
+        "defending",
+        "positioning"
+      ],
+      "others90": {
+        "rawBase": 95.00000000000004,
+        "rawOvr": 115.00000000000004,
+        "displayOvr": 115
+      },
+      "others95": {
+        "rawBase": 97.49999999999996,
+        "rawOvr": 117.49999999999996,
+        "displayOvr": 117
+      },
+      "others100": {
+        "rawBase": 100.00000000000006,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "RB",
+      "style": "왕복형 풀백",
+      "selected": [
+        "stamina",
+        "speed",
+        "positioning",
+        "defending",
+        "crossing"
+      ],
+      "others90": {
+        "rawBase": 95.94366197183105,
+        "rawOvr": 115.94366197183105,
+        "displayOvr": 116
+      },
+      "others95": {
+        "rawBase": 97.97183098591546,
+        "rawOvr": 117.97183098591546,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000006,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "RB",
+      "style": "크로스 전문가",
+      "selected": [
+        "speed",
+        "stamina",
+        "crossing",
+        "defending",
+        "positioning"
+      ],
+      "others90": {
+        "rawBase": 95.94366197183103,
+        "rawOvr": 115.94366197183103,
+        "displayOvr": 116
+      },
+      "others95": {
+        "rawBase": 97.97183098591543,
+        "rawOvr": 117.97183098591543,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000004,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "RB",
+      "style": "대인 수비형 풀백",
+      "selected": [
+        "defending",
+        "stamina",
+        "speed",
+        "positioning",
+        "crossing"
+      ],
+      "others90": {
+        "rawBase": 95.46478873239441,
+        "rawOvr": 115.46478873239441,
+        "displayOvr": 115
+      },
+      "others95": {
+        "rawBase": 97.73239436619713,
+        "rawOvr": 117.73239436619713,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000004,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "RB",
+      "style": "볼 운반형 풀백",
+      "selected": [
+        "passing",
+        "speed",
+        "stamina",
+        "defending",
+        "positioning"
+      ],
+      "others90": {
+        "rawBase": 94.83098591549302,
+        "rawOvr": 114.83098591549302,
+        "displayOvr": 115
+      },
+      "others95": {
+        "rawBase": 97.41549295774645,
+        "rawOvr": 117.41549295774645,
+        "displayOvr": 117
+      },
+      "others100": {
+        "rawBase": 100.00000000000006,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "RB",
+      "style": "언더래핑 풀백",
+      "selected": [
+        "stamina",
+        "speed",
+        "positioning",
+        "defending",
+        "crossing"
+      ],
+      "others90": {
+        "rawBase": 95.94366197183105,
+        "rawOvr": 115.94366197183105,
+        "displayOvr": 116
+      },
+      "others95": {
+        "rawBase": 97.97183098591546,
+        "rawOvr": 117.97183098591546,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000006,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "RB",
+      "style": "전통형 풀백",
+      "selected": [
+        "speed",
+        "stamina",
+        "defending",
+        "positioning",
+        "crossing"
+      ],
+      "others90": {
+        "rawBase": 95.94366197183103,
+        "rawOvr": 115.94366197183103,
+        "displayOvr": 116
+      },
+      "others95": {
+        "rawBase": 97.97183098591545,
+        "rawOvr": 117.97183098591545,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000006,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "LWB",
+      "style": "공격형 윙백",
+      "selected": [
+        "stamina",
+        "speed",
+        "crossing",
+        "dribbling",
+        "passing"
+      ],
+      "others90": {
+        "rawBase": 95.94366197183103,
+        "rawOvr": 115.94366197183103,
+        "displayOvr": 116
+      },
+      "others95": {
+        "rawBase": 97.97183098591545,
+        "rawOvr": 117.97183098591545,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000006,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "LWB",
+      "style": "크로스 전문가",
+      "selected": [
+        "crossing",
+        "speed",
+        "stamina",
+        "dribbling",
+        "passing"
+      ],
+      "others90": {
+        "rawBase": 95.94366197183103,
+        "rawOvr": 115.94366197183103,
+        "displayOvr": 116
+      },
+      "others95": {
+        "rawBase": 97.97183098591545,
+        "rawOvr": 117.97183098591545,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000006,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "LWB",
+      "style": "돌파형 윙백",
+      "selected": [
+        "dribbling",
+        "stamina",
+        "speed",
+        "crossing",
+        "passing"
+      ],
+      "others90": {
+        "rawBase": 95.07042253521132,
+        "rawOvr": 115.07042253521132,
+        "displayOvr": 115
+      },
+      "others95": {
+        "rawBase": 97.5352112676056,
+        "rawOvr": 117.5352112676056,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000006,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "LWB",
+      "style": "인버티드 윙백",
+      "selected": [
+        "passing",
+        "stamina",
+        "positioning",
+        "speed",
+        "crossing"
+      ],
+      "others90": {
+        "rawBase": 95.2535211267606,
+        "rawOvr": 115.2535211267606,
+        "displayOvr": 115
+      },
+      "others95": {
+        "rawBase": 97.62676056338023,
+        "rawOvr": 117.62676056338023,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000004,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "LWB",
+      "style": "왕복형 윙백",
+      "selected": [
+        "stamina",
+        "speed",
+        "positioning",
+        "crossing",
+        "dribbling"
+      ],
+      "others90": {
+        "rawBase": 95.8028169014085,
+        "rawOvr": 115.8028169014085,
+        "displayOvr": 116
+      },
+      "others95": {
+        "rawBase": 97.90140845070418,
+        "rawOvr": 117.90140845070418,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000006,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "LWB",
+      "style": "플레이메이커형 윙백",
+      "selected": [
+        "passing",
+        "stamina",
+        "speed",
+        "crossing",
+        "dribbling"
+      ],
+      "others90": {
+        "rawBase": 95.07042253521129,
+        "rawOvr": 115.07042253521129,
+        "displayOvr": 115
+      },
+      "others95": {
+        "rawBase": 97.53521126760559,
+        "rawOvr": 117.53521126760559,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000003,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "LWB",
+      "style": "수비형 윙백",
+      "selected": [
+        "defending",
+        "stamina",
+        "positioning",
+        "speed",
+        "crossing"
+      ],
+      "others90": {
+        "rawBase": 95.09859154929582,
+        "rawOvr": 115.09859154929582,
+        "displayOvr": 115
+      },
+      "others95": {
+        "rawBase": 97.54929577464786,
+        "rawOvr": 117.54929577464786,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000006,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "LWB",
+      "style": "언더래핑 윙백",
+      "selected": [
+        "stamina",
+        "speed",
+        "positioning",
+        "crossing",
+        "dribbling"
+      ],
+      "others90": {
+        "rawBase": 95.8028169014085,
+        "rawOvr": 115.8028169014085,
+        "displayOvr": 116
+      },
+      "others95": {
+        "rawBase": 97.90140845070418,
+        "rawOvr": 117.90140845070418,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000006,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "LWB",
+      "style": "와이드 플레이메이커",
+      "selected": [
+        "passing",
+        "stamina",
+        "speed",
+        "crossing",
+        "dribbling"
+      ],
+      "others90": {
+        "rawBase": 95.07042253521129,
+        "rawOvr": 115.07042253521129,
+        "displayOvr": 115
+      },
+      "others95": {
+        "rawBase": 97.53521126760559,
+        "rawOvr": 117.53521126760559,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000003,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "LWB",
+      "style": "터치라인 윙백",
+      "selected": [
+        "crossing",
+        "speed",
+        "stamina",
+        "dribbling",
+        "passing"
+      ],
+      "others90": {
+        "rawBase": 95.94366197183103,
+        "rawOvr": 115.94366197183103,
+        "displayOvr": 116
+      },
+      "others95": {
+        "rawBase": 97.97183098591545,
+        "rawOvr": 117.97183098591545,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000006,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "RWB",
+      "style": "공격형 윙백",
+      "selected": [
+        "stamina",
+        "speed",
+        "crossing",
+        "dribbling",
+        "passing"
+      ],
+      "others90": {
+        "rawBase": 95.94366197183103,
+        "rawOvr": 115.94366197183103,
+        "displayOvr": 116
+      },
+      "others95": {
+        "rawBase": 97.97183098591545,
+        "rawOvr": 117.97183098591545,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000006,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "RWB",
+      "style": "크로스 전문가",
+      "selected": [
+        "crossing",
+        "speed",
+        "stamina",
+        "dribbling",
+        "passing"
+      ],
+      "others90": {
+        "rawBase": 95.94366197183103,
+        "rawOvr": 115.94366197183103,
+        "displayOvr": 116
+      },
+      "others95": {
+        "rawBase": 97.97183098591545,
+        "rawOvr": 117.97183098591545,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000006,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "RWB",
+      "style": "돌파형 윙백",
+      "selected": [
+        "dribbling",
+        "stamina",
+        "speed",
+        "crossing",
+        "passing"
+      ],
+      "others90": {
+        "rawBase": 95.07042253521132,
+        "rawOvr": 115.07042253521132,
+        "displayOvr": 115
+      },
+      "others95": {
+        "rawBase": 97.5352112676056,
+        "rawOvr": 117.5352112676056,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000006,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "RWB",
+      "style": "인버티드 윙백",
+      "selected": [
+        "passing",
+        "stamina",
+        "positioning",
+        "speed",
+        "crossing"
+      ],
+      "others90": {
+        "rawBase": 95.2535211267606,
+        "rawOvr": 115.2535211267606,
+        "displayOvr": 115
+      },
+      "others95": {
+        "rawBase": 97.62676056338023,
+        "rawOvr": 117.62676056338023,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000004,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "RWB",
+      "style": "왕복형 윙백",
+      "selected": [
+        "stamina",
+        "speed",
+        "positioning",
+        "crossing",
+        "dribbling"
+      ],
+      "others90": {
+        "rawBase": 95.8028169014085,
+        "rawOvr": 115.8028169014085,
+        "displayOvr": 116
+      },
+      "others95": {
+        "rawBase": 97.90140845070418,
+        "rawOvr": 117.90140845070418,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000006,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "RWB",
+      "style": "플레이메이커형 윙백",
+      "selected": [
+        "passing",
+        "stamina",
+        "speed",
+        "crossing",
+        "dribbling"
+      ],
+      "others90": {
+        "rawBase": 95.07042253521129,
+        "rawOvr": 115.07042253521129,
+        "displayOvr": 115
+      },
+      "others95": {
+        "rawBase": 97.53521126760559,
+        "rawOvr": 117.53521126760559,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000003,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "RWB",
+      "style": "수비형 윙백",
+      "selected": [
+        "defending",
+        "stamina",
+        "positioning",
+        "speed",
+        "crossing"
+      ],
+      "others90": {
+        "rawBase": 95.09859154929582,
+        "rawOvr": 115.09859154929582,
+        "displayOvr": 115
+      },
+      "others95": {
+        "rawBase": 97.54929577464786,
+        "rawOvr": 117.54929577464786,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000006,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "RWB",
+      "style": "언더래핑 윙백",
+      "selected": [
+        "stamina",
+        "speed",
+        "positioning",
+        "crossing",
+        "dribbling"
+      ],
+      "others90": {
+        "rawBase": 95.8028169014085,
+        "rawOvr": 115.8028169014085,
+        "displayOvr": 116
+      },
+      "others95": {
+        "rawBase": 97.90140845070418,
+        "rawOvr": 117.90140845070418,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000006,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "RWB",
+      "style": "와이드 플레이메이커",
+      "selected": [
+        "passing",
+        "stamina",
+        "speed",
+        "crossing",
+        "dribbling"
+      ],
+      "others90": {
+        "rawBase": 95.07042253521129,
+        "rawOvr": 115.07042253521129,
+        "displayOvr": 115
+      },
+      "others95": {
+        "rawBase": 97.53521126760559,
+        "rawOvr": 117.53521126760559,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000003,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "RWB",
+      "style": "터치라인 윙백",
+      "selected": [
+        "crossing",
+        "speed",
+        "stamina",
+        "dribbling",
+        "passing"
+      ],
+      "others90": {
+        "rawBase": 95.94366197183103,
+        "rawOvr": 115.94366197183103,
+        "displayOvr": 116
+      },
+      "others95": {
+        "rawBase": 97.97183098591545,
+        "rawOvr": 117.97183098591545,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000006,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "CDM",
+      "style": "앵커맨",
+      "selected": [
+        "anticipation",
+        "defending",
+        "positioning",
+        "passing",
+        "decisions"
+      ],
+      "others90": {
+        "rawBase": 95.94366197183102,
+        "rawOvr": 115.94366197183102,
+        "displayOvr": 116
+      },
+      "others95": {
+        "rawBase": 97.97183098591543,
+        "rawOvr": 117.97183098591543,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000004,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "CDM",
+      "style": "볼 위닝 미드필더",
+      "selected": [
+        "defending",
+        "strength",
+        "anticipation",
+        "positioning",
+        "passing"
+      ],
+      "others90": {
+        "rawBase": 95.40845070422539,
+        "rawOvr": 115.40845070422539,
+        "displayOvr": 115
+      },
+      "others95": {
+        "rawBase": 97.70422535211262,
+        "rawOvr": 117.70422535211262,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000003,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "CDM",
+      "style": "딥라잉 플레이메이커",
+      "selected": [
+        "passing",
+        "decisions",
+        "defending",
+        "vision",
+        "anticipation"
+      ],
+      "others90": {
+        "rawBase": 95.59154929577468,
+        "rawOvr": 115.59154929577468,
+        "displayOvr": 116
+      },
+      "others95": {
+        "rawBase": 97.79577464788726,
+        "rawOvr": 117.79577464788726,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000003,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "CDM",
+      "style": "하프백",
+      "selected": [
+        "anticipation",
+        "defending",
+        "positioning",
+        "passing",
+        "decisions"
+      ],
+      "others90": {
+        "rawBase": 95.94366197183102,
+        "rawOvr": 115.94366197183102,
+        "displayOvr": 116
+      },
+      "others95": {
+        "rawBase": 97.97183098591543,
+        "rawOvr": 117.97183098591543,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000004,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "CDM",
+      "style": "레지스타",
+      "selected": [
+        "passing",
+        "decisions",
+        "defending",
+        "vision",
+        "anticipation"
+      ],
+      "others90": {
+        "rawBase": 95.59154929577468,
+        "rawOvr": 115.59154929577468,
+        "displayOvr": 116
+      },
+      "others95": {
+        "rawBase": 97.79577464788726,
+        "rawOvr": 117.79577464788726,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000003,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "CDM",
+      "style": "수비형 피벗",
+      "selected": [
+        "anticipation",
+        "defending",
+        "positioning",
+        "passing",
+        "decisions"
+      ],
+      "others90": {
+        "rawBase": 95.94366197183102,
+        "rawOvr": 115.94366197183102,
+        "displayOvr": 116
+      },
+      "others95": {
+        "rawBase": 97.97183098591543,
+        "rawOvr": 117.97183098591543,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000004,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "CDM",
+      "style": "홀딩 미드필더",
+      "selected": [
+        "anticipation",
+        "defending",
+        "positioning",
+        "passing",
+        "decisions"
+      ],
+      "others90": {
+        "rawBase": 95.94366197183102,
+        "rawOvr": 115.94366197183102,
+        "displayOvr": 116
+      },
+      "others95": {
+        "rawBase": 97.97183098591543,
+        "rawOvr": 117.97183098591543,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000004,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "CDM",
+      "style": "전진형 피벗",
+      "selected": [
+        "decisions",
+        "defending",
+        "anticipation",
+        "positioning",
+        "passing"
+      ],
+      "others90": {
+        "rawBase": 94.90140845070425,
+        "rawOvr": 114.90140845070425,
+        "displayOvr": 115
+      },
+      "others95": {
+        "rawBase": 97.45070422535206,
+        "rawOvr": 117.45070422535206,
+        "displayOvr": 117
+      },
+      "others100": {
+        "rawBase": 100.00000000000003,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "CDM",
+      "style": "압박형 미드필더",
+      "selected": [
+        "defending",
+        "strength",
+        "anticipation",
+        "positioning",
+        "passing"
+      ],
+      "others90": {
+        "rawBase": 95.40845070422539,
+        "rawOvr": 115.40845070422539,
+        "displayOvr": 115
+      },
+      "others95": {
+        "rawBase": 97.70422535211262,
+        "rawOvr": 117.70422535211262,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000003,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "CDM",
+      "style": "수비 조율형 미드필더",
+      "selected": [
+        "defending",
+        "passing",
+        "decisions",
+        "anticipation",
+        "positioning"
+      ],
+      "others90": {
+        "rawBase": 95.94366197183102,
+        "rawOvr": 115.94366197183102,
+        "displayOvr": 116
+      },
+      "others95": {
+        "rawBase": 97.97183098591542,
+        "rawOvr": 117.97183098591542,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000003,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "CM",
+      "style": "박스투박스",
+      "selected": [
+        "stamina",
+        "positioning",
+        "passing",
+        "vision",
+        "decisions"
+      ],
+      "others90": {
+        "rawBase": 95.32394366197185,
+        "rawOvr": 115.32394366197185,
+        "displayOvr": 115
+      },
+      "others95": {
+        "rawBase": 97.66197183098585,
+        "rawOvr": 117.66197183098585,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000003,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "CM",
+      "style": "메짤라",
+      "selected": [
+        "stamina",
+        "positioning",
+        "passing",
+        "vision",
+        "decisions"
+      ],
+      "others90": {
+        "rawBase": 95.32394366197185,
+        "rawOvr": 115.32394366197185,
+        "displayOvr": 115
+      },
+      "others95": {
+        "rawBase": 97.66197183098585,
+        "rawOvr": 117.66197183098585,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000003,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "CM",
+      "style": "레지스타",
+      "selected": [
+        "passing",
+        "vision",
+        "decisions",
+        "ballControl",
+        "stamina"
+      ],
+      "others90": {
+        "rawBase": 95.94366197183102,
+        "rawOvr": 115.94366197183102,
+        "displayOvr": 116
+      },
+      "others95": {
+        "rawBase": 97.97183098591543,
+        "rawOvr": 117.97183098591543,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000004,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "CM",
+      "style": "템포 조절자",
+      "selected": [
+        "passing",
+        "vision",
+        "decisions",
+        "ballControl",
+        "stamina"
+      ],
+      "others90": {
+        "rawBase": 95.94366197183102,
+        "rawOvr": 115.94366197183102,
+        "displayOvr": 116
+      },
+      "others95": {
+        "rawBase": 97.97183098591543,
+        "rawOvr": 117.97183098591543,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000004,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "CM",
+      "style": "딥라잉 플레이메이커",
+      "selected": [
+        "passing",
+        "vision",
+        "decisions",
+        "ballControl",
+        "stamina"
+      ],
+      "others90": {
+        "rawBase": 95.94366197183102,
+        "rawOvr": 115.94366197183102,
+        "displayOvr": 116
+      },
+      "others95": {
+        "rawBase": 97.97183098591543,
+        "rawOvr": 117.97183098591543,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000004,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "CM",
+      "style": "전진형 플레이메이커",
+      "selected": [
+        "passing",
+        "vision",
+        "decisions",
+        "ballControl",
+        "stamina"
+      ],
+      "others90": {
+        "rawBase": 95.94366197183102,
+        "rawOvr": 115.94366197183102,
+        "displayOvr": 116
+      },
+      "others95": {
+        "rawBase": 97.97183098591543,
+        "rawOvr": 117.97183098591543,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000004,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "CM",
+      "style": "볼 위닝 미드필더",
+      "selected": [
+        "stamina",
+        "passing",
+        "vision",
+        "decisions",
+        "ballControl"
+      ],
+      "others90": {
+        "rawBase": 94.90140845070428,
+        "rawOvr": 114.90140845070428,
+        "displayOvr": 115
+      },
+      "others95": {
+        "rawBase": 97.45070422535207,
+        "rawOvr": 117.45070422535207,
+        "displayOvr": 117
+      },
+      "others100": {
+        "rawBase": 100.00000000000004,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "CM",
+      "style": "왕복형 미드필더",
+      "selected": [
+        "stamina",
+        "positioning",
+        "passing",
+        "vision",
+        "decisions"
+      ],
+      "others90": {
+        "rawBase": 95.32394366197185,
+        "rawOvr": 115.32394366197185,
+        "displayOvr": 115
+      },
+      "others95": {
+        "rawBase": 97.66197183098585,
+        "rawOvr": 117.66197183098585,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000003,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "CM",
+      "style": "찬스 메이커",
+      "selected": [
+        "passing",
+        "vision",
+        "decisions",
+        "ballControl",
+        "stamina"
+      ],
+      "others90": {
+        "rawBase": 95.94366197183102,
+        "rawOvr": 115.94366197183102,
+        "displayOvr": 116
+      },
+      "others95": {
+        "rawBase": 97.97183098591543,
+        "rawOvr": 117.97183098591543,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000004,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "CM",
+      "style": "연결형 미드필더",
+      "selected": [
+        "passing",
+        "vision",
+        "decisions",
+        "ballControl",
+        "stamina"
+      ],
+      "others90": {
+        "rawBase": 95.94366197183102,
+        "rawOvr": 115.94366197183102,
+        "displayOvr": 116
+      },
+      "others95": {
+        "rawBase": 97.97183098591543,
+        "rawOvr": 117.97183098591543,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000004,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "CAM",
+      "style": "엔간체",
+      "selected": [
+        "passing",
+        "vision",
+        "decisions",
+        "ballControl",
+        "dribbling"
+      ],
+      "others90": {
+        "rawBase": 95.94366197183105,
+        "rawOvr": 115.94366197183105,
+        "displayOvr": 116
+      },
+      "others95": {
+        "rawBase": 97.97183098591546,
+        "rawOvr": 117.97183098591546,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000006,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "CAM",
+      "style": "트레콰르티스타",
+      "selected": [
+        "vision",
+        "passing",
+        "ballControl",
+        "dribbling",
+        "decisions"
+      ],
+      "others90": {
+        "rawBase": 95.94366197183103,
+        "rawOvr": 115.94366197183103,
+        "displayOvr": 116
+      },
+      "others95": {
+        "rawBase": 97.97183098591545,
+        "rawOvr": 117.97183098591545,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000006,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "CAM",
+      "style": "쉐도우 플레이메이커",
+      "selected": [
+        "positioning",
+        "shooting",
+        "vision",
+        "composure",
+        "passing"
+      ],
+      "others90": {
+        "rawBase": 95.30985915492963,
+        "rawOvr": 115.30985915492963,
+        "displayOvr": 115
+      },
+      "others95": {
+        "rawBase": 97.65492957746476,
+        "rawOvr": 117.65492957746476,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000006,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "CAM",
+      "style": "침투형 미드필더",
+      "selected": [
+        "positioning",
+        "shooting",
+        "vision",
+        "composure",
+        "passing"
+      ],
+      "others90": {
+        "rawBase": 95.30985915492963,
+        "rawOvr": 115.30985915492963,
+        "displayOvr": 115
+      },
+      "others95": {
+        "rawBase": 97.65492957746476,
+        "rawOvr": 117.65492957746476,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000006,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "CAM",
+      "style": "전진형 플레이메이커",
+      "selected": [
+        "passing",
+        "vision",
+        "decisions",
+        "ballControl",
+        "dribbling"
+      ],
+      "others90": {
+        "rawBase": 95.94366197183105,
+        "rawOvr": 115.94366197183105,
+        "displayOvr": 116
+      },
+      "others95": {
+        "rawBase": 97.97183098591546,
+        "rawOvr": 117.97183098591546,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000006,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "CAM",
+      "style": "찬스 메이커",
+      "selected": [
+        "passing",
+        "vision",
+        "decisions",
+        "ballControl",
+        "dribbling"
+      ],
+      "others90": {
+        "rawBase": 95.94366197183105,
+        "rawOvr": 115.94366197183105,
+        "displayOvr": 116
+      },
+      "others95": {
+        "rawBase": 97.97183098591546,
+        "rawOvr": 117.97183098591546,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000006,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "CAM",
+      "style": "클래식 10번",
+      "selected": [
+        "passing",
+        "vision",
+        "decisions",
+        "ballControl",
+        "dribbling"
+      ],
+      "others90": {
+        "rawBase": 95.94366197183105,
+        "rawOvr": 115.94366197183105,
+        "displayOvr": 116
+      },
+      "others95": {
+        "rawBase": 97.97183098591546,
+        "rawOvr": 117.97183098591546,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000006,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "CAM",
+      "style": "드리블형 플레이메이커",
+      "selected": [
+        "dribbling",
+        "ballControl",
+        "vision",
+        "passing",
+        "decisions"
+      ],
+      "others90": {
+        "rawBase": 95.46478873239442,
+        "rawOvr": 115.46478873239442,
+        "displayOvr": 115
+      },
+      "others95": {
+        "rawBase": 97.73239436619716,
+        "rawOvr": 117.73239436619716,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000006,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "CAM",
+      "style": "와이드 플레이메이커",
+      "selected": [
+        "passing",
+        "vision",
+        "decisions",
+        "ballControl",
+        "dribbling"
+      ],
+      "others90": {
+        "rawBase": 95.94366197183105,
+        "rawOvr": 115.94366197183105,
+        "displayOvr": 116
+      },
+      "others95": {
+        "rawBase": 97.97183098591546,
+        "rawOvr": 117.97183098591546,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000006,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "CAM",
+      "style": "공격형 미드필더",
+      "selected": [
+        "ballControl",
+        "decisions",
+        "shooting",
+        "vision",
+        "passing"
+      ],
+      "others90": {
+        "rawBase": 95.66197183098596,
+        "rawOvr": 115.66197183098596,
+        "displayOvr": 116
+      },
+      "others95": {
+        "rawBase": 97.83098591549292,
+        "rawOvr": 117.83098591549292,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000004,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "LM",
+      "style": "클래식 와이드 미드필더",
+      "selected": [
+        "crossing",
+        "speed",
+        "stamina",
+        "passing",
+        "dribbling"
+      ],
+      "others90": {
+        "rawBase": 95.94366197183103,
+        "rawOvr": 115.94366197183103,
+        "displayOvr": 116
+      },
+      "others95": {
+        "rawBase": 97.97183098591543,
+        "rawOvr": 117.97183098591543,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000004,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "LM",
+      "style": "측면 플레이메이커",
+      "selected": [
+        "passing",
+        "vision",
+        "crossing",
+        "dribbling",
+        "speed"
+      ],
+      "others90": {
+        "rawBase": 95.4084507042254,
+        "rawOvr": 115.4084507042254,
+        "displayOvr": 115
+      },
+      "others95": {
+        "rawBase": 97.70422535211263,
+        "rawOvr": 117.70422535211263,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000006,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "LM",
+      "style": "크로스 전문가",
+      "selected": [
+        "crossing",
+        "speed",
+        "stamina",
+        "passing",
+        "dribbling"
+      ],
+      "others90": {
+        "rawBase": 95.94366197183103,
+        "rawOvr": 115.94366197183103,
+        "displayOvr": 116
+      },
+      "others95": {
+        "rawBase": 97.97183098591543,
+        "rawOvr": 117.97183098591543,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000004,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "LM",
+      "style": "왕복형 미드필더",
+      "selected": [
+        "stamina",
+        "speed",
+        "crossing",
+        "passing",
+        "dribbling"
+      ],
+      "others90": {
+        "rawBase": 95.54929577464794,
+        "rawOvr": 115.54929577464794,
+        "displayOvr": 116
+      },
+      "others95": {
+        "rawBase": 97.77464788732391,
+        "rawOvr": 117.77464788732391,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000007,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "LM",
+      "style": "인버티드 미드필더",
+      "selected": [
+        "passing",
+        "crossing",
+        "dribbling",
+        "speed",
+        "stamina"
+      ],
+      "others90": {
+        "rawBase": 95.07042253521132,
+        "rawOvr": 115.07042253521132,
+        "displayOvr": 115
+      },
+      "others95": {
+        "rawBase": 97.5352112676056,
+        "rawOvr": 117.5352112676056,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000006,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "LM",
+      "style": "볼 운반형 미드필더",
+      "selected": [
+        "dribbling",
+        "passing",
+        "ballControl",
+        "crossing",
+        "speed"
+      ],
+      "others90": {
+        "rawBase": 95.87323943661977,
+        "rawOvr": 115.87323943661977,
+        "displayOvr": 116
+      },
+      "others95": {
+        "rawBase": 97.93661971830981,
+        "rawOvr": 117.93661971830981,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000006,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "LM",
+      "style": "수비형 측면 미드필더",
+      "selected": [
+        "crossing",
+        "passing",
+        "dribbling",
+        "speed",
+        "stamina"
+      ],
+      "others90": {
+        "rawBase": 94.50704225352116,
+        "rawOvr": 114.50704225352116,
+        "displayOvr": 115
+      },
+      "others95": {
+        "rawBase": 97.25352112676052,
+        "rawOvr": 117.25352112676052,
+        "displayOvr": 117
+      },
+      "others100": {
+        "rawBase": 100.00000000000003,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "LM",
+      "style": "침투형 미드필더",
+      "selected": [
+        "crossing",
+        "passing",
+        "dribbling",
+        "speed",
+        "stamina"
+      ],
+      "others90": {
+        "rawBase": 94.50704225352116,
+        "rawOvr": 114.50704225352116,
+        "displayOvr": 115
+      },
+      "others95": {
+        "rawBase": 97.25352112676052,
+        "rawOvr": 117.25352112676052,
+        "displayOvr": 117
+      },
+      "others100": {
+        "rawBase": 100.00000000000003,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "LM",
+      "style": "와이드 플레이메이커",
+      "selected": [
+        "passing",
+        "vision",
+        "crossing",
+        "dribbling",
+        "speed"
+      ],
+      "others90": {
+        "rawBase": 95.4084507042254,
+        "rawOvr": 115.4084507042254,
+        "displayOvr": 115
+      },
+      "others95": {
+        "rawBase": 97.70422535211263,
+        "rawOvr": 117.70422535211263,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000006,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "LM",
+      "style": "찬스 메이커",
+      "selected": [
+        "passing",
+        "vision",
+        "crossing",
+        "dribbling",
+        "speed"
+      ],
+      "others90": {
+        "rawBase": 95.4084507042254,
+        "rawOvr": 115.4084507042254,
+        "displayOvr": 115
+      },
+      "others95": {
+        "rawBase": 97.70422535211263,
+        "rawOvr": 117.70422535211263,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000006,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "RM",
+      "style": "클래식 와이드 미드필더",
+      "selected": [
+        "crossing",
+        "speed",
+        "stamina",
+        "passing",
+        "dribbling"
+      ],
+      "others90": {
+        "rawBase": 95.94366197183103,
+        "rawOvr": 115.94366197183103,
+        "displayOvr": 116
+      },
+      "others95": {
+        "rawBase": 97.97183098591543,
+        "rawOvr": 117.97183098591543,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000004,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "RM",
+      "style": "측면 플레이메이커",
+      "selected": [
+        "passing",
+        "vision",
+        "crossing",
+        "dribbling",
+        "speed"
+      ],
+      "others90": {
+        "rawBase": 95.4084507042254,
+        "rawOvr": 115.4084507042254,
+        "displayOvr": 115
+      },
+      "others95": {
+        "rawBase": 97.70422535211263,
+        "rawOvr": 117.70422535211263,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000006,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "RM",
+      "style": "크로스 전문가",
+      "selected": [
+        "crossing",
+        "speed",
+        "stamina",
+        "passing",
+        "dribbling"
+      ],
+      "others90": {
+        "rawBase": 95.94366197183103,
+        "rawOvr": 115.94366197183103,
+        "displayOvr": 116
+      },
+      "others95": {
+        "rawBase": 97.97183098591543,
+        "rawOvr": 117.97183098591543,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000004,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "RM",
+      "style": "왕복형 미드필더",
+      "selected": [
+        "stamina",
+        "speed",
+        "crossing",
+        "passing",
+        "dribbling"
+      ],
+      "others90": {
+        "rawBase": 95.54929577464794,
+        "rawOvr": 115.54929577464794,
+        "displayOvr": 116
+      },
+      "others95": {
+        "rawBase": 97.77464788732391,
+        "rawOvr": 117.77464788732391,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000007,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "RM",
+      "style": "인버티드 미드필더",
+      "selected": [
+        "passing",
+        "crossing",
+        "dribbling",
+        "speed",
+        "stamina"
+      ],
+      "others90": {
+        "rawBase": 95.07042253521132,
+        "rawOvr": 115.07042253521132,
+        "displayOvr": 115
+      },
+      "others95": {
+        "rawBase": 97.5352112676056,
+        "rawOvr": 117.5352112676056,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000006,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "RM",
+      "style": "볼 운반형 미드필더",
+      "selected": [
+        "dribbling",
+        "passing",
+        "ballControl",
+        "crossing",
+        "speed"
+      ],
+      "others90": {
+        "rawBase": 95.87323943661977,
+        "rawOvr": 115.87323943661977,
+        "displayOvr": 116
+      },
+      "others95": {
+        "rawBase": 97.93661971830981,
+        "rawOvr": 117.93661971830981,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000006,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "RM",
+      "style": "수비형 측면 미드필더",
+      "selected": [
+        "crossing",
+        "passing",
+        "dribbling",
+        "speed",
+        "stamina"
+      ],
+      "others90": {
+        "rawBase": 94.50704225352116,
+        "rawOvr": 114.50704225352116,
+        "displayOvr": 115
+      },
+      "others95": {
+        "rawBase": 97.25352112676052,
+        "rawOvr": 117.25352112676052,
+        "displayOvr": 117
+      },
+      "others100": {
+        "rawBase": 100.00000000000003,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "RM",
+      "style": "침투형 미드필더",
+      "selected": [
+        "crossing",
+        "passing",
+        "dribbling",
+        "speed",
+        "stamina"
+      ],
+      "others90": {
+        "rawBase": 94.50704225352116,
+        "rawOvr": 114.50704225352116,
+        "displayOvr": 115
+      },
+      "others95": {
+        "rawBase": 97.25352112676052,
+        "rawOvr": 117.25352112676052,
+        "displayOvr": 117
+      },
+      "others100": {
+        "rawBase": 100.00000000000003,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "RM",
+      "style": "와이드 플레이메이커",
+      "selected": [
+        "passing",
+        "vision",
+        "crossing",
+        "dribbling",
+        "speed"
+      ],
+      "others90": {
+        "rawBase": 95.4084507042254,
+        "rawOvr": 115.4084507042254,
+        "displayOvr": 115
+      },
+      "others95": {
+        "rawBase": 97.70422535211263,
+        "rawOvr": 117.70422535211263,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000006,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "RM",
+      "style": "찬스 메이커",
+      "selected": [
+        "passing",
+        "vision",
+        "crossing",
+        "dribbling",
+        "speed"
+      ],
+      "others90": {
+        "rawBase": 95.4084507042254,
+        "rawOvr": 115.4084507042254,
+        "displayOvr": 115
+      },
+      "others95": {
+        "rawBase": 97.70422535211263,
+        "rawOvr": 117.70422535211263,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000006,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "LW",
+      "style": "인사이드 포워드",
+      "selected": [
+        "dribbling",
+        "agility",
+        "ballControl",
+        "speed",
+        "shooting"
+      ],
+      "others90": {
+        "rawBase": 95.94366197183105,
+        "rawOvr": 115.94366197183105,
+        "displayOvr": 116
+      },
+      "others95": {
+        "rawBase": 97.97183098591546,
+        "rawOvr": 117.97183098591546,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000006,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "LW",
+      "style": "클래식 윙어",
+      "selected": [
+        "speed",
+        "dribbling",
+        "agility",
+        "ballControl",
+        "shooting"
+      ],
+      "others90": {
+        "rawBase": 94.9859154929578,
+        "rawOvr": 114.9859154929578,
+        "displayOvr": 115
+      },
+      "others95": {
+        "rawBase": 97.49295774647884,
+        "rawOvr": 117.49295774647884,
+        "displayOvr": 117
+      },
+      "others100": {
+        "rawBase": 100.00000000000006,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "LW",
+      "style": "인버티드 윙어",
+      "selected": [
+        "dribbling",
+        "agility",
+        "ballControl",
+        "speed",
+        "shooting"
+      ],
+      "others90": {
+        "rawBase": 95.94366197183105,
+        "rawOvr": 115.94366197183105,
+        "displayOvr": 116
+      },
+      "others95": {
+        "rawBase": 97.97183098591546,
+        "rawOvr": 117.97183098591546,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000006,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "LW",
+      "style": "드리블러",
+      "selected": [
+        "dribbling",
+        "agility",
+        "ballControl",
+        "speed",
+        "shooting"
+      ],
+      "others90": {
+        "rawBase": 95.94366197183105,
+        "rawOvr": 115.94366197183105,
+        "displayOvr": 116
+      },
+      "others95": {
+        "rawBase": 97.97183098591546,
+        "rawOvr": 117.97183098591546,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000006,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "LW",
+      "style": "와이드 플레이메이커",
+      "selected": [
+        "passing",
+        "dribbling",
+        "speed",
+        "agility",
+        "ballControl"
+      ],
+      "others90": {
+        "rawBase": 94.85915492957751,
+        "rawOvr": 114.85915492957751,
+        "displayOvr": 115
+      },
+      "others95": {
+        "rawBase": 97.4295774647887,
+        "rawOvr": 117.4295774647887,
+        "displayOvr": 117
+      },
+      "others100": {
+        "rawBase": 100.00000000000006,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "LW",
+      "style": "스피드 윙어",
+      "selected": [
+        "speed",
+        "shooting",
+        "positioning",
+        "dribbling",
+        "agility"
+      ],
+      "others90": {
+        "rawBase": 95.73239436619723,
+        "rawOvr": 115.73239436619723,
+        "displayOvr": 116
+      },
+      "others95": {
+        "rawBase": 97.86619718309855,
+        "rawOvr": 117.86619718309855,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000004,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "LW",
+      "style": "크로스 전문가",
+      "selected": [
+        "speed",
+        "dribbling",
+        "agility",
+        "ballControl",
+        "shooting"
+      ],
+      "others90": {
+        "rawBase": 94.9859154929578,
+        "rawOvr": 114.9859154929578,
+        "displayOvr": 115
+      },
+      "others95": {
+        "rawBase": 97.49295774647884,
+        "rawOvr": 117.49295774647884,
+        "displayOvr": 117
+      },
+      "others100": {
+        "rawBase": 100.00000000000006,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "LW",
+      "style": "침투형 윙어",
+      "selected": [
+        "shooting",
+        "positioning",
+        "composure",
+        "dribbling",
+        "speed"
+      ],
+      "others90": {
+        "rawBase": 95.52112676056343,
+        "rawOvr": 115.52112676056343,
+        "displayOvr": 116
+      },
+      "others95": {
+        "rawBase": 97.76056338028165,
+        "rawOvr": 117.76056338028165,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000006,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "LW",
+      "style": "프레싱 윙어",
+      "selected": [
+        "dribbling",
+        "speed",
+        "agility",
+        "ballControl",
+        "shooting"
+      ],
+      "others90": {
+        "rawBase": 94.50704225352118,
+        "rawOvr": 114.50704225352118,
+        "displayOvr": 115
+      },
+      "others95": {
+        "rawBase": 97.25352112676053,
+        "rawOvr": 117.25352112676053,
+        "displayOvr": 117
+      },
+      "others100": {
+        "rawBase": 100.00000000000006,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "LW",
+      "style": "골 사냥꾼",
+      "selected": [
+        "shooting",
+        "positioning",
+        "composure",
+        "dribbling",
+        "speed"
+      ],
+      "others90": {
+        "rawBase": 95.52112676056343,
+        "rawOvr": 115.52112676056343,
+        "displayOvr": 116
+      },
+      "others95": {
+        "rawBase": 97.76056338028165,
+        "rawOvr": 117.76056338028165,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000006,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "RW",
+      "style": "인사이드 포워드",
+      "selected": [
+        "dribbling",
+        "agility",
+        "ballControl",
+        "speed",
+        "shooting"
+      ],
+      "others90": {
+        "rawBase": 95.94366197183105,
+        "rawOvr": 115.94366197183105,
+        "displayOvr": 116
+      },
+      "others95": {
+        "rawBase": 97.97183098591546,
+        "rawOvr": 117.97183098591546,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000006,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "RW",
+      "style": "클래식 윙어",
+      "selected": [
+        "speed",
+        "dribbling",
+        "agility",
+        "ballControl",
+        "shooting"
+      ],
+      "others90": {
+        "rawBase": 94.9859154929578,
+        "rawOvr": 114.9859154929578,
+        "displayOvr": 115
+      },
+      "others95": {
+        "rawBase": 97.49295774647884,
+        "rawOvr": 117.49295774647884,
+        "displayOvr": 117
+      },
+      "others100": {
+        "rawBase": 100.00000000000006,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "RW",
+      "style": "인버티드 윙어",
+      "selected": [
+        "dribbling",
+        "agility",
+        "ballControl",
+        "speed",
+        "shooting"
+      ],
+      "others90": {
+        "rawBase": 95.94366197183105,
+        "rawOvr": 115.94366197183105,
+        "displayOvr": 116
+      },
+      "others95": {
+        "rawBase": 97.97183098591546,
+        "rawOvr": 117.97183098591546,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000006,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "RW",
+      "style": "드리블러",
+      "selected": [
+        "dribbling",
+        "agility",
+        "ballControl",
+        "speed",
+        "shooting"
+      ],
+      "others90": {
+        "rawBase": 95.94366197183105,
+        "rawOvr": 115.94366197183105,
+        "displayOvr": 116
+      },
+      "others95": {
+        "rawBase": 97.97183098591546,
+        "rawOvr": 117.97183098591546,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000006,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "RW",
+      "style": "와이드 플레이메이커",
+      "selected": [
+        "passing",
+        "dribbling",
+        "speed",
+        "agility",
+        "ballControl"
+      ],
+      "others90": {
+        "rawBase": 94.85915492957751,
+        "rawOvr": 114.85915492957751,
+        "displayOvr": 115
+      },
+      "others95": {
+        "rawBase": 97.4295774647887,
+        "rawOvr": 117.4295774647887,
+        "displayOvr": 117
+      },
+      "others100": {
+        "rawBase": 100.00000000000006,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "RW",
+      "style": "스피드 윙어",
+      "selected": [
+        "speed",
+        "shooting",
+        "positioning",
+        "dribbling",
+        "agility"
+      ],
+      "others90": {
+        "rawBase": 95.73239436619723,
+        "rawOvr": 115.73239436619723,
+        "displayOvr": 116
+      },
+      "others95": {
+        "rawBase": 97.86619718309855,
+        "rawOvr": 117.86619718309855,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000004,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "RW",
+      "style": "크로스 전문가",
+      "selected": [
+        "speed",
+        "dribbling",
+        "agility",
+        "ballControl",
+        "shooting"
+      ],
+      "others90": {
+        "rawBase": 94.9859154929578,
+        "rawOvr": 114.9859154929578,
+        "displayOvr": 115
+      },
+      "others95": {
+        "rawBase": 97.49295774647884,
+        "rawOvr": 117.49295774647884,
+        "displayOvr": 117
+      },
+      "others100": {
+        "rawBase": 100.00000000000006,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "RW",
+      "style": "침투형 윙어",
+      "selected": [
+        "shooting",
+        "positioning",
+        "composure",
+        "dribbling",
+        "speed"
+      ],
+      "others90": {
+        "rawBase": 95.52112676056343,
+        "rawOvr": 115.52112676056343,
+        "displayOvr": 116
+      },
+      "others95": {
+        "rawBase": 97.76056338028165,
+        "rawOvr": 117.76056338028165,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000006,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "RW",
+      "style": "프레싱 윙어",
+      "selected": [
+        "dribbling",
+        "speed",
+        "agility",
+        "ballControl",
+        "shooting"
+      ],
+      "others90": {
+        "rawBase": 94.50704225352118,
+        "rawOvr": 114.50704225352118,
+        "displayOvr": 115
+      },
+      "others95": {
+        "rawBase": 97.25352112676053,
+        "rawOvr": 117.25352112676053,
+        "displayOvr": 117
+      },
+      "others100": {
+        "rawBase": 100.00000000000006,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "RW",
+      "style": "골 사냥꾼",
+      "selected": [
+        "shooting",
+        "positioning",
+        "composure",
+        "dribbling",
+        "speed"
+      ],
+      "others90": {
+        "rawBase": 95.52112676056343,
+        "rawOvr": 115.52112676056343,
+        "displayOvr": 116
+      },
+      "others95": {
+        "rawBase": 97.76056338028165,
+        "rawOvr": 117.76056338028165,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000006,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "CF",
+      "style": "펄스 나인",
+      "selected": [
+        "passing",
+        "vision",
+        "ballControl",
+        "decisions",
+        "positioning"
+      ],
+      "others90": {
+        "rawBase": 95.8028169014085,
+        "rawOvr": 115.8028169014085,
+        "displayOvr": 116
+      },
+      "others95": {
+        "rawBase": 97.90140845070418,
+        "rawOvr": 117.90140845070418,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000006,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "CF",
+      "style": "연계형 포워드",
+      "selected": [
+        "passing",
+        "vision",
+        "ballControl",
+        "decisions",
+        "positioning"
+      ],
+      "others90": {
+        "rawBase": 95.8028169014085,
+        "rawOvr": 115.8028169014085,
+        "displayOvr": 116
+      },
+      "others95": {
+        "rawBase": 97.90140845070418,
+        "rawOvr": 117.90140845070418,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000006,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "CF",
+      "style": "딥라잉 포워드",
+      "selected": [
+        "passing",
+        "vision",
+        "ballControl",
+        "decisions",
+        "positioning"
+      ],
+      "others90": {
+        "rawBase": 95.8028169014085,
+        "rawOvr": 115.8028169014085,
+        "displayOvr": 116
+      },
+      "others95": {
+        "rawBase": 97.90140845070418,
+        "rawOvr": 117.90140845070418,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000006,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "CF",
+      "style": "완성형 포워드",
+      "selected": [
+        "ballControl",
+        "shooting",
+        "decisions",
+        "passing",
+        "vision"
+      ],
+      "others90": {
+        "rawBase": 95.66197183098596,
+        "rawOvr": 115.66197183098596,
+        "displayOvr": 116
+      },
+      "others95": {
+        "rawBase": 97.83098591549292,
+        "rawOvr": 117.83098591549292,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000006,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "CF",
+      "style": "쉐도우 스트라이커",
+      "selected": [
+        "positioning",
+        "shooting",
+        "composure",
+        "ballControl",
+        "passing"
+      ],
+      "others90": {
+        "rawBase": 95.73239436619724,
+        "rawOvr": 115.73239436619724,
+        "displayOvr": 116
+      },
+      "others95": {
+        "rawBase": 97.86619718309855,
+        "rawOvr": 117.86619718309855,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000006,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "CF",
+      "style": "찬스 메이커",
+      "selected": [
+        "passing",
+        "vision",
+        "ballControl",
+        "decisions",
+        "positioning"
+      ],
+      "others90": {
+        "rawBase": 95.8028169014085,
+        "rawOvr": 115.8028169014085,
+        "displayOvr": 116
+      },
+      "others95": {
+        "rawBase": 97.90140845070418,
+        "rawOvr": 117.90140845070418,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000006,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "CF",
+      "style": "테크니컬 포워드",
+      "selected": [
+        "ballControl",
+        "passing",
+        "dribbling",
+        "vision",
+        "positioning"
+      ],
+      "others90": {
+        "rawBase": 95.73239436619724,
+        "rawOvr": 115.73239436619724,
+        "displayOvr": 116
+      },
+      "others95": {
+        "rawBase": 97.86619718309856,
+        "rawOvr": 117.86619718309856,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000006,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "CF",
+      "style": "타깃형 포워드",
+      "selected": [
+        "ballControl",
+        "passing",
+        "vision",
+        "positioning",
+        "composure"
+      ],
+      "others90": {
+        "rawBase": 94.50704225352118,
+        "rawOvr": 114.50704225352118,
+        "displayOvr": 115
+      },
+      "others95": {
+        "rawBase": 97.25352112676053,
+        "rawOvr": 117.25352112676053,
+        "displayOvr": 117
+      },
+      "others100": {
+        "rawBase": 100.00000000000006,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "CF",
+      "style": "프레싱 포워드",
+      "selected": [
+        "ballControl",
+        "passing",
+        "vision",
+        "positioning",
+        "composure"
+      ],
+      "others90": {
+        "rawBase": 94.50704225352118,
+        "rawOvr": 114.50704225352118,
+        "displayOvr": 115
+      },
+      "others95": {
+        "rawBase": 97.25352112676053,
+        "rawOvr": 117.25352112676053,
+        "displayOvr": 117
+      },
+      "others100": {
+        "rawBase": 100.00000000000006,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "CF",
+      "style": "침투형 포워드",
+      "selected": [
+        "positioning",
+        "shooting",
+        "composure",
+        "ballControl",
+        "passing"
+      ],
+      "others90": {
+        "rawBase": 95.73239436619724,
+        "rawOvr": 115.73239436619724,
+        "displayOvr": 116
+      },
+      "others95": {
+        "rawBase": 97.86619718309855,
+        "rawOvr": 117.86619718309855,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000006,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "SS",
+      "style": "세컨드 스트라이커",
+      "selected": [
+        "positioning",
+        "composure",
+        "shooting",
+        "ballControl",
+        "vision"
+      ],
+      "others90": {
+        "rawBase": 95.94366197183103,
+        "rawOvr": 115.94366197183103,
+        "displayOvr": 116
+      },
+      "others95": {
+        "rawBase": 97.97183098591545,
+        "rawOvr": 117.97183098591545,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000006,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "SS",
+      "style": "쉐도우 스트라이커",
+      "selected": [
+        "positioning",
+        "shooting",
+        "composure",
+        "ballControl",
+        "vision"
+      ],
+      "others90": {
+        "rawBase": 95.94366197183103,
+        "rawOvr": 115.94366197183103,
+        "displayOvr": 116
+      },
+      "others95": {
+        "rawBase": 97.97183098591545,
+        "rawOvr": 117.97183098591545,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000006,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "SS",
+      "style": "펄스 나인",
+      "selected": [
+        "passing",
+        "vision",
+        "positioning",
+        "decisions",
+        "composure"
+      ],
+      "others90": {
+        "rawBase": 95.52112676056342,
+        "rawOvr": 115.52112676056342,
+        "displayOvr": 116
+      },
+      "others95": {
+        "rawBase": 97.76056338028164,
+        "rawOvr": 117.76056338028164,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000004,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "SS",
+      "style": "연계형 포워드",
+      "selected": [
+        "passing",
+        "vision",
+        "positioning",
+        "decisions",
+        "composure"
+      ],
+      "others90": {
+        "rawBase": 95.52112676056342,
+        "rawOvr": 115.52112676056342,
+        "displayOvr": 116
+      },
+      "others95": {
+        "rawBase": 97.76056338028164,
+        "rawOvr": 117.76056338028164,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000004,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "SS",
+      "style": "침투형 포워드",
+      "selected": [
+        "positioning",
+        "shooting",
+        "composure",
+        "ballControl",
+        "vision"
+      ],
+      "others90": {
+        "rawBase": 95.94366197183103,
+        "rawOvr": 115.94366197183103,
+        "displayOvr": 116
+      },
+      "others95": {
+        "rawBase": 97.97183098591545,
+        "rawOvr": 117.97183098591545,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000006,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "SS",
+      "style": "찬스 메이커",
+      "selected": [
+        "passing",
+        "vision",
+        "positioning",
+        "decisions",
+        "composure"
+      ],
+      "others90": {
+        "rawBase": 95.52112676056342,
+        "rawOvr": 115.52112676056342,
+        "displayOvr": 116
+      },
+      "others95": {
+        "rawBase": 97.76056338028164,
+        "rawOvr": 117.76056338028164,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000004,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "SS",
+      "style": "드리블형 포워드",
+      "selected": [
+        "ballControl",
+        "dribbling",
+        "positioning",
+        "composure",
+        "shooting"
+      ],
+      "others90": {
+        "rawBase": 95.25352112676062,
+        "rawOvr": 115.25352112676062,
+        "displayOvr": 115
+      },
+      "others95": {
+        "rawBase": 97.62676056338024,
+        "rawOvr": 117.62676056338024,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000004,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "SS",
+      "style": "완성형 포워드",
+      "selected": [
+        "shooting",
+        "ballControl",
+        "positioning",
+        "decisions",
+        "composure"
+      ],
+      "others90": {
+        "rawBase": 95.8028169014085,
+        "rawOvr": 115.8028169014085,
+        "displayOvr": 116
+      },
+      "others95": {
+        "rawBase": 97.90140845070418,
+        "rawOvr": 117.90140845070418,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000006,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "SS",
+      "style": "프레싱 포워드",
+      "selected": [
+        "positioning",
+        "composure",
+        "shooting",
+        "ballControl",
+        "vision"
+      ],
+      "others90": {
+        "rawBase": 94.50704225352116,
+        "rawOvr": 114.50704225352116,
+        "displayOvr": 115
+      },
+      "others95": {
+        "rawBase": 97.25352112676052,
+        "rawOvr": 117.25352112676052,
+        "displayOvr": 117
+      },
+      "others100": {
+        "rawBase": 100.00000000000003,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "SS",
+      "style": "골 사냥꾼",
+      "selected": [
+        "positioning",
+        "shooting",
+        "composure",
+        "ballControl",
+        "vision"
+      ],
+      "others90": {
+        "rawBase": 95.94366197183103,
+        "rawOvr": 115.94366197183103,
+        "displayOvr": 116
+      },
+      "others95": {
+        "rawBase": 97.97183098591545,
+        "rawOvr": 117.97183098591545,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000006,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "ST",
+      "style": "포처",
+      "selected": [
+        "shooting",
+        "positioning",
+        "composure",
+        "ballControl",
+        "anticipation"
+      ],
+      "others90": {
+        "rawBase": 95.94366197183103,
+        "rawOvr": 115.94366197183103,
+        "displayOvr": 116
+      },
+      "others95": {
+        "rawBase": 97.97183098591545,
+        "rawOvr": 117.97183098591545,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000006,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "ST",
+      "style": "타깃맨",
+      "selected": [
+        "heading",
+        "shooting",
+        "strength",
+        "positioning",
+        "composure"
+      ],
+      "others90": {
+        "rawBase": 95.1971830985916,
+        "rawOvr": 115.1971830985916,
+        "displayOvr": 115
+      },
+      "others95": {
+        "rawBase": 97.59859154929573,
+        "rawOvr": 117.59859154929573,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000003,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "ST",
+      "style": "프레싱 포워드",
+      "selected": [
+        "shooting",
+        "strength",
+        "positioning",
+        "composure",
+        "ballControl"
+      ],
+      "others90": {
+        "rawBase": 94.774647887324,
+        "rawOvr": 114.774647887324,
+        "displayOvr": 115
+      },
+      "others95": {
+        "rawBase": 97.38732394366193,
+        "rawOvr": 117.38732394366193,
+        "displayOvr": 117
+      },
+      "others100": {
+        "rawBase": 100.00000000000006,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "ST",
+      "style": "완성형 스트라이커",
+      "selected": [
+        "shooting",
+        "ballControl",
+        "positioning",
+        "composure",
+        "anticipation"
+      ],
+      "others90": {
+        "rawBase": 95.54929577464793,
+        "rawOvr": 115.54929577464793,
+        "displayOvr": 116
+      },
+      "others95": {
+        "rawBase": 97.7746478873239,
+        "rawOvr": 117.7746478873239,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000006,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "ST",
+      "style": "어드밴스드 포워드",
+      "selected": [
+        "positioning",
+        "shooting",
+        "speed",
+        "composure",
+        "ballControl"
+      ],
+      "others90": {
+        "rawBase": 95.8028169014085,
+        "rawOvr": 115.8028169014085,
+        "displayOvr": 116
+      },
+      "others95": {
+        "rawBase": 97.90140845070418,
+        "rawOvr": 117.90140845070418,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000006,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "ST",
+      "style": "딥라잉 포워드",
+      "selected": [
+        "shooting",
+        "positioning",
+        "composure",
+        "ballControl",
+        "anticipation"
+      ],
+      "others90": {
+        "rawBase": 94.50704225352115,
+        "rawOvr": 114.50704225352115,
+        "displayOvr": 115
+      },
+      "others95": {
+        "rawBase": 97.25352112676052,
+        "rawOvr": 117.25352112676052,
+        "displayOvr": 117
+      },
+      "others100": {
+        "rawBase": 100.00000000000003,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "ST",
+      "style": "공중볼 스트라이커",
+      "selected": [
+        "heading",
+        "shooting",
+        "strength",
+        "positioning",
+        "composure"
+      ],
+      "others90": {
+        "rawBase": 95.1971830985916,
+        "rawOvr": 115.1971830985916,
+        "displayOvr": 115
+      },
+      "others95": {
+        "rawBase": 97.59859154929573,
+        "rawOvr": 117.59859154929573,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000003,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "ST",
+      "style": "침투형 스트라이커",
+      "selected": [
+        "shooting",
+        "positioning",
+        "composure",
+        "ballControl",
+        "anticipation"
+      ],
+      "others90": {
+        "rawBase": 95.94366197183103,
+        "rawOvr": 115.94366197183103,
+        "displayOvr": 116
+      },
+      "others95": {
+        "rawBase": 97.97183098591545,
+        "rawOvr": 117.97183098591545,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000006,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "ST",
+      "style": "연계형 스트라이커",
+      "selected": [
+        "shooting",
+        "positioning",
+        "composure",
+        "ballControl",
+        "anticipation"
+      ],
+      "others90": {
+        "rawBase": 94.50704225352115,
+        "rawOvr": 114.50704225352115,
+        "displayOvr": 115
+      },
+      "others95": {
+        "rawBase": 97.25352112676052,
+        "rawOvr": 117.25352112676052,
+        "displayOvr": 117
+      },
+      "others100": {
+        "rawBase": 100.00000000000003,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    },
+    {
+      "position": "ST",
+      "style": "골 사냥꾼",
+      "selected": [
+        "shooting",
+        "positioning",
+        "composure",
+        "ballControl",
+        "anticipation"
+      ],
+      "others90": {
+        "rawBase": 95.94366197183103,
+        "rawOvr": 115.94366197183103,
+        "displayOvr": 116
+      },
+      "others95": {
+        "rawBase": 97.97183098591545,
+        "rawOvr": 117.97183098591545,
+        "displayOvr": 118
+      },
+      "others100": {
+        "rawBase": 100.00000000000006,
+        "rawOvr": 120,
+        "displayOvr": 120
+      },
+      "currentOverallAll110": 100
+    }
+  ],
+  "growthAt100": {
+    "ovr": 100,
+    "potential": 100,
+    "shooting": 100,
+    "positioning": 100,
+    "composure": 100
+  },
+  "match100vs110": {
+    "compared": 320,
+    "identical": 320,
+    "condition": "same OVR=100, same team power, same seed; every user attribute 100 versus 110; test deliberately bypasses current save ranges"
+  },
+  "save110Error": "Error: 저장 데이터 오류: player.attributes.shooting 범위가 올바르지 않습니다."
+}

@@ -110,7 +110,13 @@ export function attributeWeights(position: Position, style: string): Partial<Rec
   return weights;
 }
 
-export function overall(player: Pick<Player, 'attributes'|'position'|'style'>): number {
+/** The engine's team comparison uses actual weighted ability, without the display mastery conversion. */
+export function playingAbility(player: Pick<Player, 'attributes'|'position'|'style'>&{ovr?:number}): number {
+  // Preserve the established 0–100 comparison scale, including old saves and external roster records.
+  if(player.ovr!==undefined&&!Object.values(player.attributes).some(v=>(v??0)>100))return player.ovr;
+  return Object.entries(attributeWeights(player.position,player.style)).reduce((n,[key,w])=>n+Math.max(1,Math.min(110,player.attributes[key as AttributeKey]??1))*(w??0),0);
+}
+export function overall(player: Pick<Player, 'attributes'|'position'|'style'|'playSkills'>): number {
   const weights = attributeWeights(player.position, player.style);
   let value = 0;
   for (const [key, weight] of Object.entries(weights)) {
@@ -118,5 +124,13 @@ export function overall(player: Pick<Player, 'attributes'|'position'|'style'>): 
     const ability = typeof raw === 'number' && Number.isFinite(raw) ? Math.max(1, Math.min(100, raw)) : 1;
     value += ability * (weight ?? 0);
   }
-  return Math.max(1, Math.min(100, Math.round(value)));
+  const allowed=player.position==='GK'?GK_ATTRIBUTES:FIELD_ATTRIBUTES;
+  const selected=[...new Set(player.playSkills??[])].filter(k=>allowed.includes(k));
+  // Invalid selections must never produce an inflated rating; save/command validation rejects them.
+  if(selected.length>5)return Math.max(1,Math.min(100,Math.round(value)));
+  const fifth=Object.values(weights).sort((a,b)=>(b??0)-(a??0))[4]??1;
+  const mastery=selected.reduce((n,k)=>n+Math.max(0,Math.min(1,((player.attributes[k]??0)-100)/10))*Math.min(1,(weights[k]??0)/fifth),0)/5;
+  // Only earned 100+ skill growth closes the gap to the selected ceiling. Selecting alone adds zero.
+  const ceiling=100+4*selected.length;
+  return Math.max(1, Math.min(ceiling,120,Math.round(value+(120-value)*mastery)));
 }

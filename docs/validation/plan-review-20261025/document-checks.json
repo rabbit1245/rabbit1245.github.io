@@ -1,0 +1,14 @@
+{
+  "rowCount": 24,
+  "rangeCoverage": true,
+  "exampleCountMismatches": [
+    {
+      "range": [
+        95,
+        99
+      ],
+      "count": 6
+    }
+  ],
+  "realExampleBoundaryConflict": "Header says 75+ are named real players, while 75–79 uses fictional role examples; specific row can take precedence."
+}

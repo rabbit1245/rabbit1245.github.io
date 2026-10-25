@@ -1,0 +1,12 @@
+{
+  "reviewDate": "2026-10-25",
+  "reviewedSourceVersion": "2.7.4-dev.1",
+  "sourceHead": "f676c14ebcc1accab9f8fb13e63823d07674b095",
+  "unchangedTrackedAndSourceFilesChecked": 970,
+  "changedSinceAuditStarted": [],
+  "newRuntimeSourceFiles": [],
+  "implementationPerformed": false,
+  "deploymentPerformed": false,
+  "probeScript": "docs/validation/plan-review-20261025/probe.ts",
+  "publicZipSha256": "9eb65c523c39690f29b096e27d5a82dcee4a6661f8052af5c63f8de3f30f758b"
+}
