@@ -1,4 +1,4 @@
-import { chromium } from 'playwright';
+import { chromium } from './stored-careers.mjs';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { mkdir, stat, writeFile } from 'node:fs/promises';
@@ -9,7 +9,7 @@ const sourcePath = path.resolve(process.env.KBALL_LARGE_SAVE_FILE || 'test-resul
 const results = path.resolve(process.env.KBALL_TEST_RESULTS_DIR || 'test-results/browser-large-save');
 const size = (await stat(sourcePath)).size;
 assert.ok(size > 64 * 1024 * 1024, `Expected a real save above the previous 64MB limit; received ${size} bytes`);
-assert.ok(size <= 128 * 1024 * 1024, 'The actual thirty-season save must fit the documented 128MB limit');
+assert.ok(size <= 256 * 1024 * 1024, 'The actual thirty-season save must fit the documented 256MB limit');
 await mkdir(results, { recursive: true });
 
 // Release the large source JSON heap before the browser imports another copy.
@@ -32,24 +32,17 @@ const browser=await chromium.launch({headless:true,...(executablePath?{executabl
 const errors=[];let page;
 
 async function storedSummary() {
-  return page.evaluate(()=>new Promise((resolve,reject)=>{
-    const request=indexedDB.open('kball-careers',1);request.onerror=()=>reject(request.error);request.onsuccess=()=>{
-      const db=request.result,tx=db.transaction(['metadata','slots'],'readonly'),metadata=tx.objectStore('metadata').getAll();let result;
-      metadata.onsuccess=()=>{
-        const active=metadata.result.filter(m=>!m.deleted);
-        if(active.length!==1){result={slotCount:active.length};return;}
-        const read=tx.objectStore('slots').get(active[0].id);
-        read.onsuccess=()=>{
-          const envelope=read.result.envelope,c=envelope.career;
-          const add=(s,r)=>{for(const [key,value]of Object.entries(r))s[key]=Number(((s[key]||0)+value).toFixed(2));return s;};const sum=rows=>rows.reduce(add,{});
-          const club=sum([...c.history.map(h=>h.stats),...(!c.history.some(h=>h.year===c.season.year)?[c.season.playerStats]:[])]),n=c.systems.national,seen=new Set();
-          const nationalMatches=[...n.history.flatMap(h=>h.matches),...n.matches].filter(m=>{if(seen.has(m.id))return false;seen.add(m.id);return true;});const national=sum(nationalMatches.map(m=>m.playerStats));
-          result={slotCount:active.length,id:c.id,playerId:c.player.id,playerName:c.player.name,seed:c.seed,stage:c.stage,year:c.season.year,revision:c.revision,historyCount:c.history.length,matchCount:c.history.reduce((s,h)=>s+h.matches.length,0),nationalMatchCount:nationalMatches.length,metadataMatchesHash:active[0].hash===envelope.hash,club,national,all:sum([club,national])};
-        };
-      };
-      tx.oncomplete=()=>{db.close();resolve(result);};tx.onabort=()=>{db.close();reject(tx.error);};
-    };
-  }));
+ return page.evaluate(()=>new Promise((resolve,reject)=>{const request=indexedDB.open('kball-careers',1);request.onerror=()=>reject(request.error);request.onsuccess=()=>{
+  const db=request.result,tx=db.transaction(['metadata','slots'],'readonly'),metadata=tx.objectStore('metadata').getAll(),slots=tx.objectStore('slots').getAll();
+  tx.oncomplete=async()=>{db.close();try{
+   const active=metadata.result.filter(m=>!m.deleted);if(active.length!==1){resolve({slotCount:active.length});return;}
+   const record=slots.result.find(r=>r.id===active[0].id),c=await window.__readKballStored(record),logicalHash=record.envelope?.hash??record.journal?.at(-1)?.hash??record.versionHash;
+   const add=(s,r)=>{for(const [key,value]of Object.entries(r))s[key]=Number(((s[key]||0)+value).toFixed(2));return s;},sum=rows=>rows.reduce(add,{});
+   const club=sum([...c.history.map(h=>h.stats),...(!c.history.some(h=>h.year===c.season.year)?[c.season.playerStats]:[])]),n=c.systems.national,seen=new Set();
+   const nationalMatches=[...n.history.flatMap(h=>h.matches),...n.matches].filter(m=>{if(seen.has(m.id))return false;seen.add(m.id);return true;}),national=sum(nationalMatches.map(m=>m.playerStats));
+   resolve({slotCount:active.length,id:c.id,playerId:c.player.id,playerName:c.player.name,seed:c.seed,stage:c.stage,year:c.season.year,revision:c.revision,historyCount:c.history.length,matchCount:c.history.reduce((s,h)=>s+h.matches.length,0),nationalMatchCount:nationalMatches.length,metadataMatchesHash:active[0].hash===logicalHash,club,national,all:sum([club,national])});
+  }catch(e){reject(e);}};tx.onabort=()=>reject(tx.error);
+ }}));
 }
 async function waitSaved(label) {
   const deadline=Date.now()+180_000;
@@ -66,7 +59,7 @@ function validateStored(actual) {
   for(const scope of ['club','national','all'])assert.deepEqual(actual[scope],expected[scope],`${scope} totals must survive large-file import and save`);
 }
 async function verifyDOM() {
-  await page.getByTestId('career-tab').click();await page.getByTestId('career-view-retirement').click();await page.getByRole('heading',{name:`${expected.playerName}의 축구 인생`}).waitFor();assert.equal(await page.getByTestId('retire-career').count(),0);await page.getByTestId('career-view-records').click();await page.getByRole('button',{name:'통산',exact:true}).click();
+  await page.getByTestId('career-tab').click();await page.getByTestId('career-view-retirement').click();await page.getByRole('heading',{name:`${expected.playerName}의 은퇴 기록`}).waitFor();assert.equal(await page.getByTestId('retire-career').count(),0);await page.getByTestId('career-view-records').click();await page.getByRole('button',{name:'통산',exact:true}).click();
   for(const scope of ['all','club','national']){
     const values=await page.getByTestId(`records-scope-${scope}`).evaluate(button=>[...button.children].slice(1).map(e=>e.textContent));const stats=expected[scope];
     assert.equal(Number(values[0].replace(/[^\d]/g,'')),stats.apps||0,`${scope} DOM apps`);assert.equal(Number(values[1].replace(/[^\d]/g,'')),stats.minutes||0,`${scope} DOM minutes`);assert.equal(Number(values[2].replace(/[^\d]/g,'')),stats.goals||0,`${scope} DOM goals`);assert.equal(Number(values[3].replace(/[^\d]/g,'')),stats.assists||0,`${scope} DOM assists`);assert.equal(values[4],stats.ratingCount?(stats.ratingSum/stats.ratingCount).toFixed(2):'—',`${scope} DOM rating`);
@@ -80,6 +73,6 @@ try{
   const importMs=Date.now()-started;console.log('Large save DOM totals verified');
   await page.locator('.record-book').screenshot({path:path.join(results,'kball-large-save-records.png')});
   await page.reload({waitUntil:'networkidle'});await page.getByRole('button',{name:'이어서 플레이',exact:true}).click();await waitSaved('reload');const reloaded=await storedSummary();validateStored(reloaded);assert.equal(reloaded.id,imported.id);await verifyDOM();assert.deepEqual(errors,[]);
-  const report={passed:['actual thirty-season save above 64MB imported into a new slot','128MB UI guard and persistent IndexedDB slot accepted the actual large save','retired state, all 30 seasons and every match count preserved','combined/club/national DOM totals match source before and after reload'],baseURL,bytes:size,importMs,historyCount:expected.historyCount,matchCount:expected.matchCount,nationalMatchCount:expected.nationalMatchCount,pageErrors:errors};
+  const report={passed:['actual thirty-season save above 64MB imported into a new slot','256MB UI guard and persistent IndexedDB slot accepted the actual large save','retired state, all 30 seasons and every match count preserved','combined/club/national DOM totals match source before and after reload'],baseURL,bytes:size,importMs,historyCount:expected.historyCount,matchCount:expected.matchCount,nationalMatchCount:expected.nationalMatchCount,pageErrors:errors};
   await writeFile(path.join(results,'large-save-results.json'),JSON.stringify(report,null,2));console.log('Kball large-save browser verification passed:',JSON.stringify(report));
 }catch(error){if(page&&!page.isClosed())await page.screenshot({path:path.join(results,'large-save-failure.png'),fullPage:false}).catch(()=>{});await writeFile(path.join(results,'large-save-results.json'),JSON.stringify({failure:String(error),bytes:size,pageErrors:errors},null,2));throw error;}finally{await browser.close();}

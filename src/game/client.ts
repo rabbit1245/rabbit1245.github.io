@@ -1,6 +1,6 @@
-import type { Career, GameCommand } from './types';
+import type { Career, GameCommand,GameProgress } from './types';
 
-type Pending = { resolve: (value: Career) => void; reject: (reason: Error) => void; timeout: ReturnType<typeof setTimeout> };
+type Pending = { resolve: (value: Career) => void; reject: (reason: Error) => void; timeout: ReturnType<typeof setTimeout>;onProgress?:(p:GameProgress)=>void };
 let worker: Worker | undefined;
 let resident:Career|undefined;
 const pending = new Map<string, Pending>();
@@ -15,18 +15,19 @@ function stopWorker(message: string) {
   pending.clear();
 }
 
-export async function runGameCommand(career: Career, command: GameCommand): Promise<Career> {
+export async function runGameCommand(career: Career, command: GameCommand,onProgress?:(p:GameProgress)=>void): Promise<Career> {
   const id = crypto.randomUUID();
   if (typeof Worker === 'undefined'||['manualAging','attributeLock','attributeLockAll','training','cheatSettings','increaseAttribute'].includes(command.type)) {
     const { executeCommand } = await import('./commands');
-    return executeCommand(career, command, id);
+    return executeCommand(career, command, id,onProgress);
   }
   if (!worker) {
     worker = new Worker(new URL('./worker.ts', import.meta.url), { type: 'module' });
-    worker.addEventListener('message', (event: MessageEvent<{ id: string; career?: Career; error?: string }>) => {
+    worker.addEventListener('message', (event: MessageEvent<{ id: string; career?: Career; error?: string;progress?:GameProgress }>) => {
       const request = pending.get(event.data.id);
       if (!request) return;
       clearTimeout(request.timeout);
+      if(event.data.progress){request.timeout=setTimeout(()=>stopWorker('계산 응답이 오래 멈췄습니다. 저장된 상태는 유지됩니다.'),60_000);request.onProgress?.(event.data.progress);return;}
       pending.delete(event.data.id);
       if (event.data.error || !event.data.career) request.reject(new Error(event.data.error || '경기 결과를 불러오지 못했습니다.'));
       else {resident=event.data.career;request.resolve(event.data.career);}
@@ -36,7 +37,7 @@ export async function runGameCommand(career: Career, command: GameCommand): Prom
   }
   return new Promise<Career>((resolve, reject) => {
     const timeout = setTimeout(() => stopWorker('계산 시간이 초과되었습니다. 저장된 상태는 유지됩니다.'), 60_000);
-    pending.set(id, { resolve, reject, timeout });
+    pending.set(id, { resolve, reject, timeout,onProgress });
     try { worker!.postMessage({id,...(resident===career?{careerId:career.id,revision:career.revision}:{career}),command}); }
     catch { stopWorker('진행 요청을 전달하지 못했습니다.'); }
   });

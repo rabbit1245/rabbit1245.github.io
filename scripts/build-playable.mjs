@@ -5,7 +5,8 @@ import { execFileSync } from 'node:child_process';
 import path from 'node:path';
 
 const directory = path.resolve('play');
-await mkdir(directory, { recursive: true });
+const version = JSON.parse(await readFile('package.json', 'utf8')).version;
+const checkOnly = process.argv.includes('--check-only');
 
 function cataloguePlugin(embedCrests) {
   return {
@@ -29,7 +30,7 @@ const shared = { bundle: true, minify: true, write: false, target: 'es2022', pla
 const worker = await build({ ...shared, entryPoints: ['src/game/worker.ts'], format: 'iife', plugins: [cataloguePlugin(false)] });
 const workerSource = worker.outputFiles[0].text;
 new Function(workerSource); // Parse before embedding; never interpret replacement metacharacters in generated code.
-const saveWorker=await build({...shared,entryPoints:['src/game/save-worker.ts'],format:'iife',plugins:[cataloguePlugin(false),{name:'no-nested-save-worker',setup(builder){builder.onLoad({filter:/save-preparation\.ts$/},()=>({contents:"export function prepareSaveOffThread(){throw new Error('저장 검사 Worker 내부의 잘못된 중첩 요청입니다.');}",loader:'ts'}));}}]});
+const saveWorker=await build({...shared,entryPoints:['src/game/save-worker.ts'],format:'iife',plugins:[cataloguePlugin(false),{name:'no-nested-save-worker',setup(builder){builder.onLoad({filter:/save-preparation\.ts$/},()=>({contents:"export function prepareSaveOffThread(){throw new Error('저장 Worker 중첩 요청');} export const decodeSaveOffThread=prepareSaveOffThread,checkpointOffThread=prepareSaveOffThread,verifyFileOffThread=prepareSaveOffThread; export function cancelCheckpointPreparation(){}",loader:'ts'}));}}]});
 const saveWorkerSource=saveWorker.outputFiles[0].text;
 new Function(saveWorkerSource);
 const inlineWorkerPlugin = {
@@ -67,6 +68,12 @@ const application = await build({
 const javascript = application.outputFiles.find(file => file.path.endsWith('.js'));
 const css = application.outputFiles.find(file => file.path.endsWith('.css'));
 if (!javascript || !css) throw new Error('Missing portable application outputs.');
+if (checkOnly) {
+  new Function(javascript.text);
+  console.log('Portable application and both Blob Worker adapters validated; no HTML or ZIP written.');
+  process.exit(0);
+}
+await mkdir(directory, { recursive: true });
 const compressed = gzipSync(javascript.contents, { level: 9 }).toString('base64');
 const fontLicense = await readFile('public/FONT-LICENSE.txt','utf8');
 const crestLicense = await readFile('public/CREST-LICENSE.txt','utf8');
@@ -89,7 +96,7 @@ const html = `<!doctype html>
 })();
 </script><script type="text/plain" id="font-license">${fontLicense.replace(/<\/script/gi,'<\\/script')}</script><script type="text/plain" id="crest-license">${crestLicense.replace(/<\/script/gi,'<\\/script')}</script></body></html>`;
 await writeFile(path.join(directory, 'Kball.html'), html);
-await writeFile(path.join(directory, '읽어주세요.txt'), `K볼 · 바로 플레이\n\n1. ZIP 압축을 풉니다.\n2. Kball.html을 최신 Chrome 또는 Edge로 엽니다.\n3. 새 커리어 시작을 누르면 됩니다.\n\n별도 서버·설치·로그인 없이 동작하도록 게임, 선수 데이터와 구단 로고를 파일 안에 포함했습니다.\n저장은 브라우저에 보관됩니다. 파일 이름·위치 또는 브라우저를 바꾸기 전에는 저장 관리에서 JSON으로 내보내세요.\n\n현재 버전: K볼 2.7.2\n훈련에 체크한 능력치만 자동 성장합니다. 체크하지 않은 능력치는 훈련·출전 경험·자연 발달로 증가하지 않습니다. 0개 선택으로 시작하거나 다음 시즌에 넘어갈 수 있으며, 미확정 훈련 계획은 선택 없이 다음 시즌을 시작합니다.\n초록색 자물쇠는 자동 변동을 막습니다. 전체 잠금을 다시 누르면 모두 해제됩니다. 직접 누른 수동 노화는 잠금 중에도 적용되고 잠금은 유지됩니다.\n모바일 순위표·경기 목록에서 로고를 숨기던 스타일을 제거했습니다. 파리·인테르와 소규모 구단의 실제 엠블럼을 모바일·다운로드판에서 검증합니다.\nAZ 알크마르·NEC 네이메헌을 포함해 누락된 실제 구단 로고 187개를 추가했습니다. 국내 명단 913개 중 784개는 실제 SVG, 아직 확보하지 못한 129개는 중립 아이콘입니다. 로고는 HTML 안에 포함되어 오프라인에서도 표시됩니다.\n\n훈련의 노화 버튼 → −1/−5/−10 선택 → 원하는 능력치 클릭: 해당 항목만 감소합니다. 자물쇠를 켠 능력치는 훈련·경기 성장·부상 저하·치트 조정에서 고정됩니다. 수동 노화는 잠금 중에도 적용됩니다. 나이 증가에 따른 자동 능력치 감소는 없습니다.\n부상 버튼의 반 시즌/한 시즌은 182일/365일 동안 출전을 막고 팀 경기를 진행합니다. 시즌이 끝나면 이적·훈련을 결정한 뒤 다음 시즌에서 남은 기간을 이어갑니다. 기존 기록·부상 이력·복귀일은 보존됩니다.\n외부 이적 제안 6개(동급 3·하위 1·상위 1·극단적 랜덤 1), 재계약은 별도입니다. 금액은 저장된 유로를 게임 고정 환율 1유로=1,500원으로 환산해 표시하며 원본 계산은 유지합니다. 구단·리그·월간·국대 수상과 유니폼 판매 예상 순위를 실제 경기 기록으로 평가하고 K볼 자체 선정과 공식 수상 명칭을 구별합니다.\n국내 컵 17개와 UEFA 3개에 AFC 엘리트·리베르타도레스·CONCACAF 챔피언스컵·CAF 챔피언스리그·OFC 챔피언스리그를 연결했습니다. 직전 실제 우승자가 있을 때 국내/UEFA 슈퍼컵과 연례 FIFA 인터컨티넨털컵을 편성합니다. FIFA 클럽 월드컵은 2029년부터 4년 주기, 대륙별 자격으로 32팀·8개조·16강·결승 63경기를 진행합니다. 미래 개최국·일부 예선·미지원 국가 참가권·소속 리그에 따른 개최일·연장 생략은 표시된 게임 모형입니다. 미지원 국가의 초청 구단은 실존 구단명·추정 전력·(가상) 선수단을 쓰며 국내 리그 성적을 생성하지 않습니다.\nK3→K2는 연도별 라이선스 승인 명단과 결정전 규정 원문이 확인되어야 실제 결정전과 승강을 적용합니다. 현재 승인 명단이 미확인인 연도는 판정 보류 사유를 표시하며 우승만으로 강제 승격하지 않습니다. K4는 현재 명단에 없어 미지원입니다. 다른 국가의 기존 승강 모델은 플레이오프·연도별 규정 일부를 단순화합니다.\n기존 2024/FC25 국내 명단과 기존 저장은 유지됩니다. 공식 로고를 확보하지 못한 구단에는 중립 아이콘을 표시합니다. 진행 중 시즌에 새 국제대회나 과거 수상을 소급 생성하지 않으며 다음 시즌부터 적용합니다. 파일 이름·위치·브라우저를 바꾸기 전에 JSON 백업을 보관하세요.\n\n글꼴: Pretendard · SIL Open Font License. FONT-LICENSE.txt에 라이선스를 동봉했습니다.\n구단 SVG 출처와 저장소 라이선스는 CREST-LICENSE.txt에 동봉했습니다.\n`);
+await writeFile(path.join(directory, '읽어주세요.txt'), `K볼 · 바로 플레이\n\n1. ZIP 압축을 풉니다.\n2. Kball.html을 최신 Chrome 또는 Edge로 엽니다.\n3. 새 커리어 시작을 누르면 됩니다.\n\n별도 서버·설치·로그인 없이 동작하도록 게임, 선수 데이터와 구단 로고를 파일 안에 포함했습니다.\n저장은 브라우저에 보관됩니다. 파일 이름·위치 또는 브라우저를 바꾸기 전에는 저장 관리에서 JSON으로 내보내세요.\n\n현재 버전: K볼 ${version}\n훈련에 체크한 능력치만 자동 성장합니다. 체크하지 않은 능력치는 훈련·출전 경험·자연 발달로 증가하지 않습니다. 0개 선택으로 시작하거나 다음 시즌에 넘어갈 수 있으며, 미확정 훈련 계획은 선택 없이 다음 시즌을 시작합니다.\n초록색 자물쇠는 자동 변동을 막습니다. 전체 잠금을 다시 누르면 모두 해제됩니다. 직접 누른 수동 노화는 잠금 중에도 적용되고 잠금은 유지됩니다.\n모바일 순위표·경기 목록에서 로고를 숨기던 스타일을 제거했습니다. 파리·인테르와 소규모 구단의 실제 엠블럼을 모바일·다운로드판에서 검증합니다.\nAZ 알크마르·NEC 네이메헌을 포함해 누락된 실제 구단 로고 187개를 추가했습니다. 국내 명단 913개 중 784개는 실제 SVG, 아직 확보하지 못한 129개는 중립 아이콘입니다. 로고는 HTML 안에 포함되어 오프라인에서도 표시됩니다.\n\n훈련의 노화 버튼 → −1/−5/−10 선택 → 원하는 능력치 클릭: 해당 항목만 감소합니다. 자물쇠를 켠 능력치는 훈련·경기 성장·부상 저하·치트 조정에서 고정됩니다. 수동 노화와 부상 처리는 잠금 중에도 사용할 수 있고 잠금은 유지됩니다. 나이 증가에 따른 자동 능력치 감소는 없습니다.\n부상 버튼의 반 시즌/한 시즌은 182일/365일 동안 출전을 막고 팀 경기를 진행합니다. 시즌이 끝나면 이적·훈련을 결정한 뒤 다음 시즌에서 남은 기간을 이어갑니다. 오프시즌에는 다음 시즌 부상을 예약할 수 있습니다. 기존 기록·부상 이력·복귀일은 보존됩니다.\n\n작은 잠금·훈련·치트 변경은 먼저 안전하게 저장하고 전체 기록은 배경에서 합쳐 장기 저장의 클릭 지연을 줄였습니다. 실제 경기 계산과 과거 세부 기록은 유지합니다. 은퇴 TXT는 기본 정보·통산·연도별 기록·팀과 개인 수상·결승 결과로 정리했습니다.\n외부 이적 제안 6개(동급 3·하위 1·상위 1·극단적 랜덤 1), 재계약은 별도입니다. 금액은 저장된 유로를 게임 고정 환율 1유로=1,500원으로 환산해 표시하며 원본 계산은 유지합니다. 구단·리그·월간·국대 수상과 유니폼 판매 예상 순위를 실제 경기 기록으로 평가하고 K볼 자체 선정과 공식 수상 명칭을 구별합니다.\n국내 컵 17개와 UEFA 3개에 AFC 엘리트·리베르타도레스·CONCACAF 챔피언스컵·CAF 챔피언스리그·OFC 챔피언스리그를 연결했습니다. 직전 실제 우승자가 있을 때 국내/UEFA 슈퍼컵과 연례 FIFA 인터컨티넨털컵을 편성합니다. FIFA 클럽 월드컵은 2029년부터 4년 주기, 대륙별 자격으로 32팀·8개조·16강·결승 63경기를 진행합니다. 미래 개최국·일부 예선·미지원 국가 참가권·소속 리그에 따른 개최일·연장 생략은 표시된 게임 모형입니다. 미지원 국가의 초청 구단은 실존 구단명·추정 전력·(가상) 선수단을 쓰며 국내 리그 성적을 생성하지 않습니다.\nK3→K2는 연도별 라이선스 승인 명단과 결정전 규정 원문이 확인되어야 실제 결정전과 승강을 적용합니다. 현재 승인 명단이 미확인인 연도는 판정 보류 사유를 표시하며 우승만으로 강제 승격하지 않습니다. K4는 현재 명단에 없어 미지원입니다. 다른 국가의 기존 승강 모델은 플레이오프·연도별 규정 일부를 단순화합니다.\n기존 2024/FC25 국내 명단과 기존 저장은 유지됩니다. 공식 로고를 확보하지 못한 구단에는 중립 아이콘을 표시합니다. 진행 중 시즌에 새 국제대회나 과거 수상을 소급 생성하지 않으며 다음 시즌부터 적용합니다. 파일 이름·위치·브라우저를 바꾸기 전에 JSON 백업을 보관하세요.\n\n글꼴: Pretendard · SIL Open Font License. FONT-LICENSE.txt에 라이선스를 동봉했습니다.\n구단 SVG 출처와 저장소 라이선스는 CREST-LICENSE.txt에 동봉했습니다.\n`);
 await writeFile(path.join(directory,'FONT-LICENSE.txt'),fontLicense);
 await writeFile(path.join(directory,'CREST-LICENSE.txt'),crestLicense);
 execFileSync('python3', ['-c', `from pathlib import Path\nfrom zipfile import ZipFile, ZIP_DEFLATED\np=Path('play')\nwith ZipFile(p/'Kball.zip','w',compression=ZIP_DEFLATED,compresslevel=9) as z:\n    z.write(p/'Kball.html','Kball.html')\n    z.write(p/'읽어주세요.txt','읽어주세요.txt')\n    z.write(p/'FONT-LICENSE.txt','FONT-LICENSE.txt')\n    z.write(p/'CREST-LICENSE.txt','CREST-LICENSE.txt')\n`], { stdio: 'inherit' });

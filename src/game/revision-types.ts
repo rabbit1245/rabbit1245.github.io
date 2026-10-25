@@ -10,7 +10,8 @@ export interface MatchOptions {
   neutralVenue?:boolean;
 }
 export interface WorldPlayer { id: string; clubId: string; name: string; position: Position; age: number; ovr: number; potential: number; injuryWeeks: number; nationality: string; leadership: number; joinedYear?:number; transferFee?:number; leagueDebutYear?:number; }
-export interface ClubSeasonDevelopment {year:number;leagueId:string;rank:number;expectedRank:number|null;points:number;teams:number;bonus:number;reinvestment:number;beforePower:number;afterPower:number;prestigeBefore:number;prestigeAfter:number;improvedPlayers:number;recruits:number;userContribution?:{apps:number;minutes:number;goals:number;assists:number;rating:number};}
+export interface ClubStarContribution {playerId:string;name:string;position:Position;ovr:number;apps:number;minutes:number;rating:number;influence:number;retained:boolean;}
+export interface ClubSeasonDevelopment {year:number;leagueId:string;rank:number;expectedRank:number|null;points:number;teams:number;bonus:number;reinvestment:number;beforePower:number;afterPower:number;prestigeBefore:number;prestigeAfter:number;improvedPlayers:number;recruits:number;star?:ClubStarContribution;starBudget?:number;revenueBasis?:number;userContribution?:{apps:number;minutes:number;goals:number;assists:number;rating:number};}
 export interface ClubDevelopment {investmentPower?:number;basePower:number;prestige:number;baselineYear:number;baselinePower:number;expectedRank:number|null;history:ClubSeasonDevelopment[];}
 export interface ClubWorld { id: string; leagueId: string; power: number; depth: number; averageAge: number; injuryImpact: number; budget: number; wageBudget: number; revenue: number; rosterIds: string[]; changes: string[];development?:ClubDevelopment; }
 export interface CompetitionState { leagueId: string; fixtures: Fixture[]; table: Standing[]; round: number; totalRounds: number }
@@ -36,7 +37,7 @@ export interface CupFixture extends Fixture {stage:string;step:number;leg:number
 export interface ClubTournament {format?:'groups'|'intercontinental'|'super';groups?:string[][];singleLeg?:boolean;doubleFinal?:boolean;calendar?:string[];maxSteps?:number;playerStats?:Record<string,CompetitorSeason>;id:string;name:string;year:number;country?:string;kind:'cup'|'leagueCup'|'continental';entrants:string[];basis:string;rules:string;phase:'league'|'knockout'|'completed';step:number;leagueRounds:number;stage:string;active:string[];byes:string[];fixtures:CupFixture[];matches:MatchRecord[];table:Standing[];winnerId?:string;startedAtRound:number;}
 export interface ClubCompetitions {version:1;year:number;current:ClubTournament[];history:ClubTournament[];}
 export interface ManualAging {key?:AttributeKey;playerId?:string;playerName?:string;id:string;year:number;round:number;date:string;amount:1|5|10;before:Attributes;after:Attributes;ovrBefore:number;ovrAfter:number;}
-export interface ManualInjury {id:string;year:number;clubId:string;duration:'half'|'season';start:string;end:string;returned?:string;missed:{fixtureId:string;year:number;scope:'club'|'national'}[];}
+export interface ManualInjury {id:string;year:number;clubId:string;duration:'half'|'season';start:string;end:string;pendingNextSeason?:boolean;returned?:string;missed:{fixtureId:string;year:number;scope:'club'|'national'}[];}
 export type GrowthCause='training'|'experience'|'development'|'injury'|'aging'|'cheat';
 export type GrowthBreakdown=Record<Exclude<GrowthCause,'cheat'>,Attributes>&{cheat?:Attributes};
 export interface GrowthLedger {year:number;baselineAttributes:Attributes;trackedFromRound:number;byCause:GrowthBreakdown;injuredRounds:number;trainingQuality:number;legacy:boolean}

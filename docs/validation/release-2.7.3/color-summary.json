@@ -1,0 +1,17 @@
+{
+  "baseURL": "http://127.0.0.1:4180/Kball.html",
+  "method": "Computed foreground, ancestor backgrounds and nested group opacity composited in sRGB; WCAG luminance ratio, normal/disabled 4.5 and large text 3.0. Images are not text-audited.",
+  "summary": {
+    "screens": 142,
+    "textSamples": 15119,
+    "contrastFailures": 0,
+    "minimumRatio": 4.752,
+    "disabledSamples": 442,
+    "fixedOverlaps": 0,
+    "clippedText": 0,
+    "intentionalScrollable": 126,
+    "verifiedHorizontalScrolls": 1,
+    "pageErrors": 0
+  },
+  "pageErrors": []
+}

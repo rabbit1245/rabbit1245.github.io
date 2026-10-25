@@ -1,0 +1,26 @@
+[
+  {
+    "position": "ST",
+    "rounds": 2,
+    "baselineMs": 1747.3806160000001,
+    "candidateMs": 1365.5001939999997,
+    "exactSHA256": "dc13886c040c050db405a8b310116fdeeae5d72e25cd0bb4148d903610753952",
+    "sourceUnchanged": true
+  },
+  {
+    "position": "LWB",
+    "rounds": 2,
+    "baselineMs": 1399.2606730000007,
+    "candidateMs": 1456.2562950000001,
+    "exactSHA256": "4cf5ba132c1b60bb4d7971d4e65f53db43a33f2a850924a4bef16577f87e08cc",
+    "sourceUnchanged": true
+  },
+  {
+    "position": "GK",
+    "rounds": 2,
+    "baselineMs": 1433.527854,
+    "candidateMs": 1198.3055449999993,
+    "exactSHA256": "7a281d7da981b6b32e58776fcab3e51dede1ea12ebd3753b2623da67c66cb3f7",
+    "sourceUnchanged": true
+  }
+]

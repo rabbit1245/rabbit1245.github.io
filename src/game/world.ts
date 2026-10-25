@@ -75,11 +75,14 @@ const basePowers=new Map(CLUBS.map(club=>[club.id,round(weightedPower(ROSTERS[cl
 /** The club keeps its identity. Prestige moves by at most +/-3 team points; funded investment
  * adds at most 6 more, gradually. NPC replacement generations cannot redefine the club's scale.
  */
+const seasonForms=new WeakMap<WorldState,{year:number;seed:string;values:Map<string,number>}>();
 function teamBase(career:Career,world:WorldState,club:ClubWorld):number {
   const d=club.development,base=d?.basePower??basePowers.get(club.id)!;
   const progress=clamp(((d?.prestige??base)-base)*.3,-3,3);
-  const rng=seededRandom(`${career.seed}|club-season-form|${world.year}|${club.id}`);
-  const form=(rng()+rng()-1)*2;
+  let cache=seasonForms.get(world);
+  if(!cache||cache.year!==world.year||cache.seed!==career.seed){cache={year:world.year,seed:career.seed,values:new Map()};seasonForms.set(world,cache);}
+  let form=cache.values.get(club.id);
+  if(form===undefined){const rng=seededRandom(`${career.seed}|club-season-form|${world.year}|${club.id}`);form=(rng()+rng()-1)*2;cache.values.set(club.id,form);}
   return base+progress+clamp(d?.investmentPower??0,0,6)+form;
 }
 
@@ -388,8 +391,10 @@ export function transitionWorldSeason(career: Career): void {
   const nextYear=world.year+1;
   syncUser(career,world);
   const completedLeagues=new Set(Object.values(world.competitions).filter(comp=>comp.round===comp.totalRounds&&comp.table.every(t=>t.played>0)).map(comp=>comp.leagueId));
+  const observedByClub=new Map<string,typeof world.playerStats[string][]>();
+  for(const row of Object.values(world.playerStats)){const rows=observedByClub.get(row.clubId)??[];rows.push(row);observedByClub.set(row.clubId,rows);}
   const earned=new Map(Object.values(world.competitions).flatMap(comp=>comp.table.map(row=>{
-    const club=world.clubs[row.clubId];return [club.id,assessClubSeason(career,club,comp.table,comp.round===comp.totalRounds&&comp.table.every(t=>t.played>0))] as const;
+    const club=world.clubs[row.clubId];return [club.id,assessClubSeason(career,club,comp.table,comp.round===comp.totalRounds&&comp.table.every(t=>t.played>0),observedByClub.get(club.id)??[])] as const;
   })));
   for (const club of Object.values(world.clubs)) club.changes=[];
   applyMovements(career,world);
@@ -425,7 +430,10 @@ export function transitionWorldSeason(career: Career): void {
     club.budget=Math.round(Math.max(0,club.budget*.3+club.revenue*.22-(Math.max(0,wages-club.revenue*.65))));
     // Earned funds finance limited real squad upgrades, never a scoreboard bonus.
     if(performance.bonus>0){
-      const available=Math.min(performance.bonus*.65,club.budget*.35),training=Math.round(available*.25);
+      // Sustained elite play can attract income and justify funded squad building even below mid-table.
+      const coreBudget=performance.star?.retained?club.revenue*.07*performance.star.influence:0;
+      const available=Math.min(performance.bonus*.65+coreBudget,club.budget*.35),training=Math.round(available*.25);
+      if(coreBudget>0){performance.starBudget=Math.round(Math.min(coreBudget,available));performance.revenueBasis=club.revenue;}
       const youngsters=club.rosterIds.filter(id=>id!==career.player.id).map(id=>world.players[id]).filter(p=>p&&p.age<=26&&p.ovr<p.potential).sort((a,b)=>b.ovr-a.ovr).slice(0,8);
       const gain=Math.min(.35,training/Math.max(1,club.revenue)*16);
       for(const row of youngsters){const old=row.ovr;row.ovr=round(Math.min(row.potential,row.ovr+gain));if(row.ovr>old)performance.improvedPlayers++;}
@@ -441,7 +449,7 @@ export function transitionWorldSeason(career: Career): void {
         club.rosterIds.push(id);spent+=fee;performance.recruits=1;
       }
       club.budget=Math.max(0,Math.round(club.budget-spent));performance.reinvestment=spent;
-      club.changes.push(`${performance.year}시즌 ${performance.rank}위 · 성과 수입 +${compactMoney(performance.bonus)}, 선수단 재투자 ${compactMoney(spent)}`);
+      club.changes.push(`${performance.year}시즌 ${performance.rank}위 · 성과·핵심 선수 수입 +${compactMoney(performance.bonus)}, 선수단 재투자 ${compactMoney(spent)}`);
     }
     const rng=seededRandom(`${career.seed}|recruit-policy|${nextYear}|${club.id}`);
     if (replacements.length===0 && club.rosterIds.length>18 && rng()<.16) {

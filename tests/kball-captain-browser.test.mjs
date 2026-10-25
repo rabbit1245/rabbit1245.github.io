@@ -1,4 +1,4 @@
-import { chromium } from 'playwright';
+import { chromium } from './stored-careers.mjs';
 import assert from 'node:assert/strict';
 import { mkdir,readFile,writeFile } from 'node:fs/promises';
 import path from 'node:path';
@@ -20,7 +20,7 @@ async function stored(page){
   return page.evaluate(()=>new Promise((resolve,reject)=>{
     const req=indexedDB.open('kball-careers',1);req.onerror=()=>reject(req.error);req.onsuccess=()=>{
       const db=req.result,tx=db.transaction('slots','readonly'),read=tx.objectStore('slots').getAll();
-      tx.oncomplete=()=>{db.close();resolve(read.result.map(row=>{const c=row.envelope.career;return{id:c.id,revision:c.revision,commands:c.processedCommands,leadership:c.systems.leadership};}));};tx.onabort=()=>reject(tx.error);
+      tx.oncomplete=async()=>{db.close();resolve((await Promise.all(read.result.map(window.__readKballStored))).map(c=>{return{id:c.id,revision:c.revision,commands:c.processedCommands,leadership:c.systems.leadership};}));};tx.onabort=()=>reject(tx.error);
     };
   }));
 }

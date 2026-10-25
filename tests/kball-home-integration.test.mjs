@@ -1,4 +1,4 @@
-import {chromium} from 'playwright';
+import {chromium} from './stored-careers.mjs';
 import assert from 'node:assert/strict';
 import {mkdir,readFile,writeFile} from 'node:fs/promises';
 import path from 'node:path';
@@ -18,7 +18,7 @@ async function noOverflow(label){const sizes=await page.evaluate(()=>[document.d
 async function fingerprint(stage){return page.evaluate(stage=>new Promise((resolve,reject)=>{
  const request=indexedDB.open('kball-careers',1);request.onerror=()=>reject(request.error);request.onsuccess=()=>{
   const db=request.result,tx=db.transaction('slots','readonly'),read=tx.objectStore('slots').getAll();
-  tx.oncomplete=async()=>{db.close();try{const c=read.result.find(r=>r.envelope.career.stage===stage).envelope.career;const bytes=new TextEncoder().encode(JSON.stringify({player:c.player,season:c.season,history:c.history,awards:c.awards,systems:c.systems,revision:c.revision}));resolve(Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',bytes)),n=>n.toString(16).padStart(2,'0')).join(''));}catch(e){reject(e);}};
+  tx.oncomplete=async()=>{db.close();try{const c=(await Promise.all(read.result.map(window.__readKballStored))).find(c=>c.stage===stage);const bytes=new TextEncoder().encode(JSON.stringify({player:c.player,season:c.season,history:c.history,awards:c.awards,systems:c.systems,revision:c.revision}));resolve(Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',bytes)),n=>n.toString(16).padStart(2,'0')).join(''));}catch(e){reject(e);}};
  };
 }),stage);}
 try{

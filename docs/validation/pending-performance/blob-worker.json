@@ -1,0 +1,11 @@
+{
+  "format": "kball-blob-v1",
+  "isBlob": true,
+  "blobBytes": 37348754,
+  "canonicalHash": "ed7312def3db8bf7d24d1902ca6210d5cb2e6655e02f4fc542a5823e49a6b746",
+  "returnedFullCareer": false,
+  "revision": 24,
+  "roundTripSHA256": "91b783dffb4c599bf97068d2a5eb5c7bbeb91b8a6d00e90a2577fd5b6ca8e571",
+  "errors": [],
+  "fileProtocolTested": false
+}

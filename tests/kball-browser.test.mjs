@@ -1,4 +1,4 @@
-import { chromium } from 'playwright';
+import { chromium } from './stored-careers.mjs';
 import assert from 'node:assert/strict';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
@@ -21,9 +21,8 @@ async function saved(page) {
       const db = request.result;
       if (!db.objectStoreNames.contains('slots')) { db.close(); resolve([]); return; }
       const transaction = db.transaction('slots', 'readonly'), read = transaction.objectStore('slots').getAll();
-      transaction.oncomplete = () => {
-        db.close(); resolve(read.result.map(value => {
-          const c = value.envelope.career;
+      transaction.oncomplete = async () => {
+        db.close(); resolve((await Promise.all(read.result.map(window.__readKballStored))).map(c => {
           const summarizeMatch = m => ({ id:m.id,fixtureId:m.fixtureId,round:m.round,seasonYear:m.seasonYear,homeId:m.homeId,awayId:m.awayId,homeGoals:m.homeGoals,awayGoals:m.awayGoals,playerStats:m.playerStats,metricsVersion:m.metricsVersion,scope:m.scope,competitionId:m.competitionId });
           return {...c,season:{...c.season,matches:c.season.matches.map(summarizeMatch)},history:c.history.map(h=>({...h,matches:h.matches.map(summarizeMatch)})),systems:c.systems?{...c.systems,world:undefined,clubCompetitions:c.systems.clubCompetitions?{...c.systems.clubCompetitions,current:c.systems.clubCompetitions.current.map(({playerStats,...t})=>({...t,matches:t.matches.map(summarizeMatch)})),history:c.systems.clubCompetitions.history.map(({playerStats,...t})=>({...t,matches:t.matches.map(summarizeMatch)}))}:undefined,national:{...c.systems.national,matches:c.systems.national.matches.map(summarizeMatch),history:c.systems.national.history.map(h=>({...h,matches:h.matches.map(summarizeMatch)})),teamResults:undefined}}:undefined};
         }));
@@ -36,7 +35,7 @@ async function worldDigest(page,id) {
   return page.evaluate(id=>new Promise((resolve,reject)=>{
     const request=indexedDB.open('kball-careers',1);request.onerror=()=>reject(request.error);request.onsuccess=()=>{
       const db=request.result,tx=db.transaction('slots','readonly'),read=tx.objectStore('slots').get(id);
-      tx.oncomplete=async()=>{db.close();try{const source=JSON.stringify(read.result.envelope.career.systems.world),digest=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(source));resolve(Array.from(new Uint8Array(digest),v=>v.toString(16).padStart(2,'0')).join(''));}catch(error){reject(error);}};tx.onabort=()=>reject(tx.error);
+      tx.oncomplete=async()=>{db.close();try{const source=JSON.stringify((await window.__readKballStored(read.result)).systems.world),digest=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(source));resolve(Array.from(new Uint8Array(digest),v=>v.toString(16).padStart(2,'0')).join(''));}catch(error){reject(error);}};tx.onabort=()=>reject(tx.error);
     };
   }),id);
 }
@@ -109,7 +108,7 @@ async function downloadText(page,career) {
   assert.equal(download.suggestedFilename(),`K볼_${career.player.name}_은퇴커리어.txt`);
   const file=path.join(results,download.suggestedFilename());await download.saveAs(file);page.off('download',observeDownload);assert.equal(count,1);
   const bytes=await readFile(file),text=bytes.toString('utf8');assert.equal(text.charCodeAt(0),0xfeff);assert.ok(!/(?<!\r)\n/.test(text));
-  for(const section of ['A. 선수 기본','B. 통산','C. 연도별','D. 클럽','E. 국가대표','F. 개인 수상','G. 팀 수상','H. 주장','I. 몸값','J. 능력치','K. 전체 순위','L. 훈련'])assert.ok(text.includes(section),section);
+  for(const section of ['A. 선수 기본 정보','B. 통산 총합 스탯 · 팀 수상','C. 연도별 기록'])assert.ok(text.includes(section),section);
   assert.doesNotMatch(text,/"profile"|"playerId"|"byCause"/);assert.ok(text.includes(career.player.name));for(const h of career.history)assert.ok(text.includes(`[${h.year}시즌]`));
   assert.equal((await saved(page)).find(c=>c.id===career.id).revision,career.revision,'TXT export does not change the save');
 }
@@ -213,7 +212,7 @@ try {
   await page.getByTestId('advance-half').click();career=await waitState(page,c=>c.id===replicaId&&c.season.year>initialYear&&c.season.week===0&&c.stage==='season','next season');await ready(page);assert.equal(career.player.age,21);assert.equal(career.history.length,1);
   await page.reload({waitUntil:'networkidle'});await page.getByRole('button',{name:'이어서 플레이',exact:true}).click();await page.getByRole('heading',{level:1,name:'라커룸',exact:true}).waitFor();await ready(page);assert.equal(await page.evaluate(()=>localStorage.getItem('career24-legacy-test-sentinel')),'preserve-existing-save');
   await navigate(page,'career');await page.getByRole('button',{name:'통산',exact:true}).click();const before=totals(career),summaryBefore=await page.getByTestId('records-scope-all').textContent();
-  await page.getByTestId('career-view-retirement').click();page.once('dialog',d=>d.accept());await page.getByTestId('retire-career').click();career=await waitState(page,c=>c.id===replicaId&&c.stage==='retired','retirement');await ready(page);await page.getByRole('heading',{name:'김도윤의 축구 인생'}).waitFor();assert.deepEqual(totals(career),before);await page.getByTestId('career-view-records').click();await page.getByRole('button',{name:'통산',exact:true}).click();assert.equal(await page.getByTestId('records-scope-all').textContent(),summaryBefore);assert.equal(career.history.length,1);await noOverflow(page,'desktop career');await page.screenshot({path:path.join(results,'kball-career.png'),fullPage:true});
+  await page.getByTestId('career-view-retirement').click();page.once('dialog',d=>d.accept());await page.getByTestId('retire-career').click();career=await waitState(page,c=>c.id===replicaId&&c.stage==='retired','retirement');await ready(page);await page.getByRole('heading',{name:'김도윤의 은퇴 기록'}).waitFor();assert.deepEqual(totals(career),before);await page.getByTestId('career-view-records').click();await page.getByRole('button',{name:'통산',exact:true}).click();assert.equal(await page.getByTestId('records-scope-all').textContent(),summaryBefore);assert.equal(career.history.length,1);await noOverflow(page,'desktop career');await page.screenshot({path:path.join(results,'kball-career.png'),fullPage:true});
   completed.push('contract-controlled wage, transfer fees separate from income, next season, reload and retirement totals');
   await downloadText(page,career);
   await page.getByTestId('career-view-awards').click();

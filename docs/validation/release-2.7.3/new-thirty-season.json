@@ -1,0 +1,20 @@
+{
+  "source": "/workspace/rabbit1245.github.io/test-results/v26-long-career-30-seasons.json",
+  "saveBytes": 165352761,
+  "txtBytes": 114370,
+  "seasons": 30,
+  "clubMatches": 1395,
+  "nationalMatches": 323,
+  "newSeasonSnapshots": 30,
+  "downloads": 1,
+  "bom": true,
+  "crlf": true,
+  "rawJSON": false,
+  "annualAndCareerTotalsReconcile": true,
+  "eventTimelinesOmitted": true,
+  "readOnlyDownload": true,
+  "retirementSeasonMarked": true,
+  "mobileOverflow": false,
+  "reload": true,
+  "pageErrors": []
+}

@@ -1,0 +1,13 @@
+{
+  "url": "http://127.0.0.1:4180/Kball.html",
+  "portable": true,
+  "checks": [
+    "A new career starts with zero checked attributes and preserves an empty plan",
+    "Individual locks turn solid green; whole-player locking and unlocking each use one atomic command",
+    "Manual −5 changes exactly the locked target and retains all locks",
+    "Desktop/mobile controls fit and adjusted values plus locks survive reload",
+    "An explicitly empty offseason plan starts the next season and keeps prior records and attributes",
+    "Next season also starts directly without opening or confirming training; old selections are not carried forward"
+  ],
+  "errors": []
+}

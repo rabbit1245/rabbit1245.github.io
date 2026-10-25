@@ -1,4 +1,4 @@
-import {chromium} from 'playwright';
+import {chromium} from './stored-careers.mjs';
 import assert from 'node:assert/strict';
 import {mkdir,readFile,writeFile} from 'node:fs/promises';
 
@@ -6,12 +6,13 @@ const url=process.env.KBALL_TEST_URL||'http://127.0.0.1:4173/';
 const out=process.env.KBALL_TEST_RESULTS_DIR||'test-results/p272/controls';
 const fixture=process.env.KBALL_CONTROLS_FIXTURE||'test-results/career-completed.json';
 const previous=JSON.parse(await readFile(fixture,'utf8')).career;
+const version=JSON.parse(await readFile('package.json','utf8')).version;
 const portable=/\.html(?:[?#]|$)/.test(url),checks=[],errors=[];
 await mkdir(out,{recursive:true});
 const browser=await chromium.launch({headless:true,executablePath:process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE||'/usr/bin/chromium'});
 let page;
 async function ready(p){await p.getByTestId('save-status').filter({hasText:'자동 저장됨'}).waitFor({state:'attached'});await p.locator('.processing').waitFor({state:'hidden'});}
-async function state(p,name){return p.evaluate(name=>new Promise((resolve,reject)=>{const r=indexedDB.open('kball-careers',1);r.onerror=()=>reject(r.error);r.onsuccess=()=>{const db=r.result,tx=db.transaction('slots'),get=tx.objectStore('slots').getAll();tx.oncomplete=()=>{db.close();const c=get.result.map(r=>r.envelope.career).find(c=>c.player.name===name);resolve({revision:c.revision,training:c.training,attributes:c.player.attributes,locks:c.systems.attributeLocks??[],aging:c.systems.manualAging??[],stage:c.stage,year:c.season.year,plan:c.systems.trainingPlan,stats:c.season.playerStats,history:c.history.map(h=>({year:h.year,stats:h.stats}))});};};}),name);}
+async function state(p,name){return p.evaluate(name=>new Promise((resolve,reject)=>{const r=indexedDB.open('kball-careers',1);r.onerror=()=>reject(r.error);r.onsuccess=()=>{const db=r.result,tx=db.transaction('slots'),get=tx.objectStore('slots').getAll();tx.oncomplete=async()=>{db.close();const c=(await Promise.all(get.result.map(window.__readKballStored))).find(c=>c.player.name===name);resolve({revision:c.revision,training:c.training,attributes:c.player.attributes,locks:c.systems.attributeLocks??[],aging:c.systems.manualAging??[],stage:c.stage,year:c.season.year,plan:c.systems.trainingPlan,stats:c.season.playerStats,history:c.history.map(h=>({year:h.year,stats:h.stats}))});};};}),name);}
 async function training(p){await p.getByTestId('player-tab').click();await p.getByTestId('player-view-training').click();}
 async function setup(){const context=await browser.newContext({viewport:{width:1366,height:768},reducedMotion:'reduce'}),p=await context.newPage();p.setDefaultTimeout(60000);p.on('pageerror',e=>errors.push(String(e)));await p.goto(url,{waitUntil:'networkidle'});if(portable)await context.setOffline(true);return {context,p};}
 async function fit(p){assert.ok(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));}
@@ -22,7 +23,7 @@ try{
  await d.getByTestId('next-creation-step').click();await d.getByLabel('시작 소속',{exact:true}).selectOption('senior');await d.getByTestId('next-creation-step').click();
  while(await d.locator('.training-row[aria-pressed="true"]').count())await d.locator('.training-row[aria-pressed="true"]').first().click();
  assert.equal(await d.getByTestId('create-career').isEnabled(),true);await d.getByTestId('create-career').click();await ready(p);
- assert.match(await p.getByTestId('game-version').textContent(),/2\.7\.2/);assert.deepEqual((await state(p,'조작 검수')).training,[]);await training(p);
+ assert.ok((await p.getByTestId('game-version').textContent()).includes(version));assert.deepEqual((await state(p,'조작 검수')).training,[]);await training(p);
  assert.equal(await p.locator('.training-row[aria-pressed="true"]').count(),0);checks.push('A new career starts with zero checked attributes and preserves an empty plan');
  await p.getByTestId('lock-shooting').click();await ready(p);
  const lock=p.getByTestId('lock-shooting');assert.equal(await lock.evaluate(el=>getComputedStyle(el).backgroundColor),'rgb(46, 107, 59)');assert.equal(await lock.evaluate(el=>getComputedStyle(el).color),'rgb(255, 255, 255)');

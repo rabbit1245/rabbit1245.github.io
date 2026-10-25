@@ -1,0 +1,47 @@
+{
+  "date": "2026-10-25",
+  "version": "2.7.3-dev.2",
+  "status": "local verified; release held by user",
+  "environment": "Linux Chromium 154, localhost HTTP; Windows Edge file:// not verified",
+  "sourceSaveBytes": 119924636,
+  "historySeasons": 20,
+  "baselines": [
+    {
+      "packaging": "controlled-portable",
+      "sampleCount": 1,
+      "saveCompleteMs": 30247.90000000596,
+      "visualMs": 679.9000000059605
+    },
+    {
+      "packaging": "controlled-web",
+      "sampleCount": 1,
+      "saveCompleteMs": 20756.90000000596,
+      "visualMs": 487.1000000014901
+    }
+  ],
+  "lightControls": {
+    "samples": 20,
+    "medianSaveCompleteMs": 45.799999999813735,
+    "minMs": 39,
+    "maxMs": 57.60000000055879,
+    "inputUnlockedAfterDurableSave": true,
+    "fullCareerPostedOnLightControl": false
+  },
+  "journalReplayAndFullCheckpointReload": true,
+  "checkpointRevision": 519,
+  "remainingJournalEntries": 0,
+  "physicsExactHashMatches": 3,
+  "regressionTests": {
+    "pass": 47,
+    "fail": 0
+  },
+  "retirementTXTByteIdentical": true,
+  "retirementTXTBytes": 86443,
+  "portableBundleCheckOnly": true,
+  "portableBlobWorkerRoundTrip": true,
+  "astraSourceFilesChecked": 286,
+  "astraSourceChangedFiles": [],
+  "publicZIPUnchangedSHA256": "19aa55d39320c2e8604f7e90913492533e7c3f535f2d13fc9893d2b475a4b4a1",
+  "deployed": false,
+  "playableHTMLOrZIPGenerated": false
+}

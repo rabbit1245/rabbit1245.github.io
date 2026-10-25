@@ -1,0 +1,1014 @@
+{
+  "status": "local-only; release explicitly held by user",
+  "version": "2.7.3-dev.1",
+  "baselineCommit": "5c62148befb4e63dc29f4afad9de56f001ace31c",
+  "scope": [
+    "locked injury handling and offseason scheduling",
+    "captain and deputy organization based on actual minutes",
+    "wingback chance creation and defensive coverage",
+    "funded club improvement from observed core-player performances",
+    "live round progress prevents fixed total-duration injury timeouts"
+  ],
+  "tests": {
+    "changedLogic": {
+      "uniquePassed": 8,
+      "batchPassed": 7,
+      "separateAbsenceFilterPassed": 1,
+      "logs": [
+        "/tmp/kball-pending-final-tests.log",
+        "/tmp/kball-pending-absence-test.log"
+      ],
+      "note": "The seven-case batch includes the worker progress test; a subsequent new absence-filter case passed separately."
+    },
+    "regression": {
+      "passed": 43,
+      "failed": 0,
+      "modules": [
+        "match-engine.test.ts",
+        "club-development.test.ts",
+        "commands.test.ts"
+      ],
+      "log": "/tmp/kball-pending-final-regression.log"
+    },
+    "browser": {
+      "url": "http://127.0.0.1:4173/",
+      "checks": [
+        "All-attribute locks permit offseason injury scheduling without changing past records or abilities",
+        "The queued injury and green lock state survive reload; duplicate injuries stay blocked",
+        "During the season, a real injury command advances team games through the worker while all locks and abilities remain intact"
+      ],
+      "errors": []
+    },
+    "timeLimitTest": {
+      "progressDurationSimulatedSeconds": 177,
+      "silenceStillRejected": true,
+      "saveRetainedOnStall": true
+    },
+    "typecheckAndLocalBuild": "passed",
+    "broaderSuite": "interrupted; no full-suite pass claimed",
+    "portableBuild": "not performed; user requested release hold",
+    "finalBuildLog": "/tmp/kball-pending-final-build.log"
+  },
+  "initialRosterControl": {
+    "trialsPerCondition": 12,
+    "full90": true,
+    "allAttributesEqualToOVR": true,
+    "sameInitialRosterAndSeeds": true,
+    "isUsers448GameSave": false,
+    "rows": [
+      {
+        "label": "before74",
+        "ovr": 74,
+        "role": "none",
+        "power": 81.41,
+        "meanRank": 12.666666666666666,
+        "meanPoints": 46.833333333333336,
+        "top3": 0,
+        "meanGF": 62.666666666666664,
+        "meanGA": 67.91666666666667,
+        "seasons": [
+          {
+            "seed": 0,
+            "rank": 9,
+            "team": {
+              "clubId": "EN1_06",
+              "played": 38,
+              "won": 16,
+              "drawn": 9,
+              "lost": 13,
+              "goalsFor": 69,
+              "goalsAgainst": 62,
+              "points": 57
+            },
+            "goals": 4,
+            "assists": 5
+          },
+          {
+            "seed": 1,
+            "rank": 13,
+            "team": {
+              "clubId": "EN1_06",
+              "played": 38,
+              "won": 11,
+              "drawn": 10,
+              "lost": 17,
+              "goalsFor": 54,
+              "goalsAgainst": 67,
+              "points": 43
+            },
+            "goals": 3,
+            "assists": 1
+          },
+          {
+            "seed": 2,
+            "rank": 13,
+            "team": {
+              "clubId": "EN1_06",
+              "played": 38,
+              "won": 14,
+              "drawn": 4,
+              "lost": 20,
+              "goalsFor": 62,
+              "goalsAgainst": 67,
+              "points": 46
+            },
+            "goals": 0,
+            "assists": 2
+          },
+          {
+            "seed": 3,
+            "rank": 11,
+            "team": {
+              "clubId": "EN1_06",
+              "played": 38,
+              "won": 14,
+              "drawn": 10,
+              "lost": 14,
+              "goalsFor": 69,
+              "goalsAgainst": 62,
+              "points": 52
+            },
+            "goals": 5,
+            "assists": 6
+          },
+          {
+            "seed": 4,
+            "rank": 13,
+            "team": {
+              "clubId": "EN1_06",
+              "played": 38,
+              "won": 13,
+              "drawn": 6,
+              "lost": 19,
+              "goalsFor": 62,
+              "goalsAgainst": 74,
+              "points": 45
+            },
+            "goals": 2,
+            "assists": 7
+          },
+          {
+            "seed": 5,
+            "rank": 17,
+            "team": {
+              "clubId": "EN1_06",
+              "played": 38,
+              "won": 9,
+              "drawn": 11,
+              "lost": 18,
+              "goalsFor": 51,
+              "goalsAgainst": 70,
+              "points": 38
+            },
+            "goals": 4,
+            "assists": 2
+          },
+          {
+            "seed": 6,
+            "rank": 15,
+            "team": {
+              "clubId": "EN1_06",
+              "played": 38,
+              "won": 11,
+              "drawn": 7,
+              "lost": 20,
+              "goalsFor": 67,
+              "goalsAgainst": 74,
+              "points": 40
+            },
+            "goals": 5,
+            "assists": 6
+          },
+          {
+            "seed": 7,
+            "rank": 5,
+            "team": {
+              "clubId": "EN1_06",
+              "played": 38,
+              "won": 17,
+              "drawn": 12,
+              "lost": 9,
+              "goalsFor": 80,
+              "goalsAgainst": 59,
+              "points": 63
+            },
+            "goals": 4,
+            "assists": 4
+          },
+          {
+            "seed": 8,
+            "rank": 16,
+            "team": {
+              "clubId": "EN1_06",
+              "played": 38,
+              "won": 14,
+              "drawn": 3,
+              "lost": 21,
+              "goalsFor": 61,
+              "goalsAgainst": 82,
+              "points": 45
+            },
+            "goals": 5,
+            "assists": 3
+          },
+          {
+            "seed": 9,
+            "rank": 13,
+            "team": {
+              "clubId": "EN1_06",
+              "played": 38,
+              "won": 12,
+              "drawn": 9,
+              "lost": 17,
+              "goalsFor": 54,
+              "goalsAgainst": 65,
+              "points": 45
+            },
+            "goals": 2,
+            "assists": 4
+          },
+          {
+            "seed": 10,
+            "rank": 17,
+            "team": {
+              "clubId": "EN1_06",
+              "played": 38,
+              "won": 9,
+              "drawn": 9,
+              "lost": 20,
+              "goalsFor": 56,
+              "goalsAgainst": 69,
+              "points": 36
+            },
+            "goals": 4,
+            "assists": 5
+          },
+          {
+            "seed": 11,
+            "rank": 10,
+            "team": {
+              "clubId": "EN1_06",
+              "played": 38,
+              "won": 13,
+              "drawn": 13,
+              "lost": 12,
+              "goalsFor": 67,
+              "goalsAgainst": 64,
+              "points": 52
+            },
+            "goals": 1,
+            "assists": 2
+          }
+        ]
+      },
+      {
+        "label": "before94",
+        "ovr": 94,
+        "role": "none",
+        "power": 82.68,
+        "meanRank": 11.5,
+        "meanPoints": 50.5,
+        "top3": 0,
+        "meanGF": 67.08333333333333,
+        "meanGA": 66.41666666666667,
+        "seasons": [
+          {
+            "seed": 0,
+            "rank": 8,
+            "team": {
+              "clubId": "EN1_06",
+              "played": 38,
+              "won": 17,
+              "drawn": 8,
+              "lost": 13,
+              "goalsFor": 72,
+              "goalsAgainst": 60,
+              "points": 59
+            },
+            "goals": 7,
+            "assists": 7
+          },
+          {
+            "seed": 1,
+            "rank": 13,
+            "team": {
+              "clubId": "EN1_06",
+              "played": 38,
+              "won": 12,
+              "drawn": 11,
+              "lost": 15,
+              "goalsFor": 60,
+              "goalsAgainst": 66,
+              "points": 47
+            },
+            "goals": 6,
+            "assists": 2
+          },
+          {
+            "seed": 2,
+            "rank": 13,
+            "team": {
+              "clubId": "EN1_06",
+              "played": 38,
+              "won": 14,
+              "drawn": 6,
+              "lost": 18,
+              "goalsFor": 68,
+              "goalsAgainst": 66,
+              "points": 48
+            },
+            "goals": 4,
+            "assists": 5
+          },
+          {
+            "seed": 3,
+            "rank": 11,
+            "team": {
+              "clubId": "EN1_06",
+              "played": 38,
+              "won": 14,
+              "drawn": 10,
+              "lost": 14,
+              "goalsFor": 72,
+              "goalsAgainst": 61,
+              "points": 52
+            },
+            "goals": 8,
+            "assists": 6
+          },
+          {
+            "seed": 4,
+            "rank": 9,
+            "team": {
+              "clubId": "EN1_06",
+              "played": 38,
+              "won": 16,
+              "drawn": 4,
+              "lost": 18,
+              "goalsFor": 68,
+              "goalsAgainst": 71,
+              "points": 52
+            },
+            "goals": 5,
+            "assists": 8
+          },
+          {
+            "seed": 5,
+            "rank": 15,
+            "team": {
+              "clubId": "EN1_06",
+              "played": 38,
+              "won": 11,
+              "drawn": 11,
+              "lost": 16,
+              "goalsFor": 55,
+              "goalsAgainst": 69,
+              "points": 44
+            },
+            "goals": 6,
+            "assists": 2
+          },
+          {
+            "seed": 6,
+            "rank": 15,
+            "team": {
+              "clubId": "EN1_06",
+              "played": 38,
+              "won": 11,
+              "drawn": 7,
+              "lost": 20,
+              "goalsFor": 68,
+              "goalsAgainst": 73,
+              "points": 40
+            },
+            "goals": 6,
+            "assists": 6
+          },
+          {
+            "seed": 7,
+            "rank": 5,
+            "team": {
+              "clubId": "EN1_06",
+              "played": 38,
+              "won": 19,
+              "drawn": 11,
+              "lost": 8,
+              "goalsFor": 87,
+              "goalsAgainst": 58,
+              "points": 68
+            },
+            "goals": 10,
+            "assists": 9
+          },
+          {
+            "seed": 8,
+            "rank": 13,
+            "team": {
+              "clubId": "EN1_06",
+              "played": 38,
+              "won": 14,
+              "drawn": 7,
+              "lost": 17,
+              "goalsFor": 67,
+              "goalsAgainst": 81,
+              "points": 49
+            },
+            "goals": 9,
+            "assists": 6
+          },
+          {
+            "seed": 9,
+            "rank": 12,
+            "team": {
+              "clubId": "EN1_06",
+              "played": 38,
+              "won": 14,
+              "drawn": 7,
+              "lost": 17,
+              "goalsFor": 56,
+              "goalsAgainst": 64,
+              "points": 49
+            },
+            "goals": 4,
+            "assists": 5
+          },
+          {
+            "seed": 10,
+            "rank": 16,
+            "team": {
+              "clubId": "EN1_06",
+              "played": 38,
+              "won": 10,
+              "drawn": 9,
+              "lost": 19,
+              "goalsFor": 59,
+              "goalsAgainst": 67,
+              "points": 39
+            },
+            "goals": 6,
+            "assists": 5
+          },
+          {
+            "seed": 11,
+            "rank": 8,
+            "team": {
+              "clubId": "EN1_06",
+              "played": 38,
+              "won": 16,
+              "drawn": 11,
+              "lost": 11,
+              "goalsFor": 73,
+              "goalsAgainst": 61,
+              "points": 59
+            },
+            "goals": 6,
+            "assists": 2
+          }
+        ]
+      },
+      {
+        "label": "after74",
+        "ovr": 74,
+        "role": "none",
+        "power": 81.41,
+        "meanRank": 12.833333333333334,
+        "meanPoints": 46.583333333333336,
+        "top3": 0,
+        "meanGF": 59.166666666666664,
+        "meanGA": 65.58333333333333,
+        "seasons": [
+          {
+            "seed": 0,
+            "rank": 7,
+            "team": {
+              "clubId": "EN1_06",
+              "played": 38,
+              "won": 16,
+              "drawn": 12,
+              "lost": 10,
+              "goalsFor": 68,
+              "goalsAgainst": 58,
+              "points": 60
+            },
+            "goals": 4,
+            "assists": 5
+          },
+          {
+            "seed": 1,
+            "rank": 14,
+            "team": {
+              "clubId": "EN1_06",
+              "played": 38,
+              "won": 9,
+              "drawn": 13,
+              "lost": 16,
+              "goalsFor": 52,
+              "goalsAgainst": 63,
+              "points": 40
+            },
+            "goals": 3,
+            "assists": 3
+          },
+          {
+            "seed": 2,
+            "rank": 17,
+            "team": {
+              "clubId": "EN1_06",
+              "played": 38,
+              "won": 10,
+              "drawn": 9,
+              "lost": 19,
+              "goalsFor": 54,
+              "goalsAgainst": 65,
+              "points": 39
+            },
+            "goals": 0,
+            "assists": 5
+          },
+          {
+            "seed": 3,
+            "rank": 7,
+            "team": {
+              "clubId": "EN1_06",
+              "played": 38,
+              "won": 17,
+              "drawn": 8,
+              "lost": 13,
+              "goalsFor": 66,
+              "goalsAgainst": 60,
+              "points": 59
+            },
+            "goals": 5,
+            "assists": 5
+          },
+          {
+            "seed": 4,
+            "rank": 12,
+            "team": {
+              "clubId": "EN1_06",
+              "played": 38,
+              "won": 14,
+              "drawn": 4,
+              "lost": 20,
+              "goalsFor": 60,
+              "goalsAgainst": 70,
+              "points": 46
+            },
+            "goals": 2,
+            "assists": 8
+          },
+          {
+            "seed": 5,
+            "rank": 17,
+            "team": {
+              "clubId": "EN1_06",
+              "played": 38,
+              "won": 10,
+              "drawn": 10,
+              "lost": 18,
+              "goalsFor": 48,
+              "goalsAgainst": 68,
+              "points": 40
+            },
+            "goals": 3,
+            "assists": 1
+          },
+          {
+            "seed": 6,
+            "rank": 14,
+            "team": {
+              "clubId": "EN1_06",
+              "played": 38,
+              "won": 12,
+              "drawn": 6,
+              "lost": 20,
+              "goalsFor": 64,
+              "goalsAgainst": 70,
+              "points": 42
+            },
+            "goals": 4,
+            "assists": 3
+          },
+          {
+            "seed": 7,
+            "rank": 4,
+            "team": {
+              "clubId": "EN1_06",
+              "played": 38,
+              "won": 19,
+              "drawn": 10,
+              "lost": 9,
+              "goalsFor": 75,
+              "goalsAgainst": 55,
+              "points": 67
+            },
+            "goals": 4,
+            "assists": 7
+          },
+          {
+            "seed": 8,
+            "rank": 15,
+            "team": {
+              "clubId": "EN1_06",
+              "played": 38,
+              "won": 13,
+              "drawn": 4,
+              "lost": 21,
+              "goalsFor": 61,
+              "goalsAgainst": 81,
+              "points": 43
+            },
+            "goals": 5,
+            "assists": 5
+          },
+          {
+            "seed": 9,
+            "rank": 17,
+            "team": {
+              "clubId": "EN1_06",
+              "played": 38,
+              "won": 10,
+              "drawn": 9,
+              "lost": 19,
+              "goalsFor": 49,
+              "goalsAgainst": 67,
+              "points": 39
+            },
+            "goals": 2,
+            "assists": 3
+          },
+          {
+            "seed": 10,
+            "rank": 17,
+            "team": {
+              "clubId": "EN1_06",
+              "played": 38,
+              "won": 10,
+              "drawn": 6,
+              "lost": 22,
+              "goalsFor": 52,
+              "goalsAgainst": 68,
+              "points": 36
+            },
+            "goals": 4,
+            "assists": 4
+          },
+          {
+            "seed": 11,
+            "rank": 13,
+            "team": {
+              "clubId": "EN1_06",
+              "played": 38,
+              "won": 12,
+              "drawn": 12,
+              "lost": 14,
+              "goalsFor": 61,
+              "goalsAgainst": 62,
+              "points": 48
+            },
+            "goals": 1,
+            "assists": 1
+          }
+        ]
+      },
+      {
+        "label": "after94",
+        "ovr": 94,
+        "role": "none",
+        "power": 82.68,
+        "meanRank": 8.833333333333334,
+        "meanPoints": 55.583333333333336,
+        "top3": 1,
+        "meanGF": 66.75,
+        "meanGA": 60.583333333333336,
+        "seasons": [
+          {
+            "seed": 0,
+            "rank": 4,
+            "team": {
+              "clubId": "EN1_06",
+              "played": 38,
+              "won": 20,
+              "drawn": 11,
+              "lost": 7,
+              "goalsFor": 74,
+              "goalsAgainst": 53,
+              "points": 71
+            },
+            "goals": 7,
+            "assists": 5
+          },
+          {
+            "seed": 1,
+            "rank": 11,
+            "team": {
+              "clubId": "EN1_06",
+              "played": 38,
+              "won": 14,
+              "drawn": 10,
+              "lost": 14,
+              "goalsFor": 60,
+              "goalsAgainst": 59,
+              "points": 52
+            },
+            "goals": 6,
+            "assists": 6
+          },
+          {
+            "seed": 2,
+            "rank": 10,
+            "team": {
+              "clubId": "EN1_06",
+              "played": 38,
+              "won": 14,
+              "drawn": 9,
+              "lost": 15,
+              "goalsFor": 66,
+              "goalsAgainst": 59,
+              "points": 51
+            },
+            "goals": 4,
+            "assists": 7
+          },
+          {
+            "seed": 3,
+            "rank": 5,
+            "team": {
+              "clubId": "EN1_06",
+              "played": 38,
+              "won": 19,
+              "drawn": 6,
+              "lost": 13,
+              "goalsFor": 75,
+              "goalsAgainst": 53,
+              "points": 63
+            },
+            "goals": 8,
+            "assists": 8
+          },
+          {
+            "seed": 4,
+            "rank": 8,
+            "team": {
+              "clubId": "EN1_06",
+              "played": 38,
+              "won": 17,
+              "drawn": 4,
+              "lost": 17,
+              "goalsFor": 68,
+              "goalsAgainst": 67,
+              "points": 55
+            },
+            "goals": 5,
+            "assists": 9
+          },
+          {
+            "seed": 5,
+            "rank": 13,
+            "team": {
+              "clubId": "EN1_06",
+              "played": 38,
+              "won": 13,
+              "drawn": 11,
+              "lost": 14,
+              "goalsFor": 57,
+              "goalsAgainst": 64,
+              "points": 50
+            },
+            "goals": 6,
+            "assists": 1
+          },
+          {
+            "seed": 6,
+            "rank": 14,
+            "team": {
+              "clubId": "EN1_06",
+              "played": 38,
+              "won": 12,
+              "drawn": 7,
+              "lost": 19,
+              "goalsFor": 66,
+              "goalsAgainst": 67,
+              "points": 43
+            },
+            "goals": 6,
+            "assists": 5
+          },
+          {
+            "seed": 7,
+            "rank": 3,
+            "team": {
+              "clubId": "EN1_06",
+              "played": 38,
+              "won": 23,
+              "drawn": 7,
+              "lost": 8,
+              "goalsFor": 85,
+              "goalsAgainst": 51,
+              "points": 76
+            },
+            "goals": 10,
+            "assists": 8
+          },
+          {
+            "seed": 8,
+            "rank": 9,
+            "team": {
+              "clubId": "EN1_06",
+              "played": 38,
+              "won": 16,
+              "drawn": 5,
+              "lost": 17,
+              "goalsFor": 70,
+              "goalsAgainst": 74,
+              "points": 53
+            },
+            "goals": 9,
+            "assists": 7
+          },
+          {
+            "seed": 9,
+            "rank": 11,
+            "team": {
+              "clubId": "EN1_06",
+              "played": 38,
+              "won": 14,
+              "drawn": 6,
+              "lost": 18,
+              "goalsFor": 53,
+              "goalsAgainst": 61,
+              "points": 48
+            },
+            "goals": 4,
+            "assists": 5
+          },
+          {
+            "seed": 10,
+            "rank": 14,
+            "team": {
+              "clubId": "EN1_06",
+              "played": 38,
+              "won": 12,
+              "drawn": 7,
+              "lost": 19,
+              "goalsFor": 56,
+              "goalsAgainst": 62,
+              "points": 43
+            },
+            "goals": 6,
+            "assists": 4
+          },
+          {
+            "seed": 11,
+            "rank": 4,
+            "team": {
+              "clubId": "EN1_06",
+              "played": 38,
+              "won": 17,
+              "drawn": 11,
+              "lost": 10,
+              "goalsFor": 71,
+              "goalsAgainst": 57,
+              "points": 62
+            },
+            "goals": 6,
+            "assists": 3
+          }
+        ]
+      }
+    ]
+  },
+  "fourSeasonFullCareer": {
+    "seed": "chelsea-long-term-comparison",
+    "attributesLockedAt": 94,
+    "scope": "actual full-world league/cup/national schedules, normal selection/injuries, same seed, captain assignment",
+    "note": "One fixed seed, not a rank guarantee. Investment accumulated but the after run also had a 14th-place final season; do not claim its average season rank or points improved. Source had the final chance/leadership/funding calculations; later progress UI and validation changes do not alter the match results.",
+    "rows": [
+      {
+        "label": "before",
+        "year": 2026,
+        "rank": 7,
+        "points": 59,
+        "gf": 67,
+        "ga": 54,
+        "apps": 38,
+        "assists": 4,
+        "rating": 6.9526315789473685,
+        "power": 83.74,
+        "investment": 0
+      },
+      {
+        "label": "before",
+        "year": 2027,
+        "rank": 13,
+        "points": 49,
+        "gf": 57,
+        "ga": 63,
+        "apps": 38,
+        "assists": 6,
+        "rating": 7.136842105263158,
+        "power": 81.86,
+        "investment": 0.082
+      },
+      {
+        "label": "before",
+        "year": 2028,
+        "rank": 11,
+        "points": 49,
+        "gf": 63,
+        "ga": 59,
+        "apps": 35,
+        "assists": 7,
+        "rating": 7.1171428571428565,
+        "power": 83.77,
+        "investment": 0.08
+      },
+      {
+        "label": "before",
+        "year": 2029,
+        "rank": 5,
+        "points": 69,
+        "gf": 69,
+        "ga": 61,
+        "apps": 38,
+        "assists": 9,
+        "rating": 7.2631578947368425,
+        "power": 82.24,
+        "investment": 0.086
+      },
+      {
+        "label": "after",
+        "year": 2026,
+        "rank": 6,
+        "points": 59,
+        "gf": 67,
+        "ga": 52,
+        "apps": 38,
+        "assists": 4,
+        "rating": 6.957894736842104,
+        "power": 83.74,
+        "investment": 0
+      },
+      {
+        "label": "after",
+        "year": 2027,
+        "rank": 14,
+        "points": 42,
+        "gf": 60,
+        "ga": 72,
+        "apps": 32,
+        "assists": 4,
+        "rating": 7.021875,
+        "power": 82.48,
+        "investment": 0.7
+      },
+      {
+        "label": "after",
+        "year": 2028,
+        "rank": 4,
+        "points": 67,
+        "gf": 68,
+        "ga": 55,
+        "apps": 34,
+        "assists": 6,
+        "rating": 7.097058823529412,
+        "power": 85.03,
+        "investment": 1.379
+      },
+      {
+        "label": "after",
+        "year": 2029,
+        "rank": 14,
+        "points": 44,
+        "gf": 63,
+        "ga": 65,
+        "apps": 35,
+        "assists": 8,
+        "rating": 7.042857142857143,
+        "power": 84.34,
+        "investment": 2.038
+      }
+    ]
+  },
+  "fundingLimits": {
+    "starIncomeFractionMax": 0.035,
+    "coreBudgetFractionMax": 0.07,
+    "budgetUseFractionMax": 0.35,
+    "annualInvestmentMax": 0.7,
+    "totalInvestmentMax": 6,
+    "annualInvestmentDepreciation": 0.03,
+    "requiresObservedMinutesAndRating": true
+  },
+  "releaseHold": {
+    "sourcePushed": false,
+    "playablePushed": false,
+    "newZIPBuilt": false,
+    "existingZIPUnchanged": true,
+    "existingZIP_SHA256": "19aa55d39320c2e8604f7e90913492533e7c3f535f2d13fc9893d2b475a4b4a1",
+    "playableCommit": "4d41bc350e39f44cd43955c60d655dec1a5832b7"
+  },
+  "screenshots": [
+    "pending-impact-ui/queued-mobile.png",
+    "pending-impact-ui/locked-injury-progress.png"
+  ]
+}

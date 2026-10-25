@@ -1,0 +1,9 @@
+{
+  "url": "http://127.0.0.1:4180/Kball.html",
+  "checks": [
+    "All-attribute locks permit offseason injury scheduling without changing past records or abilities",
+    "The queued injury and green lock state survive reload; duplicate injuries stay blocked",
+    "During the season, a real injury command advances team games through the worker while all locks and abilities remain intact"
+  ],
+  "errors": []
+}

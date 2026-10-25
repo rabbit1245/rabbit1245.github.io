@@ -1,0 +1,83 @@
+{
+  "status": "local-tested-release-held",
+  "version": "2.7.3-dev.1",
+  "unit": {
+    "passed": 12,
+    "failed": 0,
+    "command": "npx tsx --test src/game/career-text.test.ts",
+    "coverage": [
+      "required profile, totals and yearly fields",
+      "no event timelines or control diagnostics",
+      "legacy unknown counts and missing denominators",
+      "mixed coverage success rates",
+      "contemporary finances and next-season contract boundary",
+      "captain, injury and retirement season labels",
+      "team titles and runner-up medals",
+      "club and national finals, bench, shootouts and personal kicks",
+      "two-leg scores and aggregate",
+      "unplayed finals and round-zero retirement",
+      "national elimination and third-place result",
+      "BOM, CRLF and read-only generation"
+    ]
+  },
+  "relatedRegression": {
+    "manualAgingSaveAndExportPassed": 1,
+    "supportedCupsAndLegacyInitializationPassed": 2,
+    "fullSuiteClaimed": false
+  },
+  "browser": {
+    "baseURL": "http://127.0.0.1:4173/",
+    "longCareer": {
+      "source": "/workspace/rabbit1245.github.io/test-results/long-career-30-seasons.json",
+      "saveBytes": 81104879,
+      "txtBytes": 86443,
+      "seasons": 30,
+      "clubMatches": 1020,
+      "nationalMatches": 108,
+      "newSeasonSnapshots": 30,
+      "downloads": 1,
+      "bom": true,
+      "crlf": true,
+      "rawJSON": false,
+      "annualAndCareerTotalsReconcile": true,
+      "eventTimelinesOmitted": true,
+      "readOnlyDownload": true,
+      "retirementSeasonMarked": true,
+      "mobileOverflow": false,
+      "reload": true,
+      "pageErrors": []
+    },
+    "activeCareer": {
+      "url": "http://127.0.0.1:4173/",
+      "checks": [
+        "inline aging decreases only clicked attribute, without a popup or round progression",
+        "attribute locks persist after reload while manual aging stays available",
+        "mobile aging, locks and injury choices fit without dialogs or horizontal overflow",
+        "contract and market values use KRW with Korean units",
+        "Korean TXT contains requested career records without control logs"
+      ],
+      "errors": []
+    },
+    "screenshots": [
+      "pending-retirement/retirement-desktop.png",
+      "pending-retirement/retirement-mobile.png"
+    ]
+  },
+  "checks": {
+    "typescript": true,
+    "localWebBuild": true,
+    "gitDiffCheck": true
+  },
+  "release": {
+    "published": false,
+    "sourcePushed": false,
+    "portableBuilt": false,
+    "releaseCheckoutClean": true,
+    "unchangedReleaseCommit": "4d41bc350e39f44cd43955c60d655dec1a5832b7",
+    "unchangedReleaseZipSha256": "19aa55d39320c2e8604f7e90913492533e7c3f535f2d13fc9893d2b475a4b4a1"
+  },
+  "limits": [
+    "Historical values absent from the saved source remain explicitly unavailable.",
+    "Validation covers the changed report and relevant regression paths; no full-suite or new portable-release validation is claimed."
+  ]
+}

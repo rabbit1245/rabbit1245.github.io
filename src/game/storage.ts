@@ -1,3 +1,6 @@
+import {canonicalBytes} from './canonical-bytes';
+import {commandChange,controlFingerprint} from './command-patches';
+import {decodeStored,isBlobCareer,prepareStored,metadataFor,journalEntry,storedHead,recordFingerprint,type StoredCareer,type BlobCareer,type PreparedSave,type DecodedSave} from './save-codec';
 import {validateCompetitionData} from './competition-validation';
 import { validateCareerExtensions } from './extension-validation';
 import { CLUBS, LEAGUES, INTERNATIONAL_CLUBS, INTERNATIONAL_LEAGUES } from './data';
@@ -17,7 +20,6 @@ const statKeys = CORE_STATS;
 const eventTypes = new Set(['shot', 'goal', 'save', 'assist', 'yellow', 'red', 'injury', 'substitution', 'pass', 'keyPass', 'dribble', 'tackle', 'interception', 'aerial', 'handling', 'sweep', 'longKick']);
 const poisonedKeys = new Set(['__proto__', 'prototype', 'constructor']);
 
-interface StoredCareer { id: string; envelope: SaveEnvelope }
 interface SlotMetadata extends SaveSlot { hash: string; deleted?: boolean }
 type Tombstone = { id: string; revision: number; deleted: true };
 type Metadata = SlotMetadata | Tombstone;
@@ -25,6 +27,10 @@ interface RecoverySnapshot { current?: StoredCareer; metadata?: Metadata; preser
 
 let databasePromise: Promise<IDBDatabase> | undefined;
 const knownVersions = new Map<string, { revision: number; hash: string }>();
+const durableCareers=new WeakMap<Career,string>();
+const checkpointTimers=new Map<string,ReturnType<typeof setTimeout>>();
+const checkpointJobs=new Map<string,Promise<void>>();
+const MAX_JOURNAL_BYTES=4*1024*1024;
 const writeQueues = new Map<string, Promise<unknown>>();
 
 function assert(condition: unknown, message: string): asserts condition {
@@ -855,16 +861,10 @@ export function validateCareer(value: unknown): Career {
   return parsed as Career;
 }
 
-function canonical(value: unknown): string {
-  if (value === null || typeof value !== 'object') return JSON.stringify(value);
-  if (Array.isArray(value)) return `[${value.map(canonical).join(',')}]`;
-  const fields = Object.entries(value).filter(([, item]) => item !== undefined).sort(([a], [b]) => a < b ? -1 : a > b ? 1 : 0);
-  return `{${fields.map(([key, item]) => `${JSON.stringify(key)}:${canonical(item)}`).join(',')}}`;
-}
 
 async function checksum(career: Career): Promise<string> {
   if (!globalThis.crypto?.subtle) throw new Error('안전한 저장을 위해 HTTPS 또는 localhost에서 게임을 열어 주세요.');
-  const digest = await globalThis.crypto.subtle.digest('SHA-256', new TextEncoder().encode(canonical(career)));
+  const digest = await globalThis.crypto.subtle.digest('SHA-256', canonicalBytes(career));
   return [...new Uint8Array(digest)].map(byte => byte.toString(16).padStart(2, '0')).join('');
 }
 
@@ -873,7 +873,7 @@ export async function prepareEnvelope(career: Career): Promise<SaveEnvelope> {
   return { format: 'kball-save', schemaVersion: 1, hash: await checksum(copy), savedAt: new Date().toISOString(), career: copy };
 }
 
-async function verifyEnvelope(value: unknown): Promise<SaveEnvelope> {
+export async function verifyEnvelope(value: unknown): Promise<SaveEnvelope> {
   const envelope = object(value, '파일');
   assert(envelope.format === 'kball-save', 'K볼 저장 파일이 아닙니다.');
   assert(envelope.schemaVersion === 1, '지원하지 않는 저장 버전입니다. 게임을 업데이트하거나 이전 백업을 사용하세요.');
@@ -930,64 +930,121 @@ async function readSlot(id: string): Promise<{ current?: StoredCareer; backup?: 
   });
 }
 
-/** A successful save updates the slot, its previous-good backup, and metadata atomically. */
-async function persistCareer(career: Career, recovery?: RecoverySnapshot): Promise<void> {
-  const envelope=typeof Worker==='undefined'?await prepareEnvelope(career):await (await import('./save-preparation')).prepareSaveOffThread(career);
-  const validated=envelope.career;
-  return enqueue(validated.id, async () => {
-    const database = await openDatabase();
-    return new Promise<void>((resolve, reject) => {
-      const transaction = database.transaction(['slots', 'backups', 'metadata'], 'readwrite');
-      const slots = transaction.objectStore('slots');
-      const metadataStore = transaction.objectStore('metadata');
-      const current = slots.get(validated.id);
-      const metadata = metadataStore.get(validated.id);
-      let failure: Error | undefined;
-      let prepared = false;
-      const write = () => {
-        if (prepared || current.readyState !== 'done' || metadata.readyState !== 'done') return;
-        prepared = true;
-        const existing = current.result as StoredCareer | undefined;
-        const currentMetadata = metadata.result as Metadata | undefined;
-        const known = knownVersions.get(validated.id);
-        const fail = (message: string) => { failure = new Error(message); transaction.abort(); };
-        if (currentMetadata?.deleted) { fail('저장 슬롯이 다른 작업에서 삭제되었습니다. 새 슬롯으로 가져오거나 다른 커리어를 선택해 주세요.'); return; }
-        if (recovery) {
-          // Explicit recovery can replace a damaged slot, but never a newer concurrent write.
-          if (JSON.stringify(existing) !== JSON.stringify(recovery.current) || JSON.stringify(currentMetadata) !== JSON.stringify(recovery.metadata)) {
-            fail('저장 충돌: 복구 중 다른 탭에서 커리어가 변경되었습니다. 슬롯을 다시 불러와 주세요.'); return;
-          }
-          if (existing && !recovery.preserveBackup) transaction.objectStore('backups').put(existing);
-        } else if (existing) {
-          const previous = existing.envelope;
-          if (previous.career.revision > validated.revision) { fail('저장 충돌: 더 최신인 진행 기록이 있습니다. 슬롯을 다시 불러와 주세요.'); return; }
-          if (previous.career.revision === validated.revision && previous.hash !== envelope.hash) { fail('저장 충돌: 같은 시점의 다른 진행 기록이 있습니다. 슬롯을 다시 불러와 주세요.'); return; }
-          if (known && (known.revision !== previous.career.revision || known.hash !== previous.hash)) { fail('저장 충돌: 다른 탭에서 커리어가 변경되었습니다. 슬롯을 다시 불러와 주세요.'); return; }
-          if (!known && previous.hash !== envelope.hash) { fail('저장 충돌: 기존 슬롯을 먼저 불러오거나 새 슬롯을 사용해 주세요.'); return; }
-          if (previous.hash === envelope.hash) return; // An identical autosave must not displace the useful backup.
-          transaction.objectStore('backups').put(existing);
-        }
-        const club = clubs.get(validated.player.clubId)!;
-        const nextMetadata: SlotMetadata = {
-          id: validated.id, name: `${validated.player.name} · ${validated.season.year}/${String(validated.season.year + 1).slice(-2)}`,
-          playerName: validated.player.name, clubName: club.name, year: validated.season.year,
-          age: validated.player.age, ovr: validated.player.ovr, updatedAt: envelope.savedAt,
-          revision: validated.revision, hash: envelope.hash,
-        };
-        slots.put({ id: validated.id, envelope } satisfies StoredCareer);
-        metadataStore.put(nextMetadata);
-      };
-      current.onsuccess = write;
-      metadata.onsuccess = write;
-      transaction.oncomplete = () => { knownVersions.set(validated.id, { revision: validated.revision, hash: envelope.hash }); resolve(); };
-      transaction.onabort = () => reject(failure ?? storageError(transaction.error));
-      transaction.onerror = () => reject(failure ?? storageError(transaction.error));
-    });
-  });
+async function prepareSnapshot(career:Career):Promise<PreparedSave>{
+ return typeof Worker==='undefined'?prepareStored(career):(await import('./save-preparation')).prepareSaveOffThread(career);
 }
+async function decodeSnapshot(record:StoredCareer):Promise<DecodedSave>{
+ return typeof Worker==='undefined'?decodeStored(record):(await import('./save-preparation')).decodeSaveOffThread(record);
+}
+function sameMetadata(a:Metadata|undefined,b:Metadata|undefined){return JSON.stringify(a)===JSON.stringify(b);}
+function assertKnown(existing:StoredCareer|undefined,metadata:Metadata|undefined,id:string){
+ if(metadata?.deleted)throw Error('저장 슬롯이 다른 작업에서 삭제되었습니다. 새 슬롯으로 가져오거나 다른 커리어를 선택해 주세요.');
+ if(!existing)return;
+ const known=knownVersions.get(id),head=storedHead(existing);
+ if(known&&(known.revision!==head.revision||known.hash!==head.hash))throw Error('저장 충돌: 다른 탭에서 커리어가 변경되었습니다. 슬롯을 다시 불러와 주세요.');
+}
+async function replaceSnapshot(career:Career,prepared:PreparedSave,expected:Awaited<ReturnType<typeof readSlot>>,recovery?:RecoverySnapshot,logicalHash?:string):Promise<void>{
+ const database=await openDatabase();let committedVersion={revision:prepared.record.revision,hash:prepared.record.versionHash};
+ await new Promise<void>((resolve,reject)=>{
+  const tx=database.transaction(['slots','backups','metadata'],'readwrite'),slots=tx.objectStore('slots'),metadata=tx.objectStore('metadata'),current=slots.get(career.id),meta=metadata.get(career.id);let failure:Error|undefined,done=false;
+  const fail=(e:unknown)=>{failure=e instanceof Error?e:new Error(String(e));tx.abort();};
+  const write=()=>{if(done||current.readyState!=='done'||meta.readyState!=='done')return;done=true;
+   try{
+    const existing=current.result as StoredCareer|undefined,m=meta.result as Metadata|undefined;
+    if(m?.deleted)throw Error('저장 슬롯이 다른 작업에서 삭제되었습니다. 새 슬롯으로 가져오세요.');
+    if(recordFingerprint(existing)!==recordFingerprint(expected.current)||!sameMetadata(m,expected.metadata))throw Error('저장 충돌: 저장 중 다른 탭에서 커리어가 변경되었습니다.');
+    if(recovery){
+     if(recordFingerprint(existing)!==recordFingerprint(recovery.current)||!sameMetadata(m,recovery.metadata))throw Error('저장 충돌: 복구 중 다른 탭에서 커리어가 변경되었습니다.');
+     if(existing&&!recovery.preserveBackup)tx.objectStore('backups').put(existing);
+    }else if(existing){
+     const head=storedHead(existing),known=knownVersions.get(career.id),contentHash=logicalHash??(!isBlobCareer(existing)?existing.envelope.hash:existing.hash);
+     if(head.revision>career.revision)throw Error('저장 충돌: 더 최신인 진행 기록이 있습니다. 슬롯을 다시 불러와 주세요.');
+     if(head.revision===career.revision&&contentHash!==prepared.record.hash)throw Error('저장 충돌: 같은 시점의 다른 진행 기록이 있습니다.');
+     if(known&&(known.revision!==head.revision||known.hash!==head.hash))throw Error('저장 충돌: 다른 탭에서 커리어가 변경되었습니다.');
+     if(!known&&head.hash!==prepared.record.hash)throw Error('저장 충돌: 기존 슬롯을 먼저 불러오거나 새 슬롯을 사용해 주세요.');
+     if(head.revision===career.revision&&contentHash===prepared.record.hash){committedVersion=head;return;}
+     tx.objectStore('backups').put(existing);
+    }
+    slots.put(prepared.record);metadata.put(prepared.metadata);
+   }catch(e){fail(e);}
+  };current.onsuccess=write;meta.onsuccess=write;
+  tx.oncomplete=()=>resolve();tx.onabort=()=>reject(failure??storageError(tx.error));tx.onerror=()=>reject(failure??storageError(tx.error));
+ });
+ knownVersions.set(career.id,committedVersion);durableCareers.set(career,controlFingerprint(career));
+}
+function stopCheckpointTimer(id:string){const timer=checkpointTimers.get(id);if(timer)clearTimeout(timer);checkpointTimers.delete(id);}
+/** Whole snapshots still receive the original complete validation and canonical checksum. */
+async function persistCareer(career:Career,recovery?:RecoverySnapshot):Promise<void>{
+ stopCheckpointTimer(career.id);
+ return enqueue(career.id,async()=>{
+  const snapshot=await readSlot(career.id);
+  if(!recovery){
+   // Preserve the more useful stale-revision error before checking a stale tab token.
+   if(snapshot.metadata?.deleted)throw Error('저장 슬롯이 다른 작업에서 삭제되었습니다.');
+   if(snapshot.current&&storedHead(snapshot.current).revision>career.revision)throw Error('저장 충돌: 더 최신인 진행 기록이 있습니다.');
+   assertKnown(snapshot.current,snapshot.metadata,career.id);
+  }
+  let logicalHash:string|undefined;
+  if(snapshot.current&&isBlobCareer(snapshot.current)&&snapshot.current.journal.length&&storedHead(snapshot.current).revision===career.revision){
+   const decoded=await decodeSnapshot(snapshot.current);logicalHash=(await prepareSnapshot(decoded.career)).record.hash;
+  }
+  const prepared=await prepareSnapshot(career);await replaceSnapshot(career,prepared,snapshot,recovery,logicalHash);
+ });
+}
+export async function saveCareer(career:Career):Promise<void>{return persistCareer(career);}
 
-export async function saveCareer(career: Career): Promise<void> {
-  return persistCareer(career);
+/** A durable, checksummed write-ahead record for an authenticated light engine result. */
+export async function saveCareerChange(previous:Career,next:Career):Promise<void>{
+ const patches=durableCareers.get(previous)===controlFingerprint(previous)?commandChange(previous,next):undefined;
+ if(!patches)return saveCareer(next);
+ await enqueue(next.id,async()=>{
+  const snapshot=await readSlot(next.id);assertKnown(snapshot.current,snapshot.metadata,next.id);
+  if(!snapshot.current||!isBlobCareer(snapshot.current))throw Error('저장 스냅샷을 다시 불러온 뒤 변경해 주세요.');
+  const head=storedHead(snapshot.current);
+  if(head.revision!==previous.revision)throw Error('저장 충돌: 변경 기록의 시작 시점이 다릅니다.');
+  const entry=await journalEntry(next.id,previous.revision,next.revision,head.hash,patches);
+  const journal=[...snapshot.current.journal,entry];
+  if(journal.length>512||new TextEncoder().encode(JSON.stringify(journal)).length>MAX_JOURNAL_BYTES)throw Error('배경 저장이 밀려 있습니다. 잠시 뒤 다시 저장해 주세요.');
+  const record:BlobCareer={...snapshot.current,journal,writeId:crypto.randomUUID()};
+  const metadata=metadataFor(next,entry.hash,new Date().toISOString()),database=await openDatabase();
+  await new Promise<void>((resolve,reject)=>{
+   const tx=database.transaction(['slots','backups','metadata'],'readwrite'),slots=tx.objectStore('slots'),store=tx.objectStore('metadata'),current=slots.get(next.id),meta=store.get(next.id);let done=false,failure:Error|undefined;
+   const write=()=>{if(done||current.readyState!=='done'||meta.readyState!=='done')return;done=true;
+    try{
+     if((meta.result as Metadata|undefined)?.deleted)throw Error('저장 슬롯이 다른 작업에서 삭제되었습니다.');
+     if(recordFingerprint(current.result)!==recordFingerprint(snapshot.current)||!sameMetadata(meta.result,snapshot.metadata))throw Error('저장 충돌: 다른 탭에서 커리어가 변경되었습니다.');
+     tx.objectStore('backups').put(snapshot.current!);slots.put(record);store.put(metadata);
+    }catch(e){failure=e instanceof Error?e:new Error(String(e));tx.abort();}
+   };current.onsuccess=write;meta.onsuccess=write;tx.oncomplete=()=>resolve();tx.onabort=()=>reject(failure??storageError(tx.error));tx.onerror=()=>reject(failure??storageError(tx.error));
+  });
+  knownVersions.set(next.id,{revision:next.revision,hash:entry.hash});durableCareers.set(next,controlFingerprint(next));
+ });
+ scheduleCheckpoint(next.id);
+}
+function scheduleCheckpoint(id:string){
+ if(typeof Worker==='undefined')return;
+ stopCheckpointTimer(id);checkpointTimers.set(id,setTimeout(()=>{checkpointTimers.delete(id);void checkpointCareer(id).catch(()=>{/* The durable journal and previous-good backup remain intact. */});},1500));
+}
+/** Compaction never changes the logical head or the last-good backup. */
+export function checkpointCareer(id:string):Promise<void>{
+ const running=checkpointJobs.get(id);if(running)return running;
+ const job=(async()=>{
+  const snapshot=await readSlot(id);if(snapshot.metadata?.deleted||!snapshot.current||!isBlobCareer(snapshot.current)||!snapshot.current.journal.length)return;
+  const source=snapshot.current;
+  const prepared=typeof Worker==='undefined'?await prepareStored((await decodeStored(source)).career):await (await import('./save-preparation')).checkpointOffThread(source);
+  const target=storedHead(source);prepared.record.versionHash=target.hash;
+  await enqueue(id,async()=>{
+   const database=await openDatabase();await new Promise<void>((resolve,reject)=>{
+    const tx=database.transaction(['slots','metadata'],'readwrite'),slots=tx.objectStore('slots'),current=slots.get(id),meta=tx.objectStore('metadata').get(id);let done=false;
+    const write=()=>{if(done||current.readyState!=='done'||meta.readyState!=='done')return;done=true;
+     const now=current.result as StoredCareer|undefined;if((meta.result as Metadata|undefined)?.deleted||!now||!isBlobCareer(now)||now.revision>target.revision)return;
+     const token=now.revision===target.revision?now.versionHash:now.journal.find(e=>e.revision===target.revision)?.hash;
+     if(token!==target.hash)return;
+     slots.put({...prepared.record,journal:now.journal.filter(e=>e.revision>target.revision),writeId:crypto.randomUUID()});
+    };current.onsuccess=write;meta.onsuccess=write;tx.oncomplete=()=>resolve();tx.onabort=()=>reject(storageError(tx.error));tx.onerror=()=>reject(storageError(tx.error));
+   });
+  });
+ })();checkpointJobs.set(id,job);void job.then(async()=>{const now=await readSlot(id);if(now.current&&isBlobCareer(now.current)&&now.current.journal.length&&!now.metadata?.deleted)scheduleCheckpoint(id);}).catch(()=>undefined);void job.finally(()=>{if(checkpointJobs.get(id)===job)checkpointJobs.delete(id);}).catch(()=>undefined);return job;
 }
 
 export async function listSlots(): Promise<SaveSlot[]> {
@@ -1002,18 +1059,27 @@ export async function listSlots(): Promise<SaveSlot[]> {
   return rows.filter((row): row is SlotMetadata => !row.deleted).map(({ hash: _hash, deleted: _deleted, ...slot }) => slot).sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
 }
 
-export async function loadCareer(id: string): Promise<Career> {
-  text(id, '슬롯 ID');
-  const snapshot = await readSlot(id);
-  if (!snapshot.current || snapshot.metadata?.deleted) throw new Error('저장 슬롯을 찾을 수 없습니다. 다른 슬롯이나 JSON 백업을 사용해 주세요.');
-  const envelope = await verifyEnvelope(snapshot.current.envelope);
-  assert(envelope.career.id === id, '슬롯 ID와 저장 내용이 일치하지 않습니다.');
-  knownVersions.set(id, { revision: envelope.career.revision, hash: envelope.hash });
-  return envelope.career;
+export async function loadCareer(id:string):Promise<Career>{
+ text(id,'슬롯 ID');const snapshot=await readSlot(id);
+ if(!snapshot.current||snapshot.metadata?.deleted)throw Error('저장 슬롯을 찾을 수 없습니다. 다른 슬롯이나 JSON 백업을 사용해 주세요.');
+ const decoded=await decodeSnapshot(snapshot.current);
+ if(decoded.career.id!==id)throw Error('슬롯 ID와 저장 내용이 일치하지 않습니다.');
+ if(decoded.normalized){
+  // Lazy, atomic migration: an old object record is never overwritten over a newer tab.
+  await enqueue(id,async()=>{const database=await openDatabase();await new Promise<void>((resolve,reject)=>{
+   const tx=database.transaction(['slots','metadata'],'readwrite'),store=tx.objectStore('slots'),current=store.get(id),meta=tx.objectStore('metadata').get(id);let done=false;
+   const migrate=()=>{if(done||current.readyState!=='done'||meta.readyState!=='done')return;done=true;if((meta.result as Metadata|undefined)?.deleted||recordFingerprint(current.result)!==recordFingerprint(snapshot.current)||!sameMetadata(meta.result,snapshot.metadata))return;store.put(decoded.normalized!);tx.objectStore('metadata').put(metadataFor(decoded.career,decoded.versionHash,new Date().toISOString()));};
+   current.onsuccess=migrate;meta.onsuccess=migrate;tx.oncomplete=()=>resolve();tx.onabort=()=>reject(storageError(tx.error));tx.onerror=()=>reject(storageError(tx.error));
+  });});
+ }
+ knownVersions.set(id,{revision:decoded.career.revision,hash:decoded.versionHash});durableCareers.set(decoded.career,controlFingerprint(decoded.career));
+ if(isBlobCareer(snapshot.current)&&snapshot.current.journal.length)scheduleCheckpoint(id);
+ return decoded.career;
 }
 
 export async function deleteSlot(id: string): Promise<void> {
   text(id, '슬롯 ID');
+  stopCheckpointTimer(id);
   return enqueue(id, async () => {
     const database = await openDatabase();
     await new Promise<void>((resolve, reject) => {
@@ -1037,11 +1103,12 @@ export async function restoreBackup(id: string): Promise<Career> {
   text(id, '슬롯 ID');
   const snapshot = await readSlot(id);
   if (!snapshot.backup || snapshot.metadata?.deleted) throw new Error('복원할 이전 저장본이 없습니다. JSON 백업을 가져올 수 있습니다.');
-  const envelope = await verifyEnvelope(snapshot.backup.envelope);
+  const decoded = await decodeSnapshot(snapshot.backup);
+  const envelope = {career:decoded.career};
   assert(envelope.career.id === id, '백업 ID와 슬롯이 일치하지 않습니다.');
-  let validCurrent: SaveEnvelope | undefined;
+  let validCurrent: DecodedSave | undefined;
   if (snapshot.current) {
-    try { validCurrent = await verifyEnvelope(snapshot.current.envelope); }
+    try { validCurrent = await decodeSnapshot(snapshot.current); }
     catch { /* Restore the verified backup without turning the damaged slot into a backup. */ }
   }
   const revisionCandidates = [envelope.career.revision, validCurrent?.career.revision, snapshot.metadata?.revision]
@@ -1056,15 +1123,15 @@ export async function exportCareer(career: Career): Promise<string> {
   return stringify(await prepareEnvelope(career));
 }
 
-/** Imported saves always become new slots; no existing game or legacy localStorage is overwritten. */
-export async function importCareer(source: string): Promise<Career> {
+/** Untrusted files always receive the original complete checks, including poison-key checks. */
+export async function verifySaveText(source:string):Promise<Career>{
   assert(typeof source === 'string' && new TextEncoder().encode(source).byteLength <= MAX_SAVE_BYTES, '저장 파일은 256MB 이하여야 합니다.');
-  let parsed: unknown;
-  try { parsed = JSON.parse(source); }
-  catch { throw new Error('저장 파일을 읽을 수 없습니다. 올바른 JSON 백업을 선택해 주세요.'); }
-  ensureSafeJSON(parsed);
-  const envelope = await verifyEnvelope(parsed);
-  const imported = envelope.career;
-  imported.id = `career-${globalThis.crypto.randomUUID()}`;
-  return imported;
+  let parsed:unknown;
+  try{parsed=JSON.parse(source);}catch{throw new Error('저장 파일을 읽을 수 없습니다. 올바른 JSON 백업을 선택해 주세요.');}
+  ensureSafeJSON(parsed);return (await verifyEnvelope(parsed)).career;
+}
+/** Imported saves always become new slots; no existing game or legacy localStorage is overwritten. */
+export async function importCareer(source:string):Promise<Career>{
+  const imported=typeof Worker==='undefined'?await verifySaveText(source):await (await import('./save-preparation')).verifyFileOffThread(source);
+  imported.id=`career-${globalThis.crypto.randomUUID()}`;return imported;
 }

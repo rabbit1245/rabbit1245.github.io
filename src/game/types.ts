@@ -4,6 +4,7 @@ export type Talent = 'SSS'|'SS'|'S'|'A'|'B'|'C'|'D';
 export type Foot = 'right'|'left'|'both';
 export type Squad = 'youth'|'senior';
 export type Intensity = 'balanced'|'intense'|'rest';
+export interface GameProgress {year:number;round:number;total:number}
 export type AttributeKey = 'strength'|'stamina'|'speed'|'agility'|'jumping'|'ballControl'|'dribbling'|'passing'|'crossing'|'shooting'|'heading'|'defending'|'setPieces'|'decisions'|'vision'|'anticipation'|'positioning'|'composure'|'concentration'|'teamwork'|'gkShotStopping'|'gkReflexes'|'gkHandling'|'gkAerialCommand'|'gkOneOnOnes'|'gkPositioning'|'gkDistribution'|'gkDefensiveOrganization';
 export type Attributes = Partial<Record<AttributeKey, number>>;
 export interface Club { id: string; name: string; nativeName: string; country: string; leagueId: string; power: number; color: string; crest?: string }

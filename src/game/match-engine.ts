@@ -5,7 +5,7 @@ import type { AttributeKey, Career, Club, Fixture, MatchEvent, MatchRecord, Play
 
 const CLUB_INDEX = new Map(CLUBS.map(club=>[club.id,club]));
 interface Actor extends MatchPerformance { from:number;to:number;teamId:string;user:boolean;style:string;creation:number }
-interface Team { club:Club; actors:Actor[]; power:number }
+interface Team { club:Club; actors:Actor[]; power:number; leadership:number }
 const FORWARD = new Set<Position>(['ST','CF','SS','LW','RW']);
 const MIDFIELD = new Set<Position>(['CDM','CM','CAM','LM','RM']);
 const DEFENCE = new Set<Position>(['CB','LB','RB','LWB','RWB']);
@@ -56,8 +56,9 @@ function makeTeam(career:Career,club:Club,provided:MatchParticipant[]|undefined,
   const includesUser=userTeam===club.id&&selection.to>selection.from;
   const userParticipant:MatchParticipant={id:user.id,name:user.name,clubId:user.clubId,position:user.position,ovr:user.ovr,attributes:{...user.attributes},nationality:user.nationality};
   const closestIndex=()=>chosen.reduce((best,p,i)=>{
-    const quality=(q:MatchParticipant)=>(q.position===user.position?100:group(q.position)===group(user.position)?35:-100)-q.ovr*.01;
-    return quality(p)>quality(chosen[best])?i:best;
+    const flank=user.position==='LWB'?'LB':user.position==='RWB'?'RB':user.position==='LB'?'LWB':user.position==='RB'?'RWB':undefined;
+    const quality=(q:MatchParticipant,index:number)=>(q.position===user.position?100:flank&&(q.position===flank||desired[index]===flank)?85:group(q.position)===group(user.position)?35:-100)-q.ovr*.01;
+    return quality(p,i)>quality(chosen[best],best)?i:best;
   },0);
   if(includesUser&&selection.started)chosen[closestIndex()]=userParticipant;
   const actors:Actor[]=chosen.map(p=>({...p,teamId:club.id,stats:emptyStats(),rating:0,minutes:90,started:true,from:0,to:90,user:p.id===user.id,style:p.id===user.id?user.style:'',creation:0}));
@@ -83,7 +84,7 @@ function makeTeam(career:Career,club:Club,provided:MatchParticipant[]|undefined,
   const worldPower=career.systems?.world.clubs[club.id]?.power;
   // Supplied teams already carry their current power (including national teams).
   const power=provided?.length?club.power:worldPower??club.power;
-  return {club,actors,power};
+  return {club,actors,power,leadership:0};
 }
 
 function sampleActions(actor:Actor,opponentPower:number,rng:()=>number,emit:(type:MatchEvent['type'],actor:Actor,minute:number,detail:string,relatedId?:string)=>string,detailed:boolean){
@@ -154,6 +155,29 @@ function assignCaptain(career:Career,team:Team,userTeam:string|undefined,scope:'
     captain=[...starters].filter(actor=>!actor.user||eligibleUser).sort(order)[0];
   }
   if(captain)captain.captain=true;
+  // Organization follows real on-pitch leadership and minutes, including an appointed deputy.
+  const quality=(actor:Actor)=>clamp(leadership(actor.id)/100,0,1)*(.55+ability(actor,'decisions')*.0025+ability(actor,'teamwork')*.002);
+  const captainFactor=captain?.user&&role==='captain'?.04:.028;
+  const deputy=role==='vice'?team.actors.find(actor=>actor.user&&actor!==captain):undefined;
+  team.leadership=clamp((captain?quality(captain)*captainFactor*duration(captain):0)+(deputy?quality(deputy)*.016*duration(deputy):0),0,.045);
+}
+
+/** Off-ball supply and coverage use actual skills, with the same rules for NPCs and the user.
+ * A stronger final pass changes the chances created, not only the name credited an assist. */
+function tacticalImpact(team:Team):{supply:number;coverage:number}{
+  let creationEdge=0,defensiveEdge=0;
+  for(const actor of team.actors){
+    if(actor.position==='GK')continue;
+    const wide=['LW','RW','LM','RM','LB','RB','LWB','RWB'].includes(actor.position);
+    const lateMinutes=Math.max(0,actor.to-Math.max(60,actor.from));
+    const referenceEndurance=1-(1-(.48+team.power*.0052))*lateMinutes/Math.max(1,actor.minutes);
+    const reference=(.15+team.power*(.021+.007+(wide?.019:.008)+.006+.006+.005))*CREATION_ROLE[actor.position]*styleFactor(actor,'pass')*referenceEndurance;
+    creationEdge+=(actor.creation-reference)*duration(actor);
+    const weight=actor.position==='CB'?1.1:['LB','RB','LWB','RWB'].includes(actor.position)?.85:actor.position==='CDM'?.8:MIDFIELD.has(actor.position)?.35:.12;
+    const defense=ability(actor,'defending')*.32+ability(actor,'anticipation')*.23+ability(actor,'positioning')*.2+ability(actor,'concentration')*.15+ability(actor,'decisions')*.1;
+    defensiveEdge+=(defense-team.power)*weight*duration(actor);
+  }
+  return {supply:clamp(1+creationEdge*.09,.78,1.28)*(1+team.leadership*.45),coverage:clamp(1-defensiveEdge*.005,.78,1.22)*(1-team.leadership)};
 }
 
 /** Pure seeded match simulation. Full worlds use the same action checks with compressed event output. */
@@ -205,6 +229,7 @@ export function simulateMatch(career:Career,fixture:Fixture,options:MatchOptions
   // These totals already reflect each actor's actual minutes, including substitutions.
   const buildUp=teams.map(t=>t.actors.reduce((n,a)=>n+a.stats.passesCompleted*.004+(a.stats.dribblesCompleted??0)*.09+(a.stats.lateSuccesses??0)*.006,0));
   const disruption=teams.map(t=>t.actors.reduce((n,a)=>n+a.stats.tackles*.12+a.stats.interceptions*.16+(a.stats.aerialWon??0)*.04+(a.stats.crossesCaught??0)*.12+(a.stats.sweepingSuccesses??0)*.12,0));
+  const tactics=teams.map(tacticalImpact);
   const scores=[0,0];
   for(let side=0;side<2;side++){
     const team=teams[side],opposition=teams[1-side];
@@ -216,7 +241,7 @@ export function simulateMatch(career:Career,fixture:Fixture,options:MatchOptions
     for(const shooter of team.actors){
       const a=(key:AttributeKey)=>ability(shooter,key);
       const minutes=duration(shooter);
-      const opportunities=SHOTS[shooter.position]*minutes*styleFactor(shooter,'shot')*powerFactor*actionFactor*(.43+a('positioning')*.006+a('speed')*.002+a('decisions')*.001)*(1.22-organization*.0048);
+      const opportunities=SHOTS[shooter.position]*minutes*styleFactor(shooter,'shot')*powerFactor*actionFactor*tactics[side].supply*tactics[1-side].coverage*(.43+a('positioning')*.006+a('speed')*.002+a('decisions')*.001)*(1.22-organization*.0048);
       const shotRng=seededRandom(`${seed}:${shooter.id}:shots`);
       const creatorRng=seededRandom(`${seed}:${shooter.id}:creators`);
       const count=roundedCount(opportunities*(.65+shotRng()*.7),shotRng);

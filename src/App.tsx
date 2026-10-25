@@ -2,12 +2,12 @@ import {currencyText} from './game/currency';
 import {careerMatchLedger} from './game/career-text';
 import { useEffect, useMemo, useRef, useState, type ChangeEvent } from 'react';
 import { AlertCircle, ArrowRight, ArrowUpRight, CheckCircle2, Download, FolderOpen, LayoutDashboard, Loader2, Menu, Plus, RotateCcw, Save, Settings2, Shield, SkipForward, Trash2, Trophy, Upload, UserRound, X } from 'lucide-react';
-import type { Career, CreateOptions, GameCommand, MatchRecord, SaveSlot } from './game/types';
+import type { Career, CreateOptions, GameCommand, GameProgress, MatchRecord, SaveSlot } from './game/types';
 import type { PresentationEvent } from './game/revision-types';
 import { CLUBS, DATA_PROVENANCE } from './game/data';
 import { createCareer, ENGINE_VERSION } from './game/engine';
 import { runGameCommand } from './game/client';
-import { deleteSlot, exportCareer, importCareer, listSlots, loadCareer, restoreBackup, saveCareer } from './game/storage';
+import { deleteSlot, exportCareer, importCareer, listSlots, loadCareer, restoreBackup, saveCareer, saveCareerChange } from './game/storage';
 import { sumStats } from './game/math';
 import { careerTextChunks,careerTextFilename } from './game/career-text';
 import Creation from './components/Creation';
@@ -47,6 +47,7 @@ export default function App() {
   const [slots, setSlots] = useState<SaveSlot[]>([]);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
+  const [progress,setProgress]=useState<GameProgress|null>(null);
   const [creation, setCreation] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [selectedMatch, setSelectedMatch] = useState<MatchRecord | null>(null);
@@ -95,9 +96,9 @@ export default function App() {
   function openCareer(view:CareerView){navigate('career');setCareerView(view);}
   async function refresh() { setSlots(await listSlots()); }
   function display(next: Career) { careerRef.current = next; setCareer(next); }
-  async function commit(next: Career): Promise<boolean> {
+  async function commit(next: Career, previous?:Career): Promise<boolean> {
     display(next); setSaveStatus('saving');
-    try { await saveCareer(next); }
+    try { if(previous)await saveCareerChange(previous,next);else await saveCareer(next); }
     catch (e) { setSaveStatus('error'); setError(`자동 저장에 실패했습니다. 현재 진행은 화면에 유지됩니다. 파일로 내보내기를 권장합니다. ${errorMessage(e)}`); return false; }
     setSaveStatus('saved');
     try { await refresh(); }
@@ -107,17 +108,17 @@ export default function App() {
   async function command(value: GameCommand) {
     if (locked.current || !careerRef.current) return;
     locked.current = true; setBusy(true); setError('');
-    try { const previous = careerRef.current; const next = await runGameCommand(previous, value); const saved=await commit(next);if(value.type==='training'&&saved)navigate('locker');
+    try { const previous = careerRef.current; const next = await runGameCommand(previous, value,setProgress); const saved=await commit(next,previous);if(value.type==='training'&&saved)navigate('locker');
       if (['advanceHalf','continueHalf','transfer','nextSeason','retire'].includes(value.type) && !reduced) { const matchIds = new Set([...careerMatchLedger(previous).club,...careerMatchLedger(previous).national].map(m => m.id)), eventIds = new Set(previous.systems?.events.map(e => e.id) || []); const matches = [...careerMatchLedger(next).club,...careerMatchLedger(next).national].filter(m => !matchIds.has(m.id)), events = next.systems?.events.filter(e => !eventIds.has(e.id)) || []; if (matches.length || events.some(e => e.importance === 'milestone')) setPresentation({ matches, events }); } if (value.type === 'nextSeason' || value.type === 'retire') navigate(value.type === 'retire' ? 'career' : 'locker'); if (value.type === 'training') setToast('새로운 훈련 계획을 적용했습니다.'); }
     catch (e) { setError(errorMessage(e)); }
-    finally { locked.current = false; setBusy(false); }
+    finally { locked.current = false; setBusy(false); setProgress(null); }
   }
   async function newCareer(options: CreateOptions) {
     if (locked.current) return;
     locked.current = true; setBusy(true); setError('');
     try { const next = createCareer(options); await commit(next); setCreation(false); navigate('locker'); setToast('당신의 커리어가 시작되었습니다.'); }
     catch (e) { setError(errorMessage(e)); throw e; }
-    finally { locked.current = false; setBusy(false); }
+    finally { locked.current = false; setBusy(false); setProgress(null); }
   }
   async function load(id: string) {
     if (locked.current) return;
@@ -125,13 +126,13 @@ export default function App() {
     locked.current = true; setBusy(true); setError('');
     try { const next = await loadCareer(id); display(next); setSelectedMatch(null); setSaveStatus('saved'); setCommon(false); navigate('locker'); setToast('커리어를 불러왔습니다.'); }
     catch (e) { setError(errorMessage(e)); }
-    finally { locked.current = false; setBusy(false); }
+    finally { locked.current = false; setBusy(false); setProgress(null); }
   }
   async function saveNow() {
     if (locked.current || !careerRef.current) return;
     locked.current = true; setBusy(true); setError('');
     try { await commit(careerRef.current); }
-    finally { locked.current = false; setBusy(false); }
+    finally { locked.current = false; setBusy(false); setProgress(null); }
   }
   async function exportFile() {
     const exporting = careerRef.current;
@@ -145,21 +146,21 @@ export default function App() {
     locked.current = true; setBusy(true); setError('');
     try { if (file.size > 256 * 1024 * 1024) throw new Error('256MB 이하의 K볼 저장 파일을 선택해 주세요.'); const next = await importCareer(await file.text()); const saved = await commit(next); setSelectedMatch(null); setCommon(false); navigate('locker'); if (saved) setToast('별도 슬롯으로 커리어를 가져왔습니다.'); }
     catch (e) { setError(errorMessage(e)); }
-    finally { locked.current = false; setBusy(false); }
+    finally { locked.current = false; setBusy(false); setProgress(null); }
   }
   async function remove(id: string) {
     if (locked.current || !window.confirm('이 커리어의 저장 파일과 백업을 삭제할까요? 삭제 후에는 되돌릴 수 없습니다.')) return;
     locked.current = true; setBusy(true); setError('');
     try { await deleteSlot(id); if (careerRef.current?.id === id) { careerRef.current = null; setCareer(null); } await refresh(); setToast('커리어를 삭제했습니다.'); }
     catch (e) { setError(errorMessage(e)); }
-    finally { locked.current = false; setBusy(false); }
+    finally { locked.current = false; setBusy(false); setProgress(null); }
   }
   async function restore(id: string) {
     if (locked.current || !window.confirm('직전 정상 저장본으로 복원할까요? 현재 저장본은 복원용 백업으로 남습니다.')) return;
     locked.current = true; setBusy(true); setError('');
     try { const next = await restoreBackup(id); display(next); setSaveStatus('saved'); await refresh(); setCommon(false); navigate('locker'); setToast('이전 저장본을 복원했습니다.'); }
     catch (e) { setError(errorMessage(e)); }
-    finally { locked.current = false; setBusy(false); }
+    finally { locked.current = false; setBusy(false); setProgress(null); }
   }
   function copyCareer() {
     const career=careerRef.current;if(!career)return;
@@ -178,7 +179,7 @@ export default function App() {
       <header className="app-header"><div className="header-inner"><Brand/><nav className="main-nav" aria-label="주요 화면">{NAVIGATION.map(n=><button key={n.id} data-testid={`${n.id}-tab`} aria-current={page===n.id?'page':undefined} className={page===n.id?'active':''} onClick={()=>navigate(n.id)}><n.icon size={17}/><span>{n.label}{n.id==='player'&&career.systems?.leadership.offers?.some(o=>o.status==='pending')&&<small className="nav-captain-offer">주장 제의</small>}</span></button>)}</nav><div className="header-tools"><span className={`save-status ${saveStatus}`} data-testid="save-status" aria-live="polite">{saveStatus==='saving'?<Loader2 size={13} className="spinner"/>:saveStatus==='error'?<AlertCircle size={13}/>:<CheckCircle2 size={13}/>}<span>{saveStatus==='saved'?'자동 저장됨':saveStatus==='saving'?'저장 중':'저장 실패'}</span></span><button className="icon-button" data-testid="common-menu" aria-label="저장 및 설정 메뉴" onClick={()=>setCommon(true)}><Menu size={21}/></button></div>{toast&&<div className="toast" role="status"><CheckCircle2 size={17}/>{toast}</div>}</div></header>
       <main className="game-main">{strip}{competitions}<div className="page-title"><h1>{page==='locker'?'라커룸':page==='player'?'선수':'커리어'}</h1><span className="page-context">{calendarLabel(career)} · {phaseLabel(career)} · {career.season.competitionName}</span></div>
         {error&&<div className="error-banner" role="alert"><AlertCircle size={18}/><span>{error}</span><button className="icon-button" aria-label="오류 알림 닫기" onClick={()=>setError('')}><X size={16}/></button></div>}
-        {busy&&<div className="processing" role="status"><Loader2 className="spinner" size={17}/>경기와 성장 기록을 계산하고 있습니다.</div>}
+        {busy&&<div className="processing" role="status"><Loader2 className="spinner" size={17}/>{progress?`${progress.year}시즌 · ${progress.round}/${progress.total}라운드 계산 중`:'경기와 성장 기록을 계산하고 있습니다.'}</div>}
         {page==='locker'&&<LockerRoom career={career} busy={busy} command={command} onMatch={setSelectedMatch} presenting={Boolean(presentation)} onTraining={openTraining} onCareer={openCareer}/>}{page==='player'&&<PlayerPanel career={career} busy={busy} command={command} requestedView={playerView} viewRequest={playerViewRequest}/>} {page==='career'&&<CareerPanel career={career} busy={busy} command={command} onExport={exportFile} onCopy={copyCareer} onMatch={setSelectedMatch} requestedView={careerView}/>}
         <footer className="game-footer"><span data-testid="game-version">K볼 {ENGINE_VERSION} · A FOOTBALL LIFE</span><span>이 브라우저에 자동 저장</span></footer>
       </main></div>}
