@@ -16,6 +16,6 @@ try{
  assert.ok(cached.every(c=>c.ok),'all known crests must be precached before the user visits their league');
  await context.setOffline(true);await page.reload({waitUntil:'networkidle'});await page.getByTestId('new-career').waitFor();
  const decoded=await page.evaluate(async crests=>{const rows=[];for(let i=0;i<crests.length;i+=30)rows.push(...await Promise.all(crests.slice(i,i+30).map(async c=>{const img=new Image();img.src=c.src;await img.decode();return {id:c.id,ok:img.naturalWidth>0&&img.naturalHeight>0};})));return rows;},crests);
- assert.equal(decoded.length,784);assert.ok(decoded.every(c=>c.ok));assert.deepEqual(errors,[]);
+ assert.equal(decoded.length,crests.length);assert.ok(decoded.every(c=>c.ok));assert.deepEqual(errors,[]);
  await writeFile(`${out}/results.json`,JSON.stringify({url,preCached:cached.length,decodedOffline:decoded.length,offlineReload:true,errors},null,2));console.log(JSON.stringify({preCached:cached.length,decodedOffline:decoded.length,offlineReload:true,errors}));
 }finally{await browser.close();}

@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {readFile, writeFile, mkdir} from 'node:fs/promises';
+import {readFile, writeFile, mkdir, readdir} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 
 const readJSON = async file => JSON.parse(await readFile(file, 'utf8'));
@@ -7,8 +7,10 @@ const catalogue = await readJSON('src/game/catalog.json');
 const mapping = await readJSON('data/canonical-logos.json');
 const diagnostics = await readJSON('data/crest-diagnostics.json');
 const manifest = await readJSON('data/crest-sources.json');
-const additions = new Map([...manifest.clubs,...(await readJSON('data/crest-additions-2.9.0.json')).clubs].map(row => [row.id, row]));
-assert.equal(additions.size, manifest.clubs.length+(await readJSON('data/crest-additions-2.9.0.json')).clubs.length, 'source IDs must be unique');
+const additionalManifests = await Promise.all((await readdir('data')).filter(file => /^crest-additions-.*\.json$/.test(file)).sort().map(file => readJSON(`data/${file}`)));
+const sources = [...manifest.clubs, ...additionalManifests.flatMap(data => data.clubs)];
+const additions = new Map(sources.map(row => [row.id, row]));
+assert.equal(additions.size, sources.length, 'source IDs must be unique');
 const rows = [];
 for (const [id, name, nativeName, , , , , crest] of catalogue.clubs) {
   const diagnostic = diagnostics.find(row => row.id === id);
@@ -46,5 +48,7 @@ const report = {clubs: rows.length, embedded: rows.filter(row => row.status === 
   neutral: rows.filter(row => row.status === 'neutral-icon').length, added: additions.size,
   sourceRevision: manifest.revision,
   note: 'Canonical IDs and pinned source SVG hashes are checked, including AZ/NEC abbreviations and all MLS/Eredivisie clubs. Unknown logos retain neutral icons; different clubs are never matched by similar spelling; verified reserve teams may share their own parent badge. Browser decoding and rendered standings are checked separately.', rows};
-await writeFile('docs/validation/kball-2.9-crests.json', JSON.stringify(report, null, 2) + '\n');
+const version = (await readJSON('package.json')).version;
+await writeFile(`docs/validation/kball-${version}-crests.json`, JSON.stringify(report, null, 2) + '\n');
 console.log(JSON.stringify({clubs: report.clubs, embedded: report.embedded, neutral: report.neutral, added: report.added}));
+if (process.argv.includes('--require-complete')) assert.equal(report.neutral, 0, 'Some domestic club crests are still missing');

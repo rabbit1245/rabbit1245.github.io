@@ -43,10 +43,12 @@ try {
     return rows;
   }, {assets, portable});
   assert.equal(decoded.length, 913);
-  assert.equal(decoded.filter(row => row.ok).length, 784);
+  const expectedCrests = assets.filter(asset => asset.data).length;
+  assert.equal(decoded.filter(row => row.ok).length, expectedCrests);
+  assert.equal(decoded.filter(row => row.neutral).length, clubs.length - expectedCrests);
   assert.ok(decoded.every(row => row.ok || row.neutral));
-  checks.push('All 784 real crest SVGs decode; 129 explicitly missing crests remain neutral');
-  console.log('Verified: 784 SVGs decode');
+  checks.push(`All ${expectedCrests} available club crests decode; ${clubs.length - expectedCrests} remain explicitly missing`);
+  console.log(`Verified: ${expectedCrests} SVGs decode`);
 
   await page.getByTestId('new-career').click();
   const dialog = page.getByRole('dialog');
@@ -133,7 +135,7 @@ try {
   assert.deepEqual(errors,[]);
   await writeFile(`${out}/results.json`, JSON.stringify({url, portable, checks, errors, external,
     count: decoded.length, decoded: decoded.filter(row => row.ok).length, neutral: decoded.filter(row => row.neutral).length, results: decoded}, null, 2));
-  console.log(JSON.stringify({url, checks, decoded: 784, neutral: 129, errors, external}));
+  console.log(JSON.stringify({url, checks, decoded: decoded.filter(row => row.ok).length, neutral: decoded.filter(row => row.neutral).length, errors, external}));
 } catch (error) {
   await page.screenshot({path: `${out}/failure.png`, fullPage: true}).catch(() => {}); throw error;
 } finally { await browser.close(); }

@@ -6,12 +6,14 @@ import hashlib
 import json
 import re
 import struct
+import sys
 import urllib.parse
 import urllib.request
 import xml.etree.ElementTree as ET
 
 ROOT = Path(__file__).resolve().parent.parent
-manifest = json.loads((ROOT / 'data/crest-additions-2.9.0.json').read_text())
+manifest_paths = [ROOT / p for p in sys.argv[1:]] or sorted((ROOT / 'data').glob('crest-additions-*.json'))
+manifest = {'clubs': [row for path in manifest_paths for row in json.loads(path.read_text())['clubs']]}
 clubs = {r[0]: r for r in json.loads((ROOT / 'src/game/catalog.json').read_text())['clubs']}
 assert len({r['id'] for r in manifest['clubs']}) == len(manifest['clubs'])
 
@@ -24,6 +26,11 @@ def fetch(row):
         url = row['repository'].replace('https://github.com/', 'https://raw.githubusercontent.com/')
         url += '/' + row['revision'] + '/' + urllib.parse.quote(row['sourcePath'])
         data = urllib.request.urlopen(url, timeout=40).read()
+        if row.get('sourceSha256'):
+            assert hashlib.sha256(data).hexdigest() == row['sourceSha256'], row['id']
+        if row.get('normalization'):
+            assert row['normalization'] == 'trim-trailing-whitespace'
+            data = b'\n'.join(line.rstrip(b' \t') for line in data.split(b'\n'))
         if row['sourcePath'].endswith('.png'):
             assert data.startswith(b'\x89PNG\r\n\x1a\n')
             w, h = struct.unpack('>II', data[16:24])
