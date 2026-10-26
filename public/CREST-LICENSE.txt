@@ -848,3 +848,56 @@ NL3_12 · Noordwijk
 https://github.com/juzser/fmm-graphics/blob/5b9bd963b8ba7b133e406b413df106b4b5b2c542/graphics/logos/normal/clubs/1026.png
 NL3_16 · Scheveningen
 https://github.com/juzser/fmm-graphics/blob/5b9bd963b8ba7b133e406b413df106b4b5b2c542/graphics/logos/normal/clubs/1038.png
+
+
+K볼 2.9.1 최종 11개 보완 · 사용자 요청(2026-10-26):
+리라-리르서 베를라르: Lyra TSV의 과거 배지.
+벨리시아 빌전: 전신 Spouwen-Mopertingen의 과거 배지.
+몽스: RAEC Mons의 과거 배지.
+튀비즈-브렌: 전신 AFC Tubize의 과거 Flat UI 배지.
+나머지 7개(울산시민·여주·센트럴 밸리 푸에고·노던 콜로라도 헤일스톰·니노버·스토케·뱅슈)는 K볼을 위해 새로 작성한 비공식 창작 SVG이며 실존 구단의 공식 엠블럼을 뜻하지 않습니다. 창작 SVG 원본은 data/original-crests/에 있고 파일 자체에도 창작 배지임을 명시합니다. 해당 7개 SVG는 MIT License로 사용·수정·배포할 수 있습니다. 기존 실제 구단 엠블럼의 권리는 해당 권리자에게 있습니다.
+TR3_25 · Diyarbekirspor
+https://github.com/juzser/fmm-graphics/blob/5b9bd963b8ba7b133e406b413df106b4b5b2c542/graphics/logos/normal/clubs/70061794.png
+TR2_20 · Yeni Malatyaspor
+https://github.com/halilwb/Turkish-Football-Team-Logos/blob/b73b85f87504688348e00851d1c8369056c4d9db/Nesine 2th League Kirmizi/Yeni Malatyaspor.png
+TR3_13 · Karakopru Belediyespor
+https://github.com/halilwb/Turkish-Football-Team-Logos/blob/b73b85f87504688348e00851d1c8369056c4d9db/Nesine 3rd League Group 2/Karakopru Belediyespor.png
+TR3_15 · Kepez Belediyespor
+https://github.com/halilwb/Turkish-Football-Team-Logos/blob/b73b85f87504688348e00851d1c8369056c4d9db/Nesine 2th League Beyaz/Kepezspor.png
+TR3_24 · Bucaspor 1928
+https://github.com/halilwb/Turkish-Football-Team-Logos/blob/b73b85f87504688348e00851d1c8369056c4d9db/Nesine 2th League Beyaz/Bucaspor.png
+TR3_30 · Karaman FK
+https://github.com/halilwb/Turkish-Football-Team-Logos/blob/b73b85f87504688348e00851d1c8369056c4d9db/Nesine 2th League Beyaz/Karaman FK.png
+TR3_32 · Nazilli Belediyespor
+https://github.com/halilwb/Turkish-Football-Team-Logos/blob/b73b85f87504688348e00851d1c8369056c4d9db/Nesine 3rd League Group 4/Nazilli Spor.png
+TR3_36 · Yeni Mersin Idmanyurdu
+https://github.com/halilwb/Turkish-Football-Team-Logos/blob/b73b85f87504688348e00851d1c8369056c4d9db/Nesine 2th League Kirmizi/Mersin Idmanyurdu.png
+IT3_58 · Taranto
+https://github.com/juzser/fmm-graphics/blob/5b9bd963b8ba7b133e406b413df106b4b5b2c542/graphics/logos/normal/clubs/2224.png
+NL3_12 · Noordwijk
+https://github.com/juzser/fmm-graphics/blob/5b9bd963b8ba7b133e406b413df106b4b5b2c542/graphics/logos/normal/clubs/1026.png
+NL3_16 · Scheveningen
+https://github.com/juzser/fmm-graphics/blob/5b9bd963b8ba7b133e406b413df106b4b5b2c542/graphics/logos/normal/clubs/1038.png
+
+BE3_08 · Lyra-Lierse Berlaar
+https://github.com/juzser/fmm-graphics/blob/5b9bd963b8ba7b133e406b413df106b4b5b2c542/graphics/logos/normal/clubs/239.png
+BE3_10 · Belisia Bilzen
+https://github.com/juzser/fmm-graphics/blob/5b9bd963b8ba7b133e406b413df106b4b5b2c542/graphics/logos/normal/clubs/8150356.png
+BE3_17 · Mons
+https://github.com/sportlogos/football.db.logos/blob/76058e2e723e21f4e61c6d495cd92db89717cea9/europe/be-belgium/mons.png
+BE3_23 · Tubize-Braine
+https://github.com/OvroExtraTime/FM-Logo-Megapack/blob/74d0bee3f42ea8391b8f9b7eeee4212bc3be26ab/Europe/Belgium/AFC Tubize.png
+KR3_08 · Ulsan Citizen
+data/original-crests/KR3_08.svg
+KR3_11 · Yeoju FC
+data/original-crests/KR3_11.svg
+US3A_01 · Central Valley Fuego FC
+data/original-crests/US3A_01.svg
+US3A_07 · Northern Colorado Hailstorm FC
+data/original-crests/US3A_07.svg
+BE3_07 · Ninove
+data/original-crests/BE3_07.svg
+BE3_25 · Stockay
+data/original-crests/BE3_25.svg
+BE3_26 · Binche
+data/original-crests/BE3_26.svg

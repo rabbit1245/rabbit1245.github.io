@@ -22,6 +22,11 @@ def fetch(row):
     assert clubs[row['id']][2] == row['native']
     if row.get('parentId'):
         data = (ROOT / clubs[row['parentId']][7]).read_bytes()
+    elif row['method'] == 'original-kball-crest':
+        assert row['sourcePath'] == f"data/original-crests/{row['id']}.svg"
+        assert row['official'] is False
+        data = (ROOT / row['sourcePath']).read_bytes()
+        assert hashlib.sha256(data).hexdigest() == row['sourceSha256'], row['id']
     else:
         url = row['repository'].replace('https://github.com/', 'https://raw.githubusercontent.com/')
         url += '/' + row['revision'] + '/' + urllib.parse.quote(row['sourcePath'])

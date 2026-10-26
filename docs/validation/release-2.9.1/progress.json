@@ -1,112 +1,50 @@
 {
-  "date": "2026-10-26",
-  "status": "partial-awaiting-network-policy-publication",
-  "requested": 57,
-  "added": 46,
-  "catalogueClubs": 913,
-  "embedded": 902,
-  "missing": [
-    {
-      "id": "KR3_08",
-      "name": "울산시민축구단",
-      "native": "Ulsan Citizen"
-    },
-    {
-      "id": "KR3_11",
-      "name": "여주 FC",
-      "native": "Yeoju FC"
-    },
-    {
-      "id": "US3A_01",
-      "name": "센트럴 밸리 푸에고 FC",
-      "native": "Central Valley Fuego FC"
-    },
-    {
-      "id": "US3A_07",
-      "name": "노던 콜로라도 헤일스톰 FC",
-      "native": "Northern Colorado Hailstorm FC"
-    },
-    {
-      "id": "BE3_07",
-      "name": "니노버",
-      "native": "Ninove"
-    },
-    {
-      "id": "BE3_08",
-      "name": "리라-리르서 베를라르",
-      "native": "Lyra-Lierse Berlaar"
-    },
-    {
-      "id": "BE3_10",
-      "name": "벨리시아 빌전",
-      "native": "Belisia Bilzen"
-    },
-    {
-      "id": "BE3_17",
-      "name": "몽스",
-      "native": "Mons"
-    },
-    {
-      "id": "BE3_23",
-      "name": "튀비즈-브렌",
-      "native": "Tubize-Braine"
-    },
-    {
-      "id": "BE3_25",
-      "name": "스토케",
-      "native": "Stockay"
-    },
-    {
-      "id": "BE3_26",
-      "name": "뱅슈",
-      "native": "Binche"
-    }
-  ],
+  "baselineSource": "e853623",
+  "clubs": 913,
+  "added": 57,
   "clubIdentityAndPowerUnchanged": true,
   "allOtherCatalogueDataUnchanged": true,
-  "sourceReimport": "46 pinned source and output hashes verified",
+  "originalBadges": 7,
+  "historicalPredecessorBadgesInFinal11": 4,
+  "date": "2026-10-26",
+  "status": "validated-awaiting-publication",
+  "requested": 57,
+  "catalogueClubs": 913,
+  "embedded": 913,
+  "missing": [],
+  "sourceReimport": "50 external originals and 7 local original SVG source/output hashes verified",
   "build": {
     "typecheck": true,
     "web": true,
     "standaloneHtmlAndZip": true
   },
   "validation": {
-    "allEmbeddedCrestsDecoded": 902,
-    "webOfflineCacheAndReload": 902,
-    "newCrestsSelectedOnDesktopAndMobile": 46,
+    "allEmbeddedCrestsDecoded": 913,
+    "webOfflineCacheAndReload": 913,
+    "newCrestsSelectedOnDesktopAndMobile": 57,
     "affectedLeagueGroupsRenderedOnDesktopAndMobile": 13,
     "pageErrors": 0,
-    "portableExternalRequests": 0
+    "portableExternalRequests": 0,
+    "playableFlowChecks": 11
   },
-  "network": {
-    "confirmedRestrictedPolicy": true,
-    "observedError": "Tunnel connection failed: 403 Forbidden",
-    "savedDraftId": "e3504c91-0d5c-4227-b487-4e26fa208f13~cecfgdraft_6adef1d5116c8194a7dd728125f299e2",
-    "requiresPublish": true,
-    "additionalDomains": [
-      "en.wikipedia.org",
-      "fr.wikipedia.org",
-      "nl.wikipedia.org",
-      "ko.wikipedia.org",
-      "commons.wikimedia.org",
-      "upload.wikimedia.org"
-    ]
-  },
-  "deployment": "Not published: the 57-crest completion requirement is not met.",
   "completeCrestGate": {
-    "passed": false,
-    "missing": 11
+    "passed": true,
+    "missing": 0
+  },
+  "deployment": "Awaiting artifact branch publication and public download verification",
+  "final11": {
+    "historicalPredecessor": 4,
+    "original": 7
   },
   "localArtifact": {
-    "status": "unpublished-development-build",
     "zipCRC": true,
     "zip": {
-      "bytes": 21256547,
-      "sha256": "6c68538c9ae51f95af0a15b2e0e1b113a16b1d903d18deef17f846d396a9bb08"
+      "bytes": 21505693,
+      "sha256": "f16f235e97991f5a3571d74cd475f5100ee6fbfd2552800a7fd05b3e822c182c"
     },
     "html": {
-      "bytes": 28207343,
-      "sha256": "1d8f518356c01979643c0bf2e87c8af17196a72d64431c3bfc951b5d6c0d0b8c"
+      "bytes": 28536686,
+      "sha256": "edda25679bd7617cffd1846c26d605b49b9daa7d2c23b611e9f128ae0816fde2"
     }
   }
 }

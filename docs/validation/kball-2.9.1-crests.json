@@ -1,10 +1,11 @@
 {
   "clubs": 913,
-  "embedded": 902,
-  "neutral": 11,
-  "added": 305,
+  "embedded": 913,
+  "neutral": 0,
+  "added": 316,
+  "original": 7,
   "sourceRevision": "5ab11fed47427b3003f4b276554491fe683387b1",
-  "note": "Canonical IDs and pinned source SVG hashes are checked, including AZ/NEC abbreviations and all MLS/Eredivisie clubs. Unknown logos retain neutral icons; different clubs are never matched by similar spelling; verified reserve teams may share their own parent badge. Browser decoding and rendered standings are checked separately.",
+  "note": "Club IDs and source hashes are checked. User-approved historical predecessor badges and seven explicitly unofficial Kball-original SVG badges fill the final gaps. Different clubs are not matched by similar spelling; verified reserves may share their parent badge. Browser decoding and rendered standings are checked separately.",
   "rows": [
     {
       "id": "KR1_01",
@@ -298,7 +299,11 @@
       "id": "KR3_08",
       "name": "울산시민축구단",
       "nativeName": "Ulsan Citizen",
-      "status": "neutral-icon"
+      "status": "embedded-svg",
+      "source": "KR3_08.svg",
+      "bytes": 659,
+      "sha256": "dee0bf0de1b093fc9fe1e382bdabb52975130b8a00634e9b39ff3c96e3a084f9",
+      "kind": "original"
     },
     {
       "id": "KR3_09",
@@ -322,7 +327,11 @@
       "id": "KR3_11",
       "name": "여주 FC",
       "nativeName": "Yeoju FC",
-      "status": "neutral-icon"
+      "status": "embedded-svg",
+      "source": "KR3_11.svg",
+      "bytes": 623,
+      "sha256": "643772de998ed09b67d8de3c78919896a5a8c84a4cea3129206220721c1ab8a5",
+      "kind": "original"
     },
     {
       "id": "KR3_12",
@@ -1858,7 +1867,11 @@
       "id": "US3A_01",
       "name": "센트럴 밸리 푸에고 FC",
       "nativeName": "Central Valley Fuego FC",
-      "status": "neutral-icon"
+      "status": "embedded-svg",
+      "source": "US3A_01.svg",
+      "bytes": 624,
+      "sha256": "76e4c86321f1c388af628a309a10461d9b4ce132f1a930b85ca16616ace23075",
+      "kind": "original"
     },
     {
       "id": "US3A_02",
@@ -1909,7 +1922,11 @@
       "id": "US3A_07",
       "name": "노던 콜로라도 헤일스톰 FC",
       "nativeName": "Northern Colorado Hailstorm FC",
-      "status": "neutral-icon"
+      "status": "embedded-svg",
+      "source": "US3A_07.svg",
+      "bytes": 671,
+      "sha256": "17090327a2f0056cef7e1302d9663c98cafcaaffed5e365fedee319d0497154a",
+      "kind": "original"
     },
     {
       "id": "US3A_08",
@@ -6838,13 +6855,21 @@
       "id": "BE3_07",
       "name": "니노버",
       "nativeName": "Ninove",
-      "status": "neutral-icon"
+      "status": "embedded-svg",
+      "source": "BE3_07.svg",
+      "bytes": 641,
+      "sha256": "8219eeed20c8913cff9fee73c3204eea6a081d5a6763071a816066c6dd033d90",
+      "kind": "original"
     },
     {
       "id": "BE3_08",
       "name": "리라-리르서 베를라르",
       "nativeName": "Lyra-Lierse Berlaar",
-      "status": "neutral-icon"
+      "status": "embedded-svg",
+      "source": "239.png",
+      "bytes": 13644,
+      "sha256": "7dd4bd3d46e9939723505c129f0c2593f62dad9c4605cae82c21948e2840ef24",
+      "kind": "historical-predecessor"
     },
     {
       "id": "BE3_09",
@@ -6859,7 +6884,11 @@
       "id": "BE3_10",
       "name": "벨리시아 빌전",
       "nativeName": "Belisia Bilzen",
-      "status": "neutral-icon"
+      "status": "embedded-svg",
+      "source": "8150356.png",
+      "bytes": 57248,
+      "sha256": "431833c1ae972ea64bf9cfba8ac6a9d95203e0cbdf7ec34a67c7e4126300b057",
+      "kind": "historical-predecessor"
     },
     {
       "id": "BE3_11",
@@ -6919,7 +6948,11 @@
       "id": "BE3_17",
       "name": "몽스",
       "nativeName": "Mons",
-      "status": "neutral-icon"
+      "status": "embedded-svg",
+      "source": "mons.png",
+      "bytes": 7130,
+      "sha256": "bcf46ad65277770e9f5de80fdd3f5337e6f4f8c538531fa09c9d597a69d91959",
+      "kind": "historical-predecessor"
     },
     {
       "id": "BE3_18",
@@ -6970,7 +7003,11 @@
       "id": "BE3_23",
       "name": "튀비즈-브렌",
       "nativeName": "Tubize-Braine",
-      "status": "neutral-icon"
+      "status": "embedded-svg",
+      "source": "AFC Tubize.png",
+      "bytes": 179188,
+      "sha256": "24497adaec068886a895b571632343a51c31389360cce06c128c08e7ff4c7de9",
+      "kind": "historical-predecessor"
     },
     {
       "id": "BE3_24",
@@ -6985,13 +7022,21 @@
       "id": "BE3_25",
       "name": "스토케",
       "nativeName": "Stockay",
-      "status": "neutral-icon"
+      "status": "embedded-svg",
+      "source": "BE3_25.svg",
+      "bytes": 602,
+      "sha256": "8dccfda92b9680ee414ff2652fa6824f148d559c26e3d215777f0b8a52f8df26",
+      "kind": "original"
     },
     {
       "id": "BE3_26",
       "name": "뱅슈",
       "nativeName": "Binche",
-      "status": "neutral-icon"
+      "status": "embedded-svg",
+      "source": "BE3_26.svg",
+      "bytes": 499,
+      "sha256": "991409f8127abeb37adc4c6e3830ce9313c32f41ca883912fc23b1444b12f1c7",
+      "kind": "original"
     },
     {
       "id": "BE3_27",

@@ -30,6 +30,14 @@ for (const [id, name, nativeName, , , , , crest] of catalogue.clubs) {
     assert.equal(crest, `assets/crests/${id}.svg`, `Missing imported crest: ${id}`);
     assert.equal(row.sha256, source.sha256, `Wrong club asset: ${id}`);
     assert.equal(row.source, source.sourcePath.split('/').at(-1), `Source identity differs: ${id}`);
+    if (source.method === 'original-kball-crest') {
+      assert.equal(source.official, false, `Original badge must not claim to be official: ${id}`);
+      assert.equal(source.sourcePath, `data/original-crests/${id}.svg`);
+      const original = await readFile(source.sourcePath, 'utf8');
+      assert.match(original, /K볼 창작 배지/);
+      assert.equal(createHash('sha256').update(original).digest('hex'), row.sha256);
+      row.kind = 'original';
+    } else if (source.method === 'reviewed-historical-predecessor-crest') row.kind = 'historical-predecessor';
   }
   rows.push(row);
 }
@@ -46,9 +54,10 @@ for (const [id, wrongSource] of [['KR2_03', 'FC_Seoul.svg'], ['KR2_06', 'Suwon_F
 await mkdir('docs/validation', {recursive: true});
 const report = {clubs: rows.length, embedded: rows.filter(row => row.status === 'embedded-svg').length,
   neutral: rows.filter(row => row.status === 'neutral-icon').length, added: additions.size,
+  original: rows.filter(row => row.kind === 'original').length,
   sourceRevision: manifest.revision,
-  note: 'Canonical IDs and pinned source SVG hashes are checked, including AZ/NEC abbreviations and all MLS/Eredivisie clubs. Unknown logos retain neutral icons; different clubs are never matched by similar spelling; verified reserve teams may share their own parent badge. Browser decoding and rendered standings are checked separately.', rows};
+  note: 'Club IDs and source hashes are checked. User-approved historical predecessor badges and seven explicitly unofficial Kball-original SVG badges fill the final gaps. Different clubs are not matched by similar spelling; verified reserves may share their parent badge. Browser decoding and rendered standings are checked separately.', rows};
 const version = (await readJSON('package.json')).version;
 await writeFile(`docs/validation/kball-${version}-crests.json`, JSON.stringify(report, null, 2) + '\n');
-console.log(JSON.stringify({clubs: report.clubs, embedded: report.embedded, neutral: report.neutral, added: report.added}));
+console.log(JSON.stringify({clubs: report.clubs, embedded: report.embedded, neutral: report.neutral, original: report.original, added: report.added}));
 if (process.argv.includes('--require-complete')) assert.equal(report.neutral, 0, 'Some domestic club crests are still missing');

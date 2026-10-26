@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="96" height="112" viewBox="0 0 96 112">
+  <title>울산시민축구단 · K볼 창작 배지 · 공식 엠블럼 아님</title>
+  <path d="M48 4 86 18v39c0 23-16 40-38 51C26 97 10 80 10 57V18Z" fill="#123d70" stroke="#102c50" stroke-width="4"/>
+  <path d="M27 31q10-12 21-2 11-10 21 2-11-5-21 5-10-10-21-5Z" fill="#fff"/>
+  <path d="M18 48q15-10 30 0t30 0v10q-15 10-30 0t-30 0Z" fill="#51c7e8"/>
+  <path d="M18 63q15-10 30 0t30 0" fill="none" stroke="#fff" stroke-width="5"/>
+  <text x="48" y="88" fill="#fff" font-family="Arial,sans-serif" font-size="23" font-weight="800" text-anchor="middle">UCF</text>
+</svg>

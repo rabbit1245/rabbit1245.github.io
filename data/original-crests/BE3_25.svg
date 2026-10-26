@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="96" height="112" viewBox="0 0 96 112">
+  <title>스토케 · K볼 창작 배지 · 공식 엠블럼 아님</title>
+  <path d="M48 4 86 18v39c0 23-16 40-38 51C26 97 10 80 10 57V18Z" fill="#9d2635" stroke="#681b28" stroke-width="4"/>
+  <path d="m14 66 69-43v18L23 78Z" fill="#fff"/>
+  <circle cx="48" cy="54" r="24" fill="#fff" stroke="#681b28" stroke-width="3"/>
+  <text x="48" y="66" fill="#812232" font-family="Arial,sans-serif" font-size="35" font-weight="800" text-anchor="middle">S</text>
+  <path d="M37 89h22" stroke="#fff" stroke-width="4"/>
+</svg>

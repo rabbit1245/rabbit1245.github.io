@@ -495,6 +495,131 @@
       "identity": "SVV Scheveningen · 1919",
       "sourceSha256": "052f23d585ad9e70ea23f5b4b665324ddf53633409dca47e45ced6dd08a66a3a",
       "sha256": "70923675cc94b4bdc84dd9c993d317bf5642aa8f4903728666265a29d8c13238"
+    },
+    {
+      "id": "BE3_08",
+      "repository": "https://github.com/juzser/fmm-graphics",
+      "revision": "5b9bd963b8ba7b133e406b413df106b4b5b2c542",
+      "sourcePath": "graphics/logos/normal/clubs/239.png",
+      "identity": "Lyra TSV; predecessor badge of Lyra-Lierse Berlaar",
+      "method": "reviewed-historical-predecessor-crest",
+      "approval": "User explicitly authorized old club/predecessor badges on 2026-10-26",
+      "sourceSha256": "b6fd70296e7effdbb6ecfdcf1a70e025e846af2d5d93fee64638a8930d703421",
+      "native": "Lyra-Lierse Berlaar",
+      "sha256": "7dd4bd3d46e9939723505c129f0c2593f62dad9c4605cae82c21948e2840ef24"
+    },
+    {
+      "id": "BE3_10",
+      "repository": "https://github.com/juzser/fmm-graphics",
+      "revision": "5b9bd963b8ba7b133e406b413df106b4b5b2c542",
+      "sourcePath": "graphics/logos/normal/clubs/8150356.png",
+      "identity": "Spouwen-Mopertingen; predecessor of Belisia Bilzen",
+      "method": "reviewed-historical-predecessor-crest",
+      "approval": "User explicitly authorized old club/predecessor badges on 2026-10-26",
+      "sourceSha256": "d3767b601b02ac8f2aba203d2cc53b20eb20aedf25b7029c7251dc270107845c",
+      "native": "Belisia Bilzen",
+      "sha256": "431833c1ae972ea64bf9cfba8ac6a9d95203e0cbdf7ec34a67c7e4126300b057"
+    },
+    {
+      "id": "BE3_17",
+      "repository": "https://github.com/sportlogos/football.db.logos",
+      "revision": "76058e2e723e21f4e61c6d495cd92db89717cea9",
+      "sourcePath": "europe/be-belgium/mons.png",
+      "identity": "Historic RAEC Mons badge; Mons club heritage",
+      "method": "reviewed-historical-predecessor-crest",
+      "approval": "User explicitly authorized old club/predecessor badges on 2026-10-26",
+      "sourceSha256": "4c506b053971d8ae03fde68579693d3a2c76560631c107992f9ec88412bf04e2",
+      "native": "Mons",
+      "sha256": "bcf46ad65277770e9f5de80fdd3f5337e6f4f8c538531fa09c9d597a69d91959"
+    },
+    {
+      "id": "BE3_23",
+      "repository": "https://github.com/OvroExtraTime/FM-Logo-Megapack",
+      "revision": "74d0bee3f42ea8391b8f9b7eeee4212bc3be26ab",
+      "sourcePath": "Europe/Belgium/AFC Tubize.png",
+      "identity": "AFC Tubize; predecessor of Tubize-Braine",
+      "method": "reviewed-historical-predecessor-crest",
+      "approval": "User explicitly authorized old club/predecessor badges on 2026-10-26",
+      "sourceSha256": "0e25166d5a59657f07f63f0accbaa3a30c2ff7be505b21710f5fa5fae2e980e5",
+      "native": "Tubize-Braine",
+      "sha256": "24497adaec068886a895b571632343a51c31389360cce06c128c08e7ff4c7de9"
+    },
+    {
+      "id": "KR3_08",
+      "method": "original-kball-crest",
+      "sourcePath": "data/original-crests/KR3_08.svg",
+      "official": false,
+      "creator": "K볼 · 사용자 요청에 따라 제작한 게임용 창작 SVG",
+      "approval": "User explicitly authorized invented badges when old logos are unavailable on 2026-10-26",
+      "sourceSha256": "dee0bf0de1b093fc9fe1e382bdabb52975130b8a00634e9b39ff3c96e3a084f9",
+      "native": "Ulsan Citizen",
+      "sha256": "dee0bf0de1b093fc9fe1e382bdabb52975130b8a00634e9b39ff3c96e3a084f9"
+    },
+    {
+      "id": "KR3_11",
+      "method": "original-kball-crest",
+      "sourcePath": "data/original-crests/KR3_11.svg",
+      "official": false,
+      "creator": "K볼 · 사용자 요청에 따라 제작한 게임용 창작 SVG",
+      "approval": "User explicitly authorized invented badges when old logos are unavailable on 2026-10-26",
+      "sourceSha256": "643772de998ed09b67d8de3c78919896a5a8c84a4cea3129206220721c1ab8a5",
+      "native": "Yeoju FC",
+      "sha256": "643772de998ed09b67d8de3c78919896a5a8c84a4cea3129206220721c1ab8a5"
+    },
+    {
+      "id": "US3A_01",
+      "method": "original-kball-crest",
+      "sourcePath": "data/original-crests/US3A_01.svg",
+      "official": false,
+      "creator": "K볼 · 사용자 요청에 따라 제작한 게임용 창작 SVG",
+      "approval": "User explicitly authorized invented badges when old logos are unavailable on 2026-10-26",
+      "sourceSha256": "76e4c86321f1c388af628a309a10461d9b4ce132f1a930b85ca16616ace23075",
+      "native": "Central Valley Fuego FC",
+      "sha256": "76e4c86321f1c388af628a309a10461d9b4ce132f1a930b85ca16616ace23075"
+    },
+    {
+      "id": "US3A_07",
+      "method": "original-kball-crest",
+      "sourcePath": "data/original-crests/US3A_07.svg",
+      "official": false,
+      "creator": "K볼 · 사용자 요청에 따라 제작한 게임용 창작 SVG",
+      "approval": "User explicitly authorized invented badges when old logos are unavailable on 2026-10-26",
+      "sourceSha256": "17090327a2f0056cef7e1302d9663c98cafcaaffed5e365fedee319d0497154a",
+      "native": "Northern Colorado Hailstorm FC",
+      "sha256": "17090327a2f0056cef7e1302d9663c98cafcaaffed5e365fedee319d0497154a"
+    },
+    {
+      "id": "BE3_07",
+      "method": "original-kball-crest",
+      "sourcePath": "data/original-crests/BE3_07.svg",
+      "official": false,
+      "creator": "K볼 · 사용자 요청에 따라 제작한 게임용 창작 SVG",
+      "approval": "User explicitly authorized invented badges when old logos are unavailable on 2026-10-26",
+      "sourceSha256": "8219eeed20c8913cff9fee73c3204eea6a081d5a6763071a816066c6dd033d90",
+      "native": "Ninove",
+      "sha256": "8219eeed20c8913cff9fee73c3204eea6a081d5a6763071a816066c6dd033d90"
+    },
+    {
+      "id": "BE3_25",
+      "method": "original-kball-crest",
+      "sourcePath": "data/original-crests/BE3_25.svg",
+      "official": false,
+      "creator": "K볼 · 사용자 요청에 따라 제작한 게임용 창작 SVG",
+      "approval": "User explicitly authorized invented badges when old logos are unavailable on 2026-10-26",
+      "sourceSha256": "8dccfda92b9680ee414ff2652fa6824f148d559c26e3d215777f0b8a52f8df26",
+      "native": "Stockay",
+      "sha256": "8dccfda92b9680ee414ff2652fa6824f148d559c26e3d215777f0b8a52f8df26"
+    },
+    {
+      "id": "BE3_26",
+      "method": "original-kball-crest",
+      "sourcePath": "data/original-crests/BE3_26.svg",
+      "official": false,
+      "creator": "K볼 · 사용자 요청에 따라 제작한 게임용 창작 SVG",
+      "approval": "User explicitly authorized invented badges when old logos are unavailable on 2026-10-26",
+      "sourceSha256": "991409f8127abeb37adc4c6e3830ce9313c32f41ca883912fc23b1444b12f1c7",
+      "native": "Binche",
+      "sha256": "991409f8127abeb37adc4c6e3830ce9313c32f41ca883912fc23b1444b12f1c7"
     }
   ]
 }
