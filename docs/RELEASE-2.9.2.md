@@ -34,3 +34,11 @@ FA 선수가 국가대표로 뛴 뒤 자동 저장이 실패하던 오류와, �
 - 913개 배지 연결 검사 통과, 중립 대체 0개·창작 배지 7개 유지. [배지 검사](validation/kball-2.9.2-crests.json)
 
 실제 Windows Edge를 직접 실행한 검사가 아니라 동일 단일 HTML의 Chromium·localhost·오프라인·Blob Worker 검사다. 913개 구단 배지와 기존 경기 시뮬레이션·성장·부상·플레이스킬·수상·은퇴 기능은 유지한다. [검증 요약](validation/release-2.9.2/summary.json)
+
+## 배포
+
+[K볼 2.9.2 ZIP 다운로드](https://github.com/rabbit1245/rabbit1245.github.io/raw/524382eadeaa46425a69cf65d7e899585145a96d/Kball.zip?download=1)
+
+공개 다운로드 HTTP 200 · 21,507,204바이트 · SHA-256 `73c37b32e48b0db02b9b4d1c14808ce803fcc1d3972c3281f76cffafa5d15e90`. ZIP CRC와 내부 HTML을 대조해 위 검사에 사용한 파일과 바이트 단위로 같음을 확인했다. [공개 다운로드 검증](validation/release-2.9.2/public-download.json).
+
+소스 구현 `327e74ebaf432924f378f1bf396233d93259c142` · 다운로드 배포 `524382eadeaa46425a69cf65d7e899585145a96d`.
