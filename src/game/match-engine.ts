@@ -1,4 +1,4 @@
-import {playingAbility} from './attributes';
+import {playingAbility,leadershipAbility} from './attributes';
 import { CLUBS, ROSTERS } from './data';
 import { clamp, emptyStats, integer, round, seededRandom } from './math';
 import type { MatchOptions, MatchParticipant, MatchPerformance } from './revision-types';
@@ -144,9 +144,8 @@ function assignCaptain(career:Career,team:Team,userTeam:string|undefined,scope:'
   const starters=team.actors.filter(actor=>actor.started&&actor.minutes>0);
   const user=starters.find(actor=>actor.user);
   const role=userTeam===team.club.id?(scope==='national'?leaders?.nationalRole:leaders?.clubRole):'none';
-  const leadership=(id:string)=>id===career.player.id?leaders?.trait??40:world?.players[id]?.leadership??45;
-  const age=(id:string)=>id===career.player.id?career.player.age:world?.players[id]?.age??27;
-  const order=(a:{id:string},b:{id:string})=>(leadership(b.id)+age(b.id)*.25)-(leadership(a.id)+age(a.id)*.25)||a.id.localeCompare(b.id);
+  const leadership=(id:string)=>id===career.player.id?leadershipAbility(career.player.attributes,leaders?.trait??40):world?.players[id]?.leadership??45;
+  const order=(a:{id:string},b:{id:string})=>leadership(b.id)-leadership(a.id)||a.id.localeCompare(b.id);
   const fullIds=scope==='club'?world?.clubs[team.club.id]?.rosterIds:undefined;
   const fullSquad=fullIds?fullIds.map(id=>({id})):sourcePlayers(career,team.club,provided);
   // A newly arrived user does not replace an established captain simply by having high abilities.
@@ -170,8 +169,8 @@ function assignCaptain(career:Career,team:Team,userTeam:string|undefined,scope:'
 
 /** Off-ball supply and coverage use actual skills, with the same rules for NPCs and the user.
  * A stronger final pass changes the chances created, not only the name credited an assist. */
-function tacticalImpact(team:Team):{supply:number;coverage:number}{
-  let creationEdge=0,defensiveEdge=0;
+function tacticalImpact(team:Team,opponentPower:number):{supply:number;coverage:number}{
+  let creationEdge=0,defensiveEdge=0,control=0;
   for(const actor of team.actors){
     if(actor.position==='GK')continue;
     const wide=['LW','RW','LM','RM','LB','RB','LWB','RWB'].includes(actor.position);
@@ -182,8 +181,16 @@ function tacticalImpact(team:Team):{supply:number;coverage:number}{
     const weight=actor.position==='CB'?1.1:['LB','RB','LWB','RWB'].includes(actor.position)?.85:actor.position==='CDM'?.8:MIDFIELD.has(actor.position)?.35:.12;
     const defense=ability(actor,'defending')*.32+ability(actor,'anticipation')*.23+ability(actor,'positioning')*.2+ability(actor,'concentration')*.15+ability(actor,'decisions')*.1;
     defensiveEdge+=(defense-team.power)*weight*duration(actor);
+    // An outstanding carrier/playmaker keeps the ball away from weaker opponents.
+    // Averaging one player into eleven used to erase this effect almost entirely.
+    // Use real ball/mental skills, role and minutes for every actor, never the user ID.
+    const retention=ability(actor,'ballControl')*.22+ability(actor,'dribbling')*.18+ability(actor,'passing')*.20+ability(actor,'decisions')*.16+ability(actor,'composure')*.12+ability(actor,'teamwork')*.12;
+    const dominance=Math.pow(clamp((retention-opponentPower-6)/32,0,1),1.5);
+    const controlRole=MIDFIELD.has(actor.position)?1:FORWARD.has(actor.position)?.85:wide?.65:.4;
+    control+=dominance*controlRole*duration(actor);
   }
-  return {supply:clamp(1+creationEdge*.11,.76,1.32)*(1+team.leadership*.45),coverage:clamp(1-defensiveEdge*.006,.75,1.25)*(1-team.leadership)};
+  const possession=clamp(control,0,1.25);
+  return {supply:clamp(1+creationEdge*.11+possession*.06,.76,1.42)*(1+team.leadership*.45),coverage:clamp(1-defensiveEdge*.006-possession*.25,.60,1.25)*(1-team.leadership)};
 }
 
 /** Pure seeded match simulation. Full worlds use the same action checks with compressed event output. */
@@ -235,7 +242,7 @@ export function simulateMatch(career:Career,fixture:Fixture,options:MatchOptions
   // These totals already reflect each actor's actual minutes, including substitutions.
   const buildUp=teams.map(t=>t.actors.reduce((n,a)=>n+a.stats.passesCompleted*.004+(a.stats.dribblesCompleted??0)*.09+(a.stats.lateSuccesses??0)*.006,0));
   const disruption=teams.map(t=>t.actors.reduce((n,a)=>n+a.stats.tackles*.12+a.stats.interceptions*.16+(a.stats.aerialWon??0)*.04+(a.stats.crossesCaught??0)*.12+(a.stats.sweepingSuccesses??0)*.12,0));
-  const tactics=teams.map(tacticalImpact);
+  const tactics=teams.map((team,index)=>tacticalImpact(team,teams[1-index].power));
   const scores=[0,0];
   for(let side=0;side<2;side++){
     const team=teams[side],opposition=teams[1-side];

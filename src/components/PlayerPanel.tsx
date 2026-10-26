@@ -20,8 +20,8 @@ function Assessment({assessment,ovr,offered}:{assessment:CaptainAssessment;ovr:n
     <div><dt>팀 위상 · 주전 실력</dt><dd>전력 {assessment.teamPower.toFixed(1)}</dd><p>{assessment.scope==='national'?'예상 주전':'주전'} 평균 OVR {assessment.squadOvr.toFixed(1)}</p></div>
     <div><dt>내 실력 · 팀 내 경쟁</dt><dd>OVR {ovr} · {assessment.abilityRank}위</dd><p>주장단 후보 {assessment.candidateRank}위</p></div>
     <div><dt>최근 경기 성적</dt><dd>평점 {assessment.recentApps?assessment.rating.toFixed(2):'미집계'}</dd><p>{assessment.recentApps}경기 · {assessment.recentMinutes.toLocaleString()}분</p></div>
-    <div><dt>나이 · 리더십</dt><dd>{assessment.age}세 · {assessment.leadership}</dd><p>실제 연령과 동료 경쟁을 함께 평가</p></div>
-    <div><dt>근속 · 신뢰</dt><dd>{assessment.tenure}시즌 · {Math.round(assessment.trust)}%</dd><p>해당 팀 통산 {assessment.apps}경기 출전</p></div>
+    <div><dt>{assessment.mental?'멘털 리더십':'제의 당시 리더십'}</dt><dd>{assessment.leadership}</dd><p>{assessment.mental?`판단 ${assessment.mental.decisions} · 집중 ${assessment.mental.concentration} · 침착 ${assessment.mental.composure} · 팀워크 ${assessment.mental.teamwork}`:'이전 버전의 평가 근거를 보존합니다.'}</p></div>
+    <div><dt>실전 신뢰 · 출전</dt><dd>{Math.round(assessment.trust)}% · {assessment.apps}경기</dd><p>{assessment.age}세 · 근속 {assessment.tenure}시즌 · {assessment.mental?'나이 가점 없음':'이전 버전 평가'}</p></div>
     <div><dt>주장단 평가</dt><dd>{assessment.eligibleRole==='none'?'제의 기준 미충족':`${roleLabel(assessment.eligibleRole)} 후보`}</dd><p>팀 위상에 맞는 실력과 꾸준한 출전 필요</p></div>
   </dl><ul className="captain-reasons">{assessment.reasons.map((reason,index)=><li key={`${index}:${reason}`}>{reason}</li>)}</ul></div>;
 }

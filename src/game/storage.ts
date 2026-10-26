@@ -615,6 +615,7 @@ function validateSystems(career: Record<string, unknown>, player: Record<string,
       assert(a.scope===scope&&a.teamId===row.teamId&&a.eligibleRole===role,'주장 제의와 평가 대상·역할이 다릅니다.');
       for(const key of ['teamPower','squadOvr','playerOvr'])number(a[key],`captainAssessment.${key}`,1,key==='playerOvr'?120:110);
       for(const key of ['leadership','trust'])number(a[key],`captainAssessment.${key}`,0,100);
+      if(a.mental!==undefined){const mental=object(a.mental,'captainAssessment.mental');for(const key of ['decisions','concentration','composure','teamwork'])number(mental[key],`captainAssessment.mental.${key}`,0,110);number(mental.score,'captainAssessment.mental.score',0,110);assert(Math.abs(Number(mental.score)-(['decisions','concentration','composure','teamwork'].reduce((sum,key)=>sum+Number(mental[key]),0)/4))<=.051,'주장 평가의 멘털 평균이 다릅니다.');}
       number(a.age,'captainAssessment.age',14,100,true);number(a.tenure,'captainAssessment.tenure',0,200,true);
       for(const key of ['abilityRank','candidateRank'])number(a[key],`captainAssessment.${key}`,1,100_000,true);
       for(const key of ['apps','recentApps','recentMinutes'])number(a[key],`captainAssessment.${key}`,0,10_000_000,true);

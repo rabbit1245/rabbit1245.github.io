@@ -15,8 +15,9 @@ import {validateCareer,saveCareer,saveCareerChange,loadCareer,exportCareer,verif
 import {commandChange} from './command-patches';
 import type {Career} from './types';
 
+let fixtureSerial=0;
 function fresh(age=35){
- const c=createCareer({name:'FA 국대 저장',nationality:'대한민국',age:Math.min(35,age),height:180,weight:75,foot:'right',position:'ST',talent:'SSS',style:PLAY_STYLES.ST[0],clubId:'EN1_01',squad:'senior',difficulty:'realistic',seed:'fa-contract-292',training:[]});c.player.age=age;
+ const c=createCareer({name:'FA 국대 저장',nationality:'대한민국',age:Math.min(35,age),height:180,weight:75,foot:'right',position:'ST',talent:'SSS',style:PLAY_STYLES.ST[0],clubId:'EN1_01',squad:'senior',difficulty:'realistic',seed:'fa-contract-292',training:[]});c.player.age=age;c.id+=`:fixture:${fixtureSerial++}`;
  for(const key of Object.keys(c.player.attributes) as (keyof typeof c.player.attributes)[])c.player.attributes[key]=94;
  c.player.ovr=overall(c.player);c.season.attributeStart={...c.player.attributes};c.season.ovrStart=c.player.ovr;c.managerTrust=95;beginGrowthSeason(c);
  return c;

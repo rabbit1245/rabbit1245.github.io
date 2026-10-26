@@ -8,7 +8,7 @@ import type { Career,MatchRecord } from './types';
 const base=createCareer({name:'주장 검증',nationality:'대한민국',age:27,height:180,weight:75,foot:'right',position:'CM',talent:'S',style:PLAY_STYLES.CM[0],clubId:'KR1_01',squad:'senior',difficulty:'realistic',seed:'captain-offers-v22'});
 function candidate():Career{
  const c=structuredClone(base);c.season.year=2028;c.season.week=20;c.player.ovr=85;c.managerTrust=90;
- const l=c.systems!.leadership;l.clubSinceYear=2026;l.trait=90;
+ const l=c.systems!.leadership;l.clubSinceYear=2026;l.trait=90;for(const key of ['decisions','concentration','composure','teamwork'] as const)c.player.attributes[key]=80;
  const club=c.systems!.world.clubs[c.player.clubId];club.power=70;
  for(const p of Object.values(c.systems!.world.players))if(p.clubId===c.player.clubId){p.ovr=65;p.leadership=55;}
  c.season.matches=Array.from({length:45},(_,i)=>({id:`match-${i}`,fixtureId:`fixture-${i}`,seasonYear:i<25?2027:2028,round:i<25?i+1:i-24,homeId:c.player.clubId,awayId:'KR1_02',homeGoals:1,awayGoals:0,events:[],playerClubId:c.player.clubId,playerPlayed:true,playerStarted:true,playerMinutes:90,playerRating:7.5,playerStats:{...emptyStats(),apps:1,starts:1,minutes:90,ratingCount:1,ratingSum:7.5},seed:'test'} as MatchRecord));
@@ -38,7 +38,7 @@ test('candidate ranking compares the same season and weights without a user-only
  const a=getCaptainAssessment(c,'club');assert.equal(a.candidateRank,4);assert.equal(a.eligibleRole,'none');
 });
 test('actual performances, tenure and trust constrain proposals without an age gate',()=>{
- for(const change of [(c:Career)=>{c.systems!.leadership.clubSinceYear=c.season.year;},(c:Career)=>{c.managerTrust=40;},(c:Career)=>{for(const m of c.season.matches)m.playerStats.ratingSum=5.5;},(c:Career)=>{for(const m of c.season.matches)m.playerStats.minutes=15;}]){
+ for(const change of [(c:Career)=>{c.systems!.leadership.clubSinceYear=c.season.year;for(const key of ['decisions','concentration','composure','teamwork'] as const)c.player.attributes[key]=65;},(c:Career)=>{c.managerTrust=40;},(c:Career)=>{for(const m of c.season.matches)m.playerStats.ratingSum=5.5;},(c:Career)=>{for(const m of c.season.matches)m.playerStats.minutes=15;}]){
   const c=candidate();change(c);assert.equal(getCaptainAssessment(c,'club').eligibleRole,'none');
  }
 });

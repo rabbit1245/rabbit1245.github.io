@@ -110,7 +110,12 @@ export function attributeWeights(position: Position, style: string): Partial<Rec
   return weights;
 }
 
-/** The engine's team comparison uses actual weighted ability, without the display mastery conversion. */
+/** Current mental excellence and established leadership use the same scale on and off the pitch. */
+export function leadershipAbility(attributes:Player['attributes'],trait:number):number{
+  const mental=((attributes.decisions??50)+(attributes.concentration??50)+(attributes.composure??50)+(attributes.teamwork??50))/4;
+  return Math.round(Math.max(0,Math.min(100,Math.max(mental*.75+trait*.25,trait*.7+mental*.3)))*10)/10;
+}
+/** Team comparisons use actual weighted ability, without the display mastery conversion. */
 export function playingAbility(player: Pick<Player, 'attributes'|'position'|'style'>&{ovr?:number}): number {
   // Preserve the established 0–100 comparison scale, including old saves and external roster records.
   if(player.ovr!==undefined&&!Object.values(player.attributes).some(v=>(v??0)>100))return player.ovr;

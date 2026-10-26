@@ -1,0 +1,225 @@
+TAP version 13
+# Subtest: a real performer gets a proposal before any role or captain term changes
+ok 1 - a real performer gets a proposal before any role or captain term changes
+  ---
+  duration_ms: 582.801322
+  ...
+# Subtest: leadership alone cannot make an inferior player captain of a stronger club
+ok 2 - leadership alone cannot make an inferior player captain of a stronger club
+  ---
+  duration_ms: 182.278656
+  ...
+# Subtest: candidate ranking compares the same season and weights without a user-only tenure bonus
+ok 3 - candidate ranking compares the same season and weights without a user-only tenure bonus
+  ---
+  duration_ms: 144.668323
+  ...
+# Subtest: actual performances, tenure and trust constrain proposals without an age gate
+ok 4 - actual performances, tenure and trust constrain proposals without an age gate
+  ---
+  duration_ms: 648.009039
+  ...
+# Subtest: declining is final for that team and season, and a later season re-evaluates
+ok 5 - declining is final for that team and season, and a later season re-evaluates
+  ---
+  duration_ms: 172.046424
+  ...
+# Subtest: a stale team offer cannot be accepted after the player changes club
+ok 6 - a stale team offer cannot be accepted after the player changes club
+  ---
+  duration_ms: 173.840911
+  ...
+# Subtest: national proposals require the correct age group and actual national selection
+ok 7 - national proposals require the correct age group and actual national selection
+  ---
+  duration_ms: 219.438504
+  ...
+# Subtest: an eighteen-year-old proven ace can receive a captain proposal
+ok 8 - an eighteen-year-old proven ace can receive a captain proposal
+  ---
+  duration_ms: 118.926882
+  ...
+# Subtest: market valuation reflects performance, age and injury while contract wage stays fixed
+ok 9 - market valuation reflects performance, age and injury while contract wage stays fixed
+  ---
+  duration_ms: 2.219201
+  ...
+# Subtest: 52 weeks of fixed salary are paid across a 38-round season; club transfer fees are separate
+ok 10 - 52 weeks of fixed salary are paid across a 38-round season; club transfer fees are separate
+  ---
+  duration_ms: 19.688048
+  ...
+# Subtest: contracts are offered only after the full season and obey actual club budgets
+ok 11 - contracts are offered only after the full season and obey actual club budgets
+  ---
+  duration_ms: 1.697011
+  ...
+# Subtest: an expired expensive legacy contract can renew on the actual affordable wage
+ok 12 - an expired expensive legacy contract can renew on the actual affordable wage
+  ---
+  duration_ms: 0.605283
+  ...
+# Subtest: a highly rated new signing does not become captain; tenure and actual appearances matter
+ok 13 - a highly rated new signing does not become captain; tenure and actual appearances matter
+  ---
+  duration_ms: 10.909912
+  ...
+# Subtest: eight goals cannot beat an actual teammate with fifteen; awards are idempotent and contain no invented growth trophies
+ok 14 - eight goals cannot beat an actual teammate with fifteen; awards are idempotent and contain no invented growth trophies
+  ---
+  duration_ms: 5.398989
+  ...
+# Subtest: Ballon d’Or has thirty unique candidates and World11 has goalkeeper plus required position groups
+ok 15 - Ballon d’Or has thirty unique candidates and World11 has goalkeeper plus required position groups
+  ---
+  duration_ms: 8.988705
+  ...
+# Subtest: award comparison uses performance instead of OVR and league medals require appearances
+ok 16 - award comparison uses performance instead of OVR and league medals require appearances
+  ---
+  duration_ms: 1.728591
+  ...
+# Subtest: offseason expiration uses the next-season effective year for free transfers and affordable renewal
+ok 17 - offseason expiration uses the next-season effective year for free transfers and affordable renewal
+  ---
+  duration_ms: 0.591368
+  ...
+# Subtest: captain proposals emit one reasoned event and acceptance records the term exactly once
+ok 18 - captain proposals emit one reasoned event and acceptance records the term exactly once
+  ---
+  duration_ms: 5.452192
+  ...
+# Subtest: youth development goals are excluded from the senior club top-scorer record
+ok 19 - youth development goals are excluded from the senior club top-scorer record
+  ---
+  duration_ms: 0.327408
+  ...
+# Subtest: a youth starter develops leadership through mental ability, age and actual appearances with annual command-independent growth
+ok 20 - a youth starter develops leadership through mental ability, age and actual appearances with annual command-independent growth
+  ---
+  duration_ms: 419.782551
+  ...
+# Subtest: national captain competition normalizes nationality aliases
+ok 21 - national captain competition normalizes nationality aliases
+  ---
+  duration_ms: 3.964175
+  ...
+# Subtest: initial contracts and every renewal preserve previous terms and actual signing/expiry dates
+ok 22 - initial contracts and every renewal preserve previous terms and actual signing/expiry dates
+  ---
+  duration_ms: 0.756743
+  ...
+# Subtest: successive contracts retain renewal and transfer changes while fees remain club transactions
+ok 23 - successive contracts retain renewal and transfer changes while fees remain club transactions
+  ---
+  duration_ms: 0.632536
+  ...
+# Subtest: legacy economic upgrades preserve known values and never invent old renewals or a missing season opening value
+ok 24 - legacy economic upgrades preserve known values and never invent old renewals or a missing season opening value
+  ---
+  duration_ms: 0.258862
+  ...
+# Subtest: opening market value uses recorded round-zero data and stays fixed through later valuations
+ok 25 - opening market value uses recorded round-zero data and stays fixed through later valuations
+  ---
+  duration_ms: 0.226043
+  ...
+# Subtest: cross-calendar transfer dates use the next real local season while logical contract years remain stable
+ok 26 - cross-calendar transfer dates use the next real local season while logical contract years remain stable
+  ---
+  duration_ms: 0.357037
+  ...
+# Subtest: opening a new season carries the last completed performance instead of resetting a proven player to zero games
+ok 27 - opening a new season carries the last completed performance instead of resetting a proven player to zero games
+  ---
+  duration_ms: 0.40731
+  ...
+# Subtest: legacy baselines retain an expired contract or already-agreed next-season timing without inventing a renewal
+ok 28 - legacy baselines retain an expired contract or already-agreed next-season timing without inventing a renewal
+  ---
+  duration_ms: 0.58396
+  ...
+# Subtest: 97 OVR City 25G10A receives a visible evaluation and ability cannot guarantee a Ballon win
+ok 29 - 97 OVR City 25G10A receives a visible evaluation and ability cannot guarantee a Ballon win
+  ---
+  duration_ms: 1.704384
+  ...
+# Subtest: league overperformance funds actual roster development and prestige gradually, not a flat match bonus
+ok 30 - league overperformance funds actual roster development and prestige gradually, not a flat match bonus
+  ---
+  duration_ms: 1183.764183
+  ...
+# Subtest: personal ability follows transfers immediately and old clubs retain only their actual roster
+ok 31 - personal ability follows transfers immediately and old clubs retain only their actual roster
+  ---
+  duration_ms: 98.705472
+  ...
+# Subtest: unplayed historical seasons never acquire invented growth results
+ok 32 - unplayed historical seasons never acquire invented growth results
+  ---
+  duration_ms: 274.547963
+  ...
+# Subtest: injury absences count only the player’s actual club/national fixtures, including a transfer
+ok 33 - injury absences count only the player’s actual club/national fixtures, including a transfer
+  ---
+  duration_ms: 93.216082
+  ...
+# Subtest: wingback crossing creates real additional teammate shots while preserving two centre backs
+ok 34 - wingback crossing creates real additional teammate shots while preserving two centre backs
+  ---
+  duration_ms: 544.879648
+  ...
+# Subtest: appointed captain and deputy provide small action-level organization gains only while playing
+ok 35 - appointed captain and deputy provide small action-level organization gains only while playing
+  ---
+  duration_ms: 705.639565
+  ...
+# Subtest: actual season-long elite performances unlock mid-table reinvestment; an OVR label without appearances does not
+ok 36 - actual season-long elite performances unlock mid-table reinvestment; an OVR label without appearances does not
+  ---
+  duration_ms: 95.538182
+  ...
+# Subtest: funded core-player investment raises the club scale gradually while the locked player stays unchanged
+ok 37 - funded core-player investment raises the club scale gradually while the locked player stays unchanged
+  ---
+  duration_ms: 317.345313
+  ...
+# Subtest: all-attribute locks allow real manual injury progress and retain exact abilities and lock state
+ok 38 - all-attribute locks allow real manual injury progress and retain exact abilities and lock state
+  ---
+  duration_ms: 13379.897344
+  ...
+# Subtest: locked offseason injury queues without advancing records and activates on the destination season calendar
+ok 39 - locked offseason injury queues without advancing records and activates on the destination season calendar
+  ---
+  duration_ms: 17579.246367
+  ...
+# Subtest: a 22-year-old national ace with strong mental attributes is not blocked by lifetime reputation or age
+ok 40 - a 22-year-old national ace with strong mental attributes is not blocked by lifetime reputation or age
+  ---
+  duration_ms: 1113.851737
+  ...
+# Subtest: each of the four mental skills changes the leadership assessment independently
+ok 41 - each of the four mental skills changes the leadership assessment independently
+  ---
+  duration_ms: 843.599132
+  ...
+# Subtest: a national debut, poor form and missing selection do not earn a captaincy by ability alone
+ok 42 - a national debut, poor form and missing selection do not earn a captaincy by ability alone
+  ---
+  duration_ms: 1281.161287
+  ...
+# Subtest: 31 goals and 23 assists fund meaningful lower-league development, without free growth from an unused OVR
+ok 43 - 31 goals and 23 assists fund meaningful lower-league development, without free growth from an unused OVR
+  ---
+  duration_ms: 545.918657
+  ...
+1..43
+# tests 43
+# suites 0
+# pass 43
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 36991.788863

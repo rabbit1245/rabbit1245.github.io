@@ -1,4 +1,4 @@
-import {playingAbility} from './attributes';
+import {playingAbility,leadershipAbility} from './attributes';
 import {cupMatches} from './club-competitions';
 import { getClub } from './data';
 import { clamp,round,sumStats } from './math';
@@ -27,32 +27,41 @@ export function getCaptainAssessment(c:Career,scope:Scope):CaptainAssessment{
   const teamPower=scope==='club'&&!junior?world.clubs[p.clubId]?.power??squadOvr:squadOvr;
   const all=records(c,scope),recent=all.slice(-12),stats=sumStats(recent.map(m=>m.playerStats));
   const tenure=scope==='club'?Math.max(0,c.season.year-l.clubSinceYear):Math.max(0,new Set(all.map(m=>m.seasonYear)).size-1);
-  const trust=scope==='club'?c.managerTrust:n.reputation,rating=average(stats);
+  const rating=average(stats);
+  const mental={decisions:p.attributes.decisions??50,concentration:p.attributes.concentration??50,composure:p.attributes.composure??50,teamwork:p.attributes.teamwork??50};
+  const mentalScore=(mental.decisions+mental.concentration+mental.composure+mental.teamwork)/4;
+  // Current mental excellence can lead immediately; demonstrated leadership
+  // remains valuable for established players rather than being discarded.
+  const leadership=leadershipAbility(p.attributes,l.trait);
+  // Reputation is a lifetime honours meter, not the coach's current trust.
+  // Recent selection, minutes, performance and mental quality establish trust now.
+  const trust=scope==='club'?c.managerTrust:clamp(35+clamp(stats.minutes/540,0,1)*20+clamp((rating-6.3)*12,0,18)+mentalScore*.2+n.reputation*.1,0,100);
   const ownAbility=playingAbility(p),abilityRank=1+peers.filter(w=>w.ovr>ownAbility).length;
   const abilityFloor=Math.max(squadOvr-7,teamPower-9),captainFloor=Math.max(squadOvr-3,teamPower-5);
   // Compare the same recorded season and weights for everyone. NPC tenure/trust
   // is not recorded, so those remain eligibility gates instead of user bonuses.
   const current=all.filter(m=>m.seasonYear===c.season.year);
   const seasonStats=sumStats((current.length?current:all.slice(-35)).map(m=>m.playerStats));
-  const candidateScore=(leadership:number,ovr:number,age:number,s?:PlayerStats)=>leadership*.42+ovr*.22+clamp((age-18)*.3,0,4)+(s?clamp((average(s)-6)*9,0,20)*.45+clamp(s.minutes/900,0,1)*6:0);
-  const rawScore=candidateScore(l.trait*.8+(p.attributes.teamwork??p.attributes.decisions??50)*.2,ownAbility,p.age,seasonStats),score=round(rawScore,2);
-  const candidateRank=1+peers.filter(w=>{const row=world.playerStats[w.id],s=scope==='national'?row?.nationalStats:row?.stats;return candidateScore(w.leadership,w.ovr,w.age,s)>rawScore;}).length;
+  const candidateScore=(quality:number,ovr:number,s?:PlayerStats)=>quality*.40+ovr*.35+(s?clamp((average(s)-6)*9,0,20)*.60+clamp(s.minutes/900,0,1)*5:0);
+  const rawScore=candidateScore(leadership,ownAbility,seasonStats),score=round(rawScore,2);
+  const candidateRank=1+peers.filter(w=>{const row=world.playerStats[w.id],s=scope==='national'?row?.nationalStats:row?.stats;return candidateScore(w.leadership,w.ovr,s)>rawScore;}).length;
   const reasons:string[]=[];
   if(scope==='club'&&p.squad==='youth')reasons.push('유소년 단계에서는 성인 클럽 주장 제의를 하지 않습니다. 1군에서 실력과 출전 경력을 쌓아야 합니다.');
   if(c.stage==='retired')reasons.push('은퇴한 선수에게 새 주장단 제의를 하지 않습니다.');
   if(scope==='national'&&(!all.length||n.status==='unselected'||n.status==='watchlist'))reasons.push('현재 연령대 대표팀의 실제 발탁과 꾸준한 출전이 먼저 필요합니다.');
-  if(tenure<1&&!(abilityRank<=2&&all.length>=12&&rating>=7&&(p.attributes.teamwork??0)>=80))reasons.push('현재 팀에서 최소 한 시즌의 근속과 동료의 신뢰가 필요합니다.');
+  if(tenure<1&&!(abilityRank<=2&&all.length>=(scope==='national'?8:12)&&rating>=7&&mentalScore>=78))reasons.push('현재 팀에서 한 시즌의 근속 또는 충분한 실전 활약과 멘털 리더십이 필요합니다.');
   if(all.length<(junior?8:scope==='club'?15:8))reasons.push(`현재 팀 실제 출전 ${all.length}경기: 충분한 출전 경력이 필요합니다.`);
   if(stats.apps<(scope==='club'?6:4)||stats.minutes<(scope==='club'?360:240)||rating<6.5)reasons.push('최근 실제 출전 시간과 평균 평점 6.50 이상의 성과가 필요합니다.');
   if(ownAbility<abilityFloor||abilityRank>Math.max(11,Math.ceil((peers.length+1)*.55)))reasons.push(`팀 전력 ${round(teamPower,1)}·주전 평균 ${round(squadOvr,1)}에 맞는 실력이 필요합니다. 현재 OVR ${p.ovr}, 팀 내 ${abilityRank}위입니다.`);
-  if(l.trait<(junior?58:65))reasons.push(`리더십 ${l.trait}: 주장단이 요구하는 수준에 아직 부족합니다.`);
+  if(leadership<(junior?58:60))reasons.push(`멘털 리더십 ${leadership}: 판단력·집중력·침착력·팀워크와 리더십을 함께 높여야 합니다.`);
   if(trust<65)reasons.push(`팀 신뢰 ${Math.round(trust)}%: 꾸준한 활약으로 신뢰를 더 쌓아야 합니다.`);
-  if(candidateRank>2)reasons.push(`실력·성과·연령·리더십을 합친 주장단 후보 ${candidateRank}위입니다.`);
+  if(candidateRank>2)reasons.push(`실력·성과·멘털 리더십을 합친 주장단 후보 ${candidateRank}위입니다.`);
   const eligible=!reasons.length;
-  const captain=eligible&&(tenure>=(junior?1:2)||abilityRank<=2&&(p.attributes.teamwork??0)>=85&&rating>=7.2)&&all.length>=(scope==='club'?junior?16:40:16)&&l.trait>=(junior?68:75)&&ownAbility>=captainFloor&&rating>=6.8&&candidateRank===1;
+  const captain=eligible&&(tenure>=(scope==='national'||junior?1:2)||abilityRank<=2&&mentalScore>=80&&rating>=7.2)&&all.length>=(scope==='club'?junior?16:40:12)&&leadership>=(junior?65:68)&&ownAbility>=captainFloor&&rating>=6.8&&candidateRank===1;
   const eligibleRole=captain?'captain':eligible?'vice':'none';
-  if(eligible)reasons.push(`현재 팀 주전 수준의 실력과 최근 평점 ${rating.toFixed(2)}, ${p.age}세·리더십 ${l.trait}·근속 ${tenure}시즌을 종합해 ${captain?'주장':'부주장'} 후보로 평가했습니다.`);
-  return {scope,teamId,eligibleRole,teamPower:round(teamPower,1),squadOvr:round(squadOvr,1),playerOvr:p.ovr,abilityRank,candidateRank,age:p.age,leadership:l.trait,tenure,apps:all.length,recentApps:stats.apps,recentMinutes:stats.minutes,rating:round(rating,2),trust:round(trust,2),score,reasons};
+  reasons.push(`판단력 ${mental.decisions} · 집중력 ${mental.concentration} · 침착력 ${mental.composure} · 팀워크 ${mental.teamwork}: 멘털 평균 ${mentalScore.toFixed(1)}와 리더십 ${l.trait}을 함께 반영합니다.`);
+  if(eligible)reasons.push(`현재 팀 주전 수준의 실력과 최근 평점 ${rating.toFixed(2)}, 멘털 리더십 ${leadership}·근속 ${tenure}시즌을 종합해 ${captain?'주장':'부주장'} 후보로 평가했습니다. 나이 ${p.age}세는 선발 가점이 아닙니다.`);
+  return {scope,teamId,eligibleRole,teamPower:round(teamPower,1),squadOvr:round(squadOvr,1),playerOvr:p.ovr,abilityRank,candidateRank,age:p.age,leadership,mental:{...mental,score:round(mentalScore,1)},tenure,apps:all.length,recentApps:stats.apps,recentMinutes:stats.minutes,rating:round(rating,2),trust:round(trust,2),score,reasons};
 }
 export function expireCaptainOffers(c:Career,scope?:Scope):void{
   for(const offer of c.systems?.leadership.offers??[])if(offer.status==='pending'&&(!scope||offer.scope===scope)){offer.status='expired';offer.answeredYear=c.season.year;offer.answeredRound=c.season.week;}

@@ -11,7 +11,7 @@ test('league overperformance funds actual roster development and prestige gradua
  const gw=good.systems!.world,pw=poor.systems!.world,gc=gw.clubs[id],pc=pw.clubs[id],initial=gc.power;
  const g=assessClubSeason(good,gc,gw.competitions.KR2.table,true),p=assessClubSeason(poor,pc,pw.competitions.KR2.table,true);assert.equal(g.rank,1);assert.ok(g.bonus>p.bonus);
  transitionWorldSeason(good);transitionWorldSeason(poor);const report=gc.development!.history.at(-1)!;
- assert.ok(report.bonus>0&&report.reinvestment>0);assert.ok(report.reinvestment<=report.bonus);assert.ok(report.recruits+report.improvedPlayers>0);assert.ok(getClubWorldPower(good,id)>getClubWorldPower(poor,id));assert.ok(Math.abs(gc.power-initial)<3,'no sudden team-wide jump');assert.ok(Math.abs(report.prestigeAfter-report.prestigeBefore)<3);
+ assert.ok(report.bonus>0&&report.reinvestment>0);assert.ok(report.reinvestment<=report.bonus);assert.ok(report.recruits+report.improvedPlayers>0);assert.ok(getClubWorldPower(good,id)>getClubWorldPower(poor,id));assert.ok(gc.development!.investmentPower!<=2.2,'funded growth stays gradual');assert.ok(Math.abs(gc.power-initial)<5,'funded growth plus yearly form is bounded');assert.ok(Math.abs(report.prestigeAfter-report.prestigeBefore)<3);
  const snapshot=JSON.stringify(gw);transitionWorldSeason(good);assert.equal(JSON.stringify(gw),snapshot);
 });
 test('personal ability follows transfers immediately and old clubs retain only their actual roster',()=>{

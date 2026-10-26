@@ -1,0 +1,27 @@
+{
+  "url": "http://127.0.0.1:4184/Kball.html",
+  "checks": [
+    {
+      "width": 1366,
+      "age": 22,
+      "nationalReputation": 23.759999999999998,
+      "nationalApps": 13,
+      "mentalScore": 98,
+      "accepted": true,
+      "reloaded": true,
+      "pastRecordsUnchanged": true
+    },
+    {
+      "width": 390,
+      "age": 22,
+      "nationalReputation": 23.759999999999998,
+      "nationalApps": 13,
+      "mentalScore": 98,
+      "accepted": true,
+      "reloaded": true,
+      "pastRecordsUnchanged": true
+    }
+  ],
+  "errors": [],
+  "external": []
+}

@@ -1,0 +1,35 @@
+{
+  "version": "2.9.3",
+  "status": "verified",
+  "core": {
+    "tests": 275,
+    "passed": 274,
+    "failed": 0,
+    "skipped": 1,
+    "skip": "existing 30-season test; KBALL_SKIP_LONG_TEST=1"
+  },
+  "targetedTestsPassed": 43,
+  "fullWorldSeasons": 3,
+  "actualYoungNationalCaptain": {
+    "age": 22,
+    "apps": 13,
+    "reputation": 23.76
+  },
+  "leagueBenchmarkPairedSeeds": 12,
+  "ordinaryAbility": 60,
+  "eliteAbility": 98,
+  "nationalUIWidths": [
+    1366,
+    390
+  ],
+  "existingPlayableFlows": 11,
+  "crests": {
+    "clubs": 913,
+    "neutral": 0,
+    "original": 7
+  },
+  "typecheck": true,
+  "productionBuild": true,
+  "standaloneBuild": true,
+  "simulationReduced": false
+}

@@ -1,0 +1,85 @@
+{
+  "rows": [
+    {
+      "year": 2026,
+      "age": 22,
+      "league": "IT3__B",
+      "rank": 4,
+      "points": 63,
+      "apps": 38,
+      "goals": 49,
+      "assists": 4,
+      "power": 60.95,
+      "investmentBefore": 0,
+      "investmentAfter": 2.2,
+      "funded": 1462582,
+      "afterPower": 63.26
+    },
+    {
+      "year": 2027,
+      "age": 23,
+      "league": "IT3__B",
+      "rank": 2,
+      "points": 76,
+      "apps": 35,
+      "goals": 35,
+      "assists": 5,
+      "power": 63.26,
+      "investmentBefore": 2.2,
+      "investmentAfter": 4.356,
+      "funded": 1987407,
+      "afterPower": 66.11
+    },
+    {
+      "year": 2028,
+      "age": 24,
+      "league": "IT2",
+      "rank": 18,
+      "points": 31,
+      "apps": 38,
+      "goals": 35,
+      "assists": 5,
+      "power": 66.11,
+      "investmentBefore": 4.356,
+      "investmentAfter": 6.423,
+      "funded": 2039230,
+      "afterPower": 67.35
+    }
+  ],
+  "firstCaptain": {
+    "age": 22,
+    "reputation": 23.759999999999998,
+    "assessment": {
+      "scope": "national",
+      "teamId": "NAT:대한민국:senior",
+      "eligibleRole": "captain",
+      "teamPower": 75.3,
+      "squadOvr": 75.3,
+      "playerOvr": 98,
+      "abilityRank": 1,
+      "candidateRank": 1,
+      "age": 22,
+      "leadership": 91.8,
+      "mental": {
+        "decisions": 98,
+        "concentration": 98,
+        "composure": 98,
+        "teamwork": 98,
+        "score": 98
+      },
+      "tenure": 0,
+      "apps": 13,
+      "recentApps": 12,
+      "recentMinutes": 1027,
+      "rating": 8.97,
+      "trust": 94.98,
+      "score": 88.02,
+      "reasons": [
+        "판단력 98 · 집중력 98 · 침착력 98 · 팀워크 98: 멘털 평균 98.0와 리더십 73을 함께 반영합니다.",
+        "현재 팀 주전 수준의 실력과 최근 평점 8.97, 멘털 리더십 91.8·근속 0시즌을 종합해 주장 후보로 평가했습니다. 나이 22세는 선발 가점이 아닙니다."
+      ]
+    }
+  },
+  "attributesUnchanged": true,
+  "saveRoundTrip": true
+}
