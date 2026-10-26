@@ -23,7 +23,7 @@ import { TALENT_PROFILES } from './talent';
 import type { AttributeKey, Attributes, Career, CreateOptions, Fixture, GameProgress, Intensity, MatchRecord, Player, PlayerStats, SeasonState, SeasonSummary, Standing, Talent, TransferOffer } from './types';
 import type { PresentationEvent } from './revision-types';
 
-export const ENGINE_VERSION = '2.9.1';
+export const ENGINE_VERSION = '2.9.2';
 export const overall = calculateOverall;
 export { addStats, emptyStats, hashSeed, seededRandom } from './math';
 const TALENT_ORDER: Talent[] = ['D','C','B','A','S','SS','SSS'];
@@ -183,6 +183,10 @@ function archive(career:Career,completed:boolean) {
 export function generateOffers(career:Career):TransferOffer[] {
   if(career.systems)return makeContractOffers(career,'offseason');
   const next=editable(career);return makeContractOffers(next,'offseason');
+}
+export function refreshContractOffers(career:Career):Career{
+ if(career.stage==='retired'||career.stage!=='offseason'&&!isFreeAgent(career)||career.transferDecision&&!isFreeAgent(career))throw new Error('현재 계약 제안을 다시 검토할 수 없습니다.');
+ const next=editable(career,true);next.offers=generateOffers(next);touch(next);return next;
 }
 function finishSeason(career:Career) {
   prepareWorldMovements(career);

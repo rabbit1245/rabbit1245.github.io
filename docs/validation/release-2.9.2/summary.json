@@ -1,0 +1,51 @@
+{
+  "version": "2.9.2",
+  "status": "verified",
+  "core": {
+    "tests": 271,
+    "passed": 270,
+    "failed": 0,
+    "skipped": 1,
+    "skip": "30-season long-career test; KBALL_SKIP_LONG_TEST=1"
+  },
+  "regressions": {
+    "initialThreeFailedBeforeFix": true,
+    "targetedTestsPassed": 5,
+    "legacyJournalReplayPassed": true
+  },
+  "browser": {
+    "url": "http://127.0.0.1:4184/Kball.html",
+    "checks": [
+      {
+        "case": "FA international history imports, autosaves, explicitly saves, exports and reloads offline",
+        "faPerformers": 4
+      },
+      {
+        "case": "Legacy one-year offers refresh once; former-club return signs, starts next year and reloads",
+        "width": 1366,
+        "age": 36,
+        "years": 3
+      },
+      {
+        "case": "Legacy one-year offers refresh once; former-club return signs, starts next year and reloads",
+        "width": 390,
+        "age": 36,
+        "years": 3
+      }
+    ],
+    "errors": [],
+    "external": []
+  },
+  "existingPlayableFlows": 11,
+  "crests": {
+    "clubs": 913,
+    "embedded": 913,
+    "neutral": 0,
+    "original": 7
+  },
+  "typecheck": true,
+  "productionBuild": true,
+  "standaloneBuild": true,
+  "catalogueChanged": false,
+  "simulationReduced": false
+}

@@ -1,0 +1,35 @@
+TAP version 13
+# Subtest: FA international performers survive archival, autosave, reload and JSON without relaxing team validation
+ok 1 - FA international performers survive archival, autosave, reload and JSON without relaxing team validation
+  ---
+  duration_ms: 7530.793489
+  ...
+# Subtest: actual ability loss and poor form still permit short contracts; voluntary FA does not create a guaranteed renewal
+ok 2 - actual ability loss and poor form still permit short contracts; voluntary FA does not create a guaranteed renewal
+  ---
+  duration_ms: 768.989975
+  ...
+# Subtest: opening legacy proposals refreshes duration once without touching archived records or altering signed contracts
+ok 3 - opening legacy proposals refreshes duration once without touching archived records or altering signed contracts
+  ---
+  duration_ms: 18949.281666
+  ...
+# Subtest: veterans who retain first-team ability and performance receive multi-year offers
+ok 4 - veterans who retain first-team ability and performance receive multi-year offers
+  ---
+  duration_ms: 1351.224912
+  ...
+# Subtest: expiry keeps natural FA status and offers the former club as a selectable return, not forced renewal
+ok 5 - expiry keeps natural FA status and offers the former club as a selectable return, not forced renewal
+  ---
+  duration_ms: 42754.57815
+  ...
+1..5
+# tests 5
+# suites 0
+# pass 5
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 71857.073082

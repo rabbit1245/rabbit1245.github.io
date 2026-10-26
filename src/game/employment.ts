@@ -3,6 +3,13 @@ import type {EmploymentPeriod} from './revision-types';
 import {getClub,getLeague} from './data';
 import {sumStats} from './math';
 export const isFreeAgent=(c:Career)=>c.player.clubId==='FA';
+/** An expired contract can be renewed in the same summer, after FA takes effect.
+ * A voluntary release or a later FA half-season is not an automatic renewal. */
+export function expiryReturnClub(c:Career):string|undefined{
+ if(!isFreeAgent(c)||c.stage!=='offseason')return;
+ const period=c.systems?.employment?.at(-1),last=c.systems?.economics.contractHistory?.at(-1);
+ if(period?.reason==='expiry'&&last?.type==='release'&&last.year===c.season.year&&last.effective==='nextSeason'&&last.previous?.clubId!=='FA')return last.previous?.clubId;
+}
 export function recordedEmployment(c:Career,year:number):EmploymentPeriod[]{
  return (c.systems?.employment??[]).filter(r=>r.year===year&&(r.toRound??(year===c.season.year?c.season.week:r.totalRounds))>r.fromRound);
 }

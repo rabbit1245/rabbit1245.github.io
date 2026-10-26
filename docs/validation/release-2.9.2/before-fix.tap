@@ -1,0 +1,71 @@
+TAP version 13
+# Subtest: FA international performers survive archival, autosave, reload and JSON without relaxing team validation
+not ok 1 - FA international performers survive archival, autosave, reload and JSON without relaxing team validation
+  ---
+  duration_ms: 2266.430695
+  location: '/workspace/rabbit1245.github.io/src/game/fa-contract-regression.test.ts:2:2316'
+  failureType: 'testCodeFailure'
+  error: '저장 데이터 오류: national.matches[0].performer.clubId의 구단을 현재 데이터에서 찾을 수 없습니다.'
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    assert (/workspace/rabbit1245.github.io/src/game/storage.ts:40:25)
+    clubId (/workspace/rabbit1245.github.io/src/game/storage.ts:74:3)
+    matches (/workspace/rabbit1245.github.io/src/game/storage.ts:318:16)
+    validateSystems (/workspace/rabbit1245.github.io/src/game/storage.ts:511:27)
+    validateCareer (/workspace/rabbit1245.github.io/src/game/storage.ts:865:3)
+    TestContext.<anonymous> (/workspace/rabbit1245.github.io/src/game/fa-contract-regression.test.ts:30:2)
+    Test.runInAsyncScope (node:async_hooks:206:9)
+    Test.run (node:internal/test_runner/test:796:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:526:18)
+    node:internal/test_runner/harness:255:12
+  ...
+# Subtest: veterans who retain first-team ability and performance receive multi-year offers
+not ok 2 - veterans who retain first-team ability and performance receive multi-year offers
+  ---
+  duration_ms: 382.575903
+  location: '/workspace/rabbit1245.github.io/src/game/fa-contract-regression.test.ts:2:4009'
+  failureType: 'testCodeFailure'
+  error: '32: retained elite player offered only 1 year'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: '=='
+  stack: |-
+    TestContext.<anonymous> (/workspace/rabbit1245.github.io/src/game/fa-contract-regression.test.ts:45:10)
+    Test.runInAsyncScope (node:async_hooks:206:9)
+    Test.run (node:internal/test_runner/test:796:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:526:18)
+    Test.postRun (node:internal/test_runner/test:889:19)
+    Test.run (node:internal/test_runner/test:835:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:526:7)
+  ...
+# Subtest: expiry keeps natural FA status and offers the former club as a selectable return, not forced renewal
+not ok 3 - expiry keeps natural FA status and offers the former club as a selectable return, not forced renewal
+  ---
+  duration_ms: 17096.174874
+  location: '/workspace/rabbit1245.github.io/src/game/fa-contract-regression.test.ts:2:4722'
+  failureType: 'testCodeFailure'
+  error: 'former club renewal must not disappear on expiry'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  operator: '=='
+  stack: |-
+    TestContext.<anonymous> (/workspace/rabbit1245.github.io/src/game/fa-contract-regression.test.ts:52:65)
+    Test.runInAsyncScope (node:async_hooks:206:9)
+    Test.run (node:internal/test_runner/test:796:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:526:18)
+    Test.postRun (node:internal/test_runner/test:889:19)
+    Test.run (node:internal/test_runner/test:835:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:526:7)
+  ...
+1..3
+# tests 3
+# suites 0
+# pass 0
+# fail 3
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 20570.135301

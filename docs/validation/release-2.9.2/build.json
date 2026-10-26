@@ -1,0 +1,13 @@
+{
+  "version": "2.9.2",
+  "bytes": 21507204,
+  "sha256": "73c37b32e48b0db02b9b4d1c14808ce803fcc1d3972c3281f76cffafa5d15e90",
+  "htmlSha256": "54de8b9a9be876d42f178ba90b10a8b4be0f0620e0f4361f72c2e98fd217bed4",
+  "zipCRC": true,
+  "entries": [
+    "Kball.html",
+    "읽어주세요.txt",
+    "FONT-LICENSE.txt",
+    "CREST-LICENSE.txt"
+  ]
+}

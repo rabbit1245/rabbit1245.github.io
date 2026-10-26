@@ -47,7 +47,7 @@ test('wage offers for a young first-team player are not uniformly forced 10 perc
 
 test('expiry releases automatically after the final paid season and next year starts without mandatory renewal',()=>{
  let c=fresh();c.player.contractYears=1;const e=c.systems!.economics;e.contract.expiresYear=c.season.year+1;delete e.contract.expiresDate;const t=e.contractHistory![0].current;t.expiresYear=c.season.year+1;t.years=1;delete t.expiresDate;validateCareer(c);
- c=advanceHalf(advanceHalf(c));assert.equal(c.player.clubId,'FA');assert.equal(c.history[0].clubId,'EN1_01');assert.equal(c.offers.length,6);assert.equal(c.transferDecision,'stay');validateCareer(c);
+ c=advanceHalf(advanceHalf(c));assert.equal(c.player.clubId,'FA');assert.equal(c.history[0].clubId,'EN1_01');assert.equal(c.offers.length,7);assert.ok(c.offers.some(o=>o.clubId==='EN1_01'&&o.fee===0));assert.equal(c.transferDecision,'stay');validateCareer(c);
  c=startNextSeason(c);assert.equal(c.player.clubId,'FA');assert.equal(c.season.week,0);assert.equal(c.player.wage,0);assert.deepEqual(c.training,[]);validateCareer(c);
 });
 

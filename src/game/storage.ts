@@ -315,7 +315,9 @@ function matches(value: unknown, label: string, playerId: string, national = fal
         number(row.ovr, `${prefix}.performer.ovr`, 1, 120);
         if (national) {
           if (String(row.clubId).startsWith('NAT:')) teamId(row.clubId, `${prefix}.performer.clubId`, true);
-          else clubId(row.clubId, `${prefix}.performer.clubId`);
+          // Club affiliation is a historical snapshot. A free agent may still
+          // play for their country; the actual national team is checked below.
+          else clubId(row.clubId, `${prefix}.performer.clubId`, true);
         }
         else assert(row.clubId === home || row.clubId === away, `${prefix}의 경기 선수 소속이 올바르지 않습니다.`);
         if (row.nationality !== undefined) text(row.nationality, `${prefix}.performer.nationality`);

@@ -1,6 +1,6 @@
 import {syncUser} from './world';
 import {globalVoting,additionalGlobalHonours} from './global-honours';
-import {isFreeAgent,changeEmployment,careerLeagueEntries} from './employment';
+import {isFreeAgent,expiryReturnClub,changeEmployment,careerLeagueEntries} from './employment';
 import {evaluateExtraHonours} from './extra-honours';
 import {moneyText} from './currency';
 import {cupLedger,cupMatches,cupStats} from './club-competitions';
@@ -132,13 +132,34 @@ function individualWageLimit(career: Career, clubId: string): number {
   const club = career.systems?.world.clubs[clubId];
   return club ? Math.max(0, Math.floor(club.wageBudget / 52 * .14)) : 0;
 }
+const CONTRACT_OFFER_MODEL='offseason-v292';
+/** Old proposals are refreshed once when opened, after the save hash is verified. */
+export function needsContractOfferRefresh(career:Career):boolean{
+ return career.stage!=='retired'&&(career.stage==='offseason'||isFreeAgent(career))&&(!career.transferDecision||isFreeAgent(career))&&
+  (career.offers.length===0||career.offers.some(o=>!o.id.includes(`:${CONTRACT_OFFER_MODEL}:`)));
+}
+function contractYears(career:Career,role:string,rng:()=>number):number{
+ const p=career.player,s=career.season.playerStats;
+ const previous=career.history.filter(h=>h.year<career.season.year).slice(-2);
+ const recentAbility=Math.max(career.season.ovrStart,...previous.map(h=>h.ovrEnd));
+ const retained=p.ovr>=recentAbility-2,proven=s.minutes>=900&&avgRating(s)>=6.8;
+ const firstTeam=role==='핵심 선수'||role==='주전';
+ // One year is a response to actual decline or a marginal squad role.
+ // Age alone never turns a retained first-team player into an annual release.
+ if(p.age>=29&&!retained&&!proven||p.age>=32&&!firstTeam&&!proven)return 1;
+ if(p.age>=32)return firstTeam&&retained&&p.age<(p.position==='GK'?40:37)?3:2;
+ if(p.age>=29)return firstTeam||proven?3:2;
+ return 3+Math.floor(rng()*2);
+}
 export function makeContractOffers(career:Career,timing:'midseason'|'offseason'):TransferOffer[]{
  if(!career.systems||(career.stage!=='offseason'&&!isFreeAgent(career))||career.stage==='retired')return[];
  const {world,economics:e}=career.systems,p=career.player,remaining=Math.max(0,e.contract.expiresYear-career.season.year-1);
  const rng=seededRandom(`${career.seed}:offers-v29:${career.season.year}:${isFreeAgent(career)?career.season.week:0}`),reports=new Map(scoutingReports(career).map(r=>[r.clubId,r]));
- const priorWage=isFreeAgent(career)?e.contract.previousWage??0:p.wage;
+ const priorWage=isFreeAgent(career)?e.contract.previousWage??0:p.wage,returnClub=expiryReturnClub(career);
+ const renewalClub=!isFreeAgent(career)?p.clubId:returnClub;
+ const canRenew=!!renewalClub&&!!world.clubs[renewalClub]&&individualWageLimit(career,renewalClub)>=150;
  const declined=p.age>=34&&p.ovr<(career.history.filter(h=>h.year<career.season.year).at(-1)?.ovrEnd??career.season.ovrStart)-4&&avgRating(career.season.playerStats)<6.5;
- const affordable=Object.values(world.clubs).filter(x=>x.id!==p.clubId&&(!isFreeAgent(career)||career.stage==='offseason'||getLeagueRule(x.leagueId).startMonth===getLeagueRule(career.season.leagueId).startMonth)&&!/(?:\sB|\sII|카스티야)$/.test(getClub(x.id).name)&&individualWageLimit(career,x.id)>=150&&x.budget>=0);
+ const affordable=Object.values(world.clubs).filter(x=>x.id!==p.clubId&&!(canRenew&&x.id===returnClub)&&(!isFreeAgent(career)||career.stage==='offseason'||getLeagueRule(x.leagueId).startMonth===getLeagueRule(career.season.leagueId).startMonth)&&!/(?:\sB|\sII|카스티야)$/.test(getClub(x.id).name)&&individualWageLimit(career,x.id)>=150&&x.budget>=0);
  // Prefer clubs that can honour the established salary; keep an explicitly explained budget fallback.
  const funded=affordable.filter(x=>individualWageLimit(career,x.id)>=priorWage*(declined?.8:1.03));
  const candidates=funded.length>=6?funded:affordable;
@@ -163,11 +184,17 @@ export function makeContractOffers(career:Career,timing:'midseason'|'offseason')
   const salaryFloor=priorWage*(exceptionalCut?.78+rng()*.12:renew?1.04:1.03+rng()*.17+demand*.08);
   const wage=Math.round(Math.min(limit,Math.max(150,justified*(.96+rng()*.2),salaryFloor)));
   const asking=renew||remaining===0?0:Math.round(e.marketValue*clamp(.45+remaining*.18+rng()*.12,.45,1.35)),fee=Math.min(asking,Math.floor(club.budget*.75));
-  const years=p.age>=32?1:p.age>=29?2:3+Math.floor(rng()*2),labels={similar:'동급 경쟁',lower:'하위 전력 · 핵심 기용',higher:'상위 전력 · 우승 경쟁',wild:'극단적 랜덤 · 도전 제안'};
-  return {id:`${career.season.year}:offseason:${renew?'renew':'transfer'}:${id}`,clubId:id,wage,years,role,fee,type:renew?'renew':'transfer',...(band?{band}:{}),expiresRound:career.season.totalWeeks,effective:'nextSeason',currentWage:p.wage,budgetLimit:club.budget,reason:`${band?labels[band]:'재계약'} · 팀 전력 ${club.power.toFixed(1)} · ${role}. 포지션 수요 ${Math.round((reports.get(id)?.need??0)*100)}%. 현재 주급 ${moneyText(p.wage)} → ${moneyText(wage)} · ${years}년.${fee<asking?' 요구 이적료보다 낮은 예산 한도 내 입찰이며 수락 여부는 선수가 결정합니다.':''}${club.power>p.ovr+12?' 즉시 주전 보장 없는 장기 육성·로테이션 계약.':''}${higher.length===0&&band==='higher'?' 현재 수준보다 강한 팀이 없어 실제 최상위 경쟁 구단으로 대체.':''}${lower.length===0&&band==='lower'?' 현재 수준보다 낮은 팀이 없어 가능한 낮은 전력의 실제 비교 구단으로 대체.':''}`};
+  const years=contractYears(career,role,rng),labels={similar:'동급 경쟁',lower:'하위 전력 · 핵심 기용',higher:'상위 전력 · 우승 경쟁',wild:'극단적 랜덤 · 도전 제안'};
+  return {id:`${career.season.year}:${CONTRACT_OFFER_MODEL}:${renew?'renew':'transfer'}:${id}`,clubId:id,wage,years,role,fee,type:renew?'renew':'transfer',...(band?{band}:{}),expiresRound:career.season.totalWeeks,effective:'nextSeason',currentWage:p.wage,budgetLimit:club.budget,reason:`${band?labels[band]:'재계약'} · 팀 전력 ${club.power.toFixed(1)} · ${role}. 포지션 수요 ${Math.round((reports.get(id)?.need??0)*100)}%. 현재 주급 ${moneyText(p.wage)} → ${moneyText(wage)} · ${years}년. 계약 기간은 현재 기량·최근 경기력·기대 역할과 나이를 함께 반영합니다.${fee<asking?' 요구 이적료보다 낮은 예산 한도 내 입찰이며 수락 여부는 선수가 결정합니다.':''}${club.power>p.ovr+12?' 즉시 주전 보장 없는 장기 육성·로테이션 계약.':''}${higher.length===0&&band==='higher'?' 현재 수준보다 강한 팀이 없어 실제 최상위 경쟁 구단으로 대체.':''}${lower.length===0&&band==='lower'?' 현재 수준보다 낮은 팀이 없어 가능한 낮은 전력의 실제 비교 구단으로 대체.':''}`};
  };
  const result=selected.sort((a,b)=>({similar:0,lower:1,higher:2,wild:3}[a.band]-{similar:0,lower:1,higher:2,wild:3}[b.band])).map(row=>offer(row.id,false,row.band));
- if(!isFreeAgent(career)&&individualWageLimit(career,p.clubId)>=150)result.push(offer(p.clubId,true));
+ if(canRenew){
+  const renewal=offer(renewalClub!,true);
+  // FA -> former club is a real, fee-free return in the transfer ledger.
+  // Keep renew snapshots reserved for uninterrupted contracts at one club.
+  if(isFreeAgent(career)){renewal.type='transfer';renewal.reason=`계약 만료 구단의 재계약 · FA 재입단 제안. ${renewal.reason}`;}
+  result.push(renewal);
+ }
  for(const o of result){if(isFreeAgent(career)){o.fee=0;o.effective=career.stage==='offseason'?'nextSeason':'now';}if(o.wage<priorWage)o.reason+=declined&&['로테이션','유망주'].includes(o.role)?' 고령·최근 기량 저하와 후보 역할을 반영한 감액 제안.':' 구단 급여 예산 한도로 종전 주급을 맞추지 못한 제안.';}
  return result;
 }
