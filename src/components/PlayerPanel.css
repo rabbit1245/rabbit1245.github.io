@@ -41,3 +41,5 @@
 
 .training-header-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;} .manual-aging{display:flex;} .manual-aging .button{min-height:34px;padding:5px 12px;} .manual-aging-options{margin:12px 0;display:flex;gap:8px;flex-wrap:wrap;} .manual-aging-overall{font-size:20px;margin:12px 0;}
 @media(min-width:1100px){.training-panel>.panel-head{padding-top:6px;padding-bottom:6px;}.training-panel>.panel-body{padding-top:8px;padding-bottom:8px;}}
+
+.skill-cap{font-size:11px;color:#365d2e;margin-left:5px;white-space:nowrap}.offer-league{display:block;font-size:13px;font-weight:500;color:#4e5964;margin-top:5px}.locker-injury{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.injury-options{flex-basis:100%;padding:10px;border:1px solid #d7ded5;border-radius:8px;background:#fff}.release-contract{margin-top:16px;padding-top:14px;border-top:1px solid #d7ded5}.training-name{display:flex;align-items:center;flex-wrap:wrap}

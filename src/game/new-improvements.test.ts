@@ -67,10 +67,11 @@ test('new continental fields preserve region, actual unique entrants and group o
  const canadian=CLUBS.find(r=>r.name.includes('토론토'))!;assert.equal(clubCountry(canadian.id),'캐나다');assert.equal(clubWorldHost(c,{'RANK:미국':[canadian.id,'US1_01']},[],2029)?.clubId,'US1_01','Canadian MLS clubs cannot take a US host berth');
  const afc=cupLedger(c).find(t=>t.id.startsWith('AFC_ELITE:'))!;for(const id of afc.entrants){const games=afc.fixtures.filter(f=>[f.homeId,f.awayId].includes(id));assert.equal(games.length,8);assert.equal(new Set(games.map(f=>f.homeId===id?f.awayId:f.homeId)).size,8);assert.equal(games.filter(f=>f.homeId===id).length,4);assert.equal(continent(id),'AFC');}
 });
-test('full season manual injury skips real games, retains team scores and spills across seasons with exact recovery',()=>{
- let c=fresh();c=advanceCareer(c,8);const oldApps=c.season.playerStats.apps,oldGoals=c.season.playerStats.goals,startWeek=c.season.week;
- const prior=JSON.stringify(c),injured=manuallyInjure(c,'season');assert.equal(JSON.stringify(c),prior);assert.equal(injured.stage,'offseason');assert.equal(injured.season.playerStats.apps,oldApps);assert.equal(injured.season.playerStats.goals,oldGoals);assert.ok(injured.season.matches.length>startWeek);assert.ok(injured.season.table.every(r=>r.played===injured.season.totalWeeks));
- const injury=injured.systems!.manualInjuries![0];assert.ok(injury.missed.length>0);const games=[...injured.season.matches,...cupLedger(injured,2026).flatMap(t=>t.matches),...injured.systems!.national.matches];assert.ok(games.filter(m=>m.date!>=injury.start&&m.date!<injury.end).every(m=>!m.playerPlayed&&m.playerStats.apps===0&&m.playerStats.goals===0));validateCareer(injured);
- c=startNextSeason(setTraining(injured,injured.training,injured.intensity));assert.ok(c.season.week>0);assert.equal(c.season.playerStats.apps,0);assert.equal(c.player.injuryWeeks,0);assert.ok(c.systems!.manualInjuries![0].returned);validateCareer(c);c=advanceCareer(c,4);validateCareer(c);assert.ok(c.systems!.manualInjuries![0].returned);assert.ok(c.season.playerStats.apps>0);
+test('season injury queues at the half boundary, excludes all remaining games and ends with that season',()=>{
+ let c=fresh();c=advanceCareer(c,c.systems!.halfRound);const oldApps=c.season.playerStats.apps,oldGoals=c.season.playerStats.goals;
+ const prior=JSON.stringify(c);let injured=manuallyInjure(c,'season');assert.equal(JSON.stringify(c),prior);assert.equal(injured.season.week,c.season.week);injured=advanceCareer(injured,120);
+ assert.equal(injured.stage,'offseason');assert.equal(injured.season.playerStats.apps,oldApps);assert.equal(injured.season.playerStats.goals,oldGoals);assert.ok(injured.season.table.every(r=>r.played===injured.season.totalWeeks));
+ const injury=injured.systems!.manualInjuries![0];assert.ok(injury.missed.length>0);assert.ok(injury.returned);validateCareer(injured);
+ c=startNextSeason(setTraining(injured,injured.training,injured.intensity));assert.equal(c.season.week,0);assert.equal(c.player.injuryWeeks,0);c=advanceCareer(c,4);validateCareer(c);assert.ok(c.season.playerStats.apps>0);
  assert.match(buildCareerText(c),/부상 유무: 부상 있음/);assert.match(buildCareerText(c),/확인된 결장 \d+경기/);assert.doesNotMatch(buildCareerText(c),/€|"missed"/);
 });

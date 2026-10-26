@@ -1,0 +1,20 @@
+{
+  "source": "/workspace/rabbit1245.github.io/test-results/release-2.8.0/retired.json",
+  "saveBytes": 130888698,
+  "txtBytes": 92084,
+  "seasons": 20,
+  "clubMatches": 1137,
+  "nationalMatches": 209,
+  "newSeasonSnapshots": 20,
+  "downloads": 1,
+  "bom": true,
+  "crlf": true,
+  "rawJSON": false,
+  "annualAndCareerTotalsReconcile": true,
+  "eventTimelinesOmitted": true,
+  "readOnlyDownload": true,
+  "retirementSeasonMarked": true,
+  "mobileOverflow": false,
+  "reload": true,
+  "pageErrors": []
+}

@@ -79,6 +79,7 @@ function nationalEmpty(career:Career):CompetitionParticipation {
 /** Actual season membership and national selection, never predicted cup eligibility. */
 export function getSeasonCompetitions(career:Career):CompetitionParticipation[] {
   const rows=[clubParticipation(career)],national=career.systems?.national,club=rows[0];
+  if(career.player.clubId==='FA'&&!career.season.playerStats.apps){club.name='FA · 무소속';club.teamId='FA';club.teamName='FA · 무소속';club.statusLabel='클럽 미등록';club.reason='계약 없이 반 시즌씩 진행 중이며 클럽 경기에 출전하지 않습니다.';}
   if(club.squad==='senior')for(const t of cupLedger(career,career.season.year).filter(t=>t.entrants.includes(club.teamId))){
     const apps=t.matches.reduce((n,m)=>n+m.playerStats.apps,0),minutes=t.matches.reduce((n,m)=>n+m.playerStats.minutes,0),result=tournamentResult(t,club.teamId);
     rows.push({id:t.id,scope:'club',competitionId:t.id,name:t.name,teamId:club.teamId,teamName:club.teamName,squad:'senior',apps,minutes,status:t.phase==='completed'||result.includes('탈락')?'completed':apps?'played':'registered',statusLabel:result,reason:`${t.basis} · ${t.rules}`});

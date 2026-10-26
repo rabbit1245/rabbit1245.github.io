@@ -26,10 +26,16 @@ function apply(career:Career,key:AttributeKey,amount:number,cause:GrowthCause):v
   if(cause!=='aging'&&cause!=='skillChange'&&career.systems?.attributeLocks?.includes(key))return;
   if((cause==='training'||cause==='experience'||cause==='development')&&!career.training.includes(key))return;
   const current=career.player.attributes[key];if(current===undefined)return;
-  const next=round(clamp(current+amount,0,attributeCap(career.player,key))),change=round(next-current);
+  const ledger=ensureGrowthTracking(career);
+  // Keep sub-cent gains instead of rounding every tiny mastery gain to zero at 100.
+  const accumulating=amount>0&&['training','experience','development'].includes(cause);
+  const remainders=accumulating?((ledger.fractionalGains??={})[cause]??=(({}))):undefined;
+  const accumulated=amount+(remainders?.[key]??0);
+  const next=round(clamp(current+accumulated,0,attributeCap(career.player,key))),change=round(next-current);
+  if(remainders)remainders[key]=next>=attributeCap(career.player,key)?0:Math.max(-.005,Math.min(.005,accumulated-change));
   if(!change)return;
   career.player.attributes[key]=next;
-  const ledger=ensureGrowthTracking(career),row=ledger.byCause[cause]??(ledger.byCause[cause]={});row[key]=round((row[key]??0)+change);
+  const row=ledger.byCause[cause]??(ledger.byCause[cause]={});row[key]=round((row[key]??0)+change);
 }
 /** Explicit removal ends excess mastery; its former value remains in the skill-change ledger. */
 export function removeSkillMastery(career:Career,key:AttributeKey):void{const value=career.player.attributes[key]??0;if(value>100)apply(career,key,100-value,'skillChange');}
@@ -64,10 +70,7 @@ export function trainRound(career:Career):void {
     const mental=(['decisions','concentration','teamwork'] as AttributeKey[]).filter(k=>p.attributes[k]!==undefined&&career.training.includes(k)).slice(0,2);
     for(const key of mental)cappedGain(career,key,.01,'development',p.age<=18?.12:.06);
   }
-  // A long layoff can modestly reduce physical sharpness, recorded separately from missed training.
-  if(p.injuryWeeks>=3)for(const key of (p.position==='GK'?['gkReflexes','gkOneOnOnes']:['stamina','speed']) as AttributeKey[]){
-    const previous=Math.abs(ledger.byCause.injury[key]??0);apply(career,key,-Math.min(.01,Math.max(0,.2-previous)),'injury');
-  }
+  // Injuries affect availability and training volume. Only explicit manual aging lowers attributes.
   p.ovr=overall(p);p.fitness=clamp(p.fitness+(career.intensity==='intense'?10:19),0,100);
 }
 export function applyMatchExperience(career:Career,stats:PlayerStats):void {

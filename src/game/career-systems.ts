@@ -1,4 +1,6 @@
+import {syncUser} from './world';
 import {globalVoting,additionalGlobalHonours} from './global-honours';
+import {isFreeAgent,changeEmployment,careerLeagueEntries} from './employment';
 import {evaluateExtraHonours} from './extra-honours';
 import {moneyText} from './currency';
 import {cupLedger,cupMatches,cupStats} from './club-competitions';
@@ -31,7 +33,7 @@ function marketEstimate(career: Career): number {
   const opening=career.season.week===0&&previous?.completed&&previous.year<career.season.year;
   const s=opening?previous.stats:career.season.playerStats;
   const evaluationRounds=opening?previous.matches.length:career.season.week;
-  const leagueId = career.systems?.world.clubs[p.clubId]?.leagueId ?? getClub(p.clubId).leagueId;
+  const leagueId = career.systems?.world.clubs[p.clubId]?.leagueId ?? career.season.leagueId;
   const tier = getLeague(leagueId).tier;
   const youth = p.age <= 23 ? 1.15 + (23 - p.age) * .025 : p.age > 29 ? Math.max(.12, 1 - (p.age - 29) * .12) : 1.1;
   const quality = Math.pow(Math.max(10, p.ovr - 25), 3.35) * 20;
@@ -104,6 +106,7 @@ export function updateMarketValue(career: Career, reason: string): void {
   else e.valueHistory.push(entry);
 }
 export function paySalary(career: Career, weeks: number): void {
+  if(isFreeAgent(career))return;
   if (!Number.isFinite(weeks) || weeks < 0) throw new Error('급여 지급 기간이 올바르지 않습니다.');
   if (!career.systems) return;
   const e = career.systems.economics;
@@ -130,10 +133,15 @@ function individualWageLimit(career: Career, clubId: string): number {
   return club ? Math.max(0, Math.floor(club.wageBudget / 52 * .14)) : 0;
 }
 export function makeContractOffers(career:Career,timing:'midseason'|'offseason'):TransferOffer[]{
- if(!career.systems||career.stage!=='offseason'||timing!=='offseason')return[];
+ if(!career.systems||(career.stage!=='offseason'&&!isFreeAgent(career))||career.stage==='retired')return[];
  const {world,economics:e}=career.systems,p=career.player,remaining=Math.max(0,e.contract.expiresYear-career.season.year-1);
- const rng=seededRandom(`${career.seed}:offers-v27:${career.season.year}`),reports=new Map(scoutingReports(career).map(r=>[r.clubId,r]));
- const candidates=Object.values(world.clubs).filter(x=>x.id!==p.clubId&&!/(?:\sB|\sII|카스티야)$/.test(getClub(x.id).name)&&individualWageLimit(career,x.id)>=150&&x.budget>=0);
+ const rng=seededRandom(`${career.seed}:offers-v29:${career.season.year}:${isFreeAgent(career)?career.season.week:0}`),reports=new Map(scoutingReports(career).map(r=>[r.clubId,r]));
+ const priorWage=isFreeAgent(career)?e.contract.previousWage??0:p.wage;
+ const declined=p.age>=34&&p.ovr<(career.history.filter(h=>h.year<career.season.year).at(-1)?.ovrEnd??career.season.ovrStart)-4&&avgRating(career.season.playerStats)<6.5;
+ const affordable=Object.values(world.clubs).filter(x=>x.id!==p.clubId&&(!isFreeAgent(career)||career.stage==='offseason'||getLeagueRule(x.leagueId).startMonth===getLeagueRule(career.season.leagueId).startMonth)&&!/(?:\sB|\sII|카스티야)$/.test(getClub(x.id).name)&&individualWageLimit(career,x.id)>=150&&x.budget>=0);
+ // Prefer clubs that can honour the established salary; keep an explicitly explained budget fallback.
+ const funded=affordable.filter(x=>individualWageLimit(career,x.id)>=priorWage*(declined?.8:1.03));
+ const candidates=funded.length>=6?funded:affordable;
  const target=clamp(p.ovr+(avgRating(career.season.playerStats)-6.5)*1.5,25,100),used=new Set<string>(),selected:{id:string;band:NonNullable<TransferOffer['band']>}[]=[],countries=new Map<string,number>();
  const choose=(pool:typeof candidates,band:NonNullable<TransferOffer['band']>,distance:(power:number)=>number)=>{
   const ranked=pool.filter(x=>!used.has(x.id)).map(x=>({x,score:distance(x.power)+(countries.get(getClub(x.id).country)??0)*5-(reports.get(x.id)?.need??.25)*3+rng()*9})).sort((a,b)=>a.score-b.score||a.x.id.localeCompare(b.x.id));
@@ -150,13 +158,17 @@ export function makeContractOffers(career:Career,timing:'midseason'|'offseason')
  if(selected.length!==6)throw new Error('실제 구단과 예산을 충족하는 6개 제안을 편성할 수 없습니다.');
  const offer=(id:string,renew:boolean,band?:TransferOffer['band']):TransferOffer=>{
   const club=world.clubs[id],limit=individualWageLimit(career,id),justified=e.marketValue/(52*210)*(1+Math.max(0,avgRating(career.season.playerStats)-6.5)*.08);
-  const wage=Math.round(Math.min(limit,Math.max(150,justified*(.92+rng()*.2),renew?p.wage*1.04:p.wage*.9)));
+  const demand=reports.get(id)?.need??.25,role=roleFor(career,club.power);
+  const exceptionalCut=declined&&['로테이션','유망주'].includes(role);
+  const salaryFloor=priorWage*(exceptionalCut?.78+rng()*.12:renew?1.04:1.03+rng()*.17+demand*.08);
+  const wage=Math.round(Math.min(limit,Math.max(150,justified*(.96+rng()*.2),salaryFloor)));
   const asking=renew||remaining===0?0:Math.round(e.marketValue*clamp(.45+remaining*.18+rng()*.12,.45,1.35)),fee=Math.min(asking,Math.floor(club.budget*.75));
-  const years=p.age>=32?1:p.age>=29?2:3+Math.floor(rng()*2),role=roleFor(career,club.power),labels={similar:'동급 경쟁',lower:'하위 전력 · 핵심 기용',higher:'상위 전력 · 우승 경쟁',wild:'극단적 랜덤 · 도전 제안'};
+  const years=p.age>=32?1:p.age>=29?2:3+Math.floor(rng()*2),labels={similar:'동급 경쟁',lower:'하위 전력 · 핵심 기용',higher:'상위 전력 · 우승 경쟁',wild:'극단적 랜덤 · 도전 제안'};
   return {id:`${career.season.year}:offseason:${renew?'renew':'transfer'}:${id}`,clubId:id,wage,years,role,fee,type:renew?'renew':'transfer',...(band?{band}:{}),expiresRound:career.season.totalWeeks,effective:'nextSeason',currentWage:p.wage,budgetLimit:club.budget,reason:`${band?labels[band]:'재계약'} · 팀 전력 ${club.power.toFixed(1)} · ${role}. 포지션 수요 ${Math.round((reports.get(id)?.need??0)*100)}%. 현재 주급 ${moneyText(p.wage)} → ${moneyText(wage)} · ${years}년.${fee<asking?' 요구 이적료보다 낮은 예산 한도 내 입찰이며 수락 여부는 선수가 결정합니다.':''}${club.power>p.ovr+12?' 즉시 주전 보장 없는 장기 육성·로테이션 계약.':''}${higher.length===0&&band==='higher'?' 현재 수준보다 강한 팀이 없어 실제 최상위 경쟁 구단으로 대체.':''}${lower.length===0&&band==='lower'?' 현재 수준보다 낮은 팀이 없어 가능한 낮은 전력의 실제 비교 구단으로 대체.':''}`};
  };
  const result=selected.sort((a,b)=>({similar:0,lower:1,higher:2,wild:3}[a.band]-{similar:0,lower:1,higher:2,wild:3}[b.band])).map(row=>offer(row.id,false,row.band));
- if(individualWageLimit(career,p.clubId)>=150)result.push(offer(p.clubId,true));
+ if(!isFreeAgent(career)&&individualWageLimit(career,p.clubId)>=150)result.push(offer(p.clubId,true));
+ for(const o of result){if(isFreeAgent(career)){o.fee=0;o.effective=career.stage==='offseason'?'nextSeason':'now';}if(o.wage<priorWage)o.reason+=declined&&['로테이션','유망주'].includes(o.role)?' 고령·최근 기량 저하와 후보 역할을 반영한 감액 제안.':' 구단 급여 예산 한도로 종전 주급을 맞추지 못한 제안.';}
  return result;
 }
 export function applyContract(career: Career, offer: TransferOffer): void {
@@ -172,6 +184,7 @@ export function applyContract(career: Career, offer: TransferOffer): void {
   if (offer.fee > target.budget || offer.wage > individualWageLimit(career, offer.clubId)) throw new Error('구단의 이적 또는 급여 예산을 초과했습니다.');
   ensureEconomicHistory(career);
   const previous=termsSnapshot(e.contract);
+  if(career.systems.employment||fromClubId==='FA')changeEmployment(career,offer.clubId,target.leagueId,offer.wage,'transfer',offer.effective==='nextSeason');
   const actualStartYear=offer.effective==='nextSeason'?nextCalendarYear(career.season,target.leagueId):(career.season.calendarYear??career.season.year);
   const signedDate=dateOnly(seasonDate(career.season));
   const expiresDate=contractEndDate(actualStartYear,getLeagueRule(target.leagueId).startMonth,offer.years);
@@ -191,6 +204,7 @@ export function applyContract(career: Career, offer: TransferOffer): void {
   }
   career.player.clubId = offer.clubId;
   career.player.wage = offer.wage;
+  syncUser(career,world);
   career.player.contractYears = offer.years;
   e.contract = { signedYear: effectiveYear, expiresYear: effectiveYear + offer.years, wageAtSigning: offer.wage, role: offer.role, clubId: offer.clubId,previousWage:previous.wage,signedDate,expiresDate };
   e.contractHistory!.push({id:historyId,year:career.season.year,round:career.season.week,type:offer.type,effective:offer.effective??'now',reason:offer.reason,fee:offer.fee,previous,current:termsSnapshot(e.contract)});
@@ -210,6 +224,7 @@ function nationalMatches(career: Career) {
   return [...new Map(all.map(m => [m.id, m])).values()];
 }
 export function updateLeadership(career: Career, scope: 'club'|'national', appointment = false): void {
+  if(scope==='club'&&isFreeAgent(career))return;
   if (!career.systems) return;
   const { leadership: l, world, national } = career.systems;
   const p = career.player;
@@ -273,7 +288,8 @@ function competitors(career: Career): CompetitorSeason[] {
   for (const h of national.history) if (h.year === career.season.year) currentNational.push(h.stats);
   // A history entry may contain the current competition: match ids are the canonical deduplication key.
   const nationalRows = nationalMatches(career).filter(m => m.seasonYear === career.season.year).map(m => m.playerStats);
-  byId.set(career.player.id, { playerId: career.player.id, name: career.player.name, clubId: career.player.clubId, leagueId: career.season.leagueId, position: career.player.position, nationality: career.player.nationality, ovr: career.player.ovr, stats: career.season.playerStats, nationalStats: sumStats(nationalRows.length ? nationalRows : currentNational) });
+  const entries=careerLeagueEntries(career),primary=[...entries].sort((a,b)=>b.stats.minutes-a.stats.minutes)[0];
+  byId.set(career.player.id, { ...(career.systems!.employment?{leagueSplits:entries.map(r=>({leagueId:r.leagueId,stats:r.stats}))}:{}),playerId: career.player.id, name: career.player.name, clubId: primary?.clubId??career.player.clubId, leagueId: primary?.leagueId??career.season.leagueId, position: career.player.position, nationality: career.player.nationality, ovr: career.player.ovr, stats: career.season.playerStats, nationalStats: sumStats(nationalRows.length ? nationalRows : currentNational) });
   return [...byId.values()];
 }
 interface VotingContext { prestige:Map<string,number>;teamScore:Map<string,number>;leagueTitles:Map<string,number>;cupTitles:Map<string,number>;roleLevels:Map<string,{rating:number;contribution:number}> }
@@ -354,19 +370,12 @@ export function getClubTopScorer(career: Career): { playerId: string; name: stri
   if (!rows.length) return null;
   return { playerId: rows[0].playerId, name: rows[0].name, goals: rows[0].stats.goals, tied: rows.filter(r => r.stats.goals === rows[0].stats.goals).length > 1 };
 }
-export function evaluateAwards(career: Career): Award[] {
-  if (!career.systems) return [];
-  const existing = career.systems.rankings.find(r => r.year === career.season.year);
-  if (existing) return existing.awards;
-  const rows = competitors(career);
-  const context = votingContext(career);
-  const leagueRows = rows.filter(r => r.leagueId === career.season.leagueId && r.stats.apps > 0);
-  // Youth fixtures are a development simulation, not senior official award eligibility.
-  const own = career.player.squad === 'senior' ? leagueRows.find(r => r.playerId === career.player.id) : undefined;
-  const won: Award[] = [];
-  const minApps = Math.max(5, Math.floor(career.season.totalWeeks * .4));
-  const leagueRanking=rankRows(leagueRows.filter(r=>r.stats.apps>=minApps),career,false,context);
-  for (const rule of leagueAwardRules(career.season.leagueId,getLeague(career.season.leagueId).name)) {
+
+function leagueHonours(career:Career,leagueId:string,leagueRows:CompetitorSeason[],context:VotingContext):Award[]{
+ const own=career.player.squad==='senior'?leagueRows.find(r=>r.playerId===career.player.id):undefined,won:Award[]=[];
+ const rounds=career.systems!.employment?career.systems!.world.competitions[leagueId]?.totalRounds??career.season.totalWeeks:career.season.totalWeeks,minApps=Math.max(5,Math.floor(rounds*.4));
+ const leagueRanking=rankRows(leagueRows.filter(r=>r.stats.apps>=minApps),career,false,context);
+  for (const rule of leagueAwardRules(leagueId,getLeague(leagueId).name)) {
     if (!own) continue;
     if (rule.metric === 'goals' || rule.metric === 'assists' || rule.metric === 'cleanSheets') {
       const eligible = rule.metric === 'cleanSheets' ? leagueRows.filter(r => r.position === 'GK') : leagueRows;
@@ -379,17 +388,46 @@ export function evaluateAwards(career: Career): Award[] {
         tied = tied.filter(r => r.stats.minutes === leastMinutes);
       }
       const resolved = rule.tieBreak !== 'unresolved' || tied.length === 1;
-      if (max > 0 && resolved && tied.some(r => r.playerId === own.playerId)) won.push(award(career, rule, 'league', `${getLeague(career.season.leagueId).name} ${max}${rule.metric === 'goals' ? '득점' : rule.metric === 'assists' ? '도움' : '무실점'} · 실제 리그 출전 선수 ${eligible.length}명 비교${tied.length > 1 ? ' · 공동 수상' : ''}`));
+      if (max > 0 && resolved && tied.some(r => r.playerId === own.playerId)) won.push({...award(career, rule, 'league', `${getLeague(leagueId).name} ${max}${rule.metric === 'goals' ? '득점' : rule.metric === 'assists' ? '도움' : '무실점'} · 실제 리그 출전 선수 ${eligible.length}명 비교${tied.length > 1 ? ' · 공동 수상' : ''}`),clubId:own.clubId});
     } else {
       const ranking = leagueRanking;
       const winners = rule.metric === 'performance' ? ranking.slice(0,1) : selectEleven(ranking, rule.formation!.defenders, rule.formation!.midfielders, rule.formation!.forwards);
-      if (winners.some(r => r.playerId === own.playerId)) won.push({ ...award(career, rule, 'league', `${own.stats.apps}경기 · 평점 ${avgRating(own.stats).toFixed(2)} · 포지션별 실제 기록을 사용한 게임 내 투표 결과`), position: own.position });
+      if (winners.some(r => r.playerId === own.playerId)) won.push({ ...award(career, rule, 'league', `${own.stats.apps}경기 · 평점 ${avgRating(own.stats).toFixed(2)} · 포지션별 실제 기록을 사용한 게임 내 투표 결과`), position: own.position,clubId:own.clubId });
     }
+  }
+
+ return career.systems!.employment?won.map(a=>({...a,id:`${a.id}:${leagueId}`})):won;
+}
+
+export function evaluateAwards(career: Career): Award[] {
+  if (!career.systems) return [];
+  const existing = career.systems.rankings.find(r => r.year === career.season.year);
+  if (existing) return existing.awards;
+  const rows = competitors(career);
+  const context = votingContext(career);
+  const entries=careerLeagueEntries(career),localEntry=entries.find(r=>r.leagueId===career.season.leagueId);
+  const leagueRows = rows.filter(r => r.playerId!==career.player.id&&r.leagueId === career.season.leagueId && r.stats.apps > 0);
+  if(localEntry&&localEntry.stats.apps>0)leagueRows.push({...rows.find(r=>r.playerId===career.player.id)!,...localEntry});
+  // Youth fixtures are a development simulation, not senior official award eligibility.
+  const own = career.player.squad === 'senior' ? leagueRows.find(r => r.playerId === career.player.id) : undefined;
+  const won: Award[] = [];
+  const minApps = Math.max(5, Math.floor(career.season.totalWeeks * .4));
+  const leagueRanking=rankRows(leagueRows.filter(r=>r.stats.apps>=minApps),career,false,context);
+  for(const entry of entries){
+   const local=rows.filter(r=>r.playerId!==career.player.id&&r.leagueId===entry.leagueId&&r.stats.apps>0);
+   if(entry.stats.apps>0)local.push({...rows.find(r=>r.playerId===career.player.id)!,...entry});
+   won.push(...leagueHonours(career,entry.leagueId,local,context));
   }
   const competition = career.systems.world.competitions[career.season.leagueId];
   const standings = [...(competition?.table ?? career.season.table)].sort((a,b) => b.points - a.points || (b.goalsFor-b.goalsAgainst) - (a.goalsFor-a.goalsAgainst) || b.goalsFor-a.goalsFor || a.clubId.localeCompare(b.clubId));
   const leagueRule = getLeagueRule(career.season.leagueId);
-  if (own && standings[0]?.clubId === career.player.clubId && career.season.playerStats.apps >= leagueRule.medalApps) won.push({ id: `${career.season.year}:league-title:${career.player.id}`, name: `${getLeague(career.season.leagueId).name} 우승 메달`, year: career.season.year, clubId: career.player.clubId, description: `우승팀에서 리그 ${career.season.playerStats.apps}경기 출전. 메달 기준 ${leagueRule.medalApps}경기. ${leagueRule.note}`, organiser: getLeague(career.season.leagueId).name, criterion: `우승팀 소속 및 최소 ${leagueRule.medalApps}경기 출전. 확인되지 않은 리그의 기준은 게임 모형입니다.`, sourceUrl: leagueRule.sourceUrl, category: 'team', official: career.season.leagueId === 'EN1' });
+  if (!career.systems.employment&&own && standings[0]?.clubId === career.player.clubId && career.season.playerStats.apps >= leagueRule.medalApps) won.push({ id: `${career.season.year}:league-title:${career.player.id}`, name: `${getLeague(career.season.leagueId).name} 우승 메달`, year: career.season.year, clubId: career.player.clubId, description: `우승팀에서 리그 ${career.season.playerStats.apps}경기 출전. 메달 기준 ${leagueRule.medalApps}경기. ${leagueRule.note}`, organiser: getLeague(career.season.leagueId).name, criterion: `우승팀 소속 및 최소 ${leagueRule.medalApps}경기 출전. 확인되지 않은 리그의 기준은 게임 모형입니다.`, sourceUrl: leagueRule.sourceUrl, category: 'team', official: career.season.leagueId === 'EN1' });
+  if(career.systems.employment){
+   const clubs=[...new Set(career.season.matches.map(m=>`${m.competitionId??career.season.leagueId}|${m.playerClubId}`))];
+   for(const key of clubs){const [leagueId,clubId]=key.split('|'),rule=getLeagueRule(leagueId),table=career.systems.world.competitions[leagueId]?.table,stats=sumStats(career.season.matches.filter(m=>(m.competitionId??career.season.leagueId)===leagueId&&m.playerClubId===clubId).map(m=>m.playerStats));
+    if(career.player.squad==='senior'&&table?.[0]?.clubId===clubId&&stats.apps>=rule.medalApps)won.push({id:`${career.season.year}:league-title:${leagueId}:${clubId}:${career.player.id}`,name:`${getLeague(leagueId).name} 우승 메달`,year:career.season.year,clubId,description:`해당 우승팀에서 실제 리그 ${stats.apps}경기 출전 · 메달 기준 ${rule.medalApps}경기`,organiser:getLeague(leagueId).name,category:'team',official:leagueId==='EN1'});
+   }
+  }
   const national = career.systems.national;
   const nationalSeasons = national.history.filter(h => h.year === career.season.year && /우승|champion/i.test(h.result) && !/준우승|runner/i.test(h.result));
   for (const title of nationalSeasons) if (title.stats.apps > 0 && title.matches.some(m => m.playerPlayed && m.playerMinutes > 0 && /\|(semifinal|final)\|/.test(m.fixtureId))) won.push({ id: `${career.season.year}:national:${title.competitionId}:${career.player.id}`, name: `${title.competitionName} 우승`, year: career.season.year, clubId: career.player.clubId, description: `대표팀 대회 ${title.stats.apps}경기 실제 출전 · ${title.result}`, organiser: /월드컵|World Cup/i.test(title.competitionName) ? 'FIFA' : '해당 대륙 축구연맹', criterion: '게임에서는 실제 본선 출전이 있는 우승팀 선수에게 우승 기록을 부여합니다. 대회별 공식 메달 규정과는 구별됩니다.', sourceUrl: 'https://www.fifa.com/', category: 'national', official: true });

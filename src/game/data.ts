@@ -55,6 +55,7 @@ export const ROSTER_CALIBRATION = catalogue.calibration;
 export const DATA_PROVENANCE = '기존 2024 / FC25 자료 기반 · 14개국, 43개 리그 단계 / 50개 진행 그룹. 실제 2026/27 명단이 아니며, 미매칭 선수단은 가상 선수로 보완합니다.';
 
 export function getClub(id: string): Club {
+  if(id==='FA')return {id:'FA',name:'FA · 무소속',nativeName:'Free agent',country:'',leagueId:'EN1',power:50,color:'#526452'};
   const club = clubsById.get(id);
   if (!club) throw new Error(`알 수 없는 구단입니다: ${id}`);
   return club;

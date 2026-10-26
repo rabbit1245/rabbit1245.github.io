@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createCareer,setPlaySkill,configureCheats,cheatIncreaseAttribute,setAllAttributeLocks,manuallyAge,advanceCareer} from './engine';
 import {FIELD_ATTRIBUTES,GK_ATTRIBUTES,PLAY_STYLES,POSITION_LABELS,attributeWeights,overall} from './attributes';
-import {FIELD_PLAY_SKILLS,GK_PLAY_SKILLS,playSkillsForYear} from './play-skills';
+import {FIELD_PLAY_SKILLS,GK_PLAY_SKILLS,playSkillsForYear,retirementPlaySkillNames} from './play-skills';
 import {trainRound,applyMatchExperience,beginGrowthSeason} from './growth';
 import {validateCareer,exportCareer,verifySaveText} from './storage';
 import {buildCareerText} from './career-text';
@@ -14,6 +14,15 @@ import type {AttributeKey,Position,Career} from './types';
 
 const fresh=(position:Position='ST')=>createCareer({name:'스킬 검증',nationality:'포르투갈',age:16,height:180,weight:75,foot:'right',position,talent:'SSS',style:PLAY_STYLES[position][0],clubId:'EN1_01',squad:'senior',difficulty:'realistic',seed:'skills-280-'+position});
 const core=(position:Position,style=PLAY_STYLES[position][0])=>(Object.entries(attributeWeights(position,style))as[AttributeKey,number][]).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([k])=>k);
+
+test('annual retirement skills explain the specialty for field players and keepers',()=>{
+ assert.deepEqual(retirementPlaySkillNames('ST',['stamina','shooting']),['엔진(체력 스페셜리스트)','스나이퍼(슈팅 스페셜리스트)']);
+ assert.match(retirementPlaySkillNames('GK',['gkReflexes'])[0],/^리플렉스\(.+ 스페셜리스트\)$/);
+ const c=setPlaySkill(fresh(),'stamina',true),text=buildCareerText(c);
+ assert.match(text,/플레이스타일: 엔진\(체력 스페셜리스트\)/);
+ assert.doesNotMatch(text.split('C. 연도별 기록')[0],/엔진\(/);
+ assert.doesNotMatch(buildCareerText(setPlaySkill(c,'stamina',false)),/엔진\(/);
+});
 
 test('all 30 skill mappings and all 24 OVR ranges are complete, unique by context and have five examples',()=>{
  assert.deepEqual(FIELD_PLAY_SKILLS.map(s=>s.key),FIELD_ATTRIBUTES);assert.deepEqual(GK_PLAY_SKILLS.map(s=>s.key),GK_ATTRIBUTES);

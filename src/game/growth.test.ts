@@ -62,12 +62,12 @@ test('facilities and actual club minutes affect selected growth under identical 
   for(const career of[low,high,minutes])reconcile(career);
 });
 
-test('a sustained injury reduces training and records bounded physical loss separately',()=>{
+test('a sustained injury reduces training volume without automatically lowering any ability',()=>{
   const healthy=createCareer(options()),injured=structuredClone(healthy);injured.player.injuryWeeks=8;
   for(let week=1;week<=30;week++)for(const career of[healthy,injured]){career.season.week=week;trainRound(career);}
   const a=ensureGrowthTracking(healthy),b=ensureGrowthTracking(injured);
   assert.ok(b.byCause.training.shooting!<a.byCause.training.shooting!);
-  assert.equal(b.injuredRounds,30);assert.equal(b.byCause.injury.speed,-.2);assert.equal(b.byCause.injury.stamina,-.2);
+  assert.equal(b.injuredRounds,30);assert.deepEqual(b.byCause.injury,{});assert.equal(injured.player.attributes.speed,healthy.player.attributes.speed);assert.equal(injured.player.attributes.stamina,healthy.player.attributes.stamina);
   assert.deepEqual(a.byCause.injury,{});reconcile(healthy);reconcile(injured);
 });
 

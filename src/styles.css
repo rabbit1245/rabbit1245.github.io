@@ -1133,3 +1133,8 @@ input,select { font-size:17px; min-height:38px; padding:7px 10px; border-radius:
 .play-skills:not([open]){margin-top:4px;padding-top:0}.play-skills:not([open])>summary{padding:4px 0;font-size:14px;line-height:20px}@media(min-width:1200px) and (max-height:850px){.training-panel .training-cell .training-row{min-height:38px;padding:4px 6px}}
 
 @media(min-width:1200px) and (max-height:850px){.training-panel .play-skills:not([open]){margin-top:0}}
+
+/* Preserve readable names while showing sub-point progress without colliding with deltas. */
+.training-cell .training-row{grid-template-columns:22px minmax(0,1fr) 42px 55px}.training-row>strong{font-size:20px}.training-row .attribute-fraction{display:block;font-size:11px;line-height:1;color:#4e5964}.training-row .selection-box{font-size:11px}
+.training-row>strong{line-height:1}.training-row .attribute-fraction{font-size:10px;line-height:1}
+@media(min-width:1200px) and (max-height:850px){.training-panel>.panel-body>.fine-print{margin-top:4px}.training-panel>.panel-body{padding-bottom:4px}}

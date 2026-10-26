@@ -1,0 +1,56 @@
+TAP version 13
+# Subtest: annual retirement skills explain the specialty for field players and keepers
+ok 1 - annual retirement skills explain the specialty for field players and keepers
+  ---
+  duration_ms: 438.126712
+  ...
+# Subtest: all 30 skill mappings and all 24 OVR ranges are complete, unique by context and have five examples
+ok 2 - all 30 skill mappings and all 24 OVR ranges are complete, unique by context and have five examples
+  ---
+  duration_ms: 0.674375
+  ...
+# Subtest: choosing skills adds no abilities, OVR or hidden bonus; sixth choice and wrong-position skills are rejected
+ok 3 - choosing skills adds no abilities, OVR or hidden bonus; sixth choice and wrong-position skills are rejected
+  ---
+  duration_ms: 884.039314
+  ...
+# Normal growth reachability: [{"position":"GK","age":25,"ovr":120},{"position":"CB","age":26,"ovr":120},{"position":"LB","age":26,"ovr":120},{"position":"RB","age":25,"ovr":120},{"position":"LWB","age":25,"ovr":120},{"position":"RWB","age":26,"ovr":120},{"position":"CDM","age":25,"ovr":120},{"position":"CM","age":25,"ovr":120},{"position":"CAM","age":24,"ovr":120},{"position":"LM","age":26,"ovr":120},{"position":"RM","age":25,"ovr":120},{"position":"LW","age":25,"ovr":120},{"position":"RW","age":25,"ovr":120},{"position":"CF","age":25,"ovr":120},{"position":"SS","age":25,"ovr":120},{"position":"ST","age":25,"ovr":120}]
+# Subtest: locks, explicit manual aging, deletion above 100 and a complete export/import preserve the skill history
+ok 4 - locks, explicit manual aging, deletion above 100 and a complete export/import preserve the skill history
+  ---
+  duration_ms: 1341.03888
+  ...
+# Subtest: 110 mental attributes keep derived leadership within its percentage scale and remain saveable after a real round
+ok 5 - 110 mental attributes keep derived leadership within its percentage scale and remain saveable after a real round
+  ---
+  duration_ms: 1183.31366
+  ...
+# Subtest: annual retirement skills start at acquisition and disappear from deletion year; neither skills nor narratives enter totals
+ok 6 - annual retirement skills start at acquisition and disappear from deletion year; neither skills nor narratives enter totals
+  ---
+  duration_ms: 577.755376
+  ...
+# Subtest: every position and tactical style can reach exactly 120 with five fully grown core skills, never with four
+ok 7 - every position and tactical style can reach exactly 120 with five fully grown core skills, never with four
+  ---
+  duration_ms: 24.333857
+  ...
+# Subtest: actual training and experience, without cheat increases or automatic unchecked growth, reach 120 in all sixteen positions
+ok 8 - actual training and experience, without cheat increases or automatic unchecked growth, reach 120 in all sixteen positions
+  ---
+  duration_ms: 5646.170153
+  ...
+1..8
+# tests 8
+# suites 0
+# pass 8
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 10677.506721
+npm notice
+npm notice New minor version of npm available! 11.9.0 -> 11.21.1
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.21.1
+npm notice To update run: npm install -g npm@11.21.1
+npm notice

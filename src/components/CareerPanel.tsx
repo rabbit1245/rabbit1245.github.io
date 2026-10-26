@@ -106,6 +106,7 @@ function Retirement({career}:{career:Career}) {
     <h3>연도별 기록</h3>{[...seasons].reverse().map(h=><DeferredDetails className="retirement-record-section" key={h.year} testId={`retirement-season-${h.year}`} summary={`${h.year}시즌 · ${h.clubName} · ${h.status}`}>{()=> <>
       <div className="retirement-facts"><span>소속팀 <b>{h.clubName}</b></span><span>몸값 <b>{h.value}</b></span><span>주급 <b>{h.wage}</b></span>
         <span>능력점수 <b>{h.ovrStart} → {h.ovrEnd}</b></span><span>주장/부주장 <b>{h.leadership}</b></span><span>부상 유무 <b>{h.injury}</b></span></div>
+      {!!h.employment.length&&<ul className="employment-periods">{h.employment.map((period,i)=><li key={i}>{period}</li>)}</ul>}
       {!!h.playSkills.length&&<p>플레이스타일: {h.playSkills.join(' / ')}</p>}
       <p>팀 수상: {h.teamAwards.join(' / ')||'없음'}</p>
       {!!h.awardResults.length&&<p>개인상 평가 결과: {h.awardResults.join(' / ')}</p>}

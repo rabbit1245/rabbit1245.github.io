@@ -1,3 +1,4 @@
+import {isFreeAgent,beginEmployment,changeEmployment} from './employment';
 import {beginAchievementSeason} from './achievement-evidence';
 import {copySystems} from './snapshot';
 import {playSkillDefinitions,playSkillNames} from './play-skills';
@@ -22,7 +23,7 @@ import { TALENT_PROFILES } from './talent';
 import type { AttributeKey, Attributes, Career, CreateOptions, Fixture, GameProgress, Intensity, MatchRecord, Player, PlayerStats, SeasonState, SeasonSummary, Standing, Talent, TransferOffer } from './types';
 import type { PresentationEvent } from './revision-types';
 
-export const ENGINE_VERSION = '2.8.0';
+export const ENGINE_VERSION = '2.9.0';
 export const overall = calculateOverall;
 export { addStats, emptyStats, hashSeed, seededRandom } from './math';
 const TALENT_ORDER: Talent[] = ['D','C','B','A','S','SS','SSS'];
@@ -41,7 +42,7 @@ function editable(career:Career,light=false):Career {
   initializeClubCompetitions(next);
   if(!next.systems!.trainingPlan)next.systems!.trainingPlan={forYear:next.season.year+(next.stage==='offseason'?1:0),confirmed:true,confirmedAtRound:next.season.week,source:'legacy'};
   // Old midseason contract prompts are retired on the first command, after their original hash was checked.
-  if(next.stage==='season'){next.systems!.pendingChoice=undefined;next.offers=[];}
+  if(next.stage==='season'&&!isFreeAgent(next)){next.systems!.pendingChoice=undefined;next.offers=[];}
   return next;
 }
 function currentDate(c:Career):string{const date=seasonDate(c.season);return c.systems?.manualClock&&c.systems.manualClock>date?c.systems.manualClock:date;}
@@ -85,7 +86,7 @@ export function calculateTable(fixtures:Fixture[],clubIds:string[]):Standing[] {
   return [...table.values()].sort((a,b)=>b.points-a.points||(b.goalsFor-b.goalsAgainst)-(a.goalsFor-a.goalsAgainst)||b.goalsFor-a.goalsFor||a.clubId.localeCompare(b.clubId));
 }
 function makeSeason(player:Player,year:number,index:number,career?:Career):SeasonState {
-  const leagueId=career?.systems?.world.clubs[player.clubId]?.leagueId??getClub(player.clubId).leagueId;
+  const leagueId=career?.systems?.world.clubs[player.clubId]?.leagueId??(player.clubId==='FA'?career!.season.leagueId:getClub(player.clubId).leagueId);
   const league=getLeague(leagueId);
   const teams=career?.systems?getSeasonClubIds(career,leagueId):CLUBS.filter(c=>c.leagueId===leagueId).map(c=>c.id);
   const competition=career?.systems?.world.competitions[leagueId];
@@ -166,7 +167,7 @@ function halfway(career:Career) {
   growthReport(career,'first');
   systems.firstHalfSnapshot={attributes:{...career.player.attributes},stats:{...career.season.playerStats},ovr:career.player.ovr,value:systems.economics.marketValue,round:career.season.week};
   systems.phase='midseason';
-  career.offers=[];systems.pendingChoice=undefined;
+  career.offers=isFreeAgent(career)?makeContractOffers(career,'midseason'):[];systems.pendingChoice=undefined;
 }
 function archive(career:Career,completed:boolean) {
   if(career.history.some(row=>row.year===career.season.year))return;
@@ -175,7 +176,7 @@ function archive(career:Career,completed:boolean) {
   const changes:Attributes={};
   for(const key of Object.keys(player.attributes) as AttributeKey[])changes[key]=round((player.attributes[key]??0)-(season.attributeStart[key]??0));
   const priorIncome=career.history.reduce((s,h)=>s+h.income,0);
-  const summary:SeasonSummary={year:season.year,...(season.calendarYear?{calendarYear:season.calendarYear}:{}),clubId:season.matches[0]?.playerClubId??player.clubId,clubName:getClub(season.matches[0]?.playerClubId??player.clubId).name,leagueId:season.leagueId,competitionName:season.competitionName,age:player.age,position:player.position,squad:player.squad,rank:season.table.findIndex(r=>r.clubId===(season.matches[0]?.playerClubId??player.clubId))+1,ovrStart:season.ovrStart,ovrEnd:player.ovr,stats:{...season.playerStats},awards:[...new Map([...awards,...career.awards.filter(a=>a.year===season.year)].map(a=>[a.id,a])).values()],matches:[...season.matches],attributeGrowth:changes,income:round(Math.max(0,career.careerIncome-priorIncome)),completed,details:captureSeasonDetails(career)};
+  const summary:SeasonSummary={year:season.year,...(season.calendarYear?{calendarYear:season.calendarYear}:{}),clubId:(career.systems?.employment?.some(r=>r.year===season.year)?player.clubId:season.matches[0]?.playerClubId)??player.clubId,clubName:getClub((career.systems?.employment?.some(r=>r.year===season.year)?player.clubId:season.matches[0]?.playerClubId)??player.clubId).name,leagueId:season.leagueId,competitionName:season.competitionName,age:player.age,position:player.position,squad:player.squad,rank:season.table.findIndex(r=>r.clubId===((career.systems?.employment?.some(r=>r.year===season.year)?player.clubId:season.matches[0]?.playerClubId)??player.clubId))+1,ovrStart:season.ovrStart,ovrEnd:player.ovr,stats:{...season.playerStats},awards:[...new Map([...awards,...career.awards.filter(a=>a.year===season.year)].map(a=>[a.id,a])).values()],matches:[...season.matches],attributeGrowth:changes,income:round(Math.max(0,career.careerIncome-priorIncome)),completed,details:captureSeasonDetails(career)};
   career.history.push(summary);
   for(const award of awards){news(career,'award',award.name,award.description);present(career,'award',award.name,award.description,'milestone');}
 }
@@ -191,10 +192,12 @@ function finishSeason(career:Career) {
   updateLeadership(career,'club');updateLeadership(career,'national',true);
   updateMarketValue(career,'시즌 종료 평가');
   growthReport(career,'season');
+  syncManualInjury(career,new Date(Date.parse(seasonHalfEndDate(career.season,'second'))+86400000).toISOString());
   archiveNationalSeason(career);
   archive(career,true);
   career.player.contractYears=Math.max(0,systems.economics.contract.expiresYear-(career.season.year+1));
-  career.offers=generateOffers(career);career.transferDecision=undefined;
+  if(career.player.contractYears===0&&!isFreeAgent(career))releaseInPlace(career,'expiry',true);
+  career.offers=generateOffers(career);career.transferDecision=isFreeAgent(career)?'stay':undefined;
   systems.phase='review';systems.pendingChoice=undefined;
   systems.trainingPlan={forYear:career.season.year+1,confirmed:false,confirmedAtRound:career.season.week,source:'offseason'};
   news(career,'career','시즌 종료 · 이적시장',`${career.season.competitionName} ${career.season.table.findIndex(r=>r.clubId===career.player.clubId)+1}위. 구단의 실제 경기 성적과 재정을 반영한 계약을 검토하세요.`);
@@ -240,11 +243,11 @@ function playRound(next:Career) {
   processWorldRound(next,results);
   updateLeadership(next,'club');
   syncManualInjury(next,fixtureDate(next.season,next.season.week));
-  if(wasInjured)next.player.injuryWeeks=Math.max(0,next.player.injuryWeeks-1);
+  if(wasInjured&&!next.systems!.manualInjuries?.some(r=>r.selectionVersion===2&&!r.returned))next.player.injuryWeeks=Math.max(0,next.player.injuryWeeks-1);
   paySalary(next,52/next.season.totalWeeks);
   if(next.season.week===systems.halfRound)halfway(next);
   if(next.season.week>=next.season.totalWeeks)finishSeason(next);
-  recordManualAbsences(next);
+  recordManualAbsences(next);syncManualInjury(next,fixtureDate(next.season,next.season.week));
   touch(next);
 }
 export function advanceCareer(career:Career,weeks=1,onProgress?:(p:GameProgress)=>void):Career {
@@ -318,12 +321,14 @@ export function cheatIncreaseAttribute(career:Career,key:AttributeKey,amount:num
 }
 export function acceptTransfer(career:Career,offerId:string):Career {
   if(career.stage==='retired')throw new Error('은퇴한 선수는 계약을 체결할 수 없습니다.');
-  if(career.stage!=='offseason')throw new Error('이적과 재계약은 시즌 종료 후에만 결정할 수 있습니다.');
-  if(career.stage==='offseason'&&career.transferDecision)throw new Error('이번 이적시장의 선택은 이미 확정되었습니다.');
+  if(career.stage!=='offseason'&&!isFreeAgent(career))throw new Error('소속 선수의 이적과 재계약은 시즌 종료 후에만 결정할 수 있습니다.');
+  if(career.stage==='offseason'&&career.transferDecision&&!isFreeAgent(career))throw new Error('이번 이적시장의 선택은 이미 확정되었습니다.');
   const offer=career.offers.find(o=>o.id===offerId);
   if(!offer)throw new Error('유효한 계약 제안을 선택해 주세요.');
   const next=editable(career),from=next.player.clubId;
+  const wasFree=isFreeAgent(next);
   applyContract(next,offer);
+  if(wasFree&&next.stage==='season')adoptDestinationSchedule(next);
   if(next.stage==='offseason')next.transferDecision='signed';
   next.systems!.pendingChoice=undefined;next.offers=[];
   present(next,offer.type==='renew'?'renewal':'transfer',offer.type==='renew'?'재계약 체결':`${getClub(offer.clubId).name} 이적`,`${offer.years}년 · 주급 ${moneyText(offer.wage)} · 구단 간 이적료 ${moneyText(offer.fee)}`,'milestone');
@@ -345,9 +350,7 @@ export function stayAtClub(career:Career):Career {
   if(career.stage!=='offseason')throw new Error('시즌 종료 후 잔류를 결정할 수 있습니다.');
   if(career.transferDecision)return career;
   if(career.player.contractYears<=0) {
-    const renewal=career.offers.find(o=>o.type==='renew'&&o.clubId===career.player.clubId);
-    if(!renewal)throw new Error('계약이 만료되었습니다. 새 계약을 선택해 주세요.');
-    return acceptTransfer(career,renewal.id);
+    return releaseContract(career);
   }
   const next=editable(career);next.transferDecision='stay';next.offers=[];
   present(next,'transfer','소속 팀 잔류',`${getClub(next.player.clubId).name}에서 현재 계약을 이어갑니다.`);touch(next);return next;
@@ -368,6 +371,7 @@ export function startNextSeason(career:Career,onProgress?:(p:GameProgress)=>void
   if(promoted)next.player.squad='senior';
   next.player.fitness=100;next.player.morale=clamp(next.player.morale+10,0,100);if(!next.systems?.manualInjuries?.some(r=>!r.returned))next.player.injuryWeeks=0;
   next.season=makeSeason(next.player,lastYear+1,next.season.index+1,next);
+  if(next.systems!.employment)beginEmployment(next);
   const calendarYear=nextCalendarYear(previousSeason,next.season.leagueId);
   if(calendarYear!==next.season.year)next.season.calendarYear=calendarYear;
   activatePendingInjury(next);
@@ -389,14 +393,15 @@ export function startNextSeason(career:Career,onProgress?:(p:GameProgress)=>void
   syncManualInjury(next,seasonDate(next.season,0));
   touch(next);
   const injury=next.systems?.manualInjuries?.find(r=>!r.returned);
-  if(injury)skipInjuryPeriod(next,injury.end,onProgress);
+  if(injury&&injury.selectionVersion!==2)skipInjuryPeriod(next,injury.end,onProgress);
+  if(isFreeAgent(next))next.offers=makeContractOffers(next,'midseason');
   return next;
 }
 export function retireCareer(career:Career):Career {
   if(career.stage==='retired')return career;
-  if(career.stage==='offseason'&&career.transfers.some(t=>t.year>career.season.year))throw new Error('새 구단과의 계약이 확정됐습니다. 다음 시즌을 시작한 뒤 은퇴해 주세요.');
+  if(career.stage==='offseason'&&!isFreeAgent(career)&&career.transfers.some(t=>t.year>career.season.year))throw new Error('새 구단과의 계약이 확정됐습니다. 다음 시즌을 시작한 뒤 은퇴해 주세요.');
   const next=editable(career);
-  if(next.season.week>0&&!next.history.some(s=>s.year===next.season.year))archive(next,false);
+  if((next.season.week>0||isFreeAgent(next))&&!next.history.some(s=>s.year===next.season.year))archive(next,false);
   archiveNationalSeason(next);
   next.stage='retired';next.retiredYear=next.season.year;next.offers=[];
   next.systems!.phase='retired';next.systems!.pendingChoice=undefined;next.systems!.national.status='retired';
@@ -425,9 +430,20 @@ export function setAllAttributeLocks(career:Career,locked:boolean):Career{
  next.systems!.attributeLocks=locked?allowed.filter(key=>next.player.attributes[key]!==undefined):[];
  touch(next);return next;
 }
-export function manuallyInjure(career:Career,duration:'half'|'season',onProgress?:(p:GameProgress)=>void):Career{
- if(career.stage==='retired'||!['half','season'].includes(duration))throw new Error('현역 선수의 부상 기간을 선택해 주세요.');
+export function manuallyInjure(career:Career,duration:'half'|'season'|5|10|20,onProgress?:(p:GameProgress)=>void):Career{
+ if(career.stage==='retired'||!['half','season',5,10,20].includes(duration))throw new Error('현역 선수의 부상 기간을 선택해 주세요.');
  if(career.systems?.manualInjuries?.some(r=>!r.returned))throw new Error('현재 수동 부상이 끝난 뒤 다시 적용해 주세요.');
+ if(duration!=='half'){
+  const half=career.systems!.halfRound;
+  if(career.stage==='season'&&career.season.week!==0&&career.season.week!==half)throw new Error('전반기·후반기 시작 전에 부상을 선택해 주세요.');
+  const next=editable(career),pending=next.stage==='offseason';
+  const year=next.season.year+Number(pending),base=pending?Date.UTC(nextCalendarYear(next.season,next.season.leagueId),getLeagueRule(next.season.leagueId).startMonth-1,1):Date.parse(currentDate(next))+1;
+  const start=new Date(base).toISOString(),end=pending?new Date(base+365*86400000).toISOString():new Date(Date.parse(seasonHalfEndDate(next.season,'second'))+86400000).toISOString();
+  (next.systems!.manualInjuries??=[]).push({id:`manual-injury:${next.id}:${next.revision}`,year,clubId:next.player.clubId,duration,selectionVersion:2,start,end,...(typeof duration==='number'?{remainingMatches:duration,targetMatches:duration}:{}),...(pending?{pendingNextSeason:true}:{}),missed:[]});
+  if(!pending)next.player.injuryWeeks=1;
+  present(next,'injury',pending?'다음 시즌 부상 예약':'부상 기간 선택',duration==='season'?'이번 시즌 남은 전 경기 결장':`클럽 ${duration}경기 결장 · 해당 기간 국대도 출전 제외`,'milestone');touch(next);return next;
+ }
+
  const next=editable(career),pending=career.stage==='offseason',league=getClub(next.player.clubId).leagueId;
  const start=pending?new Date(Date.UTC(nextCalendarYear(next.season,league),getLeagueRule(league).startMonth-1,1)).toISOString():new Date(Date.parse(currentDate(next))+1).toISOString(),end=new Date(Date.parse(start)+(duration==='half'?182:365)*86400000).toISOString();
  (next.systems!.manualInjuries??=[]).push({id:`manual-injury:${next.id}:${next.revision}`,year:next.season.year+(pending?1:0),clubId:next.player.clubId,duration,start,end,...(pending?{pendingNextSeason:true}:{}),missed:[]});
@@ -444,4 +460,35 @@ function skipInjuryPeriod(c:Career,end:string,onProgress?:(p:GameProgress)=>void
   processInternationalThrough(c,end);syncManualInjury(c,end);c.systems!.manualClock=end;
  }
  recordManualAbsences(c);
+}
+
+function releaseInPlace(next:Career,reason:'release'|'expiry',nextSeason=false):void{
+ if(isFreeAgent(next))return;
+ const e=next.systems!.economics,old=next.player.clubId,c=e.contract;
+ const previous={clubId:c.clubId,wage:c.wageAtSigning,years:c.expiresYear-c.signedYear,signedYear:c.signedYear,expiresYear:c.expiresYear,role:c.role,...(c.signedDate?{signedDate:c.signedDate}:{}),...(c.expiresDate?{expiresDate:c.expiresDate}:{})};
+ changeEmployment(next,'FA',next.season.leagueId,0,reason,nextSeason);
+ next.systems!.world.clubs[old].rosterIds=next.systems!.world.clubs[old].rosterIds.filter(id=>id!==next.player.id);
+ delete next.systems!.world.players[next.player.id];
+ for(const term of next.systems!.leadership.terms)if(term.scope==='club'&&term.endYear===undefined){term.endYear=next.season.year;term.endRound=next.season.week;}
+ expireCaptainOffers(next,'club');
+ Object.assign(next.systems!.leadership,{clubId:'FA',clubRole:'none',clubMatches:0,clubSinceYear:next.season.year+Number(nextSeason)});
+ next.player.clubId='FA';next.player.wage=0;next.player.contractYears=0;
+ const year=next.season.year+Number(nextSeason);
+ e.contract={clubId:'FA',signedYear:year,expiresYear:year,wageAtSigning:0,role:'FA · 무소속',previousWage:previous.wage};
+ e.contractHistory!.push({id:`release:${next.id}:${next.revision}:${reason}`,year:next.season.year,round:next.season.week,type:'release',effective:nextSeason?'nextSeason':'now',fee:0,reason:reason==='expiry'?'계약 만료 · FA 전환':'선수의 직접 계약 해지 · FA 전환',previous,current:{clubId:'FA',wage:0,years:0,signedYear:year,expiresYear:year,role:'FA · 무소속'}});
+}
+export function releaseContract(career:Career):Career{
+ if(career.stage==='retired')throw new Error('은퇴한 선수는 계약을 해지할 수 없습니다.');
+ const next=editable(career);releaseInPlace(next,'release',next.stage==='offseason');next.transferDecision=next.stage==='offseason'?'stay':undefined;
+ next.offers=makeContractOffers(next,next.stage==='offseason'?'offseason':'midseason');
+ present(next,'transfer','FA · 무소속 전환','클럽 명단과 급여에서 제외됩니다. 반 시즌씩 진행하면서 새 계약을 검토할 수 있습니다.','milestone');touch(next);return next;
+}
+function adoptDestinationSchedule(next:Career):void{
+ const old=next.season,league=next.systems!.world.clubs[next.player.clubId].leagueId,state=next.systems!.world.competitions[league];
+ // Other leagues have already simulated exactly to their own current round.
+ next.season={...old,leagueId:league,competitionName:getLeague(league).name,week:state.round,totalWeeks:state.totalRounds,fixtures:state.fixtures.map(f=>({...f})),table:state.table.map(t=>({...t})),completed:state.round===state.totalRounds};
+ next.systems!.halfRound=Math.ceil(state.totalRounds/2);delete next.systems!.monthlyLeague;
+ const period=next.systems!.employment?.at(-1);if(period)period.fromRound=state.round;
+ if(next.systems!.growthLedger)next.systems!.growthLedger.trackedFromRound=Math.min(next.systems!.growthLedger.trackedFromRound,state.round);
+ next.systems!.phase=state.round===0?'preseason':state.round===next.systems!.halfRound?'midseason':state.round<next.systems!.halfRound?'first':'second';
 }

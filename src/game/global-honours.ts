@@ -44,6 +44,7 @@ export const ADDITIONAL_GLOBAL_AWARDS={
  shoe:annual('european-golden-shoe','유러피언 골든슈','European Sports Media','https://www.eusm.eu/'),
 } as const;
 export function europeanShoePoints(r:CompetitorSeason):number{
+ if(r.leagueSplits)return r.leagueSplits.reduce((n,s)=>n+europeanShoePoints({...r,...s,leagueSplits:undefined}),0);
  const l=getLeague(r.leagueId);if(l.tier!==1||!EUROPEAN_COUNTRIES.includes(l.country))return 0;
  return r.stats.goals*(['영국','스페인','독일','이탈리아','프랑스'].includes(l.country)?2:1.5);
 }

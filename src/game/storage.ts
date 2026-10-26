@@ -69,9 +69,9 @@ function unique(values: string[], label: string): void {
   assert(new Set(values).size === values.length, `${label}에 중복 ID가 있습니다.`);
 }
 
-function clubId(value: unknown, label: string): string {
+function clubId(value: unknown, label: string, allowFA=false): string {
   const id = text(value, label);
-  assert(clubs.has(id), `${label}의 구단을 현재 데이터에서 찾을 수 없습니다.`);
+  assert(clubs.has(id)||allowFA&&id==='FA', `${label}의 구단을 현재 데이터에서 찾을 수 없습니다.`);
   return id;
 }
 
@@ -147,6 +147,7 @@ function growthLedger(value: unknown, end: unknown, throughRound: number, year: 
   const legacy = bool(row.legacy, `${label}.legacy`);
   assert(legacy || from === 0, `${label}의 추적 시작 주차에 과거 미집계 표시가 없습니다.`);
   if (!legacy) sameAttributeValues(baseline, object(seasonStart, `${label}.seasonStart`), label);
+  if(row.fractionalGains!==undefined)for(const [cause,residue] of Object.entries(object(row.fractionalGains,`${label}.fractionalGains`))){assert(['training','experience','development'].includes(cause),'성장 잔여 원인이 올바르지 않습니다.');attributes(residue,'성장 잔여',undefined,-.005,.005);}
   const causes = object(row.byCause, `${label}.byCause`);
   const trackedCauses:string[]=[...growthCauses,...(causes.cheat===undefined?[]:['cheat']),...(causes.skillChange===undefined?[]:['skillChange'])];
   assert(Object.keys(causes).length === trackedCauses.length && trackedCauses.every(cause => cause in causes), `${label}의 성장 원인이 누락되거나 올바르지 않습니다.`);
@@ -180,7 +181,7 @@ function agingReport(value: unknown, year: number, label: string, seasonStart: u
 
 function contractTerms(value: unknown, label: string): Record<string, unknown> {
   const row = object(value, label);
-  clubId(row.clubId, `${label}.clubId`); number(row.wage, `${label}.wage`, 0, 1e12); text(row.role, `${label}.role`);
+  clubId(row.clubId, `${label}.clubId`, true); number(row.wage, `${label}.wage`, 0, 1e12); text(row.role, `${label}.role`);
   const signed = number(row.signedYear, `${label}.signedYear`, 1900, 2500, true), expires = number(row.expiresYear, `${label}.expiresYear`, signed, 2520, true);
   assert(number(row.years, `${label}.years`, 0, 20, true) === expires - signed, `${label}의 계약 연수와 만료 연도가 다릅니다.`);
   if (row.signedDate !== undefined) calendarDate(row.signedDate, `${label}.signedDate`);
@@ -380,7 +381,7 @@ function awards(value: unknown, label: string): void {
     const id = text(item.id, `${label}.id`);
     text(item.name, `${label}.name`);
     text(item.description, `${label}.description`, 4_000);
-    clubId(item.clubId, `${label}.clubId`);
+    clubId(item.clubId, `${label}.clubId`, true);
     number(item.year, `${label}.year`, 1900, 2500, true);
     for (const key of ['organiser', 'criterion', 'sourceUrl', 'category', 'ruleVersion', 'evaluationPeriod']) if (item[key] !== undefined) text(item[key], `${label}.${key}`, 4_000);
     if(item.verification!==undefined)choice(item.verification,['game-model'],`${label}.verification`);
@@ -543,7 +544,7 @@ function validateSystems(career: Record<string, unknown>, player: Record<string,
   if (contract.signedDate !== undefined) calendarDate(contract.signedDate, 'contract.signedDate');
   if (contract.expiresDate !== undefined) calendarDate(contract.expiresDate, 'contract.expiresDate');
   if (contract.signedDate !== undefined && contract.expiresDate !== undefined) assert(String(contract.signedDate) <= String(contract.expiresDate), '계약 만료일이 서명일보다 빠릅니다.');
-  assert(clubId(contract.clubId, 'contract.clubId') === player.clubId && contract.wageAtSigning === player.wage, '계약 소속·주급과 선수 정보가 다릅니다.');
+  assert(clubId(contract.clubId, 'contract.clubId', true) === player.clubId && contract.wageAtSigning === player.wage, '계약 소속·주급과 선수 정보가 다릅니다.');
   assert(Number(economy.highestWage) >= Number(player.wage), '최고 주급이 현재 주급보다 작습니다.');
   if (economy.seasonStartValue !== undefined || economy.seasonStartYear !== undefined) {
     number(economy.seasonStartValue, 'economics.seasonStartValue', 0, Number(economy.peakValue));
@@ -557,10 +558,10 @@ function validateSystems(career: Record<string, unknown>, player: Record<string,
     const matchedTransfers = new Set<number>();
     for (const row of history) {
       const year = number(row.year, 'contractHistory.year', 1900, currentYear, true), round = number(row.round, 'contractHistory.round', 0, 150, true);
-      assert(year > previousYear || year === previousYear && round >= previousRound, '계약 이력이 시간 순서와 다릅니다.');
-      assert(year < currentYear || round <= currentRound, '계약 이력의 결정 주차가 미래입니다.');
+      assert(year > previousYear || year === previousYear && (round >= previousRound||systems.employment!==undefined), '계약 이력이 시간 순서와 다릅니다.');
+      assert(year < currentYear || round <= currentRound||systems.employment!==undefined, '계약 이력의 결정 주차가 미래입니다.');
       previousYear = year; previousRound = round;
-      const type = choice(row.type, ['initial', 'renew', 'transfer', 'legacy'], 'contractHistory.type'), effective = choice(row.effective, ['now', 'nextSeason'], 'contractHistory.effective');
+      const type = choice(row.type, ['initial', 'renew', 'transfer', 'legacy', 'release'], 'contractHistory.type'), effective = choice(row.effective, ['now', 'nextSeason'], 'contractHistory.effective');
       text(row.reason, 'contractHistory.reason', 4_000); const fee = number(row.fee, 'contractHistory.fee', 0, 1e15);
       const terms = contractTerms(row.current, 'contractHistory.current');
       if (type === 'initial' || type === 'legacy') {
@@ -572,9 +573,9 @@ function validateSystems(career: Record<string, unknown>, player: Record<string,
         const previous = contractTerms(row.previous, 'contractHistory.previous');
         assert(matchingTerms(previous, previousTerms), '계약 이력의 이전 조건이 앞선 계약과 다릅니다.');
         assert(terms.signedYear === year + Number(effective === 'nextSeason'), '계약 효력 연도와 서명 이력이 다릅니다.');
-        assert(Number(terms.years) >= 1 && Number(terms.years) <= 5, '새 계약 기간은 1~5년이어야 합니다.');
+        assert(type==='release'?terms.clubId==='FA'&&terms.wage===0&&terms.years===0&&fee===0:Number(terms.years) >= 1 && Number(terms.years) <= 5, '새 계약 기간은 1~5년이며 해지는 무소속·무급이어야 합니다.');
         if (type === 'renew') assert(previous.clubId === terms.clubId && fee === 0, '재계약의 구단 또는 이적료가 올바르지 않습니다.');
-        else {
+        else if(type==='transfer') {
           assert(previous.clubId !== terms.clubId, '이적 계약의 이전·현재 구단이 같습니다.');
           const transfers = career.transfers as Record<string, unknown>[];
           const index = transfers.findIndex((transfer, index) => !matchedTransfers.has(index) && transfer.year === terms.signedYear && transfer.fromClubId === previous.clubId && transfer.toClubId === terms.clubId && transfer.fee === fee && transfer.wage === terms.wage);
@@ -592,7 +593,7 @@ function validateSystems(career: Record<string, unknown>, player: Record<string,
   if (leadership.baseTrait !== undefined) number(leadership.baseTrait, 'leadership.baseTrait', 0, 100);
   if (leadership.traitUpdatedYear !== undefined) number(leadership.traitUpdatedYear, 'leadership.traitUpdatedYear', 1900, 2500, true);
   number(leadership.trait, 'leadership.trait', 0, 100); number(leadership.clubSinceYear, 'leadership.clubSinceYear', 1900, 2500, true);
-  assert(clubId(leadership.clubId, 'leadership.clubId') === player.clubId, '주장단 소속과 선수 소속이 다릅니다.');
+  assert(clubId(leadership.clubId, 'leadership.clubId', true) === player.clubId, '주장단 소속과 선수 소속이 다릅니다.');
   for (const key of ['clubRole', 'nationalRole']) choice(leadership[key], ['none', 'captain', 'vice'], `leadership.${key}`);
   for (const key of ['clubMatches', 'nationalMatches']) number(leadership[key], `leadership.${key}`, 0, 100_000, true);
   text(leadership.reason, 'leadership.reason', 4_000);
@@ -633,7 +634,7 @@ function validateSystems(career: Record<string, unknown>, player: Record<string,
     // A completed year's ranking is a self-contained snapshot. Retired competitors
     // leave the live world roster, while their name, club and season statistics remain here.
     assert(historical || id === playerId || worldPlayers.has(id) || temporaryReserve(id, row), '수상 후보 선수 참조가 올바르지 않습니다.');
-    text(row.name, 'ranking.name'); clubId(row.clubId, 'ranking.clubId'); assert(positions.has(String(row.position)), '수상 후보 포지션이 올바르지 않습니다.');
+    text(row.name, 'ranking.name'); clubId(row.clubId, 'ranking.clubId', true); assert(positions.has(String(row.position)), '수상 후보 포지션이 올바르지 않습니다.');
     number(row.score, 'ranking.score', 0, 1e12); number(row.rank, 'ranking.rank', 1, 100_000, true); stats(row.stats, 'ranking.stats'); stats(row.nationalStats, 'ranking.nationalStats'); return row;
   }
   const rankings = list(systems.rankings, 'systems.rankings', 200).map(raw => object(raw, 'ranking'));
@@ -701,7 +702,7 @@ export function validateCareer(value: unknown): Career {
   assert(['right', 'left', 'both'].includes(String(player.foot)), '주발이 올바르지 않습니다.');
   assert(['youth', 'senior'].includes(String(player.squad)), '소속 단계가 올바르지 않습니다.');
   text(player.style, 'player.style');
-  clubId(player.clubId, 'player.clubId');
+  clubId(player.clubId, 'player.clubId', true);
   number(player.age, 'player.age', 14, 100, true);
   number(player.height, 'player.height', 150, 210);
   number(player.weight, 'player.weight', 45, 120);
@@ -768,7 +769,8 @@ export function validateCareer(value: unknown): Career {
   const fixtureIndex = new Map(fixtures.map(fixture => [fixture.id, fixture]));
   const records = matches(season.matches, 'season.matches', playerId);
   for (const record of records) {
-    const fixture = fixtureIndex.get(record.fixtureId);
+    const foreign=(career.systems as Career['systems'])?.employment?((career.systems as Career['systems'])!.world.competitions[record.competitionId!]?.fixtures.find(f=>f.id===record.fixtureId)):undefined;
+    const fixture = fixtureIndex.get(record.fixtureId)??foreign;
     assert(fixture?.played && fixture.homeId === record.homeId && fixture.awayId === record.awayId && fixture.homeGoals === record.homeGoals && fixture.awayGoals === record.awayGoals, '경기 원장과 일정의 결과가 일치하지 않습니다.');
   }
   reconciledStats(season.playerStats, records, 'season.playerStats');
@@ -808,12 +810,12 @@ export function validateCareer(value: unknown): Career {
     const summaryYear = number(summary.year, `${prefix}.year`, 1900, 2500, true);
     historyYears.push(String(summaryYear));
     if (summary.calendarYear !== undefined) number(summary.calendarYear, `${prefix}.calendarYear`, summaryYear, 2500, true);
-    clubId(summary.clubId, `${prefix}.clubId`);
+    clubId(summary.clubId, `${prefix}.clubId`, true);
     leagueId(summary.leagueId, `${prefix}.leagueId`);
     text(summary.clubName, `${prefix}.clubName`);
     text(summary.competitionName, `${prefix}.competitionName`);
     number(summary.age, `${prefix}.age`, 14, 100, true);
-    number(summary.rank, `${prefix}.rank`, 1, 128, true);
+    number(summary.rank, `${prefix}.rank`, summary.clubId==='FA'?0:1, 128, true);
     number(summary.ovrStart, `${prefix}.ovrStart`, 1, 120);
     number(summary.ovrEnd, `${prefix}.ovrEnd`, 1, 120);
     number(summary.income, `${prefix}.income`, 0, 1e15);
@@ -855,7 +857,7 @@ export function validateCareer(value: unknown): Career {
   for (const [index, raw] of list(career.transfers, 'transfers', 500).entries()) {
     const item = object(raw, `transfers[${index}]`);
     number(item.year, 'transfer.year', 1900, 2500, true);
-    clubId(item.fromClubId, 'transfer.fromClubId');
+    clubId(item.fromClubId, 'transfer.fromClubId', true);
     clubId(item.toClubId, 'transfer.toClubId');
     number(item.fee, 'transfer.fee', 0, 1e12);
     number(item.wage, 'transfer.wage', 0, 1e12);

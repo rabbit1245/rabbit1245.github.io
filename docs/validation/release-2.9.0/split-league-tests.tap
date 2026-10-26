@@ -1,0 +1,70 @@
+TAP version 13
+# Subtest: skill mastery above 100 accumulates tiny gains; no automatic injury or age loss
+ok 1 - skill mastery above 100 accumulates tiny gains; no automatic injury or age loss # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.843161
+  ...
+# Subtest: FA release removes squad membership and wages, advances halves, signs instantly and survives JSON
+ok 2 - FA release removes squad membership and wages, advances halves, signs instantly and survives JSON # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.126476
+  ...
+# Subtest: FA entire seasons preserve world simulation, year and half-year retirement records
+ok 3 - FA entire seasons preserve world simulation, year and half-year retirement records # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.115134
+  ...
+# Subtest: manual injury 5 is queued, actually excludes games and retains attributes
+ok 4 - manual injury 5 is queued, actually excludes games and retains attributes # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.108352
+  ...
+# Subtest: manual injury 10 is queued, actually excludes games and retains attributes
+ok 5 - manual injury 10 is queued, actually excludes games and retains attributes # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.148317
+  ...
+# Subtest: manual injury 20 is queued, actually excludes games and retains attributes
+ok 6 - manual injury 20 is queued, actually excludes games and retains attributes # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.096861
+  ...
+# Subtest: manual injury season is queued, actually excludes games and retains attributes
+ok 7 - manual injury season is queued, actually excludes games and retains attributes # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.102982
+  ...
+# Subtest: wage offers for a young first-team player are not uniformly forced 10 percent cuts
+ok 8 - wage offers for a young first-team player are not uniformly forced 10 percent cuts # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.164576
+  ...
+# Subtest: expiry releases automatically after the final paid season and next year starts without mandatory renewal
+ok 9 - expiry releases automatically after the final paid season and next year starts without mandatory renewal # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.164055
+  ...
+# Subtest: release after playing preserves prior match records and the former club final position
+ok 10 - release after playing preserves prior match records and the former club final position # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.216804
+  ...
+# Subtest: a midseason FA move keeps league scoring, prizes and shoe coefficients in their actual leagues
+ok 11 - a midseason FA move keeps league scoring, prizes and shoe coefficients in their actual leagues
+  ---
+  duration_ms: 676.802646
+  ...
+1..11
+# tests 11
+# suites 0
+# pass 1
+# fail 0
+# cancelled 0
+# skipped 10
+# todo 0
+# duration_ms 1409.034443
+npm notice
+npm notice New minor version of npm available! 11.9.0 -> 11.21.1
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.21.1
+npm notice To update run: npm install -g npm@11.21.1
+npm notice

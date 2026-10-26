@@ -1,0 +1,115 @@
+TAP version 13
+# Subtest: distinct global awards retain organisers, own eligibility and year results without fake nominee screens
+ok 1 - distinct global awards retain organisers, own eligibility and year results without fake nominee screens
+  ---
+  duration_ms: 581.836025
+  ...
+# Subtest: European Golden Shoe uses league goals and coefficients alone, excludes second divisions and non-Europe
+ok 2 - European Golden Shoe uses league goals and coefficients alone, excludes second divisions and non-Europe
+  ---
+  duration_ms: 381.048044
+  ...
+# Subtest: ability participates in subjective votes but cannot replace performance, appearances or eligibility
+ok 3 - ability participates in subjective votes but cannot replace performance, appearances or eligibility
+  ---
+  duration_ms: 323.798912
+  ...
+# Subtest: narrative achievements require evidence, diminish overlapping titles, cap at ten, and do not invent a drought
+ok 4 - narrative achievements require evidence, diminish overlapping titles, cap at ten, and do not invent a drought
+  ---
+  duration_ms: 333.970932
+  ...
+# Subtest: historical league records exclude cup goals and old award IDs/data survive display renaming
+ok 5 - historical league records exclude cup goals and old award IDs/data survive display renaming
+  ---
+  duration_ms: 369.795429
+  ...
+# Subtest: equal output in a lower division is weighted below top-flight output in global awards
+ok 6 - equal output in a lower division is weighted below top-flight output in global awards
+  ---
+  duration_ms: 314.986844
+  ...
+# Subtest: real simulated international guests can be saved as award candidates; forged guest identities remain invalid
+ok 7 - real simulated international guests can be saved as award candidates; forged guest identities remain invalid
+  ---
+  duration_ms: 725.846336
+  ...
+# Subtest: a first-place midseason is not a title and season/individual honours remain distinct
+ok 8 - a first-place midseason is not a title and season/individual honours remain distinct
+  ---
+  duration_ms: 646.997045
+  ...
+# Subtest: league rankings use actual league ledgers and the same K1 sporting tie-break as awards
+ok 9 - league rankings use actual league ledgers and the same K1 sporting tie-break as awards
+  ---
+  duration_ms: 618.680803
+  ...
+# Subtest: inflated internal NPC ratings never give a different club/national ability or false captain XI average
+ok 10 - inflated internal NPC ratings never give a different club/national ability or false captain XI average
+  ---
+  duration_ms: 881.726534
+  ...
+# Subtest: 26-man national squads still exclude injuries and preserve real forward competition
+ok 11 - 26-man national squads still exclude injuries and preserve real forward competition
+  ---
+  duration_ms: 490.644521
+  ...
+# Subtest: 17 league goals and 10 assists by a major contributor to an Inter treble compete for Ballon shortlist and Serie A XI
+ok 12 - 17 league goals and 10 assists by a major contributor to an Inter treble compete for Ballon shortlist and Serie A XI
+  ---
+  duration_ms: 2010.508111
+  ...
+# Subtest: weak or absent performances do not earn awards just by joining a treble winner
+ok 13 - weak or absent performances do not earn awards just by joining a treble winner
+  ---
+  duration_ms: 494.837861
+  ...
+# Subtest: career identity omits one ambiguous overall while each annual ability record remains intact
+ok 14 - career identity omits one ambiguous overall while each annual ability record remains intact
+  ---
+  duration_ms: 444.168594
+  ...
+# Subtest: real retained nationalities are independent of whether the old club mapper recognised the club
+ok 15 - real retained nationalities are independent of whether the old club mapper recognised the club
+  ---
+  duration_ms: 0.22547
+  ...
+# Subtest: FIFA personal awards compare the whole played finals field, excluding club and qualifying goals
+ok 16 - FIFA personal awards compare the whole played finals field, excluding club and qualifying goals
+  ---
+  duration_ms: 10.772047
+  ...
+# Subtest: Golden Boot tie-breaks use assists and then actual minutes, preserving exact ties
+ok 17 - Golden Boot tie-breaks use assists and then actual minutes, preserving exact ties
+  ---
+  duration_ms: 0.774572
+  ...
+# Subtest: unfinished finals and qualifier-only appearances create no personal tournament awards
+ok 18 - unfinished finals and qualifier-only appearances create no personal tournament awards
+  ---
+  duration_ms: 0.788428
+  ...
+# Subtest: Golden Glove compares only actual goalkeeper performance and U20 uses its own real award names
+ok 19 - Golden Glove compares only actual goalkeeper performance and U20 uses its own real award names
+  ---
+  duration_ms: 0.85375
+  ...
+# Subtest: archived/current duplicate fixtures are counted once and old completed tournaments are not awarded again
+ok 20 - archived/current duplicate fixtures are counted once and old completed tournaments are not awarded again
+  ---
+  duration_ms: 0.930793
+  ...
+1..20
+# tests 20
+# suites 0
+# pass 20
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 4942.66413
+npm notice
+npm notice New minor version of npm available! 11.9.0 -> 11.21.1
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.21.1
+npm notice To update run: npm install -g npm@11.21.1
+npm notice

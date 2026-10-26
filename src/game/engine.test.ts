@@ -146,7 +146,7 @@ test('six distinct external offers, signing, contract renewal and new league wor
   assert.equal(next.season.week,0);assert.equal(next.history.length,1);
   const expired={...complete,player:{...complete.player,contractYears:0}};
   const renewed=stayAtClub(expired);
-  assert.ok(renewed.player.contractYears>0);assert.equal(renewed.player.clubId,originalClub);assert.equal(renewed.transfers.length,0);
+  assert.equal(renewed.player.contractYears,0);assert.equal(renewed.player.clubId,'FA');assert.equal(renewed.transfers.length,0);
 });
 
 test('GK records saves without striker output; position performance differs over many matches',()=>{

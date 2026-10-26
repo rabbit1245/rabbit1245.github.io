@@ -7,8 +7,8 @@ const catalogue = await readJSON('src/game/catalog.json');
 const mapping = await readJSON('data/canonical-logos.json');
 const diagnostics = await readJSON('data/crest-diagnostics.json');
 const manifest = await readJSON('data/crest-sources.json');
-const additions = new Map(manifest.clubs.map(row => [row.id, row]));
-assert.equal(additions.size, manifest.clubs.length, 'source IDs must be unique');
+const additions = new Map([...manifest.clubs,...(await readJSON('data/crest-additions-2.9.0.json')).clubs].map(row => [row.id, row]));
+assert.equal(additions.size, manifest.clubs.length+(await readJSON('data/crest-additions-2.9.0.json')).clubs.length, 'source IDs must be unique');
 const rows = [];
 for (const [id, name, nativeName, , , , , crest] of catalogue.clubs) {
   const diagnostic = diagnostics.find(row => row.id === id);
@@ -45,6 +45,6 @@ await mkdir('docs/validation', {recursive: true});
 const report = {clubs: rows.length, embedded: rows.filter(row => row.status === 'embedded-svg').length,
   neutral: rows.filter(row => row.status === 'neutral-icon').length, added: additions.size,
   sourceRevision: manifest.revision,
-  note: 'Canonical IDs and pinned source SVG hashes are checked, including AZ/NEC abbreviations and all MLS/Eredivisie clubs. Unknown logos retain neutral icons; similar names and reserve teams are not assigned another club’s badge. Browser decoding and rendered standings are checked separately.', rows};
-await writeFile('docs/validation/kball-2.7.1-crests.json', JSON.stringify(report, null, 2) + '\n');
+  note: 'Canonical IDs and pinned source SVG hashes are checked, including AZ/NEC abbreviations and all MLS/Eredivisie clubs. Unknown logos retain neutral icons; different clubs are never matched by similar spelling; verified reserve teams may share their own parent badge. Browser decoding and rendered standings are checked separately.', rows};
+await writeFile('docs/validation/kball-2.9-crests.json', JSON.stringify(report, null, 2) + '\n');
 console.log(JSON.stringify({clubs: report.clubs, embedded: report.embedded, neutral: report.neutral, added: report.added}));

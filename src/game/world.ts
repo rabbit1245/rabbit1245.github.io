@@ -59,12 +59,13 @@ function userWorldPlayer(career: Career): WorldPlayer {
   return {id:player.id,clubId:player.clubId,name:player.name,position:player.position,age:player.age,ovr:player.ovr,potential:player.potential,injuryWeeks:player.injuryWeeks,nationality:player.nationality,leadership:Math.round(clamp((player.attributes.teamwork??55)*.6+(player.attributes.composure??55)*.4,0,100))};
 }
 
-function syncUser(career: Career, world: WorldState): void {
+export function syncUser(career: Career, world: WorldState): void {
   const previous=world.players[career.player.id];
   if (previous && previous.clubId!==career.player.clubId) {
     const oldClub=world.clubs[previous.clubId];
     if (oldClub) oldClub.rosterIds=oldClub.rosterIds.filter(id=>id!==career.player.id);
   }
+  if(career.player.clubId==='FA'){delete world.players[career.player.id];return;}
   world.players[career.player.id]=userWorldPlayer(career);
   const own=world.clubs[career.player.clubId];
   if (own && !own.rosterIds.includes(career.player.id)) own.rosterIds.push(career.player.id);

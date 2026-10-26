@@ -1,4 +1,5 @@
 import type {AttributeKey,Career,Player,Position} from './types';
+import {ATTRIBUTE_LABELS} from './attributes';
 
 export interface PlaySkill {key:AttributeKey;name:string;english:string}
 export const FIELD_PLAY_SKILLS:PlaySkill[]=[
@@ -22,3 +23,7 @@ export function playSkillsForYear(c:Career,year:number):AttributeKey[]{
  return c.history.find(h=>h.year===year)?.details?.playSkills??(year===c.season.year?c.player.playSkills??[]:[]);
 }
 export function playSkillNames(position:Position,keys:readonly AttributeKey[]):string[]{return keys.map(key=>playSkillDefinitions(position).find(s=>s.key===key)?.name).filter((s):s is string=>!!s);}
+/** Annual retirement labels explain the specialty without changing saved skill IDs. */
+export function retirementPlaySkillNames(position:Position,keys:readonly AttributeKey[]):string[]{
+ return keys.flatMap(key=>{const skill=playSkillDefinitions(position).find(s=>s.key===key);return skill?[`${skill.name}(${ATTRIBUTE_LABELS[key]} 스페셜리스트)`]:[];});
+}

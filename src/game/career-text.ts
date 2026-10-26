@@ -1,8 +1,9 @@
-import {playSkillsForYear,playSkillNames} from './play-skills';
+import {employmentLines,recordedEmployment} from './employment';
+import {playSkillsForYear,retirementPlaySkillNames} from './play-skills';
 import {moneyText,currencyText} from './currency';
 import {cupMatches,cupStats,cupLedger,tournamentResult} from './club-competitions';
 import {POSITION_LABELS} from './attributes';
-import {getClub} from './data';
+import {getClub,getLeague} from './data';
 import {ALL_STATS,emptyStats,sumStats} from './math';
 import {competitionLabel,seasonHonours} from './honours';
 import type {Career,MatchRecord,PlayerStats,SeasonSummary} from './types';
@@ -117,11 +118,13 @@ function financials(c:Career,year:number,h:SeasonSummary|undefined,clubId:string
  const value=h?.details?.marketValue??(current?e?.marketValue:undefined)??e?.valueHistory.filter(v=>v.year===year).at(-1)?.value;
  const contracts=(e?.contractHistory??[]).filter(r=>r.year+(r.effective==='nextSeason'?1:0)<=year&&r.current.clubId===clubId&&r.current.signedYear<=year&&r.current.expiresYear>=year).sort((a,b)=>a.year-b.year||a.round-b.round);
  const wage=h?.details?.contract.wage??(current?c.player.wage:undefined)??contracts.at(-1)?.current.wage;
- return {value:value===undefined?'과거 기록 미보존':moneyText(value),wage:wage===undefined?'과거 기록 미보존':moneyText(wage)};
+ const periods=recordedEmployment(c,year);
+ return {value:value===undefined?'과거 기록 미보존':moneyText(value),wage:periods.length?periods.map(r=>`${name(r.clubId)} ${moneyText(r.wage)}`).join(' → '):wage===undefined?'과거 기록 미보존':moneyText(wage)};
 }
 function seasonLeadership(c:Career,year:number,h:SeasonSummary|undefined,clubId:string){
  const l=c.systems?.leadership;
- const terms=l?.terms.filter(t=>t.startYear<=year&&(t.endYear??Infinity)>=year&&(t.scope==='national'||t.teamId===clubId))??[];
+ const clubs=new Set([clubId,...recordedEmployment(c,year).map(r=>r.clubId)]);
+ const terms=l?.terms.filter(t=>t.startYear<=year&&(t.endYear??Infinity)>=year&&(t.scope==='national'||clubs.has(t.teamId)))??[];
  const labels=terms.map(t=>`${name(t.teamId)} ${roleText(t.role)}`);
  const snapshot=h?.details?.captain??(year===c.season.year&&!h&&l?{club:l.clubRole,national:l.nationalRole}:undefined);
  if(snapshot?.club&&snapshot.club!=='none')labels.push(`${name(clubId)} ${roleText(snapshot.club)}`);
@@ -133,7 +136,7 @@ function seasonInjuries(c:Career,year:number,matches:MatchRecord[]){
  const recorded=matches.some(m=>(m.effects?.injuryWeeksAfter??0)>0||m.events.some(e=>e.type==='injury'&&(e.playerId===c.player.id||e.playerName===c.player.name)));
  const active=year===c.season.year&&c.player.injuryWeeks>0;
  const missed=new Set(manual.flatMap(r=>r.missed.filter(m=>m.year===year).map(m=>m.fixtureId))).size;
- if(recorded||manual.length||active)return `부상 있음${active?' · 은퇴/현재 시점 부상 중':''}${missed?` · 확인된 결장 ${missed}경기`:''}`;
+ if(recorded||manual.length||active)return `부상 있음${active?' · 은퇴/현재 시점 부상 중':''}${manual.some(r=>r.selectionVersion===2&&r.duration==='season')?' · 시즌 전체 부상 (선택 이후 남은 전 경기 결장)':''}${missed?` · 확인된 결장 ${missed}경기 (클럽 ${new Set(manual.flatMap(r=>r.missed.filter(m=>m.year===year&&m.scope==='club').map(m=>m.fixtureId))).size} · 국대 ${new Set(manual.flatMap(r=>r.missed.filter(m=>m.year===year&&m.scope==='national').map(m=>m.fixtureId))).size})`:''}`;
  if(matches.length&&matches.every(m=>m.effects!==undefined))return '부상 없음';
  if(year===c.season.year&&c.season.week===0)return '부상 없음';
  return '과거 기록 미보존';
@@ -162,16 +165,17 @@ export function careerSeasonRecords(c:Career){
   const rank=h?.rank??(c.season.table.findIndex(t=>t.clubId===clubId)+1),leagueName=h?.competitionName??c.season.competitionName;
   const row=h?.details?.table.find(t=>t.clubId===clubId)??(!h?c.season.table.find(t=>t.clubId===clubId):undefined);
   const leagueResult=`${leagueName} · ${rank>0?`${rank}위`:'순위 미보존'}${completed?' (최종)':retired?' (은퇴 시점)':' (진행 중)'}${row?` · ${row.won}승 ${row.drawn}무 ${row.lost}패 · 승점 ${row.points}점`:''}`;
+  const employmentResults=h?.details?.employmentStandings?.map(r=>`${name(r.clubId)} · ${getLeague(r.leagueId).name} · ${r.rank}위${completed?' (최종)':''} · ${r.won}승 ${r.drawn}무 ${r.lost}패 · 승점 ${r.points}점`);
   const own=seasonClubIds(c,year),honours=seasonHonours(c,year),finals=careerFinals(c,year,ledger);
   const cups=cupLedger(c,year).flatMap(t=>[...own].filter(id=>t.entrants.includes(id)).map(id=>`${t.name} · ${name(id)} · ${tournamentResult(t,id)==='결승 탈락'?'준우승 (결승 탈락)':tournamentResult(t,id)}`));
   const judging=c.systems?.rankings.find(r=>r.year===year),globalNames=/발롱도르|FIFPRO|The Best FIFA|야신 트로피|코파 트로피|유러피언 골든슈/;
   const awardResults=(judging?.diagnostics??[]).filter(d=>d.eligible&&globalNames.test(d.name)).map(d=>`${d.name}: ${d.name==='발롱도르'&&d.result==='미선정'?(d.detail.match(/전체 (\d+)위/)?.[1]?d.detail.match(/전체 (\d+)위/)![1]+'위':'후보권 밖')+' · 30인 후보 제외':d.result}`);
-  return {year,awardResults,playSkills:playSkillNames(h?.position??c.player.position,playSkillsForYear(c,year)),age:h?.age??c.player.age,clubId,clubName:h?.clubName??name(clubId),
+  return {year,employment:employmentLines(c,year),awardResults,playSkills:retirementPlaySkillNames(h?.position??c.player.position,playSkillsForYear(c,year)),age:h?.age??c.player.age,clubId,clubName:recordedEmployment(c,year).length?[...new Set(recordedEmployment(c,year).map(r=>name(r.clubId)))].join(' → '):h?.clubName??name(clubId),
    status:retired?`은퇴${completed?' (시즌 종료 후)':' (시즌 도중)'}`:completed?'시즌 종료':'진행 중',
    ovrStart:h?.ovrStart??c.season.ovrStart,ovrEnd:h?.ovrEnd??c.player.ovr,
    ...financials(c,year,h,clubId),leadership:seasonLeadership(c,year,h,clubId),injury:seasonInjuries(c,year,[...clubMatches,...nationalMatches]),
    stats:sumStats([clubStats,nationalStats]),clubStats,nationalStats,matches:[...clubMatches,...nationalMatches],
-   results:[leagueResult,...cups,...nationalResults(c,year,nationalMatches)],
+   results:[...(employmentResults?.length?employmentResults:clubId==='FA'&&!leagueMatches.length?['FA · 클럽 리그 미참가']:[leagueResult]),...cups,...nationalResults(c,year,nationalMatches)],
    titles:honours.titles,teamAwards:[...new Set([
     ...honours.titles.map(t=>`${t.team} · ${t.name} 우승`),
     ...honours.teamAwards.filter(a=>!honours.titles.some(t=>a.name.replace(/\s*우승(?:\s*(?:메달|트로피))?$/,'')===t.name)).map(a=>`${a.category==='team'?name(a.clubId):`${c.systems?.national.country??c.player.nationality} 대표팀`} · ${a.name}`),
@@ -202,6 +206,7 @@ export function* careerTextChunks(c:Career):Generator<string>{
  for(const h of seasons){
   yield line();yield line(`[${h.year}시즌] ${h.status} · ${h.age}세`);
   yield line(`소속팀: ${h.clubName}`);
+  for(const period of h.employment)yield line(`소속 기간: ${period}`);
   yield line(`몸값: ${h.value}`);yield line(`주급: ${h.wage}`);
   yield line(`능력점수: ${h.ovrStart} → ${h.ovrEnd}`);
   if(h.playSkills.length)yield line(`플레이스타일: ${h.playSkills.join(' / ')}`);

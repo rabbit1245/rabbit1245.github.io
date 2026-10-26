@@ -1,5 +1,5 @@
 import {recordCommandChange} from './command-patches';
-import {setPlaySkill} from './engine';
+import {releaseContract,setPlaySkill} from './engine';
 import type { Career, GameCommand,GameProgress } from './types';
 import { advanceCareer, advanceHalf, dismissChoice, setTraining, acceptTransfer, stayAtClub, startNextSeason, retireCareer, respondToCaptainOffer,configureCheats,cheatIncreaseAttribute,manuallyAge,setAttributeLock,setAllAttributeLocks,manuallyInjure } from './engine';
 
@@ -8,6 +8,7 @@ export function executeCommand(career: Career, command: GameCommand, commandId: 
   if (career.processedCommands.includes(commandId)) return career;
   let next: Career;
   switch (command.type) {
+    case 'releaseContract':next=releaseContract(career);break;
     case 'playSkill':next=setPlaySkill(career,command.key,command.selected);break;
     case 'advance':
       if (!Number.isInteger(command.weeks) || command.weeks < 1 || command.weeks > 120) throw new Error('진행 범위는 1~120주입니다.');

@@ -57,6 +57,7 @@ export interface SeasonSummary {
   income: number; completed: boolean; details?:SeasonDetails;
 }
 export interface SeasonDetails {
+  employmentStandings?:{clubId:string;leagueId:string;rank:number;played:number;won:number;drawn:number;lost:number;points:number}[];
   playSkills?:AttributeKey[];
   version:1; clubDevelopment?:ClubSeasonDevelopment; table:Standing[]; attributes:Attributes; startAttributes:Attributes;
   marketValue:number; seasonStartValue?:number; contract:{clubId:string;wage:number;years:number;signedYear:number;expiresYear:number;role:string};
@@ -79,6 +80,6 @@ export interface CreateOptions {
   position: Position; secondaryPositions?: Position[]; talent: Talent; style: string; clubId: string;
   squad: Squad; difficulty: 'realistic'|'challenge'|'free'; seed: string; training?: AttributeKey[]; intensity?: Intensity;
 }
-export type GameCommand = {type:'playSkill';key:AttributeKey;selected:boolean} | {type:'manualAging';amount:1|5|10;key:AttributeKey} | {type:'attributeLock';key:AttributeKey;locked:boolean} | {type:'attributeLockAll';locked:boolean} | {type:'manualInjury';duration:'half'|'season'} | {type:'advance'; weeks:number} | {type:'training'; keys:AttributeKey[]; intensity:Intensity} | {type:'transfer'; offerId:string} | {type:'captainDecision';offerId:string;accept:boolean} | {type:'cheatSettings';enabled:boolean;freezeAging:boolean} | {type:'increaseAttribute';key:AttributeKey;amount:number} | {type:'stay'} | {type:'nextSeason'} | {type:'retire'} | {type:'advanceHalf'} | {type:'continueHalf'} | {type:'dismissChoice'};
+export type GameCommand = {type:'releaseContract'} | {type:'playSkill';key:AttributeKey;selected:boolean} | {type:'manualAging';amount:1|5|10;key:AttributeKey} | {type:'attributeLock';key:AttributeKey;locked:boolean} | {type:'attributeLockAll';locked:boolean} | {type:'manualInjury';duration:'half'|'season'|5|10|20} | {type:'advance'; weeks:number} | {type:'training'; keys:AttributeKey[]; intensity:Intensity} | {type:'transfer'; offerId:string} | {type:'captainDecision';offerId:string;accept:boolean} | {type:'cheatSettings';enabled:boolean;freezeAging:boolean} | {type:'increaseAttribute';key:AttributeKey;amount:number} | {type:'stay'} | {type:'nextSeason'} | {type:'retire'} | {type:'advanceHalf'} | {type:'continueHalf'} | {type:'dismissChoice'};
 export interface SaveSlot { id: string; name: string; playerName: string; clubName: string; year: number; age: number; ovr: number; updatedAt: string; revision: number }
 export interface SaveEnvelope { format: 'kball-save'; schemaVersion: 1; hash: string; savedAt: string; career: Career }

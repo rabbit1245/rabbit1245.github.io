@@ -110,9 +110,10 @@ function awardTitle(c:Career,t:ClubTournament){
   if(ranked[0]?.playerId===c.player.id){const id=`${t.id}:player-season:${c.player.id}`;if(!c.awards.some(a=>a.id===id))c.awards.push({id,year:t.year,clubId:c.player.clubId,name:t.id.startsWith('CLUB_WORLD_CUP:')?'FIFA 클럽 월드컵 골든볼':`${t.name} 시즌의 선수`,category:'continental-individual',organiser:t.id.startsWith('CLUB_WORLD_CUP:')?'FIFA':'해당 대륙 축구연맹',sourceUrl:t.id.startsWith('CLUB_WORLD_CUP:')?'https://www.fifa.com/':'https://www.uefa.com/',verification:'game-model',description:`해당 대회 실제 출전 선수 ${rows.length}명의 포지션별 경기 기여·평점·징계를 비교한 게임 내 평가. 리그·다른 컵·국대 기록 제외.`});}
  }
 
- if(t.winnerId!==c.player.clubId||c.player.squad!=='senior'||!t.matches.some(m=>m.playerStats.apps>0))return;
+ const contribution=t.matches.filter(m=>m.playerClubId===t.winnerId&&m.playerStats.apps>0);
+ if(c.player.squad!=='senior'||!contribution.length)return;
  const id=`${t.id}:champion:${c.player.id}`;if(c.awards.some(a=>a.id===id))return;
- const a={id,year:t.year,clubId:t.winnerId,name:`${t.name} 우승 메달`,description:`실제 결승 승리 · ${t.matches.reduce((n,m)=>n+m.playerStats.apps,0)}경기 출전`,category:'team'};c.awards.push(a);c.systems!.events.push({id,year:t.year,round:c.season.week,type:'award',title:a.name,body:a.description,importance:'milestone'});
+ const a={id,year:t.year,clubId:t.winnerId!,name:`${t.name} 우승 메달`,description:`실제 결승 승리 · ${contribution.reduce((n,m)=>n+m.playerStats.apps,0)}경기 출전`,category:'team'};c.awards.push(a);c.systems!.events.push({id,year:t.year,round:c.season.week,type:'award',title:a.name,body:a.description,importance:'milestone'});
 }
 function finishStep(c:Career,t:ClubTournament){
  if(t.format==='intercontinental'){

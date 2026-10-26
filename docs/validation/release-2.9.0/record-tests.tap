@@ -1,0 +1,125 @@
+TAP version 13
+# Subtest: retirement TXT contains only requested records, Korean labels and no event timelines or diagnostics
+ok 1 - retirement TXT contains only requested records, Korean labels and no event timelines or diagnostics
+  ---
+  duration_ms: 325.665925
+  ...
+# Subtest: new season snapshots validate and unknown old snapshots stay absent on hash-preserving import
+ok 2 - new season snapshots validate and unknown old snapshots stay absent on hash-preserving import
+  ---
+  duration_ms: 1355.955679
+  ...
+# Subtest: known legacy counts survive; unavailable counters and denominators never turn into fabricated zero rates
+ok 3 - known legacy counts survive; unavailable counters and denominators never turn into fabricated zero rates
+  ---
+  duration_ms: 101.283854
+  ...
+# Subtest: annual records use contemporary values, captaincy, injuries, awards and retirement status
+ok 4 - annual records use contemporary values, captaincy, injuries, awards and retirement status
+  ---
+  duration_ms: 286.817165
+  ...
+# Subtest: a next-season contract cannot rewrite the previous season wage and a queued injury is not an injury
+ok 5 - a next-season contract cannot rewrite the previous season wage and a queued injury is not an injury
+  ---
+  duration_ms: 139.492987
+  ...
+# Subtest: club final records cover shootout wins and losses, own stats, bench appearances and exclude other finals
+ok 6 - club final records cover shootout wins and losses, own stats, bench appearances and exclude other finals
+  ---
+  duration_ms: 232.569649
+  ...
+# Subtest: two-legged finals preserve both scores, aggregate and the actual winning side
+ok 7 - two-legged finals preserve both scores, aggregate and the actual winning side
+  ---
+  duration_ms: 100.613475
+  ...
+# Subtest: national finals use exact final stage, result, shootout and individual counts without semifinal false positives
+ok 8 - national finals use exact final stage, result, shootout and individual counts without semifinal false positives
+  ---
+  duration_ms: 94.800232
+  ...
+# Subtest: completed retirement season is explicitly retired while all annual totals still reconcile
+ok 9 - completed retirement season is explicitly retired while all annual totals still reconcile
+  ---
+  duration_ms: 94.950281
+  ...
+# Subtest: team awards include runner-up medals without duplicating a championship and injuries remain annual summaries
+ok 10 - team awards include runner-up medals without duplicating a championship and injuries remain annual summaries
+  ---
+  duration_ms: 103.555353
+  ...
+# Subtest: mixed legacy coverage uses matching detailed-game denominators for percentages
+ok 11 - mixed legacy coverage uses matching detailed-game denominators for percentages
+  ---
+  duration_ms: 97.578705
+  ...
+# Subtest: national elimination rounds and third-place results are explicit even without a year-end archive
+ok 12 - national elimination rounds and third-place results are explicit even without a year-end archive
+  ---
+  duration_ms: 102.310856
+  ...
+# Subtest: skill mastery above 100 accumulates tiny gains; no automatic injury or age loss
+ok 13 - skill mastery above 100 accumulates tiny gains; no automatic injury or age loss
+  ---
+  duration_ms: 494.980265
+  ...
+# Subtest: FA release removes squad membership and wages, advances halves, signs instantly and survives JSON
+ok 14 - FA release removes squad membership and wages, advances halves, signs instantly and survives JSON
+  ---
+  duration_ms: 32537.943002
+  ...
+# Subtest: FA entire seasons preserve world simulation, year and half-year retirement records
+ok 15 - FA entire seasons preserve world simulation, year and half-year retirement records
+  ---
+  duration_ms: 46596.756419
+  ...
+# Subtest: manual injury 5 is queued, actually excludes games and retains attributes
+ok 16 - manual injury 5 is queued, actually excludes games and retains attributes
+  ---
+  duration_ms: 20471.30031
+  ...
+# Subtest: manual injury 10 is queued, actually excludes games and retains attributes
+ok 17 - manual injury 10 is queued, actually excludes games and retains attributes
+  ---
+  duration_ms: 22451.86782
+  ...
+# Subtest: manual injury 20 is queued, actually excludes games and retains attributes
+ok 18 - manual injury 20 is queued, actually excludes games and retains attributes
+  ---
+  duration_ms: 20045.961537
+  ...
+# Subtest: manual injury season is queued, actually excludes games and retains attributes
+ok 19 - manual injury season is queued, actually excludes games and retains attributes
+  ---
+  duration_ms: 19993.896019
+  ...
+# Subtest: wage offers for a young first-team player are not uniformly forced 10 percent cuts
+ok 20 - wage offers for a young first-team player are not uniformly forced 10 percent cuts
+  ---
+  duration_ms: 371.549169
+  ...
+# Subtest: expiry releases automatically after the final paid season and next year starts without mandatory renewal
+ok 21 - expiry releases automatically after the final paid season and next year starts without mandatory renewal
+  ---
+  duration_ms: 21438.720043
+  ...
+# Subtest: release after playing preserves prior match records and the former club final position
+ok 22 - release after playing preserves prior match records and the former club final position
+  ---
+  duration_ms: 20322.521745
+  ...
+1..22
+# tests 22
+# suites 0
+# pass 22
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 205319.668929
+npm notice
+npm notice New minor version of npm available! 11.9.0 -> 11.21.1
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.21.1
+npm notice To update run: npm install -g npm@11.21.1
+npm notice

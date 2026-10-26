@@ -1,0 +1,60 @@
+{
+  "version": "2.9.0",
+  "status": "verified; awaiting publication",
+  "unit": {
+    "passed": 265,
+    "failed": 0,
+    "skipped": 1,
+    "skipNote": "New 30-season generation skipped; previously generated 20/30-season saves imported and their complete TXT verified."
+  },
+  "fullPortableChecks": 11,
+  "newUI": {
+    "web": 6,
+    "offlinePortable": 6,
+    "pageErrors": 0
+  },
+  "records": {
+    "twenty": {
+      "saveBytes": 130888698,
+      "txtBytes": 92084,
+      "clubMatches": 1137,
+      "nationalMatches": 209
+    },
+    "thirty": {
+      "saveBytes": 81104879,
+      "txtBytes": 86425,
+      "clubMatches": 1020,
+      "nationalMatches": 108
+    },
+    "engineByteComparison": true,
+    "readOnlyDownloads": true
+  },
+  "crests": {
+    "domesticClubs": 913,
+    "displayed": 856,
+    "new": 72,
+    "unresolved": 57,
+    "decoded": 856,
+    "failures": 0,
+    "note": "Reviewed SVGs, historical flat PNGs embedded in SVG and approved parent/reserve shared badges; unresolved clubs retain neutral icons."
+  },
+  "build": {
+    "typecheck": true,
+    "web": true,
+    "portable": true,
+    "legacyCore": true,
+    "zipCRC": true,
+    "zipHTMLMatches": true
+  },
+  "artifact": {
+    "zipBytes": 19194676,
+    "zipSha256": "ce01722cfafb7cdb428c2919ee1ca0f26e967ca48845ffa5b6d945fbf626d291",
+    "htmlBytes": 25473961,
+    "htmlSha256": "e82590eab260168144f0ce0bd06501cc2eda1965e15f87a3ca53869008d56b74"
+  },
+  "limits": [
+    "Windows Edge file:// execution cannot be directly tested in this managed browser; identical HTML tested through localhost and offline.",
+    "FA midseason offers use leagues with the same season-start calendar; offseason contracts retain calendar conversion.",
+    "Old saved ability losses and adjudicated awards are preserved, not retroactively rewritten."
+  ]
+}
