@@ -1,0 +1,12 @@
+{
+  "url": "https://github.com/rabbit1245/rabbit1245.github.io/raw/737d7de4f74326d546d3c1c911cd894d99439b80/Kball.zip?download=1",
+  "artifactCommit": "737d7de4f74326d546d3c1c911cd894d99439b80",
+  "sourceCommit": "6f5499d29efa40434766d090943b6ffd067ff866",
+  "status": 200,
+  "contentType": "application/zip",
+  "bytes": 21505693,
+  "sha256": "f16f235e97991f5a3571d74cd475f5100ee6fbfd2552800a7fd05b3e822c182c",
+  "htmlSha256": "edda25679bd7617cffd1846c26d605b49b9daa7d2c23b611e9f128ae0816fde2",
+  "zipCRC": true,
+  "matchesTestedBuild": true
+}

@@ -1,6 +1,6 @@
 # K볼 2.9.1
 
-2026-10-26 · 구단 배지 보완 완료, 공개 다운로드 검증 준비.
+2026-10-26 · 배포 완료. 구단 배지 57개 보완.
 
 2.9.0에서 비어 있던 57개 구단의 배지를 모두 연결했다. **913개 구단에 배지가 표시되고 표시 누락은 0개**다. 기존·과거·전신 구단 자료 906개와 사용자 요청으로 제작한 비공식 창작 SVG 7개를 포함한다. 창작 배지를 실제 공식 엠블럼으로 표시하지 않는다.
 
@@ -29,4 +29,12 @@
 - [기존 구단 데이터 보존](validation/release-2.9.1/catalogue-preservation.json)
 - [57개 배지 대조 이미지](validation/release-2.9.1/added-crests.png)
 
-공개 다운로드 주소와 실제 내려받은 파일의 대조 결과는 배포 후 이 문서에 기록한다.
+[K볼 2.9.1 ZIP 다운로드](https://github.com/rabbit1245/rabbit1245.github.io/raw/737d7de4f74326d546d3c1c911cd894d99439b80/Kball.zip?download=1)
+
+ZIP **21,505,693바이트** · SHA-256 `f16f235e97991f5a3571d74cd475f5100ee6fbfd2552800a7fd05b3e822c182c`. 공개 주소의 HTTP 200·application/zip 응답에서 다시 받은 파일의 해시·CRC·동봉 HTML이 검수본과 일치한다.
+
+소스 구현 `6f5499d29efa40434766d090943b6ffd067ff866` · 다운로드 배포 `737d7de4f74326d546d3c1c911cd894d99439b80`.
+
+[공개 다운로드 검증](validation/release-2.9.1/public-download.json) · [실제 다운로드판 실행 검증](validation/release-2.9.1/public-smoke.json).
+
+실제로 내려받은 HTML에서도 913개 배지 디코딩, PC·모바일 표시, 오프라인·저장·재실행 검증이 통과했고 페이지 오류와 외부 요청은 0건이다.
