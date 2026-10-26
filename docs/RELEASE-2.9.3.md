@@ -41,3 +41,11 @@
 - 913개 구단 배지 유지, 누락 0개·비공식 창작 7개 유지. [결과](validation/kball-2.9.3-crests.json)
 
 실제 Windows Edge 직접 실행과 구별해 동일 단일 HTML의 Chromium·localhost·오프라인·Blob Worker·자동 저장을 검사했다. 페이지 오류와 외부 HTTP 자산 요청은 0건이다. [검증 요약](validation/release-2.9.3/summary.json)
+
+## 배포
+
+[K볼 2.9.3 ZIP 다운로드](https://github.com/rabbit1245/rabbit1245.github.io/raw/4200c91316d956267ae1714610bed5cb2bf863c3/Kball.zip?download=1)
+
+공개 다운로드 HTTP 200 · 21,508,652바이트 · SHA-256 `79445a5d4dcc3b62d6d5bcced7be93f116e794ff6c2c041d091169cf09e62fa3`. ZIP CRC 및 내부 HTML을 대조해 위 검사의 단일 HTML과 바이트 단위로 같음을 확인했다. [공개 다운로드 검증](validation/release-2.9.3/public-download.json).
+
+소스 구현 `208dddb775e50211af0922041e18cf96ab0eebec` · 다운로드 배포 `4200c91316d956267ae1714610bed5cb2bf863c3`.

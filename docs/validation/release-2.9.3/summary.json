@@ -1,6 +1,6 @@
 {
   "version": "2.9.3",
-  "status": "verified",
+  "status": "published",
   "core": {
     "tests": 275,
     "passed": 274,
@@ -31,5 +31,17 @@
   "typecheck": true,
   "productionBuild": true,
   "standaloneBuild": true,
-  "simulationReduced": false
+  "simulationReduced": false,
+  "public": {
+    "url": "https://github.com/rabbit1245/rabbit1245.github.io/raw/4200c91316d956267ae1714610bed5cb2bf863c3/Kball.zip?download=1",
+    "artifactCommit": "4200c91316d956267ae1714610bed5cb2bf863c3",
+    "sourceCommit": "208dddb775e50211af0922041e18cf96ab0eebec",
+    "status": 200,
+    "contentType": "application/zip",
+    "bytes": 21508652,
+    "sha256": "79445a5d4dcc3b62d6d5bcced7be93f116e794ff6c2c041d091169cf09e62fa3",
+    "htmlSha256": "054b9add3bf6c1e20f0c8d07f0419cdb517467fee94868eb5fbabdec7e770694",
+    "zipCRC": true,
+    "matchesTestedBuild": true
+  }
 }
