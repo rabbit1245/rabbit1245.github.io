@@ -1,6 +1,6 @@
 import {internationalEntries,internationalPlans} from './international-competitions';
 import {syncManualInjury} from './manual-injury';
-import {tournamentPerformance} from './tournament-awards';
+import {evaluateClubAwards} from './club-awards';
 import {CLUBS,getClub,getLeague} from './data';
 import {simulateMatch} from './match-engine';
 import {getClubWorldPower,getWorldClubPlayers} from './world';
@@ -105,10 +105,7 @@ function playedTable(t:ClubTournament){const table=new Map(emptyTable(t.entrants
  t.table=[...table.values()].sort((a,b)=>b.points-a.points||(b.goalsFor-b.goalsAgainst)-(a.goalsFor-a.goalsAgainst)||b.goalsFor-a.goalsFor||a.clubId.localeCompare(b.clubId));
 }
 function awardTitle(c:Career,t:ClubTournament){
- if(t.kind==='continental'&&t.format!=='super'&&t.format!=='intercontinental'){
-  const maxApps=Math.max(1,...Object.values(t.playerStats??{}).map(r=>r.stats.apps));const rows=Object.values(t.playerStats??{}).filter(r=>r.stats.apps>=Math.max(2,Math.ceil(maxApps*.5))&&r.stats.minutes>=90),ranked=rows.sort((a,b)=>tournamentPerformance({id:b.playerId,...b})-tournamentPerformance({id:a.playerId,...a})||a.playerId.localeCompare(b.playerId));
-  if(ranked[0]?.playerId===c.player.id){const id=`${t.id}:player-season:${c.player.id}`;if(!c.awards.some(a=>a.id===id))c.awards.push({id,year:t.year,clubId:c.player.clubId,name:t.id.startsWith('CLUB_WORLD_CUP:')?'FIFA 클럽 월드컵 골든볼':`${t.name} 시즌의 선수`,category:'continental-individual',organiser:t.id.startsWith('CLUB_WORLD_CUP:')?'FIFA':'해당 대륙 축구연맹',sourceUrl:t.id.startsWith('CLUB_WORLD_CUP:')?'https://www.fifa.com/':'https://www.uefa.com/',verification:'game-model',description:`해당 대회 실제 출전 선수 ${rows.length}명의 포지션별 경기 기여·평점·징계를 비교한 게임 내 평가. 리그·다른 컵·국대 기록 제외.`});}
- }
+ for(const award of evaluateClubAwards(c,t).awards)if(!c.awards.some(a=>a.id===award.id))c.awards.push(award);
 
  const contribution=t.matches.filter(m=>m.playerClubId===t.winnerId&&m.playerStats.apps>0);
  if(c.player.squad!=='senior'||!contribution.length)return;

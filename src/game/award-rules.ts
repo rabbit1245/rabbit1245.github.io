@@ -1,6 +1,6 @@
 import type {Award} from './types';
 /** Real award names and organisers. Numerical voting below is a game model, never an official vote. */
-export const AWARD_MODEL_VERSION='kball-awards-2.8';
+export const AWARD_MODEL_VERSION='kball-awards-2.9.5';
 export const AWARD_VERIFICATION_NOTE='게임 경기 기록으로 선정하는 모형입니다. 대상 연도의 공식 규정·평가 기간을 모두 검증한 결과는 아닙니다.';
 export interface AwardRule {
   id: string; name: string; organiser: string; criterion: string; sourceUrl: string;
@@ -25,10 +25,13 @@ export const LEAGUE_AWARD_RULES: Record<string, AwardRule[]> = {
     { id: 'mvp', name: 'K리그1 MVP', organiser: '한국프로축구연맹', sourceUrl: kleague, metric: 'performance', criterion: '실제 상은 감독·주장·미디어 투표로 선정합니다. 게임에서는 실제 시즌 기록·팀 성적·징계로 투표를 모형화합니다.' },
     { id: 'best-eleven', name: 'K리그1 베스트 일레븐', organiser: '한국프로축구연맹', sourceUrl: kleague, metric: 'eleven', formation: { defenders: 4, midfielders: 4, forwards: 2 }, criterion: '실제 상은 포지션별 투표로 선정합니다. 게임에서는 시즌 기록으로 GK 1·DF 4·MF 4·FW 2를 선정합니다.' },
   ],
-  ES1: [scorers('pichichi', '피치치 트로피', 'MARCA', 'https://www.marca.com/futbol/primera-division/pichichi.html')],
-  DE1: [scorers('torjaegerkanone', '분데스리가 득점왕 · Torjägerkanone', 'kicker', 'https://www.bundesliga.com/en/bundesliga/stats/players/goals')],
+  ES1: [scorers('pichichi', '피치치 트로피', 'MARCA', 'https://www.marca.com/futbol/primera-division/pichichi.html'),
+    {id:'player-season',name:'라리가 시즌 최우수 선수',organiser:'LALIGA',sourceUrl:'https://www.laliga.com/en-GB/laliga-awards',metric:'performance',criterion:'실제 리그 출전·포지션별 경기 기여·평점·팀 성적·징계를 비교하는 게임 투표 모형. 실제 시상 투표와 구별합니다.'}],
+  DE1: [scorers('torjaegerkanone', '분데스리가 득점왕 · Torjägerkanone', 'kicker', 'https://www.bundesliga.com/en/bundesliga/stats/players/goals'),
+    {id:'player-season',name:'분데스리가 시즌 최우수 선수',organiser:'Bundesliga',sourceUrl:'https://www.bundesliga.com/en/bundesliga',metric:'performance',criterion:'실제 리그 출전·포지션별 경기 기여·평점·팀 성적·징계를 비교하는 게임 투표 모형. 실제 시상 투표와 구별합니다.'}],
   IT1: [scorers('capocannoniere', '세리에 A 득점왕 · Capocannoniere', 'Lega Serie A', 'https://www.legaseriea.it/en/serie-a/statistiche')],
-  FR1: [{ ...scorers('top-scorer', '리그 1 최다득점상', 'Ligue de Football Professionnel', 'https://ligue1.com/'), tieBreak: 'unresolved', criterion: '리그 1 최다 득점. 동률 시 비페널티 득점 등 공식 세부 기준에 필요한 기록이 없어 게임은 수상을 확정하지 않습니다.' }],
+  FR1: [{ ...scorers('top-scorer', '리그 1 최다득점상', 'Ligue de Football Professionnel', 'https://ligue1.com/'), tieBreak: 'unresolved', criterion: '리그 1 최다 득점. 동률 시 비페널티 득점 등 공식 세부 기준에 필요한 기록이 없어 게임은 수상을 확정하지 않습니다.' },
+    {id:'unfp-player-season',name:'UNFP 리그 1 올해의 선수',organiser:'UNFP',sourceUrl:'https://www.tropheesunfp.com/',metric:'performance',criterion:'실제 리그 출전·포지션별 경기 기여·평점·팀 성적·징계를 비교하는 게임 선수 투표 모형. 실제 UNFP 투표와 구별합니다.'}],
   JP1: [scorers('top-scorer', 'J1리그 득점왕', 'J.LEAGUE', 'https://www.jleague.jp/awards/')],
 };
 export const GLOBAL_AWARD_RULES = {

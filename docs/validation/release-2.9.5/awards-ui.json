@@ -1,0 +1,89 @@
+{
+  "version": "2.9.5",
+  "url": "http://127.0.0.1:4187/Kball.html",
+  "checks": [
+    {
+      "width": 1366,
+      "file": "season.json",
+      "actualSeason": true,
+      "syntheticRecords": false,
+      "newAwards": [
+        "라리가 시즌 최우수 선수"
+      ],
+      "filters": true,
+      "retirementTXT": true,
+      "reload": true,
+      "noOverflow": true
+    },
+    {
+      "width": 390,
+      "file": "season.json",
+      "actualSeason": true,
+      "syntheticRecords": false,
+      "newAwards": [
+        "라리가 시즌 최우수 선수"
+      ],
+      "filters": true,
+      "retirementTXT": true,
+      "reload": true,
+      "noOverflow": true
+    },
+    {
+      "width": 390,
+      "file": "retired.json",
+      "actualSeason": true,
+      "syntheticRecords": false,
+      "newAwards": [
+        "라리가 시즌 최우수 선수"
+      ],
+      "filters": true,
+      "retirementTXT": true,
+      "reload": true,
+      "noOverflow": true
+    },
+    {
+      "width": 1366,
+      "file": "layout-retired.json",
+      "actualSeason": false,
+      "syntheticRecords": true,
+      "newAwards": [
+        "라리가 시즌 최우수 선수",
+        "분데스리가 시즌 최우수 선수",
+        "UNFP 리그 1 올해의 선수",
+        "UEFA 챔피언스리그 득점왕",
+        "UEFA 챔피언스리그 시즌 베스트 11",
+        "UEFA 유로파리그 득점왕",
+        "UEFA 유로파리그 시즌 베스트 11",
+        "UEFA 컨퍼런스리그 득점왕",
+        "UEFA 컨퍼런스리그 시즌 베스트 11"
+      ],
+      "filters": true,
+      "retirementTXT": true,
+      "reload": true,
+      "noOverflow": true
+    },
+    {
+      "width": 390,
+      "file": "layout-retired.json",
+      "actualSeason": false,
+      "syntheticRecords": true,
+      "newAwards": [
+        "라리가 시즌 최우수 선수",
+        "분데스리가 시즌 최우수 선수",
+        "UNFP 리그 1 올해의 선수",
+        "UEFA 챔피언스리그 득점왕",
+        "UEFA 챔피언스리그 시즌 베스트 11",
+        "UEFA 유로파리그 득점왕",
+        "UEFA 유로파리그 시즌 베스트 11",
+        "UEFA 컨퍼런스리그 득점왕",
+        "UEFA 컨퍼런스리그 시즌 베스트 11"
+      ],
+      "filters": true,
+      "retirementTXT": true,
+      "reload": true,
+      "noOverflow": true
+    }
+  ],
+  "errors": [],
+  "external": []
+}

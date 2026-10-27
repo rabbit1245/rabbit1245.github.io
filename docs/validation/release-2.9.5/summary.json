@@ -1,0 +1,32 @@
+{
+  "version": "2.9.5",
+  "status": "verified",
+  "newAwardCount": 9,
+  "core": {
+    "tests": 296,
+    "passed": 295,
+    "failed": 0,
+    "skipped": 1,
+    "skip": "existing 30-season test; KBALL_SKIP_LONG_TEST=1"
+  },
+  "targetedAwardTests": 12,
+  "actualWholeWorldSeasons": 1,
+  "actualNewAward": "라리가 시즌 최우수 선수",
+  "actualCupAdjudicationsMatchStoredResults": true,
+  "allNinePresentationUsesExplicitSyntheticFixture": true,
+  "UIWidths": [
+    1366,
+    390
+  ],
+  "UIImportReloadTXT": true,
+  "existingPlayableFlows": 11,
+  "pageErrors": 0,
+  "externalAssetRequests": 0,
+  "typecheck": true,
+  "productionBuild": true,
+  "standaloneBuild": true,
+  "zipCRC": true,
+  "simulationReduced": false,
+  "previousAwardsPreserved": true,
+  "newSaveSchemaRequired": false
+}

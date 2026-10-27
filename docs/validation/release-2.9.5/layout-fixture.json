@@ -1,0 +1,46 @@
+{
+  "syntheticAwardRecords": true,
+  "testsPresentationOnly": true,
+  "adjudicationEvidence": [
+    "award-rules.tap",
+    "actual-season.json"
+  ],
+  "newAwards": [
+    {
+      "id": "layout:ES1:player-season",
+      "name": "라리가 시즌 최우수 선수"
+    },
+    {
+      "id": "layout:DE1:player-season",
+      "name": "분데스리가 시즌 최우수 선수"
+    },
+    {
+      "id": "layout:FR1:unfp-player-season",
+      "name": "UNFP 리그 1 올해의 선수"
+    },
+    {
+      "id": "layout:UCL:2026:top-scorer",
+      "name": "UEFA 챔피언스리그 득점왕"
+    },
+    {
+      "id": "layout:UCL:2026:season-eleven",
+      "name": "UEFA 챔피언스리그 시즌 베스트 11"
+    },
+    {
+      "id": "layout:UEL:2026:top-scorer",
+      "name": "UEFA 유로파리그 득점왕"
+    },
+    {
+      "id": "layout:UEL:2026:season-eleven",
+      "name": "UEFA 유로파리그 시즌 베스트 11"
+    },
+    {
+      "id": "layout:UECL:2026:top-scorer",
+      "name": "UEFA 컨퍼런스리그 득점왕"
+    },
+    {
+      "id": "layout:UECL:2026:season-eleven",
+      "name": "UEFA 컨퍼런스리그 시즌 베스트 11"
+    }
+  ]
+}

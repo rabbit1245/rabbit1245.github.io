@@ -1,0 +1,30 @@
+{
+  "version": "2.9.5",
+  "year": 2026,
+  "clubId": "ES1_01",
+  "actualWholeWorldSeason": true,
+  "league": {
+    "apps": 36,
+    "goals": 32,
+    "assists": 5
+  },
+  "ucl": {
+    "apps": 12,
+    "goals": 6,
+    "participants": 468
+  },
+  "newAwards": [
+    {
+      "id": "2026:league:player-season:player_1psis7x",
+      "name": "라리가 시즌 최우수 선수",
+      "description": "36경기 · 평점 7.97 · 포지션별 실제 기록을 사용한 게임 내 투표 결과"
+    }
+  ],
+  "completedCups": 25,
+  "abilitiesUnchanged": true,
+  "completionIdempotent": true,
+  "archive": true,
+  "seasonHonours": true,
+  "JSONRoundTrip": true,
+  "retirementTXT": true
+}

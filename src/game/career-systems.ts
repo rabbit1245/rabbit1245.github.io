@@ -1,4 +1,7 @@
 import {syncUser} from './world';
+import {selectEleven,awardPositionGroup} from './award-selection';
+export {awardPositionGroup} from './award-selection';
+import {evaluateClubAwards} from './club-awards';
 import {personalityEdge} from './personality';
 import {globalVoting,additionalGlobalHonours} from './global-honours';
 import {isFreeAgent,expiryReturnClub,changeEmployment,careerLeagueEntries} from './employment';
@@ -19,13 +22,6 @@ export { getCaptainAssessment,answerCaptainOffer,expireCaptainOffers } from './c
 import type { Award, Career, PlayerStats, Position, TransferOffer } from './types';
 import type { BallonDorYear, CompetitorSeason, ContractSnapshot, ContractTermsSnapshot, Economics, Leadership, RankingCandidate } from './revision-types';
 
-type Group = 'GK'|'DEF'|'MID'|'FWD';
-export function awardPositionGroup(position: Position): Group {
-  if (position === 'GK') return 'GK';
-  if (['CB','LB','RB','LWB','RWB'].includes(position)) return 'DEF';
-  if (['CDM','CM','CAM','LM','RM'].includes(position)) return 'MID';
-  return 'FWD';
-}
 const avgRating = (s: PlayerStats) => s.ratingCount ? s.ratingSum / s.ratingCount : 0;
 const clubPower = (career: Career, clubId: string) => career.systems?.world.clubs[clubId]?.power ?? getClub(clubId).power;
 function marketEstimate(career: Career): number {
@@ -377,19 +373,6 @@ function rankRows(rows: CompetitorSeason[], career: Career, global = false, cont
   return rows.filter(r => r.stats.apps > 0).map(row => ({ playerId: row.playerId, name: row.name, clubId: row.clubId, position: row.position, score: score?score(row):performanceScore(row, career, global, context), rank: 0, stats: { ...row.stats }, nationalStats: { ...(row.nationalStats ?? emptyStats()) } }))
     .sort((a,b) => b.score - a.score || a.playerId.localeCompare(b.playerId)).map((row,i) => ({ ...row, rank: i + 1 }));
 }
-function selectEleven(ranking:RankingCandidate[],defenders:number,midfielders:number,forwards:number,extra=false):RankingCandidate[]{
- const selected:RankingCandidate[]=[],used=new Set<string>();
- const family=(p:Position)=>['LB','LWB'].includes(p)?'LB':['RB','RWB'].includes(p)?'RB':['ST','CF','SS'].includes(p)?'ST':p;
- for(const [group,amount]of [['GK',1],['DEF',defenders],['MID',midfielders],['FWD',forwards]] as const){
-  const pool=ranking.filter(r=>awardPositionGroup(r.position)===group);
-  const slots:Position[]=group==='GK'?['GK']:group==='DEF'?(amount===4?['LB','CB','CB','RB']:['CB','CB']):group==='FWD'&&amount===3?['LW','ST','RW']:[];
-  const take=(position?:Position)=>{const remaining=pool.filter(r=>!used.has(r.playerId));const same=position?remaining.filter(r=>family(r.position)===family(position)):remaining;const winner=(same.length?same:remaining)[0];if(winner){used.add(winner.playerId);selected.push(winner);}};
-  for(const pos of slots.slice(0,amount))take(pos);
-  while(selected.filter(r=>awardPositionGroup(r.position)===group).length<amount&&pool.some(r=>!used.has(r.playerId)))take();
- }
- if(extra){const other=ranking.find(r=>r.position!=='GK'&&!used.has(r.playerId));if(other)selected.push(other);}
- return selected;
-}
 function award(career: Career, rule: Pick<AwardRule,'id'|'name'|'organiser'|'criterion'|'sourceUrl'|'official'>, category: string, detail: string): Award {
   return { id: `${career.season.year}:${category}:${rule.id}:${career.player.id}`, name: rule.name, year: career.season.year, clubId: career.player.clubId, description: detail, organiser: rule.organiser, criterion: rule.criterion, sourceUrl: rule.sourceUrl, category, official: rule.official??true };
 }
@@ -488,7 +471,7 @@ export function evaluateAwards(career: Career): Award[] {
   const rankedOwn=fullRanking.find(r=>r.playerId===career.player.id);
   for(const [name,selected] of [['발롱도르',playerRank===1],['FIFPRO 월드 11',world11.some(r=>r.playerId===career.player.id)]] as const)diagnostics.push({name,scope:'리그·클럽 컵·국가대표',eligible:!!rankedOwn&&(name==='발롱도르'||rankedOwn.stats.apps+rankedOwn.nationalStats.apps>=30),result:selected?'수상':name==='발롱도르'&&playerRank?`${playerRank}위 · 미선정`:'미선정',detail:rankedOwn?`경기력 점수 ${rankedOwn.score.toFixed(2)} · 전체 ${rankedOwn.rank}위 · 우승/대회 기여 ${(context.cupTitles.get(career.player.id)??0).toFixed(1)}점 · 전체 비교 ${fullRanking.length}명 · 클럽 ${rankedOwn.stats.apps}경기 · 국대 ${rankedOwn.nationalStats.apps}경기. 발롱도르는 30인 후보 중 1위, 월드 11은 포지션별 비교와 총 30경기 이상.`:'성인 클럽 최소 출전·450분 기준 미충족 또는 실제 성적 미확인'});
   diagnostics.push({name:'경기 최우수 선수',scope:'실제 경기별',eligible:!!globalOwn?.stats.apps,result:`${(globalOwn?.stats.mom??0)+(globalOwn?.nationalStats.mom??0)}회`,detail:'각 경기에서 실제로 뛰고 받은 평점과 기여를 비교합니다. 출전하지 않은 경기는 제외합니다.'});
-  for(const t of cupLedger(career,career.season.year).filter(t=>t.kind==='continental'&&t.format!=='super'&&t.format!=='intercontinental'&&t.entrants.includes(career.player.clubId)))diagnostics.push({name:t.id.startsWith('CLUB_WORLD_CUP:')?'FIFA 클럽 월드컵 골든볼':`${t.name} 시즌의 선수`,scope:'해당 대회만',eligible:!!t.playerStats?.[career.player.id]&&t.phase==='completed',result:career.awards.some(a=>a.id===`${t.id}:player-season:${career.player.id}`)?'수상':'미선정',detail:`실제 해당 대회 ${t.playerStats?.[career.player.id]?.stats.apps??0}경기 · ${t.phase==='completed'?'대회 완료 후 전체 출전 선수의 역할별 기여 비교':'대회 미종료'}`});
+  for(const t of cupLedger(career,career.season.year).filter(t=>t.entrants.includes(career.player.clubId)||!!t.playerStats?.[career.player.id]))diagnostics.push(...evaluateClubAwards(career,t).diagnostics);
   const result: BallonDorYear = {diagnostics, year: career.season.year, candidates, playerRank, winnerId: candidates[0]?.playerId ?? '', world11, awards: won };
   career.systems.rankings.push(result);
   voting.finish();
