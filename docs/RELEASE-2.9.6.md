@@ -53,3 +53,13 @@
 - PC 1,366px에서 12시즌·101,788,022바이트 저장, 모바일 390px에서 1시즌·38,816,791바이트 저장을 가져와 검사했다. 미저장 클릭 중 리비전 변화/경기 Worker 전송은 0회, 저장 한 번의 리비전 변화는 +1이었다. 접기/펼치기·초안 취소·능력치 보존·JSON 내보내기·재실행·가로 넘침·글자 색상을 통과했다. 큰 저장의 편집 클릭 왕복 중앙값 139ms·95백분위 278ms, 저장 483ms였다. 이는 Playwright 동작과 다른 회귀 검사를 함께 실행한 Linux Chromium 수치이며 Windows Edge 직접 측정치가 아니다. [결과](validation/release-2.9.6/personality-ui.json) · [PC](validation/release-2.9.6/personality-desktop.png) · [모바일](validation/release-2.9.6/personality-mobile.png)
 - 기존 다운로드판 플레이 11항목 통과. 훈련·진행·순위·계약·세이브·체크섬·백업·다음 시즌·은퇴·모바일 GK·치트를 유지했다. 페이지 오류와 외부 HTTP 자산 요청은 0건이다. [결과](validation/release-2.9.6/playable-flow.json)
 - 타입 검사·프로덕션 빌드·단일 HTML·ZIP CRC·내부 HTML 대조 통과. 최종 안내문을 갱신한 ZIP의 HTML은 브라우저에서 검수한 HTML과 SHA-256이 일치한다. [빌드 해시](validation/release-2.9.6/build.json) · [검증 요약](validation/release-2.9.6/summary.json)
+
+## 공개 다운로드
+
+[K볼 2.9.6 ZIP](https://github.com/rabbit1245/rabbit1245.github.io/raw/c17280f3580583ce244ef8ef7322998871439bbb/Kball.zip?download=1) · 21,515,922바이트. 공개 링크에서 HTTP 200·`application/zip`으로 실제 내려받아 ZIP CRC·내부 HTML·검수 빌드 SHA-256 일치를 확인했다. [다운로드 검증](validation/release-2.9.6/public-download.json)
+
+- 소스: `38b425e7c3d8ae4eae9337f2c04aca9a5c8c3657`
+- 다운로드 배포: `c17280f3580583ce244ef8ef7322998871439bbb`
+- ZIP SHA-256: `4e3ad67eec5033e278c36ae8a506aaee007e7a3fa39b16afa94a2e5cf80b46a9`
+
+기존 게임에서 JSON 내보내기 → 새 ZIP 압축 해제 → `Kball.html`에서 JSON 불러오기로 이어 한다. 하단에서 **K볼 2.9.6**을 확인한다. 성향을 펼쳐 수정 후 성향 저장을 눌러 적용한다. 과거 확정 경기·순위·수상은 보존하고 이후 경기·평가부터 반영한다.

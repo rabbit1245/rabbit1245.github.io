@@ -1,6 +1,6 @@
 {
   "version": "2.9.6",
-  "status": "verified",
+  "status": "published",
   "core": {
     "tests": 304,
     "passed": 303,
@@ -43,5 +43,8 @@
   "productionBuild": true,
   "standaloneBuild": true,
   "matchesBrowserTestedHTML": true,
-  "simulationReduced": false
+  "simulationReduced": false,
+  "publicDownload": "public-download.json",
+  "artifactCommit": "c17280f3580583ce244ef8ef7322998871439bbb",
+  "matchesTestedBuild": true
 }
