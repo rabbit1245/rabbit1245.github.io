@@ -129,7 +129,7 @@ GitHub Pages에는 `dist/`를 배포합니다. 저장소 Settings → Pages의 S
 
 ## 파일로 바로 플레이
 
-[K볼 2.9.4 다운로드](https://github.com/rabbit1245/rabbit1245.github.io/raw/808db805f045fa47e24c5ce24ba160cee2109a1d/Kball.zip?download=1)을 내려받아 압축을 풀고 `Kball.html`을 최신 Chrome 또는 Edge로 엽니다. 게임 코드, 선수 명단과 구단 로고가 파일 안에 포함되어 있습니다. 사용자에게 Node.js나 Python 설치는 필요하지 않습니다. 저장 데이터는 브라우저에 보관되므로 파일 이름·위치 또는 브라우저를 바꾸기 전에 JSON으로 내보내세요.
+[K볼 2.9.5 다운로드](https://github.com/rabbit1245/rabbit1245.github.io/raw/6052a270d3b07c58c913ee05bb384c4e05d090ed/Kball.zip?download=1)을 내려받아 압축을 풀고 `Kball.html`을 최신 Chrome 또는 Edge로 엽니다. 게임 코드, 선수 명단과 구단 로고가 파일 안에 포함되어 있습니다. 사용자에게 Node.js나 Python 설치는 필요하지 않습니다. 저장 데이터는 브라우저에 보관되므로 파일 이름·위치 또는 브라우저를 바꾸기 전에 JSON으로 내보내세요.
 
 개발자가 이 파일을 다시 생성하려면 Node.js와 Python 3가 설치된 환경에서 다음 명령을 사용합니다.
 

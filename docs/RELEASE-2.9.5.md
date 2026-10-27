@@ -43,3 +43,13 @@ UEFA 베스트 11은 대회 내 최다 출전 경기 수의 절반 이상(올림
 - PC 1,366px·모바일 390px에서 실제 시즌·은퇴 저장 가져오기와 신규 9개 표시 전용 자료의 수상 범위 필터·가로 넘침·TXT 다운로드·재실행 후 보존 검사 5개 사례 통과. 페이지 오류·외부 HTTP 자산 요청은 0건이다. [결과](validation/release-2.9.5/awards-ui.json) · [PC](validation/release-2.9.5/awards-desktop.png) · [모바일](validation/release-2.9.5/awards-mobile.png)
 - 전체 코어 296개 중 295개 통과·실패 0개. 기존 30시즌 장기 검사 1개는 `KBALL_SKIP_LONG_TEST=1`로 제외했으며 위 실제 한 시즌 진행은 별도로 실행했다. [전체 결과](validation/release-2.9.5/core-suite.tap)
 - 타입 검사·프로덕션 빌드·단일 HTML 빌드·ZIP CRC·내부 HTML 대조 통과. [빌드 해시](validation/release-2.9.5/build.json) · [검증 요약](validation/release-2.9.5/summary.json)
+
+## 공개 다운로드
+
+[K볼 2.9.5 ZIP](https://github.com/rabbit1245/rabbit1245.github.io/raw/6052a270d3b07c58c913ee05bb384c4e05d090ed/Kball.zip?download=1) · 21,514,401바이트. 공개 링크에서 HTTP 200·`application/zip`으로 실제 내려받아 ZIP CRC·내부 HTML·검수 빌드 SHA-256 일치를 확인했다. [다운로드 검증](validation/release-2.9.5/public-download.json)
+
+- 소스: `90797cb220e633f1d853835f17ff1dbbe791331d`
+- 다운로드 배포: `6052a270d3b07c58c913ee05bb384c4e05d090ed`
+- ZIP SHA-256: `af519e09a4cf3f040a45ffb1c748eca1bd3fae4c062fe4daf690836b22c98804`
+
+기존 게임에서 JSON 내보내기 → 새 ZIP 압축 해제 → `Kball.html`에서 JSON 불러오기로 이어 한다. 하단에서 **K볼 2.9.5**를 확인한다. 새 수상은 업데이트 이후 실제 대회·시즌 종료 시점부터 판정하며 과거 확정 기록은 보존한다.

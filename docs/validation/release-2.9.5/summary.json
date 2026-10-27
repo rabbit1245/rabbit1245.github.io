@@ -1,6 +1,6 @@
 {
   "version": "2.9.5",
-  "status": "verified",
+  "status": "published",
   "newAwardCount": 9,
   "core": {
     "tests": 296,
@@ -28,5 +28,8 @@
   "zipCRC": true,
   "simulationReduced": false,
   "previousAwardsPreserved": true,
-  "newSaveSchemaRequired": false
+  "newSaveSchemaRequired": false,
+  "publicDownload": "public-download.json",
+  "artifactCommit": "6052a270d3b07c58c913ee05bb384c4e05d090ed",
+  "matchesTestedBuild": true
 }
