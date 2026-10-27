@@ -8,7 +8,8 @@ export function userInfluencedClub(c:Career,id:string):boolean{
  const w=c.systems?.world;if(!w)return id===c.player.clubId;
  let index=indexes.get(w);
  if(!index||index.clubId!==c.player.clubId||index.history!==c.history.length){
-  index={clubId:c.player.clubId,history:c.history.length,influenced:new Set([c.player.clubId,...c.history.filter(h=>h.squad==='senior'&&(h.stats?.apps??0)>=8).map(h=>h.clubId),...Object.values(w.clubs).filter(t=>t.development?.history.some(r=>r.star?.playerId===c.player.id&&r.star.apps>=8)).map(t=>t.id)])};indexes.set(w,index);
+  const built=c.history.filter(h=>h.squad==='senior'&&(h.stats?.apps??0)>=8&&(h.stats?.minutes??0)>=900&&(h.ovrEnd>=(w.clubs[h.clubId]?.development?.basePower??100)+8||h.stats.ratingCount>0&&h.stats.ratingSum/h.stats.ratingCount>=7.3));
+  index={clubId:c.player.clubId,history:c.history.length,influenced:new Set([c.player.clubId,...built.map(h=>h.clubId),...Object.values(w.clubs).filter(t=>t.development?.history.some(r=>r.star?.playerId===c.player.id&&r.star.influence>=.2)).map(t=>t.id)])};indexes.set(w,index);
  }
  return index.influenced.has(id);
 }

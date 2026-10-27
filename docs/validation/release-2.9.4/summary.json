@@ -34,5 +34,7 @@
   "typecheck": true,
   "productionBuild": true,
   "standaloneBuild": true,
-  "simulationReduced": false
+  "simulationReduced": false,
+  "formerClubCameoDoesNotExemptBalance": true,
+  "finalCoreSuite": "core-suite.tap"
 }

@@ -32,7 +32,8 @@ test('unaffected clubs cannot become superclubs from inherited investment; all r
  const c=fresh(),w=c.systems!.world,id='DE1_09',base=getClubWorldPower(c,id);assert.ok(!userInfluencedClub(c,id));w.clubs[id].development!.investmentPower=22;w.clubs[id].development!.prestige=99;assert.ok(getClubWorldPower(c,id)-base<=4.01);
  assert.equal(ESTABLISHED_CLUBS.size,22);for(const club of ESTABLISHED_CLUBS){assert.ok(w.clubs[club]);assert.ok(['영국','이탈리아','스페인','독일','프랑스'].includes(getLeague(w.clubs[club].leagueId).country));}
  const own=w.clubs[c.player.clubId],old=getClubWorldPower(c,own.id);own.development!.investmentPower=12;assert.ok(getClubWorldPower(c,own.id)>old+10);
- const past=structuredClone(c);past.player.clubId='FA';past.history=[{clubId:own.id,squad:'senior',stats:{apps:30}}] as Career['history'];assert.ok(userInfluencedClub(past,own.id),'an actually built former club keeps its legacy');
+ const past=structuredClone(c);past.player.clubId='FA';past.history=[{clubId:own.id,squad:'senior',ovrEnd:98,stats:{apps:30,minutes:2700,ratingCount:30,ratingSum:225}}] as Career['history'];assert.ok(userInfluencedClub(past,own.id),'an actually built former club keeps its legacy');
+ const cameo=structuredClone(c);cameo.player.clubId='FA';cameo.history=[{clubId:own.id,squad:'senior',ovrEnd:50,stats:{apps:8,minutes:120,ratingCount:8,ratingSum:48}}] as Career['history'];assert.equal(userInfluencedClub(cameo,own.id),false,'a brief reserve spell does not license decades of autonomous superclub growth');
 });
 test('the first command repairs legacy current club powers on a copy without rewriting historic games or the original',()=>{
  const c=fresh();delete c.systems!.world.balanceVersion;c.systems!.world.clubs.DE1_09.development!.investmentPower=20;c.systems!.world.clubs.DE1_09.power=95;const before=JSON.stringify(c),history=JSON.stringify(c.history);
