@@ -18,6 +18,6 @@ ZIP을 내려받아 압축을 풀고 Kball.html을 최신 Chrome 또는 Edge에�
 
 [변경 내용과 검증](https://github.com/rabbit1245/rabbit1245.github.io/blob/codex/kball-white-green-20261021/docs/RELEASE-2.9.4.md)
 
-소스: 939c5ba7c2bb5f2b27805bc0142d26b8b863b84d
+소스: 0c50c0b899e8b991893b30ab2e582dff589d458c
 
-ZIP: 21,513,028바이트 · SHA-256: e26fcfffe03c4adf2f07d8997f710bc19a376be007673022cdd32ba0c4161e05
+ZIP: 21,513,172바이트 · SHA-256: 3bd68a73e93a815c6753a3f5f76073bead2aca3fdb166312882cabaf63ef349c
