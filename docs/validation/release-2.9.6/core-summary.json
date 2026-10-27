@@ -1,0 +1,13 @@
+{
+  "tests": 304,
+  "passed": 303,
+  "failed": 0,
+  "skipped": 1,
+  "cancelled": 0,
+  "durationMs": 512395.760122,
+  "command": "KBALL_SKIP_LONG_TEST=1 node --import tsx --test --test-concurrency=7 src/game/*.test.ts",
+  "skip": "existing 30-season test",
+  "evidence": "Counts transcribed from the completed terminal test-run summary observed in this conversation. The /tmp TAP log was lost when the execution environment restarted; source and the tested HTML remained unchanged.",
+  "rawTapAvailable": false,
+  "testedHtmlSha256": "05255c1ca1e01fa4cd8956cf6d59182a80b90fdb17053841cf09404f52b50039"
+}

@@ -42,7 +42,7 @@ function marketEstimate(career: Career): number {
   const demand = 1 + Math.min(.2, career.offers.filter(o => o.type === 'transfer').length * .035);
   const international = 1 + Math.min(.15, (career.systems?.national.reputation ?? 0) / 650);
   const injury = Math.max(.45, 1 - p.injuryWeeks * .035);
-  return Math.max(1_000, Math.round(quality * youth * potential * form * minutes * prestige * demand * injury * international * (1+personalityEdge(career,'stardom')*.05) / 1_000) * 1_000);
+  return Math.max(1_000, Math.round(quality * youth * potential * form * minutes * prestige * demand * injury * international * (1+personalityEdge(career,'stardom')*.06) / 1_000) * 1_000);
 }
 function dateOnly(value:string):string { return value.slice(0,10); }
 function contractEndDate(startYear:number,startMonth:number,years:number):string {
@@ -288,7 +288,7 @@ export function updateLeadership(career: Career, scope: 'club'|'national', appoi
     l.nationalRole = 'none';expireCaptainOffers(career,'national');
   }
   const assessment=getCaptainAssessment(career,scope);
-  if(appointment)proposeCaptainOffer(career,scope);
+  if(appointment||scope==='club'&&career.season.week>0&&career.season.week%6===0)proposeCaptainOffer(career,scope,assessment);
   for (const t of l.terms.filter(t => t.scope === scope && t.teamId === teamId)) {
     if (t.role !== 'match') t.apps = matches.filter((m, index) => {
       const playedRound = scope === 'club' ? m.round : matches.slice(0, index + 1).filter(previous => previous.seasonYear === m.seasonYear).length;
@@ -323,7 +323,7 @@ function roleContribution(row:CompetitorSeason):number{
  if(group==='GK')return rate(s.saves,3.4)*12+s.cleanSheets/Math.max(1,s.apps)*32+s.saves/Math.max(1,s.shotsFaced??s.saves+s.goalsConceded)*18+rate(s.penaltiesSaved??0,.04)*2;
  if(group==='DEF')return rate(s.tackles+s.interceptions,4)*20+rate(s.aerialWon??0,2.3)*7+s.cleanSheets/Math.max(1,s.apps)*22+rate(s.goals+s.assists,.18)*8;
  if(group==='MID')return rate(s.goals+s.assists,.45)*19+rate(s.keyPasses??0,1.6)*11+rate(s.tackles+s.interceptions,3.5)*8+s.passesCompleted/Math.max(1,s.passes)*8;
- return rate(s.goals,.52)*26+rate(s.assists,.2)*10+rate(s.dribblesCompleted??0,2)*7;
+ return rate(s.goals,.52)*26+rate(s.assists,.2)*10+rate(s.dribblesCompleted??0,2)*7+rate(s.tackles+s.interceptions,3)*10+rate(s.keyPasses??0,1.2)*6+rate(s.aerialWon??0,2)*4;
 }
 const median=(values:number[])=>{const a=values.sort((x,y)=>x-y),m=Math.floor(a.length/2);return a.length%2?a[m]:(a[m-1]+a[m])/2;};
 function votingContext(career:Career):VotingContext{
@@ -386,7 +386,7 @@ export function getClubTopScorer(career: Career): { playerId: string; name: stri
 function leagueHonours(career:Career,leagueId:string,leagueRows:CompetitorSeason[],context:VotingContext):Award[]{
  const own=career.player.squad==='senior'?leagueRows.find(r=>r.playerId===career.player.id):undefined,won:Award[]=[];
  const rounds=career.systems!.employment?career.systems!.world.competitions[leagueId]?.totalRounds??career.season.totalWeeks:career.season.totalWeeks,minApps=Math.max(5,Math.floor(rounds*.4));
- const leagueRanking=rankRows(leagueRows.filter(r=>r.stats.apps>=minApps),career,false,context,r=>performanceScore(r,career,false,context)*(r.playerId===career.player.id?1+personalityEdge(career,'stardom')*.006:1));
+ const leagueRanking=rankRows(leagueRows.filter(r=>r.stats.apps>=minApps),career,false,context,r=>performanceScore(r,career,false,context)*(r.playerId===career.player.id?1+personalityEdge(career,'stardom')*.016:1));
   for (const rule of leagueAwardRules(leagueId,getLeague(leagueId).name)) {
     if (!own) continue;
     if (rule.metric === 'goals' || rule.metric === 'assists' || rule.metric === 'cleanSheets') {

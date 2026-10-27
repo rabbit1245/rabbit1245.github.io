@@ -17,7 +17,7 @@ function stopWorker(message: string) {
 
 export async function runGameCommand(career: Career, command: GameCommand,onProgress?:(p:GameProgress)=>void): Promise<Career> {
   const id = crypto.randomUUID();
-  if (typeof Worker === 'undefined'||['playSkill','manualAging','attributeLock','attributeLockAll','training','cheatSettings','increaseAttribute'].includes(command.type)) {
+  if (typeof Worker === 'undefined'||['personality','personalitySet','playSkill','manualAging','attributeLock','attributeLockAll','training','cheatSettings','increaseAttribute'].includes(command.type)) {
     const { executeCommand } = await import('./commands');
     return executeCommand(career, command, id,onProgress);
   }

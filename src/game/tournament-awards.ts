@@ -15,7 +15,7 @@ export function tournamentPerformance(player:TournamentPlayer):number {
   if(role==='GK')return common+s.saves/matches*2+s.saves/Math.max(1,s.shotsFaced??s.saves+s.goalsConceded)*16+s.cleanSheets/Math.max(1,s.apps)*16-s.goalsConceded/matches*1.5+(s.penaltiesSaved??0)*3;
   if(role==='DEF')return common+(s.tackles+s.interceptions)/matches*2.5+(s.aerialWon??0)/matches+s.cleanSheets/Math.max(1,s.apps)*12+(s.goals+s.assists)/matches*6;
   if(role==='MID')return common+(s.goals+s.assists)/matches*9+(s.keyPasses??0)/matches*2+(s.tackles+s.interceptions)/matches+s.passesCompleted/Math.max(1,s.passes)*5;
-  return common+s.goals/matches*13+s.assists/matches*7+(s.dribblesCompleted??0)/matches;
+  return common+s.goals/matches*13+s.assists/matches*7+(s.dribblesCompleted??0)/matches+(s.tackles+s.interceptions)/matches*2+(s.keyPasses??0)/matches*1.5+(s.aerialWon??0)/matches*.6;
 }
 
 /** Pure, competition-scoped personal awards, based only on completed FIFA finals ledgers. */

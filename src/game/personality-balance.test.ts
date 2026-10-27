@@ -62,9 +62,9 @@ test('leadership improves the use of real paid investment rather than creating f
  const c=elite('IT3_30'),comp=c.systems!.world.competitions[c.season.leagueId];for(const f of comp.fixtures){f.played=true;f.homeGoals=1;f.awayGoals=1;}comp.round=comp.totalRounds;comp.table=calculateTable(comp.fixtures,comp.table.map(r=>r.clubId));c.season.playerStats={...emptyStats(),apps:38,starts:38,minutes:3420,goals:31,assists:23,ratingCount:38,ratingSum:296.4};
  const high=setPersonality(structuredClone(c),'leadership',10);transitionWorldSeason(c);transitionWorldSeason(high);const a=c.systems!.world.clubs.IT3_30.development!,b=high.systems!.world.clubs.IT3_30.development!;assert.equal(a.history.at(-1)!.reinvestment,b.history.at(-1)!.reinvestment);assert.ok(b.investmentPower!>a.investmentPower!);assert.deepEqual(c.player.attributes,high.player.attributes);
 });
-test('stardom gives a small subjective vote bonus but never changes a Golden Shoe goal count',()=>{
+test('stardom gives a noticeable bounded subjective vote bonus but never changes a Golden Shoe goal count',()=>{
  const c=elite(),high=setPersonality(c,'stardom',10),r={playerId:c.player.id,name:c.player.name,clubId:c.player.clubId,leagueId:c.season.leagueId,nationality:c.player.nationality,ovr:98,position:c.player.position,stats:{...emptyStats(),apps:34,minutes:2900,goals:31,assists:23,ratingCount:34,ratingSum:272},nationalStats:emptyStats()},ctx={leagueWinners:new Map<string,string>(),cups:[],leagueTitles:new Map<string,number>(),cupTitles:new Map<string,number>(),teamScore:new Map<string,number>()};
- const a=globalVoting(c,[r],()=>100,ctx).score(r),b=globalVoting(high,[r],()=>100,ctx).score(r);assert.ok(b>a&&b<=a*1.041);assert.equal(europeanShoePoints(r),62);assert.deepEqual(high.player.attributes,c.player.attributes);
+ const a=globalVoting(c,[r],()=>100,ctx).score(r),b=globalVoting(high,[r],()=>100,ctx).score(r);assert.ok(b>a*1.05&&b<=a*1.12);assert.equal(europeanShoePoints(r),62);assert.deepEqual(high.player.attributes,c.player.attributes);
 });
 
 test('clutch only boosts big stages; winning helps actual on-pitch team chances and never absent players',()=>{

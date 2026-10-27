@@ -36,7 +36,7 @@ export function evaluateExtraHonours(c:Career,scoreSeason:(r:CompetitorSeason)=>
   const prior=c.systems!.rankings.slice(-3).flatMap(y=>y.candidates),ranks=prior.filter(x=>x.playerId===r.playerId);
   return Math.max(0,...ranks.map(x=>31-x.rank))*1.1+(r.playerId===p.id?c.awards.filter(a=>a.year>=year-2&&['world','continental-individual'].includes(a.category??'')).length*6:0);
  };
- const popularity=(r:CompetitorSeason)=>(performance(r)*.65+reputation(r)+Math.min(7,tenure(r))*2+Math.min(12,r.stats.goals*.25+r.stats.assists*.18)*(1+Math.log10(1+(w.clubs[clubId]?.revenue??0)/1000000)*.03)+(r.stats.mom??0)*.9)*(r.playerId===p.id?1+personalityEdge(c,'stardom')*.03:1);
+ const popularity=(r:CompetitorSeason)=>(performance(r)*.65+reputation(r)+Math.min(7,tenure(r))*2+Math.min(12,r.stats.goals*.25+r.stats.assists*.18)*(1+Math.log10(1+(w.clubs[clubId]?.revenue??0)/1000000)*.03)+(r.stats.mom??0)*.9)*(r.playerId===p.id?1+personalityEdge(c,'stardom')*.05:1);
  const firstSigning=(r:CompetitorSeason)=>r.playerId===p.id?c.transfers.some(t=>t.toClubId===r.clubId&&t.year===year&&t.fromClubId!==t.toClubId):w.players[r.playerId]?.joinedYear===year;
  const valueReturn=(r:CompetitorSeason)=>performance(r)/(1+Math.log10(1+(r.playerId===p.id?c.transfers.find(t=>t.year===year&&t.toClubId===clubId)?.fee??0:w.players[r.playerId]?.transferFee??0)/1000000)*.14);
  const add=(id:string,name:string,scope:string,rows:CompetitorSeason[],score:(r:CompetitorSeason)=>number,detail:string,commercial=false)=>{

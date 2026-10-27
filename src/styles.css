@@ -1148,3 +1148,14 @@ input,select { font-size:17px; min-height:38px; padding:7px 10px; border-radius:
 .personality-control output { min-width:66px; text-align:center; font-weight:700; color:var(--text); }
 .personality-control small { font-size:13px; color:var(--muted); font-weight:400; }
 @media(max-width:540px) { .personality-row { align-items:flex-start; flex-wrap:wrap; } .personality-control { margin-left:auto; } }
+
+.personality-card > summary { display:flex; align-items:center; justify-content:space-between; gap:14px; padding:16px 20px; cursor:pointer; list-style:none; color:var(--text); }
+.personality-card > summary::-webkit-details-marker { display:none; }
+.personality-card > summary strong { font-size:18px; }
+.personality-preview { display:flex; flex-wrap:wrap; gap:4px 12px; margin:7px 0 0; color:var(--muted); font-size:14px; line-height:1.5; }
+.personality-fold { display:flex; align-items:center; gap:6px; flex-shrink:0; color:var(--text); font-size:14px; }
+.personality-card[open] > summary { border-bottom:1px solid var(--border); }
+.personality-card[open] .personality-fold svg { transform:rotate(180deg); }
+.personality-actions { display:flex; justify-content:flex-end; align-items:center; gap:10px; flex-wrap:wrap; margin-top:16px; }
+.personality-actions > span { margin-right:auto; color:var(--text); font-size:14px; }
+@media(max-width:540px) { .personality-card > summary { padding:14px; align-items:flex-start; } .personality-fold { font-size:13px; } }

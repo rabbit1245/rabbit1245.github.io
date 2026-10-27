@@ -496,7 +496,7 @@ export function transitionWorldSeason(career: Career): void {
     const room=clamp((94-club.power)/20,.12,1);
     // Lower divisions already earn smaller budgets. Dividing the funded gain by
     // tier a second time made building a small club effectively impossible.
-    const influenced=userInfluencedClub(career,club.id),leadership=club.id===career.player.clubId?1+personalityEdge(career,'leadership')*.04:1;
+    const influenced=userInfluencedClub(career,club.id),leadership=club.id===career.player.clubId?1+personalityEdge(career,'leadership')*.08:1;
     const investment=completedLeagues.has(performance.leagueId)?Math.min(performance.star?.retained?2.2:1.8,performance.reinvestment/Math.max(1,oldRevenue)*36)*room*leadership:0;
     // Existing investment is retained across updates. High-level squads face smaller marginal gains.
     club.development.investmentPower=round(influenced?clamp(previousInvestment*.98+investment,0,Math.max(previousInvestment,ceiling)):clamp(previousInvestment*.7+investment*.15,0,2.5),3);

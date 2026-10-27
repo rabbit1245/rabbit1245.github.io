@@ -1,0 +1,46 @@
+{
+  "version": "2.9.6",
+  "url": "http://127.0.0.1:4188/Kball.html",
+  "checks": [
+    {
+      "width": 1366,
+      "fixture": "test-results/release-2.9.4/liverpool/career.json",
+      "fixtureBytes": 101788022,
+      "historySeasons": 12,
+      "defaultCollapsed": true,
+      "unsavedEditsDoNotChangeRevision": true,
+      "cancel": true,
+      "collapseKeepsDraft": true,
+      "oneSaveRevision": true,
+      "gameWorkerRequests": 0,
+      "editMedianMs": 139,
+      "editP95Ms": 278,
+      "saveMs": 483,
+      "abilitiesUnchanged": true,
+      "export": true,
+      "reload": true,
+      "noOverflow": true
+    },
+    {
+      "width": 390,
+      "fixture": "test-results/release-2.9.5/fixtures/season.json",
+      "fixtureBytes": 38816791,
+      "historySeasons": 1,
+      "defaultCollapsed": true,
+      "unsavedEditsDoNotChangeRevision": true,
+      "cancel": true,
+      "collapseKeepsDraft": true,
+      "oneSaveRevision": true,
+      "gameWorkerRequests": 0,
+      "editMedianMs": 87,
+      "editP95Ms": 175,
+      "saveMs": 392,
+      "abilitiesUnchanged": true,
+      "export": true,
+      "reload": true,
+      "noOverflow": true
+    }
+  ],
+  "errors": [],
+  "external": []
+}

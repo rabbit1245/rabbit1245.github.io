@@ -1,7 +1,7 @@
 import type {Career,GameCommand} from './types';
 
 export type CareerPatch = {path:(string|number)[];op:'set';value:unknown}|{path:(string|number)[];op:'delete'}|{path:(string|number)[];op:'length';value:number};
-export const LIGHT_COMMANDS=new Set<GameCommand['type']>(['personality','refreshOffers','playSkill','manualAging','attributeLock','attributeLockAll','training','cheatSettings','increaseAttribute']);
+export const LIGHT_COMMANDS=new Set<GameCommand['type']>(['personality','personalitySet','refreshOffers','playSkill','manualAging','attributeLock','attributeLockAll','training','cheatSettings','increaseAttribute']);
 const forbidden=new Set(['__proto__','prototype','constructor']);
 const receipts=new WeakMap<Career,{previous:WeakRef<Career>;patches:CareerPatch[];signature:string}>();
 const MAX_PATCH_BYTES=512*1024;

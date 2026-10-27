@@ -1,0 +1,279 @@
+{
+  "version": "2.9.6",
+  "userSaveReproduction": false,
+  "controlledProfile": "all field attributes 95; ST pressing forward; Liverpool; age 26; locked abilities; three actual whole-world seasons per arm; same starting seed; valid captain offers and renewals accepted",
+  "arms": {
+    "default5": [
+      {
+        "year": 2026,
+        "rank": 3,
+        "points": 74,
+        "apps": 34,
+        "goals": 17,
+        "assists": 3,
+        "tackles": 91,
+        "interceptions": 58,
+        "rating": 7.756,
+        "power": 87.67,
+        "investment": 0,
+        "clubRole": "captain",
+        "offers": [
+          {
+            "scope": "club",
+            "role": "vice",
+            "round": 12,
+            "status": "expired"
+          },
+          {
+            "scope": "club",
+            "role": "captain",
+            "round": 18,
+            "status": "accepted"
+          },
+          {
+            "scope": "national",
+            "role": "vice",
+            "round": 38,
+            "status": "accepted"
+          }
+        ],
+        "awards": [
+          "UEFA 챔피언스리그 우승 메달",
+          "클럽 선정 · 구단 올해의 선수",
+          "클럽 선정 · 구단 팬 선정 올해의 선수",
+          "클럽 선정 · 구단 선수단 선정 올해의 선수",
+          "클럽 선정 · 구단 올해의 공격수",
+          "클럽 선정 · 구단 올해의 해결사",
+          "언론 선정 · 프리미어리그 올해의 신인",
+          "언론 선정 · 프리미어리그 2027-03 이달의 선수",
+          "언론 선정 · 프리미어리그 2027-05 이달의 선수",
+          "언론 선정 · 대한민국 국가대표 올해의 선수",
+          "언론 선정 · 구단 유니폼 판매 예상 1위",
+          "The Best FIFA Men's 11",
+          "FIFPRO 월드 11"
+        ],
+        "maxNpcRise": 2.219999999999999
+      },
+      {
+        "year": 2027,
+        "rank": 1,
+        "points": 90,
+        "apps": 38,
+        "goals": 19,
+        "assists": 7,
+        "tackles": 107,
+        "interceptions": 68,
+        "rating": 7.826,
+        "power": 87.66,
+        "investment": 0.638,
+        "clubRole": "captain",
+        "offers": [
+          {
+            "scope": "national",
+            "role": "captain",
+            "round": 19,
+            "status": "accepted"
+          }
+        ],
+        "awards": [
+          "FIFA 인터컨티넨털컵 우승 메달",
+          "PFA 올해의 팀",
+          "프리미어리그 우승 메달",
+          "클럽 선정 · 구단 올해의 선수",
+          "클럽 선정 · 구단 팬 선정 올해의 선수",
+          "클럽 선정 · 구단 선수단 선정 올해의 선수",
+          "클럽 선정 · 구단 올해의 공격수",
+          "언론 선정 · 프리미어리그 2028-05 이달의 선수",
+          "언론 선정 · FA컵 최우수 선수",
+          "언론 선정 · 대한민국 국가대표 올해의 선수",
+          "언론 선정 · 구단 유니폼 판매 예상 1위",
+          "The Best FIFA Men's 11",
+          "FIFPRO 월드 11"
+        ],
+        "maxNpcRise": 2.1199999999999974
+      },
+      {
+        "year": 2028,
+        "rank": 1,
+        "points": 92,
+        "apps": 38,
+        "goals": 23,
+        "assists": 2,
+        "tackles": 111,
+        "interceptions": 70,
+        "rating": 7.921,
+        "power": 89.04,
+        "investment": 1.322,
+        "clubRole": "captain",
+        "offers": [],
+        "awards": [
+          "커뮤니티 실드 우승 메달",
+          "카라바오컵 우승 메달",
+          "UEFA 챔피언스리그 시즌의 선수",
+          "UEFA 챔피언스리그 득점왕",
+          "UEFA 챔피언스리그 시즌 베스트 11",
+          "프리미어리그 우승 메달",
+          "클럽 선정 · 구단 올해의 선수",
+          "클럽 선정 · 구단 팬 선정 올해의 선수",
+          "클럽 선정 · 구단 선수단 선정 올해의 선수",
+          "클럽 선정 · 구단 올해의 공격수",
+          "클럽 선정 · 구단 올해의 해결사",
+          "언론 선정 · 프리미어리그 2028-08 이달의 선수",
+          "언론 선정 · 프리미어리그 2029-02 이달의 선수",
+          "언론 선정 · 대한민국 국가대표 올해의 선수",
+          "언론 선정 · 구단 유니폼 판매 예상 1위",
+          "The Best FIFA 올해의 선수",
+          "The Best FIFA Men's 11",
+          "발롱도르",
+          "FIFPRO 월드 11"
+        ],
+        "maxNpcRise": 2.180000000000007
+      }
+    ],
+    "high10": [
+      {
+        "year": 2026,
+        "rank": 3,
+        "points": 80,
+        "apps": 34,
+        "goals": 20,
+        "assists": 3,
+        "tackles": 93,
+        "interceptions": 59,
+        "rating": 7.924,
+        "power": 87.67,
+        "investment": 0,
+        "clubRole": "captain",
+        "offers": [
+          {
+            "scope": "club",
+            "role": "vice",
+            "round": 12,
+            "status": "expired"
+          },
+          {
+            "scope": "club",
+            "role": "captain",
+            "round": 18,
+            "status": "accepted"
+          },
+          {
+            "scope": "national",
+            "role": "vice",
+            "round": 38,
+            "status": "accepted"
+          }
+        ],
+        "awards": [
+          "카라바오컵 우승 메달",
+          "UEFA 챔피언스리그 시즌 베스트 11",
+          "UEFA 챔피언스리그 우승 메달",
+          "프리미어리그 시즌의 선수",
+          "PFA 올해의 팀",
+          "클럽 선정 · 구단 올해의 선수",
+          "클럽 선정 · 구단 팬 선정 올해의 선수",
+          "클럽 선정 · 구단 선수단 선정 올해의 선수",
+          "클럽 선정 · 구단 올해의 공격수",
+          "클럽 선정 · 구단 올해의 해결사",
+          "언론 선정 · 프리미어리그 올해의 신인",
+          "언론 선정 · 프리미어리그 2026-07 이달의 선수",
+          "언론 선정 · 프리미어리그 2027-03 이달의 선수",
+          "언론 선정 · 프리미어리그 2027-05 이달의 선수",
+          "언론 선정 · 카라바오컵 최우수 선수",
+          "언론 선정 · 대한민국 국가대표 올해의 선수",
+          "언론 선정 · 구단 유니폼 판매 예상 1위",
+          "The Best FIFA 올해의 선수",
+          "The Best FIFA Men's 11",
+          "발롱도르",
+          "FIFPRO 월드 11"
+        ],
+        "maxNpcRise": 2.219999999999999
+      },
+      {
+        "year": 2027,
+        "rank": 1,
+        "points": 95,
+        "apps": 38,
+        "goals": 20,
+        "assists": 7,
+        "tackles": 107,
+        "interceptions": 68,
+        "rating": 7.895,
+        "power": 87.9,
+        "investment": 0.896,
+        "clubRole": "captain",
+        "offers": [
+          {
+            "scope": "national",
+            "role": "captain",
+            "round": 19,
+            "status": "accepted"
+          }
+        ],
+        "awards": [
+          "FIFA 인터컨티넨털컵 우승 메달",
+          "UEFA 챔피언스리그 시즌 베스트 11",
+          "프리미어리그 시즌의 선수",
+          "PFA 올해의 팀",
+          "프리미어리그 우승 메달",
+          "클럽 선정 · 구단 올해의 선수",
+          "클럽 선정 · 구단 팬 선정 올해의 선수",
+          "클럽 선정 · 구단 선수단 선정 올해의 선수",
+          "클럽 선정 · 구단 올해의 공격수",
+          "언론 선정 · 프리미어리그 2028-05 이달의 선수",
+          "언론 선정 · FA컵 최우수 선수",
+          "언론 선정 · 대한민국 국가대표 올해의 선수",
+          "언론 선정 · 구단 유니폼 판매 예상 1위",
+          "The Best FIFA 올해의 선수",
+          "The Best FIFA Men's 11",
+          "발롱도르",
+          "FIFPRO 월드 11"
+        ],
+        "maxNpcRise": 2.1199999999999974
+      },
+      {
+        "year": 2028,
+        "rank": 1,
+        "points": 95,
+        "apps": 37,
+        "goals": 28,
+        "assists": 8,
+        "tackles": 96,
+        "interceptions": 62,
+        "rating": 8.092,
+        "power": 89.49,
+        "investment": 1.819,
+        "clubRole": "captain",
+        "offers": [],
+        "awards": [
+          "커뮤니티 실드 우승 메달",
+          "카라바오컵 우승 메달",
+          "UEFA 챔피언스리그 시즌의 선수",
+          "UEFA 챔피언스리그 득점왕",
+          "UEFA 챔피언스리그 시즌 베스트 11",
+          "프리미어리그 골든 부트",
+          "프리미어리그 시즌의 선수",
+          "PFA 올해의 팀",
+          "프리미어리그 우승 메달",
+          "클럽 선정 · 구단 올해의 선수",
+          "클럽 선정 · 구단 팬 선정 올해의 선수",
+          "클럽 선정 · 구단 선수단 선정 올해의 선수",
+          "클럽 선정 · 구단 올해의 공격수",
+          "언론 선정 · 프리미어리그 2028-07 이달의 선수",
+          "언론 선정 · 프리미어리그 2028-09 이달의 선수",
+          "언론 선정 · 프리미어리그 2029-02 이달의 선수",
+          "언론 선정 · 프리미어리그 2029-05 이달의 선수",
+          "언론 선정 · 대한민국 국가대표 올해의 선수",
+          "언론 선정 · 구단 유니폼 판매 예상 1위",
+          "The Best FIFA 올해의 선수",
+          "The Best FIFA Men's 11",
+          "발롱도르",
+          "FIFPRO 월드 11"
+        ],
+        "maxNpcRise": 2.180000000000007
+      }
+    ]
+  },
+  "attributesUnchanged": true,
+  "JSONRoundTrips": true
+}

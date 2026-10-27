@@ -1,5 +1,5 @@
 import {isFreeAgent,beginEmployment,changeEmployment} from './employment';
-import {personality,PERSONALITY_KEYS,type PersonalityKey} from './personality';
+import {personality,PERSONALITY_KEYS,type PersonalityKey,type Personality} from './personality';
 import {beginAchievementSeason} from './achievement-evidence';
 import {copySystems} from './snapshot';
 import {playSkillDefinitions,playSkillNames} from './play-skills';
@@ -24,7 +24,7 @@ import { TALENT_PROFILES } from './talent';
 import type { AttributeKey, Attributes, Career, CreateOptions, Fixture, GameProgress, Intensity, MatchRecord, Player, PlayerStats, SeasonState, SeasonSummary, Standing, Talent, TransferOffer } from './types';
 import type { PresentationEvent } from './revision-types';
 
-export const ENGINE_VERSION = '2.9.5';
+export const ENGINE_VERSION = '2.9.6';
 export const overall = calculateOverall;
 export { addStats, emptyStats, hashSeed, seededRandom } from './math';
 const TALENT_ORDER: Talent[] = ['D','C','B','A','S','SS','SSS'];
@@ -48,8 +48,12 @@ function editable(career:Career,light=false):Career {
 }
 function currentDate(c:Career):string{const date=seasonDate(c.season);return c.systems?.manualClock&&c.systems.manualClock>date?c.systems.manualClock:date;}
 export function setPersonality(career:Career,key:PersonalityKey,value:number):Career{
- if(career.stage==='retired'||!PERSONALITY_KEYS.includes(key)||!Number.isInteger(value)||value<1||value>10)throw new Error('성향은 현역 중 각 1~10 범위로 조정할 수 있습니다.');
- const next=editable(career,true);next.systems!.personality={...personality(next),[key]:value};touch(next);return next;
+ if(!PERSONALITY_KEYS.includes(key))throw new Error('성향은 현역 중 각 1~10 범위로 조정할 수 있습니다.');
+ return setPersonalityValues(career,{...personality(career),[key]:value});
+}
+export function setPersonalityValues(career:Career,values:Personality):Career{
+ if(career.stage==='retired'||!values||typeof values!=='object'||Array.isArray(values)||Object.keys(values).length!==PERSONALITY_KEYS.length||PERSONALITY_KEYS.some(key=>!Object.prototype.hasOwnProperty.call(values,key)||!Number.isInteger(values[key])||values[key]<1||values[key]>10))throw new Error('성향은 현역 중 각 1~10 범위로 조정할 수 있습니다.');
+ const next=editable(career,true);next.systems!.personality={...values};touch(next);return next;
 }
 function touch(career:Career) {
   career.revision++;
@@ -198,7 +202,7 @@ function finishSeason(career:Career) {
   career.season.completed=true;career.stage='offseason';
   const systems=career.systems!;
   processInternationalThrough(career,seasonHalfEndDate(career.season,'second'));
-  updateLeadership(career,'club');updateLeadership(career,'national',true);
+  updateLeadership(career,'club',true);updateLeadership(career,'national',true);
   updateMarketValue(career,'시즌 종료 평가');
   growthReport(career,'season');
   syncManualInjury(career,new Date(Date.parse(seasonHalfEndDate(career.season,'second'))+86400000).toISOString());

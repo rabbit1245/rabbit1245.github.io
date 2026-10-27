@@ -1,0 +1,65 @@
+{
+  "version": "2.9.6",
+  "label": "after",
+  "controlledFixture": true,
+  "userSaveReproduction": false,
+  "profile": "all 20 field attributes 95; ST pressing forward; equal 72-power peer teams; forced 90 minutes; 320 paired seeds per condition",
+  "attributesUnchanged": true,
+  "records": {
+    "pressing": {
+      "matches": 320,
+      "points": 665,
+      "teamGF": 880,
+      "teamGA": 481,
+      "goals": 278,
+      "assists": 81,
+      "tackles": 987,
+      "interceptions": 636,
+      "meanRating": 8.414
+    },
+    "poacher": {
+      "matches": 320,
+      "points": 680,
+      "teamGF": 962,
+      "teamGA": 503,
+      "goals": 360,
+      "assists": 81,
+      "tackles": 449,
+      "interceptions": 410,
+      "meanRating": 8.408
+    },
+    "winning10": {
+      "matches": 320,
+      "points": 739,
+      "teamGF": 982,
+      "teamGA": 430,
+      "goals": 317,
+      "assists": 88,
+      "tackles": 987,
+      "interceptions": 636,
+      "meanRating": 8.571
+    },
+    "final5": {
+      "matches": 320,
+      "points": 659,
+      "teamGF": 857,
+      "teamGA": 508,
+      "goals": 296,
+      "assists": 70,
+      "tackles": 995,
+      "interceptions": 630,
+      "meanRating": 8.446
+    },
+    "final10": {
+      "matches": 320,
+      "points": 691,
+      "teamGF": 915,
+      "teamGA": 508,
+      "goals": 354,
+      "assists": 70,
+      "tackles": 995,
+      "interceptions": 630,
+      "meanRating": 8.637
+    }
+  }
+}

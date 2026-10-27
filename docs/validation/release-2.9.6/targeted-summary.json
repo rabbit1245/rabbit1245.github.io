@@ -1,0 +1,17 @@
+{
+  "tests": 79,
+  "passed": 79,
+  "failed": 0,
+  "skipped": 0,
+  "durationMs": 24293.534256,
+  "evidence": "Completed terminal test-run summary observed before the execution environment restarted; /tmp TAP unavailable.",
+  "files": [
+    "personality-batch.test.ts",
+    "pressing-leadership.test.ts",
+    "personality-balance.test.ts",
+    "captain.test.ts",
+    "star-captain-regression.test.ts",
+    "european-awards.test.ts",
+    "match-engine.test.ts"
+  ]
+}

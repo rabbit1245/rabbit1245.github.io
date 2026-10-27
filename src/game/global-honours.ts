@@ -32,7 +32,7 @@ export function globalVoting(c:Career,rows:CompetitorSeason[],performance:(r:Com
  };
  const thresholds=new Map<VoteKind,number>();
  for(const kind of Object.keys(weights)as VoteKind[]){const scores=rows.filter(r=>r.stats.minutes>=900).map(r=>base(r,kind)).sort((a,b)=>a-b);thresholds.set(kind,(scores[Math.floor(scores.length*.8)]??100)-4);}
- return {score:(r:CompetitorSeason,kind:VoteKind='ballon')=>round((base(r,kind)+(base(r,kind)>=(thresholds.get(kind)??100)?evidence.get(r.playerId)??0:0))*(r.playerId===c.player.id?1+personalityEdge(c,'stardom')*.008:1),4),finish:()=>finishAchievementSeason(c,rows,context)};
+ return {score:(r:CompetitorSeason,kind:VoteKind='ballon')=>round((base(r,kind)+(base(r,kind)>=(thresholds.get(kind)??100)?evidence.get(r.playerId)??0:0))*(r.playerId===c.player.id?1+personalityEdge(c,'stardom')*.02:1),4),finish:()=>finishAchievementSeason(c,rows,context)};
 }
 
 const annual=(id:string,name:string,organiser:string,url:string)=>({id,name,organiser,sourceUrl:url});
