@@ -1,0 +1,23 @@
+{
+  "url": "http://127.0.0.1:4185/Kball.html",
+  "checks": [
+    {
+      "case": "FA international history imports, autosaves, explicitly saves, exports and reloads offline",
+      "faPerformers": 4
+    },
+    {
+      "case": "Legacy one-year offers refresh once; former-club return signs, starts next year and reloads",
+      "width": 1366,
+      "age": 36,
+      "years": 2
+    },
+    {
+      "case": "Legacy one-year offers refresh once; former-club return signs, starts next year and reloads",
+      "width": 390,
+      "age": 36,
+      "years": 2
+    }
+  ],
+  "errors": [],
+  "external": []
+}

@@ -6,6 +6,7 @@ import path from 'node:path';
 const url=process.env.KBALL_TEST_URL||'http://127.0.0.1:4184/Kball.html';
 const out=process.env.KBALL_TEST_RESULTS_DIR||'test-results/release-2.9.2/browser';
 const fixtures=path.resolve(process.env.KBALL_FA_FIXTURE_DIR||'test-results/release-2.9.2/fixtures');
+const version=JSON.parse(await readFile('package.json','utf8')).version;
 const browser=await chromium.launch({headless:true,executablePath:'/usr/bin/chromium'}),errors=[],external=[],checks=[];
 await mkdir(out,{recursive:true});
 async function state(p){return p.evaluate(()=>new Promise((resolve,reject)=>{
@@ -24,7 +25,7 @@ async function open(file,width){const context=await browser.newContext({viewport
  await context.addInitScript(()=>localStorage.setItem('kball-reduced-motion','true'));
  p.on('pageerror',e=>errors.push(String(e)));p.on('request',r=>{if(/^https?:/.test(r.url())&&r.url()!==url)external.push(r.url());});
  await p.goto(url,{waitUntil:'networkidle'});await context.setOffline(true);await p.getByLabel('K볼 저장 파일 가져오기').setInputFiles(path.join(fixtures,file));await ready(p);
- assert.match(await p.getByTestId('game-version').innerText(),/2\.9\.2/);return {context,p};
+ assert.ok((await p.getByTestId('game-version').innerText()).includes(version));return {context,p};
 }
 async function reload(context,p){await context.setOffline(false);await p.reload({waitUntil:'networkidle'});await context.setOffline(true);await p.getByRole('button',{name:'이어서 플레이',exact:true}).click();await ready(p);}
 try{
@@ -37,7 +38,7 @@ try{
 
  for(const width of [1366,390]){
   const {context,p}=await open('legacy-expired-veteran.json',width);const old=await state(p);assert.equal(old.clubId,'FA');assert.equal(old.offers.length,6);assert.ok(old.offers.every(o=>o.years===1));
-  await p.getByTestId('transfer-window').click();const revised=await changed(p,old.revision);assert.equal(revised.offers.length,7);assert.ok(revised.offers.every(o=>o.id.includes(':offseason-v292:')));
+  await p.getByTestId('transfer-window').click();const revised=await changed(p,old.revision);assert.equal(revised.offers.length,7);assert.ok(revised.offers.every(o=>/:offseason-v\d+:/.test(o.id)));
   const offer=revised.offers.find(o=>o.clubId==='EN1_01');assert.ok(offer&&offer.years>=2&&offer.fee===0);assert.equal(revised.history,old.history);
   const card=p.locator('.offer').filter({hasText:'전 소속팀 재계약'});assert.equal(await card.count(),1);assert.match(await card.innerText(),/프리미어리그/);await card.scrollIntoViewIfNeeded();await p.screenshot({path:path.join(out,`return-offer-${width}.png`),fullPage:true});
   await card.getByRole('button',{name:'제안 수락'}).click();const signed=await changed(p,revised.revision);assert.equal(signed.clubId,'EN1_01');assert.equal(signed.years,offer.years);

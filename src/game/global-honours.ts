@@ -1,4 +1,5 @@
 import {getLeague} from './data';
+import {personalityEdge} from './personality';
 import {clamp,round,emptyStats} from './math';
 import {worldPlayerAbility} from './world';
 import {EUROPEAN_COUNTRIES} from './cup-rules';
@@ -9,7 +10,7 @@ import type {CompetitorSeason,RankingCandidate} from './revision-types';
 
 export type VoteKind='ballon'|'fifa'|'fifa11'|'fifpro'|'yashin'|'fifa-gk'|'kopa';
 export interface VotingTeamContext extends AchievementContext {leagueTitles:Map<string,number>;cupTitles:Map<string,number>;teamScore:Map<string,number>;prestige?:Map<string,number>}
-const weights:Record<VoteKind,[number,number,number]>={ballon:[50,30,20],fifa:[55,25,20],fifa11:[60,20,20],fifpro:[65,15,20],yashin:[60,25,15],'fifa-gk':[65,20,15],kopa:[60,20,20]};
+const weights:Record<VoteKind,[number,number,number]>={ballon:[60,20,20],fifa:[65,20,15],fifa11:[70,15,15],fifpro:[75,10,15],yashin:[65,20,15],'fifa-gk':[70,15,15],kopa:[65,20,15]};
 const avg=(r:CompetitorSeason)=>r.stats.ratingCount?r.stats.ratingSum/r.stats.ratingCount:0;
 export function globalVoting(c:Career,rows:CompetitorSeason[],performance:(r:CompetitorSeason)=>number,context:VotingTeamContext){
  const offsets=new Map<string,number>(),raw=new Map(rows.map(r=>[r.playerId,Math.max(0,performance(r)-(context.teamScore.get(r.clubId)??0))*(context.prestige?.get(r.leagueId)??1/Math.sqrt(getLeague(r.leagueId).tier))]));
@@ -25,13 +26,13 @@ export function globalVoting(c:Career,rows:CompetitorSeason[],performance:(r:Com
  const base=(r:CompetitorSeason,kind:VoteKind)=>{
   const [personal,team,skill]=weights[kind],n=r.nationalStats;
   const national=n?.minutes?clamp((n.ratingCount?n.ratingSum/n.ratingCount:0)-6,0,3)*Math.min(8,n.apps)*.5:0;
-  const individual=clamp(((raw.get(r.playerId)??0)+national)/scale,0,1);
+  const individual=clamp(((raw.get(r.playerId)??0)+national)/scale,0,1.35);
   const achievement=(context.leagueTitles.get(r.clubId)??0)/Math.sqrt(getLeague(r.leagueId).tier)+(context.cupTitles.get(r.playerId)??0)+(nationalTitles.get(r.playerId)??0)+(context.teamScore.get(r.clubId)??0)*.25;
   return personal*individual+team*clamp(achievement/36,0,1)+skill*clamp((ability(r)-50)/70,0,1);
  };
  const thresholds=new Map<VoteKind,number>();
  for(const kind of Object.keys(weights)as VoteKind[]){const scores=rows.filter(r=>r.stats.minutes>=900).map(r=>base(r,kind)).sort((a,b)=>a-b);thresholds.set(kind,(scores[Math.floor(scores.length*.8)]??100)-4);}
- return {score:(r:CompetitorSeason,kind:VoteKind='ballon')=>round(base(r,kind)+(base(r,kind)>=(thresholds.get(kind)??100)?evidence.get(r.playerId)??0:0),4),finish:()=>finishAchievementSeason(c,rows,context)};
+ return {score:(r:CompetitorSeason,kind:VoteKind='ballon')=>round((base(r,kind)+(base(r,kind)>=(thresholds.get(kind)??100)?evidence.get(r.playerId)??0:0))*(r.playerId===c.player.id?1+personalityEdge(c,'stardom')*.008:1),4),finish:()=>finishAchievementSeason(c,rows,context)};
 }
 
 const annual=(id:string,name:string,organiser:string,url:string)=>({id,name,organiser,sourceUrl:url});

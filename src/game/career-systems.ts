@@ -1,4 +1,5 @@
 import {syncUser} from './world';
+import {personalityEdge} from './personality';
 import {globalVoting,additionalGlobalHonours} from './global-honours';
 import {isFreeAgent,expiryReturnClub,changeEmployment,careerLeagueEntries} from './employment';
 import {evaluateExtraHonours} from './extra-honours';
@@ -35,7 +36,7 @@ function marketEstimate(career: Career): number {
   const evaluationRounds=opening?previous.matches.length:career.season.week;
   const leagueId = career.systems?.world.clubs[p.clubId]?.leagueId ?? career.season.leagueId;
   const tier = getLeague(leagueId).tier;
-  const youth = p.age <= 23 ? 1.15 + (23 - p.age) * .025 : p.age > 29 ? Math.max(.12, 1 - (p.age - 29) * .12) : 1.1;
+  const youth = p.age <= 23 ? 1.15 + (23 - p.age) * .025 : p.age > 29 ? Math.max(.42, 1 - (p.age - 29) * .04) : 1.1;
   const quality = Math.pow(Math.max(10, p.ovr - 25), 3.35) * 20;
   const potential = 1 + Math.max(0, p.potential - p.ovr) / 85;
   const per90 = s.minutes ? (s.goals + .75 * s.assists) * 90 / s.minutes : 0;
@@ -45,7 +46,7 @@ function marketEstimate(career: Career): number {
   const demand = 1 + Math.min(.2, career.offers.filter(o => o.type === 'transfer').length * .035);
   const international = 1 + Math.min(.15, (career.systems?.national.reputation ?? 0) / 650);
   const injury = Math.max(.45, 1 - p.injuryWeeks * .035);
-  return Math.max(1_000, Math.round(quality * youth * potential * form * minutes * prestige * demand * injury * international / 1_000) * 1_000);
+  return Math.max(1_000, Math.round(quality * youth * potential * form * minutes * prestige * demand * injury * international * (1+personalityEdge(career,'stardom')*.05) / 1_000) * 1_000);
 }
 function dateOnly(value:string):string { return value.slice(0,10); }
 function contractEndDate(startYear:number,startMonth:number,years:number):string {
@@ -132,7 +133,7 @@ function individualWageLimit(career: Career, clubId: string): number {
   const club = career.systems?.world.clubs[clubId];
   return club ? Math.max(0, Math.floor(club.wageBudget / 52 * .14)) : 0;
 }
-const CONTRACT_OFFER_MODEL='offseason-v292';
+const CONTRACT_OFFER_MODEL='offseason-v294';
 /** Old proposals are refreshed once when opened, after the save hash is verified. */
 export function needsContractOfferRefresh(career:Career):boolean{
  return career.stage!=='retired'&&(career.stage==='offseason'||isFreeAgent(career))&&(!career.transferDecision||isFreeAgent(career))&&
@@ -147,7 +148,8 @@ function contractYears(career:Career,role:string,rng:()=>number):number{
  // One year is a response to actual decline or a marginal squad role.
  // Age alone never turns a retained first-team player into an annual release.
  if(p.age>=29&&!retained&&!proven||p.age>=32&&!firstTeam&&!proven)return 1;
- if(p.age>=32)return firstTeam&&retained&&p.age<(p.position==='GK'?40:37)?3:2;
+ const physical=p.position==='GK'?((p.attributes.gkPositioning??50)+(p.attributes.concentration??50))/2:((p.attributes.stamina??50)+(p.attributes.strength??50)+(p.attributes.speed??50))/3;
+ if(p.age>=32)return firstTeam&&retained&&physical>=75&&p.injuryWeeks===0?3:2;
  if(p.age>=29)return firstTeam||proven?3:2;
  return 3+Math.floor(rng()*2);
 }
@@ -401,7 +403,7 @@ export function getClubTopScorer(career: Career): { playerId: string; name: stri
 function leagueHonours(career:Career,leagueId:string,leagueRows:CompetitorSeason[],context:VotingContext):Award[]{
  const own=career.player.squad==='senior'?leagueRows.find(r=>r.playerId===career.player.id):undefined,won:Award[]=[];
  const rounds=career.systems!.employment?career.systems!.world.competitions[leagueId]?.totalRounds??career.season.totalWeeks:career.season.totalWeeks,minApps=Math.max(5,Math.floor(rounds*.4));
- const leagueRanking=rankRows(leagueRows.filter(r=>r.stats.apps>=minApps),career,false,context);
+ const leagueRanking=rankRows(leagueRows.filter(r=>r.stats.apps>=minApps),career,false,context,r=>performanceScore(r,career,false,context)*(r.playerId===career.player.id?1+personalityEdge(career,'stardom')*.006:1));
   for (const rule of leagueAwardRules(leagueId,getLeague(leagueId).name)) {
     if (!own) continue;
     if (rule.metric === 'goals' || rule.metric === 'assists' || rule.metric === 'cleanSheets') {

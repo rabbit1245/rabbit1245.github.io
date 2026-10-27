@@ -64,7 +64,8 @@ test('malformed patch paths cannot alter prototypes and deleted slots cannot be 
 
 test('offseason training confirmation uses the same durable change path',async()=>{
  const initial=JSON.parse(gunzipSync(readFileSync(new URL('../../tests/fixtures/v272-offseason.json.gz',import.meta.url))).toString('utf8')).career as Career;initial.id='performance-training';assert.equal(initial.stage,'offseason');await saveCareer(initial);
- const next=step(initial,{type:'training',keys:[],intensity:'rest'});assert.ok(commandChange(initial,next));await saveCareerChange(initial,next);assert.deepEqual(await loadCareer(initial.id),json(next));await deleteSlot(initial.id);
+ const upgraded=step(initial,{type:'attributeLock',key:'passing',locked:false});assert.equal(commandChange(initial,upgraded),undefined,'the one-off old-world repair requires a fully validated snapshot');await saveCareerChange(initial,upgraded);assert.equal(initial.systems!.world.balanceVersion,undefined,'original old save stays intact');
+ const next=step(upgraded,{type:'training',keys:[],intensity:'rest'});assert.ok(commandChange(upgraded,next));await saveCareerChange(upgraded,next);assert.deepEqual(await loadCareer(initial.id),json(next));await deleteSlot(initial.id);
 });
 test('a modified previous mutable state cannot inherit a trusted incremental receipt',async()=>{
  const initial=fresh('previous-tampered');await saveCareer(initial);initial.player.attributes.shooting=-1;

@@ -1138,3 +1138,13 @@ input,select { font-size:17px; min-height:38px; padding:7px 10px; border-radius:
 .training-cell .training-row{grid-template-columns:22px minmax(0,1fr) 42px 55px}.training-row>strong{font-size:20px}.training-row .attribute-fraction{display:block;font-size:11px;line-height:1;color:#4e5964}.training-row .selection-box{font-size:11px}
 .training-row>strong{line-height:1}.training-row .attribute-fraction{font-size:10px;line-height:1}
 @media(min-width:1200px) and (max-height:850px){.training-panel>.panel-body>.fine-print{margin-top:4px}.training-panel>.panel-body{padding-bottom:4px}}
+.personality-card { margin-top:20px; }
+.personality-grid { display:grid; gap:0; }
+.personality-row { display:flex; align-items:center; justify-content:space-between; gap:14px; padding:14px 0; border-bottom:1px solid var(--border); }
+.personality-row p { color:var(--muted); margin:5px 0 0; font-size:14px; line-height:1.5; }
+.personality-control { display:flex; align-items:center; gap:8px; flex-shrink:0; }
+.personality-control button { width:36px; height:36px; border:1px solid var(--border); border-radius:6px; background:#fff; color:var(--text); font-size:20px; cursor:pointer; }
+.personality-control button:disabled { opacity:.4; cursor:default; }
+.personality-control output { min-width:66px; text-align:center; font-weight:700; color:var(--text); }
+.personality-control small { font-size:13px; color:var(--muted); font-weight:400; }
+@media(max-width:540px) { .personality-row { align-items:flex-start; flex-wrap:wrap; } .personality-control { margin-left:auto; } }

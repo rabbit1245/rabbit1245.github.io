@@ -1,5 +1,6 @@
 import {captureNationalPower} from './achievement-evidence';
 import {playingAbility} from './attributes';
+import {personalityEdge} from './personality';
 import {advanceNationalWindow} from './national-expanded';
 import { CLUBS, ROSTERS, getClub, getLeague } from './data';
 import { getLeagueRule } from './league-rules';
@@ -315,7 +316,9 @@ export function resolveNationalShootout(career: Career, match: NationalMatch): v
     for(let side=0;side<2;side++){
       const shooters=side===0?h:a,shooter=shooters[round%shooters.length];
       const skill=ability(shooter,'setPieces')*.6+ability(shooter,'composure')*.25+ability(shooter,'shooting')*.15;
-      const scored=rng()<clamp(.74+(skill-keepers[side])*.005,.5,.92);
+      const clutch=shooter.id===career.player.id?personalityEdge(career,'clutch')*.008:0;
+      const defending=(side===0?away:home).some(p=>p.id===career.player.id&&p.position==='GK')?personalityEdge(career,'clutch')*.008:0;
+      const scored=rng()<clamp(.74+(skill-keepers[side])*.005+clutch-defending,.5,.92);
       result.attempts.push({teamId:side===0?match.homeId:match.awayId,playerId:shooter.id,scored});
       if(scored){if(side===0)result.home++;else result.away++;}
     }

@@ -1,4 +1,5 @@
 import {isFreeAgent,beginEmployment,changeEmployment} from './employment';
+import {personality,PERSONALITY_KEYS,type PersonalityKey} from './personality';
 import {beginAchievementSeason} from './achievement-evidence';
 import {copySystems} from './snapshot';
 import {playSkillDefinitions,playSkillNames} from './play-skills';
@@ -23,7 +24,7 @@ import { TALENT_PROFILES } from './talent';
 import type { AttributeKey, Attributes, Career, CreateOptions, Fixture, GameProgress, Intensity, MatchRecord, Player, PlayerStats, SeasonState, SeasonSummary, Standing, Talent, TransferOffer } from './types';
 import type { PresentationEvent } from './revision-types';
 
-export const ENGINE_VERSION = '2.9.3';
+export const ENGINE_VERSION = '2.9.4';
 export const overall = calculateOverall;
 export { addStats, emptyStats, hashSeed, seededRandom } from './math';
 const TALENT_ORDER: Talent[] = ['D','C','B','A','S','SS','SSS'];
@@ -46,6 +47,10 @@ function editable(career:Career,light=false):Career {
   return next;
 }
 function currentDate(c:Career):string{const date=seasonDate(c.season);return c.systems?.manualClock&&c.systems.manualClock>date?c.systems.manualClock:date;}
+export function setPersonality(career:Career,key:PersonalityKey,value:number):Career{
+ if(career.stage==='retired'||!PERSONALITY_KEYS.includes(key)||!Number.isInteger(value)||value<1||value>10)throw new Error('성향은 현역 중 각 1~10 범위로 조정할 수 있습니다.');
+ const next=editable(career,true);next.systems!.personality={...personality(next),[key]:value};touch(next);return next;
+}
 function touch(career:Career) {
   career.revision++;
   career.updatedAt=currentDate(career);

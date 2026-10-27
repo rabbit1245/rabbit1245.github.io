@@ -1,4 +1,6 @@
 import {playingAbility} from './attributes';
+import {ESTABLISHED_CLUBS,userInfluencedClub} from './club-balance';
+import {personalityEdge} from './personality';
 import {reviewK3Promotion} from './korean-promotion';
 import {internationalRoster} from './international-clubs';
 import {compactMoney} from './currency';
@@ -80,12 +82,15 @@ const basePowers=new Map(CLUBS.map(club=>[club.id,round(weightedPower(ROSTERS[cl
 const seasonForms=new WeakMap<WorldState,{year:number;seed:string;values:Map<string,number>}>();
 function teamBase(career:Career,world:WorldState,club:ClubWorld):number {
   const d=club.development,base=d?.basePower??basePowers.get(club.id)!;
-  const progress=clamp(((d?.prestige??base)-base)*.35,-3,6);
+  const influenced=userInfluencedClub(career,club.id);
+  const progress=influenced?clamp(((d?.prestige??base)-base)*.35,-3,6):clamp(((d?.prestige??base)-base)*.15,-1,1.5);
   let cache=seasonForms.get(world);
   if(!cache||cache.year!==world.year||cache.seed!==career.seed){cache={year:world.year,seed:career.seed,values:new Map()};seasonForms.set(world,cache);}
   let form=cache.values.get(club.id);
   if(form===undefined){const rng=seededRandom(`${career.seed}|club-season-form|${world.year}|${club.id}`);form=(rng()+rng()-1)*2;cache.values.set(club.id,form);}
-  return base+progress+clamp(d?.investmentPower??0,0,22)+form;
+  const investment=clamp(d?.investmentPower??0,0,influenced?22:2.5);
+  const power=base+progress+investment+form;
+  return ESTABLISHED_CLUBS.has(club.id)?Math.max(base-.5,power+.5):power;
 }
 
 function squadStrength(career: Career, world: WorldState, club: ClubWorld) {
@@ -111,7 +116,7 @@ function refreshClub(career: Career, world: WorldState, club: ClubWorld): void {
 }
 
 export function createWorld(career: Career): WorldState {
-  const world: WorldState={rosterVersion:ROSTER_CALIBRATION.version,year:career.season.year,clubs:{},players:{},competitions:{},playerStats:{},movements:[]};
+  const world: WorldState={balanceVersion:1,rosterVersion:ROSTER_CALIBRATION.version,year:career.season.year,clubs:{},players:{},competitions:{},playerStats:{},movements:[]};
   for (const club of CLUBS) {
     const roster=ROSTERS[club.id]??[];
     for (const player of roster) {
@@ -168,6 +173,12 @@ export function repairLegacyRosterScale(career:Career):void {
 export function getSeasonClubIds(career: Career, leagueId: string): string[] {
   return career.systems ? Object.values(career.systems.world.clubs).filter(club=>club.leagueId===leagueId).map(club=>club.id).sort()
     : CLUBS.filter(club=>club.leagueId===leagueId).map(club=>club.id).sort();
+}
+/** Called on an isolated editable copy, after validating the old checksum. */
+export function repairClubBalance(c:Career):void{
+ const w=c.systems?.world;if(!w||w.balanceVersion===1)return;
+ for(const club of Object.values(w.clubs))refreshClub(c,w,club);
+ w.balanceVersion=1;
 }
 
 export function getClubWorldPower(career: Career, id: string): number {
@@ -485,9 +496,10 @@ export function transitionWorldSeason(career: Career): void {
     const room=clamp((94-club.power)/20,.12,1);
     // Lower divisions already earn smaller budgets. Dividing the funded gain by
     // tier a second time made building a small club effectively impossible.
-    const investment=completedLeagues.has(performance.leagueId)?Math.min(performance.star?.retained?2.2:1.8,performance.reinvestment/Math.max(1,oldRevenue)*36)*room:0;
+    const influenced=userInfluencedClub(career,club.id),leadership=club.id===career.player.clubId?1+personalityEdge(career,'leadership')*.04:1;
+    const investment=completedLeagues.has(performance.leagueId)?Math.min(performance.star?.retained?2.2:1.8,performance.reinvestment/Math.max(1,oldRevenue)*36)*room*leadership:0;
     // Existing investment is retained across updates. High-level squads face smaller marginal gains.
-    club.development.investmentPower=round(clamp(previousInvestment*.98+investment,0,Math.max(previousInvestment,ceiling)),3);
+    club.development.investmentPower=round(influenced?clamp(previousInvestment*.98+investment,0,Math.max(previousInvestment,ceiling)):clamp(previousInvestment*.7+investment*.15,0,2.5),3);
     refreshClub(career,world,club);
     performance.afterPower=club.power;
     if(completedLeagues.has(performance.leagueId))club.development.history=[...club.development.history.filter(r=>r.year!==performance.year),performance].slice(-5);

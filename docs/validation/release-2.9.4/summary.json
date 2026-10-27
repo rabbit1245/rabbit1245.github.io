@@ -1,0 +1,38 @@
+{
+  "version": "2.9.4",
+  "status": "verified",
+  "core": {
+    "tests": 284,
+    "passed": 283,
+    "failed": 0,
+    "skipped": 1,
+    "skip": "existing 30-season test; KBALL_SKIP_LONG_TEST=1"
+  },
+  "targetedEffectsAndStorage": 19,
+  "fullWorldLiverpoolSeasons": 12,
+  "personalityDefault": 5,
+  "personalityRange": [
+    1,
+    10
+  ],
+  "personalityIndependent": true,
+  "abilityUnchanged": true,
+  "leagueTitles": 8,
+  "uclTitles": 4,
+  "maxUninfluencedClubRise": 3.51,
+  "legacyFAImportAndRenewal": true,
+  "UIWidths": [
+    1366,
+    390
+  ],
+  "existingPlayableFlows": 11,
+  "crests": {
+    "clubs": 913,
+    "neutral": 0,
+    "original": 7
+  },
+  "typecheck": true,
+  "productionBuild": true,
+  "standaloneBuild": true,
+  "simulationReduced": false
+}

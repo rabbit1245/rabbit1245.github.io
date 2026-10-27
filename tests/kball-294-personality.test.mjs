@@ -1,0 +1,23 @@
+import {chromium} from './stored-careers.mjs';
+import assert from 'node:assert/strict';
+import {mkdir,readFile,writeFile} from 'node:fs/promises';
+const url=process.env.KBALL_TEST_URL||'http://127.0.0.1:4185/Kball.html',out=process.env.KBALL_TEST_RESULTS_DIR||'test-results/release-2.9.4/personality-ui';
+await mkdir(out,{recursive:true});const browser=await chromium.launch({headless:true,executablePath:'/usr/bin/chromium'}),errors=[],external=[],checks=[];
+const labels={leadership:'리더십',stardom:'스타성',fairPlay:'페어 능력',clutch:'승부사',winning:'유관력'};
+async function ready(p){await p.getByTestId('save-status').filter({hasText:'자동 저장됨'}).waitFor({state:'attached'});await p.locator('.processing').waitFor({state:'hidden'});assert.deepEqual(await p.getByRole('alert').allTextContents(),[]);}
+async function stored(p){return p.evaluate(()=>new Promise((resolve,reject)=>{const r=indexedDB.open('kball-careers',1);r.onerror=()=>reject(r.error);r.onsuccess=()=>{const db=r.result,tx=db.transaction('slots'),get=tx.objectStore('slots').getAll();tx.oncomplete=async()=>{db.close();const c=await window.__readKballStored(get.result[0]);resolve({id:c.id,revision:c.revision,ovr:c.player.ovr,attributes:c.player.attributes,personality:c.systems.personality});};};}));}
+async function training(p){await p.getByTestId('player-tab').click();await p.getByTestId('player-view-training').click();await p.getByTestId('personality-panel').waitFor();}
+try{
+ for(const width of [1366,390]){
+  const context=await browser.newContext({viewport:{width,height:900},reducedMotion:'reduce'}),p=await context.newPage();p.setDefaultTimeout(90000);p.on('pageerror',e=>errors.push(String(e)));p.on('request',r=>{if(/^https?:/.test(r.url())&&r.url()!==url)external.push(r.url());});await p.goto(url,{waitUntil:'networkidle'});await context.setOffline(true);
+  await p.getByTestId('new-career').click();const d=p.getByRole('dialog');await d.getByLabel('선수 이름',{exact:true}).fill(`성향 화면 ${width}`);await d.getByLabel('주 포지션',{exact:true}).selectOption('ST');await d.getByTestId('next-creation-step').click();await d.getByLabel('시작 소속',{exact:true}).selectOption('senior');await d.getByTestId('next-creation-step').click();await d.getByTestId('create-career').click();await ready(p);assert.match(await p.getByTestId('game-version').innerText(),/2\.9\.4/);await training(p);const before=await stored(p);
+  for(const [key,label]of Object.entries(labels)){assert.match(await p.getByTestId(`personality-${key}`).innerText(),/^5/);await p.getByRole('button',{name:`${label} 올리기`,exact:true}).click();await ready(p);assert.match(await p.getByTestId(`personality-${key}`).innerText(),/^6/);}
+  for(let i=0;i<4;i++){await p.getByRole('button',{name:'페어 능력 올리기',exact:true}).click();await ready(p);}assert.equal(await p.getByRole('button',{name:'페어 능력 올리기',exact:true}).isDisabled(),true);
+  for(let i=0;i<5;i++){await p.getByRole('button',{name:'리더십 낮추기',exact:true}).click();await ready(p);}assert.equal(await p.getByRole('button',{name:'리더십 낮추기',exact:true}).isDisabled(),true);
+  const after=await stored(p);assert.deepEqual(after.attributes,before.attributes);assert.equal(after.ovr,before.ovr);assert.deepEqual(after.personality,{leadership:1,stardom:6,fairPlay:10,clutch:6,winning:6});
+  await p.getByTestId('personality-panel').scrollIntoViewIfNeeded();assert.ok(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));assert.equal(await p.getByTestId('personality-fairPlay').evaluate(el=>getComputedStyle(el).color),'rgb(32, 33, 36)');await p.screenshot({path:`${out}/personality-${width}.png`,fullPage:true});
+  await p.getByTestId('common-menu').click();const download=p.waitForEvent('download');await p.getByRole('button',{name:'JSON 내보내기',exact:true}).click();const file=await download;await file.saveAs(`${out}/export-${width}.json`);assert.deepEqual(JSON.parse(await readFile(`${out}/export-${width}.json`,'utf8')).career.systems.personality,after.personality);
+  await context.setOffline(false);await p.reload({waitUntil:'networkidle'});await context.setOffline(true);await p.getByRole('button',{name:'이어서 플레이',exact:true}).click();await ready(p);await training(p);const loaded=await stored(p);assert.deepEqual(loaded.personality,after.personality);assert.deepEqual(loaded.attributes,before.attributes);checks.push({width,independent:true,range:[1,10],default:5,abilityUnchanged:true,export:true,reload:true});console.log('Verified personality:',width);await context.close();
+ }
+ assert.deepEqual(errors,[]);assert.deepEqual(external,[]);await writeFile(`${out}/results.json`,JSON.stringify({url,checks,errors,external},null,2)+'\n');
+}finally{await browser.close();}

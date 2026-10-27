@@ -1,0 +1,8 @@
+import type {Career,GameCommand} from '../game/types';
+import {Panel} from './Shared';
+import {personality,PERSONALITY_KEYS,PERSONALITY_LABELS,type PersonalityKey} from '../game/personality';
+const descriptions:Record<PersonalityKey,string>={leadership:'주장단 평가와 실제 재투자에 따른 팀 성장에 반영',stardom:'몸값·팬 평가·주관적 개인상 투표에 작은 보정',fairPlay:'높을수록 카드 감소 · 10은 카드 없음 · 1은 거친 플레이',clutch:'결승·토너먼트와 강팀 간 큰 경기의 결정력·선방에 반영',winning:'실제 출전 중 팀의 찬스 공급·경기 운영에 작은 보정'};
+export default function PersonalityPanel({career,busy,command}:{career:Career;busy:boolean;command:(c:GameCommand)=>void}){
+ const values=personality(career),disabled=busy||career.stage==='retired';
+ return <Panel title="커리어 성향" className="personality-card"><div className="panel-body" data-testid="personality-panel"><p className="muted">각 1~10 · 기본 5 · 항목별로 독립 조정합니다. 능력치·OVR은 바뀌지 않으며 이후 평가와 실제 경기에 반영합니다.</p><div className="personality-grid">{PERSONALITY_KEYS.map(key=><div className="personality-row" key={key}><div><strong>{PERSONALITY_LABELS[key]}</strong><p>{descriptions[key]}</p></div><div className="personality-control"><button type="button" aria-label={`${PERSONALITY_LABELS[key]} 낮추기`} disabled={disabled||values[key]===1} onClick={()=>command({type:'personality',key,value:values[key]-1})}>−</button><output data-testid={`personality-${key}`} aria-label={`${PERSONALITY_LABELS[key]} 점수`}>{values[key]}<small> / 10</small></output><button type="button" aria-label={`${PERSONALITY_LABELS[key]} 올리기`} disabled={disabled||values[key]===10} onClick={()=>command({type:'personality',key,value:values[key]+1})}>+</button></div></div>)}</div></div></Panel>;
+}

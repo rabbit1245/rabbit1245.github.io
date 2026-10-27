@@ -1,0 +1,22 @@
+{
+  "passed": [
+    "1366x768 and 1920x1080 show all 20 abilities and training rows with primary fonts of at least 17px",
+    "creation training, three menus, one-command half progression and identical skipped/reduced-motion results",
+    "all league teams in one modal, actual W/D/L/GF/GA/GD/points and league-only scorer table",
+    "annual-only contracts, one training route, current competitions, locker combined details and reconciled records",
+    "JSON export, independent import slot, checksum rejection and previous-good backup restore",
+    "contract-controlled wage, transfer fees separate from income, next season, reload and retirement totals",
+    "one click downloads one complete UTF-8 career TXT, leaves saves untouched and awards show only own selection",
+    "mobile three-menu navigation, ten goalkeeper abilities, half progression and nine goalkeeper metrics",
+    "mobile full standings retain every team and allow reaching the last points column",
+    "season honours split trophies/personal awards; cheats edit attributes, retain freeze preference and survive reload on desktop/mobile",
+    "standalone HTML makes no external HTTP asset requests"
+  ],
+  "skipped": [
+    "offline cache reload requires a production build"
+  ],
+  "pageErrors": [],
+  "httpRequests": [
+    "http://127.0.0.1:4185/Kball.html"
+  ]
+}

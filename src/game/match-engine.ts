@@ -1,4 +1,5 @@
 import {playingAbility,leadershipAbility} from './attributes';
+import {personalityEdge,personality} from './personality';
 import { CLUBS, ROSTERS } from './data';
 import { clamp, emptyStats, integer, round, seededRandom } from './math';
 import type { MatchOptions, MatchParticipant, MatchPerformance } from './revision-types';
@@ -169,7 +170,7 @@ function assignCaptain(career:Career,team:Team,userTeam:string|undefined,scope:'
 
 /** Off-ball supply and coverage use actual skills, with the same rules for NPCs and the user.
  * A stronger final pass changes the chances created, not only the name credited an assist. */
-function tacticalImpact(team:Team,opponentPower:number):{supply:number;coverage:number}{
+function tacticalImpact(team:Team,opponentPower:number,career:Career):{supply:number;coverage:number}{
   let creationEdge=0,defensiveEdge=0,control=0;
   for(const actor of team.actors){
     if(actor.position==='GK')continue;
@@ -190,7 +191,8 @@ function tacticalImpact(team:Team,opponentPower:number):{supply:number;coverage:
     control+=dominance*controlRole*duration(actor);
   }
   const possession=clamp(control,0,1.25);
-  return {supply:clamp(1+creationEdge*.11+possession*.06,.76,1.42)*(1+team.leadership*.45),coverage:clamp(1-defensiveEdge*.006-possession*.25,.60,1.25)*(1-team.leadership)};
+  const user=team.actors.find(a=>a.user),winning=user?personalityEdge(career,'winning')*.008*duration(user):0;
+  return {supply:clamp(1+creationEdge*.11+possession*.06,.76,1.42)*(1+team.leadership*.45)*(1+winning),coverage:clamp(1-defensiveEdge*.006-possession*.25,.60,1.25)*(1-team.leadership)*(1-winning)};
 }
 
 /** Pure seeded match simulation. Full worlds use the same action checks with compressed event output. */
@@ -198,6 +200,8 @@ export function simulateMatch(career:Career,fixture:Fixture,options:MatchOptions
   const home=options.home??CLUB_INDEX.get(fixture.homeId),away=options.away??CLUB_INDEX.get(fixture.awayId);
   if(!home||!away)throw new Error('경기를 치를 두 팀의 데이터가 필요합니다.');
   const seed=`${career.seed}:match-v2:${career.season.year}:${fixture.id}`;
+  const stage=(fixture as Fixture&{stage?:string}).stage;
+  const bigMatch=!!stage&&/^(결승|준결승|8강|16강|final|semifinal|quarterfinal|round16)$/.test(stage)||/(?:^|[|:])(final|semifinal|quarterfinal|round16)(?:[|:]|$)/.test(fixture.id)||home.power>=80&&away.power>=80&&Math.abs(home.power-away.power)<=8;
   const rng=seededRandom(seed),selectRng=seededRandom(`${seed}:selection`);
   const p=career.player;
   const suppliedHome=options.homePlayers?.some(row=>row.id===p.id),suppliedAway=options.awayPlayers?.some(row=>row.id===p.id);
@@ -208,7 +212,7 @@ export function simulateMatch(career:Career,fixture:Fixture,options:MatchOptions
   if(!options.forceSelection&&userTeam&&available){
     const startProbability=clamp(.48+(playingAbility(p)-ownClub.power)*.025+(career.managerTrust-50)*.004+(p.form-60)*.002,.04,.96);
     selection.started=selectRng()<startProbability;
-    if(selection.started){selection.from=0;selection.to=selectRng()<.36?integer(selectRng,62,84):90;}
+    if(selection.started){const stamina=p.attributes.stamina??p.attributes.concentration??60,edge=Math.max(0,playingAbility(p)-ownClub.power),withdrawal=clamp(.36-edge*.015-Math.max(0,stamina-75)*.006,.10,.45);selection.from=0;selection.to=selectRng()<withdrawal?integer(selectRng,62,84):90;}
     else if(selectRng()<clamp(.66+(playingAbility(p)-ownClub.power)*.012,.15,.9)){selection.from=integer(selectRng,55,80);selection.to=90;}
   }
   selection.from=clamp(Math.floor(selection.from),0,90);selection.to=clamp(Math.floor(selection.to),selection.from,90);
@@ -216,7 +220,8 @@ export function simulateMatch(career:Career,fixture:Fixture,options:MatchOptions
   const played=selection.to>selection.from;
   let redMinute:number|undefined,injuryMinute:number|undefined,injuryWeeks=0;
   if(played&&!options.forceSelection){
-    if(selectRng()<.009){redMinute=integer(selectRng,Math.max(2,selection.from+1),selection.to);selection.to=redMinute;}
+    const fair=personality(career).fairPlay,discipline=(10-fair)/5*(fair<=2?2:1);
+    if(selectRng()<.009*discipline){redMinute=integer(selectRng,Math.max(2,selection.from+1),selection.to);selection.to=redMinute;}
     else if(selectRng()<.012+(100-p.fitness)*.00025){injuryMinute=integer(selectRng,Math.max(2,selection.from+1),selection.to);selection.to=injuryMinute;injuryWeeks=integer(selectRng,1,5);}
   }
   const teams=[makeTeam(career,home,options.homePlayers,userTeam,selection,selectRng),makeTeam(career,away,options.awayPlayers,userTeam,selection,selectRng)];
@@ -237,12 +242,13 @@ export function simulateMatch(career:Career,fixture:Fixture,options:MatchOptions
   const userActor=teams.flatMap(t=>t.actors).find(actor=>actor.user);
   if(userActor&&redMinute){userActor.stats.redCards=1;emit('red',userActor,redMinute,'퇴장');}
   if(userActor&&injuryMinute)emit('injury',userActor,injuryMinute,`${injuryWeeks}주 치료가 필요한 부상`);
-  if(userActor&&!redMinute&&selectRng()<.12*duration(userActor)){userActor.stats.yellowCards=1;emit('yellow',userActor,integer(selectRng,userActor.from+1,userActor.to),'경고');}
+  const fair=personality(career).fairPlay,discipline=(10-fair)/5*(fair<=2?2:1);
+  if(userActor&&!redMinute&&selectRng()<.12*discipline*duration(userActor)){userActor.stats.yellowCards=1;emit('yellow',userActor,integer(selectRng,userActor.from+1,userActor.to),'경고');}
   // Successful build-up and defensive actions change the chances that reach either goal.
   // These totals already reflect each actor's actual minutes, including substitutions.
   const buildUp=teams.map(t=>t.actors.reduce((n,a)=>n+a.stats.passesCompleted*.004+(a.stats.dribblesCompleted??0)*.09+(a.stats.lateSuccesses??0)*.006,0));
   const disruption=teams.map(t=>t.actors.reduce((n,a)=>n+a.stats.tackles*.12+a.stats.interceptions*.16+(a.stats.aerialWon??0)*.04+(a.stats.crossesCaught??0)*.12+(a.stats.sweepingSuccesses??0)*.12,0));
-  const tactics=teams.map((team,index)=>tacticalImpact(team,teams[1-index].power));
+  const tactics=teams.map((team,index)=>tacticalImpact(team,teams[1-index].power,career));
   const scores=[0,0];
   for(let side=0;side<2;side++){
     const team=teams[side],opposition=teams[1-side];
@@ -254,7 +260,8 @@ export function simulateMatch(career:Career,fixture:Fixture,options:MatchOptions
     for(const shooter of team.actors){
       const a=(key:AttributeKey)=>ability(shooter,key);
       const minutes=duration(shooter);
-      const opportunities=SHOTS[shooter.position]*minutes*styleFactor(shooter,'shot')*powerFactor*actionFactor*tactics[side].supply*tactics[1-side].coverage*(.43+a('positioning')*.006+a('speed')*.002+a('decisions')*.001)*(1.22-organization*.0048);
+      const clutch=shooter.user&&bigMatch?personalityEdge(career,'clutch'):0;
+      const opportunities=SHOTS[shooter.position]*minutes*styleFactor(shooter,'shot')*powerFactor*actionFactor*tactics[side].supply*tactics[1-side].coverage*(.43+a('positioning')*.006+a('speed')*.002+a('decisions')*.001)*(1.22-organization*.0048)*(1+clutch*.015);
       const shotRng=seededRandom(`${seed}:${shooter.id}:shots`);
       const creatorRng=seededRandom(`${seed}:${shooter.id}:creators`);
       const count=roundedCount(opportunities*(.65+shotRng()*.7),shotRng);
@@ -278,13 +285,14 @@ export function simulateMatch(career:Career,fixture:Fixture,options:MatchOptions
           if(creator){creator.stats.keyPasses=(creator.stats.keyPasses??0)+1;if(detailed)emit('keyPass',creator,minute,'동료의 슈팅으로 연결한 패스',shotId);}
         }
         const late=minute>60?Math.min(1,.62+a('stamina')*.0038):1;
-        const aim=clamp((.12+a('shooting')*.0042+a('composure')*.0015+a('setPieces')*(shotType==='setPiece'||shotType==='penalty'?.003:.00045)+(shotType==='header'?a('heading')*.0033:0))*late,.07,.96);
+        const aim=clamp((.12+a('shooting')*.0042+a('composure')*.0015+a('setPieces')*(shotType==='setPiece'||shotType==='penalty'?.003:.00045)+(shotType==='header'?a('heading')*.0033:0))*late*(1+clutch*.01),.07,.96);
         const onTarget=shotRng()<(shotType==='penalty'?Math.max(.78,aim):aim);
         if(!onTarget)continue;
         shooter.stats.shotsOnTarget++;keeper.stats.shotsFaced=(keeper.stats.shotsFaced??0)+1;
         let saveChance=.50+k('gkShotStopping')*.003+k('gkReflexes')*.0015+k('gkPositioning')*.001+k('concentration')*.0007+k('gkHandling')*.0004-a('shooting')*.001-a('composure')*.001;
         if(shotType==='oneOnOne'){keeper.stats.oneOnOneAttempts=(keeper.stats.oneOnOneAttempts??0)+1;saveChance=.10+k('gkOneOnOnes')*.0038+k('gkReflexes')*.0012+k('gkPositioning')*.001+k('decisions')*.001-a('composure')*.0016;}
         if(shotType==='penalty'){keeper.stats.penaltiesFaced=(keeper.stats.penaltiesFaced??0)+1;saveChance=.04+k('gkOneOnOnes')*.0023+k('gkReflexes')*.0008+k('gkPositioning')*.0007-a('setPieces')*.0007;}
+        if(keeper.user&&bigMatch)saveChance+=personalityEdge(career,'clutch')*.008;
         const saved=shotRng()<clamp(saveChance,.05,.97);
         if(saved){
           keeper.stats.saves++;

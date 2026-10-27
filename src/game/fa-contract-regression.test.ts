@@ -57,7 +57,7 @@ test('actual ability loss and poor form still permit short contracts; voluntary 
 });
 
 test('opening legacy proposals refreshes duration once without touching archived records or altering signed contracts',async()=>{
- const completed=expiry(),c={...completed,offers:completed.offers.filter(o=>o.clubId!=='EN1_01').map(o=>({...o,id:o.id.replace('offseason-v292','offseason'),years:1}))};
+ const completed=expiry(),c={...completed,offers:completed.offers.filter(o=>o.clubId!=='EN1_01').map(o=>({...o,id:o.id.replace(/offseason-v\d+/,'offseason'),years:1}))};
  assert.ok(needsContractOfferRefresh(c));const before=JSON.stringify(c),next=executeCommand(c,{type:'refreshOffers'},'refresh-292');
  assert.equal(JSON.stringify(c),before);assert.equal(next.revision,c.revision+1);assert.equal(needsContractOfferRefresh(next),false);
  assert.equal(c.offers.length,6);assert.equal(next.offers.length,7);

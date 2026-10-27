@@ -1,4 +1,5 @@
 import {playingAbility,leadershipAbility} from './attributes';
+import {personalityEdge} from './personality';
 import {cupMatches} from './club-competitions';
 import { getClub } from './data';
 import { clamp,round,sumStats } from './math';
@@ -32,7 +33,7 @@ export function getCaptainAssessment(c:Career,scope:Scope):CaptainAssessment{
   const mentalScore=(mental.decisions+mental.concentration+mental.composure+mental.teamwork)/4;
   // Current mental excellence can lead immediately; demonstrated leadership
   // remains valuable for established players rather than being discarded.
-  const leadership=leadershipAbility(p.attributes,l.trait);
+  const leadership=clamp(leadershipAbility(p.attributes,l.trait)+personalityEdge(c,'leadership')*1.2,0,100);
   // Reputation is a lifetime honours meter, not the coach's current trust.
   // Recent selection, minutes, performance and mental quality establish trust now.
   const trust=scope==='club'?c.managerTrust:clamp(35+clamp(stats.minutes/540,0,1)*20+clamp((rating-6.3)*12,0,18)+mentalScore*.2+n.reputation*.1,0,100);
