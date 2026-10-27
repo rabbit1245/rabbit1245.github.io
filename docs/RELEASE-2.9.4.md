@@ -49,3 +49,13 @@
 - 913개 배지 유지, 누락 0개·비공식 창작 배지 7개. [결과](validation/kball-2.9.4-crests.json)
 
 12시즌 저장의 JSON 왕복 체크섬도 일치했다. 실제 Windows Edge 직접 실행과 구별해 동일 HTML의 Chromium·localhost·오프라인·Blob Worker·저장을 검증했다. 브라우저 검사에서 페이지 오류·외부 HTTP 자산 요청은 0건이다. [검증 요약](validation/release-2.9.4/summary.json)
+
+## 공개 다운로드
+
+[K볼 2.9.4 ZIP](https://github.com/rabbit1245/rabbit1245.github.io/raw/808db805f045fa47e24c5ce24ba160cee2109a1d/Kball.zip?download=1) · 21,513,172바이트. 공개 링크에서 HTTP 200·`application/zip` 응답으로 실제 다운로드하고, ZIP CRC·내부 HTML·빌드 SHA-256 일치를 확인했다. [공개 다운로드 검증](validation/release-2.9.4/public-download.json)
+
+- 소스: `0c50c0b899e8b991893b30ab2e582dff589d458c`
+- 다운로드 배포: `808db805f045fa47e24c5ce24ba160cee2109a1d`
+- ZIP SHA-256: `3bd68a73e93a815c6753a3f5f76073bead2aca3fdb166312882cabaf63ef349c`
+
+압축을 풀고 `Kball.html`을 최신 Chrome 또는 Edge에서 연다. 게임 하단에서 **K볼 2.9.4**를 확인한다. 기존 JSON을 불러올 수 있고, 확정된 과거 경기·순위·수상은 그대로 둔다. 새 성향과 균형·계약·수상 보정은 이후 진행에 반영한다. 파일 이름·위치·브라우저를 바꾸기 전에 기존 게임에서 JSON으로 내보낸다.

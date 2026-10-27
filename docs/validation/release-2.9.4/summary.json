@@ -1,6 +1,6 @@
 {
   "version": "2.9.4",
-  "status": "verified",
+  "status": "published",
   "core": {
     "tests": 284,
     "passed": 283,
@@ -36,5 +36,8 @@
   "standaloneBuild": true,
   "simulationReduced": false,
   "formerClubCameoDoesNotExemptBalance": true,
-  "finalCoreSuite": "core-suite.tap"
+  "finalCoreSuite": "core-suite.tap",
+  "publicDownload": "public-download.json",
+  "artifactCommit": "808db805f045fa47e24c5ce24ba160cee2109a1d",
+  "matchesTestedBuild": true
 }
