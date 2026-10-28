@@ -1,0 +1,20 @@
+{
+  "version": "2.10.1",
+  "core": {
+    "tests": 326,
+    "pass": 325,
+    "fail": 0,
+    "cancelled": 0,
+    "skipped": 1
+  },
+  "attributeContexts": 30,
+  "all30UpperRangeLinksPassed": true,
+  "actualWorldSeasons": 7,
+  "recordBrowserFixtures": 7,
+  "playableFlowChecks": 11,
+  "old12SeasonSaveImportedAndReexported": true,
+  "pageErrors": 0,
+  "externalAssets": 0,
+  "preservedSystemFiles": 18,
+  "publication": "pending"
+}

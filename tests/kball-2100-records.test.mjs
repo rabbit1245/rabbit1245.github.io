@@ -7,11 +7,14 @@ import {actionCoverage,ACTION_LABELS} from '../src/game/action-metrics.ts';
 import {careerMatchLedger,careerRecordTotals,buildCareerText} from '../src/game/career-text.ts';
 import {seasonOverview,newestMatchFirst} from '../src/game/season-overview.ts';
 
+const version=JSON.parse(await readFile('package.json','utf8')).version;
 const url=process.env.KBALL_TEST_URL||'http://127.0.0.1:4190/Kball.html';
 const root=process.env.KBALL_ACTION_RESULTS||'test-results/release-2.10.0',out=`${root}/records-ui`;
+const fixtureRoot=process.env.KBALL_ACTION_FIXTURES||`${root}/careers`;
 await mkdir(out,{recursive:true});
 const browser=await chromium.launch({headless:true,executablePath:process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE||'/usr/bin/chromium'}),errors=[],external=[],checks=[];
-const fixtures=[['CB',1366,`${root}/careers/CB-season.json`],['GK',390,`${root}/careers/GK-season.json`],['legacy',1366,'test-results/release-2.9.5/fixtures/season.json'],['mixed',390,`${root}/careers/legacy-mixed.json`],['retired',1366,`${root}/careers/CB-retired.json`],['long',1366,`${root}/careers/long-mixed.json`]];
+const fixtures=[['CB',1366,`${fixtureRoot}/CB-season.json`],['GK',390,`${fixtureRoot}/GK-season.json`],['legacy',1366,'test-results/release-2.9.5/fixtures/season.json'],['mixed',390,`${fixtureRoot}/legacy-mixed.json`],['retired',1366,`${fixtureRoot}/CB-retired.json`],['long',1366,`${fixtureRoot}/long-mixed.json`]];
+if(process.env.KBALL_ABILITY_FIXTURE)fixtures.push(['elite',1366,process.env.KBALL_ABILITY_FIXTURE]);
 async function ready(p){await p.getByTestId('save-status').filter({hasText:'자동 저장됨'}).waitFor({state:'attached'});await p.locator('.processing').waitFor({state:'hidden'});assert.deepEqual(await p.getByRole('alert').allTextContents(),[]);}
 async function metrics(locator,stats,position){
   assert.equal(await locator.locator('.stat-detail').count(),position==='GK'?10:12);
@@ -24,7 +27,7 @@ try{
     const context=await browser.newContext({viewport:{width,height:900},reducedMotion:'reduce',acceptDownloads:true}),p=await context.newPage();p.setDefaultTimeout(180000);
     p.on('pageerror',e=>errors.push(String(e)));p.on('request',r=>{if(/^https?:/.test(r.url())&&r.url()!==url)external.push(r.url());});
     await p.goto(url,{waitUntil:'networkidle'});await context.setOffline(true);const start=performance.now();await p.getByLabel('K볼 저장 파일 가져오기').setInputFiles(path.resolve(file));await ready(p);const importMs=performance.now()-start;
-    assert.ok((await p.getByTestId('game-version').innerText()).includes('2.10.0'));
+    assert.ok((await p.getByTestId('game-version').innerText()).includes(version));
     await p.getByTestId('season-details-disclosure').locator('summary').click();await metrics(p.getByTestId('locker-season-details').getByTestId('role-metrics'),seasonOverview(original).combined,position);
     await p.getByTestId('career-tab').click();await p.getByTestId('career-view-records').click();await p.getByRole('button',{name:'통산',exact:true}).click();
     for(const scope of ['all','club','national']){await p.getByTestId(`records-scope-${scope}`).click();await metrics(p.getByTestId('role-metrics'),totals[scope],position);}

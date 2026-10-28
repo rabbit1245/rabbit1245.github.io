@@ -20,6 +20,7 @@ test('forwards retain link-up assists and creative positions supply actual assis
   }
   assert.ok(row.assistsAll/row.goalsAll>.65&&row.assistsAll/row.goalsAll<.85);
  }
+ t.diagnostic(JSON.stringify(rows));
  assert.ok(rows.ST.assists>rows.ST.goals*.15,'strikers can link play, rather than only score');
  assert.ok(rows.CAM.assists>rows.CAM.goals*.6);assert.ok(rows.RW.assists>75);
  assert.ok(rows.CAM.assists>rows.CB.assists*3,'creative positions supply more final passes than central defenders');t.diagnostic(JSON.stringify(rows));

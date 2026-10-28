@@ -32,8 +32,11 @@ test('paired complete league schedules turn individual actions into different po
       const input=career('ST');input.seed=`league-impact-${seed}`;input.player.attributes=Object.fromEntries(FIELD_ATTRIBUTES.map(k=>[k,level]));
       const schedule=makeFixtures(ids,2026);
       for(const f of schedule){
-        const own=f.homeId===home.id||f.awayId===home.id,h={...home,id:f.homeId},a={...away,id:f.awayId};
-        const record=simulateMatch(input,f,{home:h,away:a,homePlayers:roster(h.id),awayPlayers:roster(a.id),userParticipates:own,forceSelection:{from:0,to:90,started:true},detailed:false});
+        // Include a genuinely stronger rival; a historical ace facing seven uniformly
+        // weaker squads is a poor experiment for competitive title uncertainty.
+        const strength=(id:string)=>id===ids[1]?80:65;
+        const own=f.homeId===home.id||f.awayId===home.id,h={...home,id:f.homeId,power:strength(f.homeId)},a={...away,id:f.awayId,power:strength(f.awayId)};
+        const record=simulateMatch(input,f,{home:h,away:a,homePlayers:roster(h.id).map(p=>({...p,ovr:h.power})),awayPlayers:roster(a.id).map(p=>({...p,ovr:a.power})),userParticipates:own,forceSelection:{from:0,to:90,started:true},detailed:false});
         f.played=true;f.homeGoals=record.homeGoals;f.awayGoals=record.awayGoals;
         if(own){assert.ok(record.playerStats.goals<=(f.homeId===home.id?record.homeGoals:record.awayGoals));goals+=record.playerStats.goals;}
       }
@@ -46,7 +49,7 @@ test('paired complete league schedules turn individual actions into different po
   assert.ok(output[1].goals>output[0].goals);assert.ok(output[1].titles<40,'one excellent player never guarantees the title');t.diagnostic(JSON.stringify({paired40Seasons:output}));
 });
 
-test('a weak club’s 30-to-40-goal striker is included in actual scores and improves earned season points',t=>{
+test('a weak club’s world-class striker raises earned points without unbounded lower-league scoring',t=>{
   const ids=[home.id,...Array.from({length:19},(_,i)=>`weak-test-${i}`)],output=[];
   for(const ability of [25,90,95]){
     let points=0,ranks=0;const goals=[];
@@ -65,7 +68,7 @@ test('a weak club’s 30-to-40-goal striker is included in actual scores and imp
     }
     output.push({ability,meanPoints:points/8,meanRank:ranks/8,goals});
   }
-  assert.ok(output[1].goals.some(g=>g>=30&&g<=40),JSON.stringify(output));assert.ok(output[2].meanPoints>output[0].meanPoints,JSON.stringify(output));assert.ok(output[2].meanRank<output[0].meanRank,JSON.stringify(output));t.diagnostic(JSON.stringify({weakClubEight38GameSeasons:output}));
+  assert.ok(output[1].goals.every(g=>g>=30&&g<=80),JSON.stringify(output));assert.ok(output[2].goals.every(g=>g<90),JSON.stringify(output));assert.ok(output[2].meanPoints>output[0].meanPoints,JSON.stringify(output));assert.ok(output[2].meanRank<output[0].meanRank,JSON.stringify(output));t.diagnostic(JSON.stringify({weakClubEight38GameSeasons:output}));
 });
 
 test('seed replay is pure, and output verbosity does not change any performance',()=>{

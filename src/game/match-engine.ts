@@ -1,5 +1,6 @@
 import {playingAbility,leadershipAbility} from './attributes';
 import {personalityEdge,personality} from './personality';
+import {skillSuccess,openPlaySaveChance} from './ability-contests';
 import {phasePasses,resolvePressing,resolveAirClaims,headerProbability,headerDelivery,aerialQuality,type ActionEmitter} from './match-actions';
 import { CLUBS, ROSTERS } from './data';
 import { clamp, emptyStats, hashSeed, integer, round, seededRandom } from './math';
@@ -8,7 +9,7 @@ import type { AttributeKey, Career, Club, Fixture, MatchEvent, MatchRecord, Play
 
 const CLUB_INDEX = new Map(CLUBS.map(club=>[club.id,club]));
 interface Actor extends MatchPerformance { from:number;to:number;teamId:string;user:boolean;style:string;creation:number }
-interface Team { club:Club; actors:Actor[]; power:number; leadership:number }
+interface Team { club:Club; actors:Actor[]; power:number; referencePower:number; leadership:number }
 const FORWARD = new Set<Position>(['ST','CF','SS','LW','RW']);
 const MIDFIELD = new Set<Position>(['CDM','CM','CAM','LM','RM']);
 const DEFENCE = new Set<Position>(['CB','LB','RB','LWB','RWB']);
@@ -92,7 +93,11 @@ function makeTeam(career:Career,club:Club,provided:MatchParticipant[]|undefined,
   const worldPower=career.systems?.world.clubs[club.id]?.power;
   // Supplied teams already carry their current power (including national teams).
   const power=provided?.length?club.power:worldPower??club.power;
-  return {club,actors,power,leadership:0};
+  // A better goalkeeper or one exceptional player must not raise all teammates' reference
+  // expectations and erase their contribution. The outfield median is robust to that outlier.
+  const levels=actors.filter(a=>a.position!=='GK'&&a.minutes>0).map(a=>a.attributes?playingAbility({...a,attributes:a.attributes,style:a.style}):a.ovr).sort((a,b)=>a-b);
+  const referencePower=levels.length?(levels[Math.floor((levels.length-1)/2)]+levels[Math.floor(levels.length/2)])/2:power;
+  return {club,actors,power,referencePower,leadership:0};
 }
 
 function sampleActions(actor:Actor,opponentPower:number,rng:()=>number,emit:ActionEmitter,detailed:boolean,team:Team,opposition:Team,seed:string,recordActions:boolean){
@@ -108,27 +113,28 @@ function sampleActions(actor:Actor,opponentPower:number,rng:()=>number,emit:Acti
   let loggedPasses=0,loggedCompleted=0;
   if(actor.position==='GK'){
     s.buildUpPasses=count(PASSES.GK*styleFactor(actor,'pass'));
-    s.buildUpCompleted=success(s.buildUpPasses,.24+a('gkDistribution')*.005+a('decisions')*.002-resistance);
-    s.longKicks=count(7.5);s.longKicksCompleted=success(s.longKicks,.12+a('gkDistribution')*.0055+a('decisions')*.0012-resistance);
+    s.buildUpCompleted=success(s.buildUpPasses,skillSuccess(.695,a('gkDistribution')*.72+a('decisions')*.28,opponentPower));
+    s.longKicks=count(7.5);s.longKicksCompleted=success(s.longKicks,skillSuccess(.5555,a('gkDistribution')*.82+a('decisions')*.18,opponentPower));
     s.passes=s.buildUpPasses+s.longKicks;s.passesCompleted=s.buildUpCompleted+s.longKicksCompleted;
     s.sweepingAttempts=count(2.6*styleFactor(actor,'sweep'));
     s.sweepingSuccesses=success(s.sweepingAttempts,.08+a('decisions')*.0045+a('gkPositioning')*.0032-resistance);
-    s.handlingAttempts=count(3.8);s.handlingSuccesses=success(s.handlingAttempts,.15+a('gkHandling')*.007+a('concentration')*.001-resistance);
+    s.handlingAttempts=count(3.8);s.handlingSuccesses=success(s.handlingAttempts,skillSuccess(.67,a('gkHandling')*.875+a('concentration')*.125,opponentPower));
   }else{
     s.passes=count(PASSES[actor.position]*styleFactor(actor,'pass')*(.66+a('teamwork')*.005)*endurance);
-    const passProbability=clamp((.33+a('passing')*.0045+a('ballControl')*.0012+a('decisions')*.0013+a('concentration')*.0009-resistance)*endurance,.03,.98);
+    const passQuality=a('passing')*.57+a('ballControl')*.15+a('decisions')*.17+a('concentration')*.11;
+    const passProbability=skillSuccess(.8435,passQuality,opponentPower,.027,.02)*endurance;
     const phases=phasePasses(actor,team,opposition,seed,emit,detailed,styleFactor(actor,'pass'),endurance,passProbability,recordActions);
     s.passesCompleted=phases.completed+success(s.passes-phases.attempts,passProbability);loggedPasses=phases.logged;loggedCompleted=phases.loggedCompleted;
     const wide=['LW','RW','LM','RM','LB','RB','LWB','RWB'].includes(actor.position);
     actor.creation=(.15+a('vision')*.021+a('passing')*.007+a('crossing')*(wide?.019:.008)+a('decisions')*.006+a('setPieces')*.006+a('teamwork')*.005)*CREATION_ROLE[actor.position]*styleFactor(actor,'pass')*endurance;
     s.dribbleAttempts=count((FORWARD.has(actor.position)?5.2:MIDFIELD.has(actor.position)?3.4:1.9)*styleFactor(actor,'dribble')*(.55+a('speed')*.007)*endurance);
-    s.dribblesCompleted=success(s.dribbleAttempts,(.07+a('dribbling')*.005+a('agility')*.0022+a('ballControl')*.0013+a('speed')*.0008+a('strength')*.0006-resistance)*endurance);
+    s.dribblesCompleted=success(s.dribbleAttempts,skillSuccess(.7135,a('dribbling')*.51+a('agility')*.22+a('ballControl')*.13+a('speed')*.08+a('strength')*.06,opponentPower,.032,.022)*endurance);
     const pressingForward=FORWARD.has(actor.position)&&/수비형|압박|프레싱/.test(actor.style);
     s.tackleAttempts=count((DEFENCE.has(actor.position)?4.3:MIDFIELD.has(actor.position)?3.1:pressingForward?2.7:1.6)*styleFactor(actor,'tackle')*endurance);
-    s.tackles=success(s.tackleAttempts,(.1+a('defending')*.0057+a('strength')*.002+a('decisions')*.0007-resistance)*endurance);
+    s.tackles=success(s.tackleAttempts,skillSuccess(.646,a('defending')*.68+a('strength')*.24+a('decisions')*.08,opponentPower,.032,.025)*endurance);
     s.interceptions=count((DEFENCE.has(actor.position)?2.1:MIDFIELD.has(actor.position)?1.5:pressingForward?1:.65)*(.2+a('anticipation')*.013+a('positioning')*.004+a('concentration')*.002)*endurance);
     s.aerialAttempts=count((actor.position==='CB'||actor.position==='ST'?4.5:2.1)*styleFactor(actor,'aerial'));
-    s.aerialWon=success(s.aerialAttempts,.06+a('jumping')*.0044+a('heading')*.0024+a('strength')*.002-resistance);
+    s.aerialWon=success(s.aerialAttempts,skillSuccess(.632,a('jumping')*.5+a('heading')*.273+a('strength')*.227,opponentPower,.035,.027));
   }
   // Explicit late actions expose stamina's time-dependent effect without conflating it with OVR.
   s.lateActions=roundedCount(lateMinutes*(actor.position==='GK'?.22:.65)*(.35+a('stamina')*.008),rng);
@@ -178,28 +184,32 @@ function assignCaptain(career:Career,team:Team,userTeam:string|undefined,scope:'
 function tacticalImpact(team:Team,opponentPower:number,career:Career):{supply:number;coverage:number}{
   let creationEdge=0,defensiveEdge=0,control=0;
   for(const actor of team.actors){
-    if(actor.position==='GK')continue;
+    if(actor.position==='GK'){
+      const distribution=ability(actor,'gkDistribution')*.7+ability(actor,'decisions')*.3;
+      creationEdge+=(distribution-team.referencePower)*.025*duration(actor);
+      continue;
+    }
     const wide=['LW','RW','LM','RM','LB','RB','LWB','RWB'].includes(actor.position);
     const lateMinutes=Math.max(0,actor.to-Math.max(60,actor.from));
-    const referenceEndurance=1-(1-(.48+team.power*.0052))*lateMinutes/Math.max(1,actor.minutes);
-    const reference=(.15+team.power*(.021+.007+(wide?.019:.008)+.006+.006+.005))*CREATION_ROLE[actor.position]*styleFactor(actor,'pass')*referenceEndurance;
+    const referenceEndurance=1-(1-(.48+team.referencePower*.0052))*lateMinutes/Math.max(1,actor.minutes);
+    const reference=(.15+team.referencePower*(.021+.007+(wide?.019:.008)+.006+.006+.005))*CREATION_ROLE[actor.position]*styleFactor(actor,'pass')*referenceEndurance;
     creationEdge+=(actor.creation-reference)*duration(actor);
     // Successful high pressing is team defence too; merely choosing the style gives no coverage credit.
     const pressure=clamp((actor.stats.tackles+actor.stats.interceptions)/Math.max(.25,duration(actor))/4,0,1);
-    const weight=actor.position==='CB'?1.1:['LB','RB','LWB','RWB'].includes(actor.position)?.85:actor.position==='CDM'?.8:MIDFIELD.has(actor.position)?.35:.12+pressure*.4;
+    const weight=actor.position==='CB'?1.3:['LB','RB','LWB','RWB'].includes(actor.position)?1:actor.position==='CDM'?1:MIDFIELD.has(actor.position)?.45:.18+pressure*.45;
     const defense=ability(actor,'defending')*.32+ability(actor,'anticipation')*.23+ability(actor,'positioning')*.2+ability(actor,'concentration')*.15+ability(actor,'decisions')*.1;
-    defensiveEdge+=(defense-team.power)*weight*duration(actor);
+    defensiveEdge+=(defense-team.referencePower)*weight*duration(actor);
     // An outstanding carrier/playmaker keeps the ball away from weaker opponents.
     // Averaging one player into eleven used to erase this effect almost entirely.
     // Use real ball/mental skills, role and minutes for every actor, never the user ID.
     const retention=ability(actor,'ballControl')*.22+ability(actor,'dribbling')*.18+ability(actor,'passing')*.20+ability(actor,'decisions')*.16+ability(actor,'composure')*.12+ability(actor,'teamwork')*.12;
-    const dominance=Math.pow(clamp((retention-opponentPower-6)/32,0,1),1.5);
+    const dominance=Math.pow(clamp((retention-opponentPower)/26,0,1),1.25);
     const controlRole=MIDFIELD.has(actor.position)?1:FORWARD.has(actor.position)?.85:wide?.65:.4;
     control+=dominance*controlRole*duration(actor);
   }
   const possession=clamp(control,0,1.25);
   const user=team.actors.find(a=>a.user),winning=user?personalityEdge(career,'winning')*.02*duration(user):0;
-  return {supply:clamp(1+creationEdge*.11+possession*.06,.76,1.42)*(1+team.leadership*.45)*(1+winning),coverage:clamp(1-defensiveEdge*.006-possession*.25,.60,1.25)*(1-team.leadership)*(1-winning)};
+  return {supply:clamp(1+creationEdge*.11+possession*.06,.76,1.42)*(1+team.leadership*.45)*(1+winning),coverage:clamp(1-defensiveEdge*.008-possession*.25,.55,1.25)*(1-team.leadership)*(1-winning)};
 }
 
 /** Pure seeded match simulation. Full worlds use the same action checks with compressed event output. */
@@ -218,7 +228,14 @@ export function simulateMatch(career:Career,fixture:Fixture,options:MatchOptions
   const available=p.injuryWeeks<=0&&p.fitness>=25;
   const selection=options.forceSelection?{...options.forceSelection}:{from:0,to:0,started:false};
   if(!options.forceSelection&&userTeam&&available){
-    const startProbability=clamp(.48+(playingAbility(p)-ownClub.power)*.025+(career.managerTrust-50)*.004+(p.form-60)*.002,.04,.96);
+    const supplied=userTeam===home.id?options.homePlayers:options.awayPlayers;
+    const peers=sourcePlayers(career,ownClub,supplied).filter(row=>row.id!==p.id);
+    const flank=p.position==='LWB'?'LB':p.position==='RWB'?'RB':undefined;
+    let competition=peers.filter(row=>row.position===p.position||row.position===flank);
+    if(!competition.length)competition=peers.filter(row=>group(row.position)===group(p.position));
+    const levels=competition.map(row=>row.attributes?playingAbility({...row,attributes:row.attributes,style:''}):row.ovr).sort((a,b)=>b-a);
+    const rival=levels[Math.min(p.position==='CB'?1:0,Math.max(0,levels.length-1))]??ownClub.power;
+    const startProbability=clamp(.68+(playingAbility(p)-rival)*.035+(career.managerTrust-50)*.003+(p.form-60)*.002,.03,.99);
     selection.started=selectRng()<startProbability;
     if(selection.started){const stamina=p.attributes.stamina??p.attributes.concentration??60,edge=Math.max(0,playingAbility(p)-ownClub.power),withdrawal=clamp(.36-edge*.015-Math.max(0,stamina-75)*.006,.10,.45);selection.from=0;selection.to=selectRng()<withdrawal?integer(selectRng,62,84):90;}
     else if(selectRng()<clamp(.66+(playingAbility(p)-ownClub.power)*.012,.15,.9)){selection.from=integer(selectRng,55,80);selection.to=90;}
@@ -271,7 +288,9 @@ export function simulateMatch(career:Career,fixture:Fixture,options:MatchOptions
       const a=(key:AttributeKey)=>ability(shooter,key);
       const minutes=duration(shooter);
       const clutch=shooter.user&&bigMatch?personalityEdge(career,'clutch'):0;
-      const opportunities=SHOTS[shooter.position]*minutes*styleFactor(shooter,'shot')*powerFactor*actionFactor*tactics[side].supply*tactics[1-side].coverage*(.43+a('positioning')*.006+a('speed')*.002+a('decisions')*.001)*(1.22-organization*.0048)*(1+clutch*.03);
+      const threat=a('positioning')*.28+a('anticipation')*.16+a('decisions')*.14+a('speed')*.14+a('ballControl')*.14+a('dribbling')*.14;
+      const selfCreation=shooter.position==='GK'?1:clamp(1+(threat-opposition.power)*.012,.65,1.65);
+      const opportunities=SHOTS[shooter.position]*minutes*styleFactor(shooter,'shot')*powerFactor*actionFactor*tactics[side].supply*tactics[1-side].coverage*selfCreation*(.43+a('positioning')*.006+a('speed')*.002+a('decisions')*.001)*(1.22-organization*.0048)*(1+clutch*.03);
       const shotRng=seededRandom(`${seed}:${shooter.id}:shots`);
       const creatorRng=seededRandom(`${seed}:${shooter.id}:creators`);
       const headerRng=seededRandom(`${actionSeed}:${shooter.id}:headers`),headerChance=headerProbability(shooter,team);
@@ -301,11 +320,14 @@ export function simulateMatch(career:Career,fixture:Fixture,options:MatchOptions
         }
         if(creator){creator.stats.keyPasses=(creator.stats.keyPasses??0)+1;if(detailed)emit('keyPass',creator,minute,'동료의 슈팅으로 연결한 패스',shotId);}
         const late=minute>60?Math.min(1,.62+a('stamina')*.0038):1;
-        const aim=clamp((shotType==='header'?.12+a('heading')*.0044+a('jumping')*.0016+a('positioning')*.0018+a('strength')*.001+a('composure')*.0011:.12+a('shooting')*.0042+a('composure')*.0015+a('setPieces')*(shotType==='setPiece'||shotType==='penalty'?.003:.00045))*late*(1+clutch*.018),.07,.96);
+        const shootingQuality=shotType==='header'?a('heading')*.445+a('jumping')*.162+a('positioning')*.182+a('strength')*.101+a('composure')*.11:shotType==='setPiece'||shotType==='penalty'?a('shooting')*.38+a('composure')*.2+a('setPieces')*.42:a('shooting')*.68+a('composure')*.25+a('setPieces')*.07;
+        const aim=clamp(skillSuccess(shotType==='header'?.7635:shotType==='setPiece'||shotType==='penalty'?.6855:.51975,shootingQuality,opposition.power,.037,.01)*late*(1+clutch*.018),.07,.98);
         const onTarget=shotRng()<(shotType==='penalty'?Math.max(.78,aim):aim);
         if(!onTarget)continue;
         shooter.stats.shotsOnTarget++;keeper.stats.shotsFaced=(keeper.stats.shotsFaced??0)+1;
-        let saveChance=.50+k('gkShotStopping')*.003+k('gkReflexes')*.0015+k('gkPositioning')*.001+k('concentration')*.0007+k('gkHandling')*.0004-(shotType==='header'?aerialQuality(shooter):a('shooting'))*.001-a('composure')*.001;
+        const keeping=k('gkShotStopping')*.455+k('gkReflexes')*.227+k('gkPositioning')*.152+k('concentration')*.106+k('gkHandling')*.06;
+        const finishing=(shotType==='header'?aerialQuality(shooter):a('shooting'))*.65+a('composure')*.25+a('decisions')*.1;
+        let saveChance=openPlaySaveChance(keeping,finishing);
         if(shotType==='oneOnOne'){keeper.stats.oneOnOneAttempts=(keeper.stats.oneOnOneAttempts??0)+1;saveChance=.10+k('gkOneOnOnes')*.0038+k('gkReflexes')*.0012+k('gkPositioning')*.001+k('decisions')*.001-a('composure')*.0016;}
         if(shotType==='penalty'){keeper.stats.penaltiesFaced=(keeper.stats.penaltiesFaced??0)+1;saveChance=.04+k('gkOneOnOnes')*.0023+k('gkReflexes')*.0008+k('gkPositioning')*.0007-a('setPieces')*.0007;}
         if(keeper.user&&bigMatch)saveChance+=personalityEdge(career,'clutch')*.012;

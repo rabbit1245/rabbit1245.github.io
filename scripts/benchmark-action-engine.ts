@@ -17,7 +17,7 @@ async function main(){
     if(trial>=0){times[condition].push(performance.now()-start);events[condition]=eventCount;}
   }
   const median=(a:number[])=>[...a].sort((a,b)=>a-b)[Math.floor(a.length/2)],before=median(times.before),after=median(times.after);
-  const report={matchesPerTrial:1000,trials:5,baseline:'2.9.6',sameMachineAlternatingTrials:true,calculationsAndFullActionSources:true,timesMs:times,medianBeforeMs:before,medianAfterMs:after,ratio:after/before,npcMedianBeforeMs:median(times.beforeNPC),npcMedianAfterMs:median(times.afterNPC),npcRatio:median(times.afterNPC)/median(times.beforeNPC),events};
+  const report={matchesPerTrial:1000,trials:5,baseline:versions.before.engine.ENGINE_VERSION,sameMachineAlternatingTrials:true,calculationsAndFullActionSources:true,timesMs:times,medianBeforeMs:before,medianAfterMs:after,ratio:after/before,npcMedianBeforeMs:median(times.beforeNPC),npcMedianAfterMs:median(times.afterNPC),npcRatio:median(times.afterNPC)/median(times.beforeNPC),events};
   const out=process.env.KBALL_ACTION_RESULTS||'test-results/release-2.10.0';await mkdir(out,{recursive:true});await writeFile(`${out}/engine-performance.json`,JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify(report,null,2));
 }
 main().catch(error=>{console.error(error);process.exitCode=1;});

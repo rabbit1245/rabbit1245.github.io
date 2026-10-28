@@ -11,7 +11,7 @@ async function main(){
     if(trial>=0){times[label].push(elapsed);fixtures[label]=Object.values(c.systems.world.competitions).reduce((n:number,l:any)=>n+l.fixtures.filter((f:any)=>f.played).length,0);}
   }
   const median=(values:number[])=>[...values].sort((a,b)=>a-b)[Math.floor(values.length/2)];
-  const report={baseline:'2.9.6',trials:3,leagueRoundsPerTrial:2,sameMachineAlternatingTrials:true,wholeWorldAndCareerProgression:true,timesMs:times,medianBeforeMs:median(times.before),medianAfterMs:median(times.after),ratio:median(times.after)/median(times.before),worldFixturesPlayed:fixtures};
+  const report={baseline:versions.before.ENGINE_VERSION,trials:3,leagueRoundsPerTrial:2,sameMachineAlternatingTrials:true,wholeWorldAndCareerProgression:true,timesMs:times,medianBeforeMs:median(times.before),medianAfterMs:median(times.after),ratio:median(times.after)/median(times.before),worldFixturesPlayed:fixtures};
   const out=process.env.KBALL_ACTION_RESULTS||'test-results/release-2.10.0';await mkdir(out,{recursive:true});await writeFile(`${out}/world-performance.json`,JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify(report,null,2));
 }
 main().catch(error=>{console.error(error);process.exitCode=1;});

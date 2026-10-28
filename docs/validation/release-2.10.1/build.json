@@ -1,0 +1,16 @@
+{
+  "version": "2.10.1",
+  "sourceBase": "da59d9ec5f07da418ae958c34ff8c575ded63706",
+  "typecheckAndProductionBuild": true,
+  "portableBuild": true,
+  "html": {
+    "bytes": 28568825,
+    "sha256": "b5a2f2e8766ceb2fc6e66aae19b4e71898cdbc2b1de606e8eb3fe64d69679fe7"
+  },
+  "zip": {
+    "bytes": 21529910,
+    "sha256": "0fa8391a74138b34d5de5afb5d567b4c5821309cb87b0fe7d3d3886bcf632b89",
+    "crc": true,
+    "embeddedHTMLMatches": true
+  }
+}

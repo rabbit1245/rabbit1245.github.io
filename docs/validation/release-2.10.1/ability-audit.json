@@ -1,0 +1,1037 @@
+{
+  "baseline": "2.10.0",
+  "version": "2.10.1",
+  "matchesPerPair": 300,
+  "checks": [
+    {
+      "context": "CM",
+      "attribute": "strength",
+      "metric": "tackles",
+      "direction": 1,
+      "before": {
+        "low": 744,
+        "high": 766
+      },
+      "after": {
+        "low": 625,
+        "high": 641
+      },
+      "passed": true
+    },
+    {
+      "context": "CM",
+      "attribute": "stamina",
+      "metric": "lateSuccesses",
+      "direction": 1,
+      "before": {
+        "low": 3411,
+        "high": 3863
+      },
+      "after": {
+        "low": 3411,
+        "high": 3863
+      },
+      "passed": true
+    },
+    {
+      "context": "CM",
+      "attribute": "speed",
+      "metric": "dribbleAttempts",
+      "direction": 1,
+      "before": {
+        "low": 1178,
+        "high": 1261
+      },
+      "after": {
+        "low": 1178,
+        "high": 1261
+      },
+      "passed": true
+    },
+    {
+      "context": "CM",
+      "attribute": "agility",
+      "metric": "dribblesCompleted",
+      "direction": 1,
+      "before": {
+        "low": 1093,
+        "high": 1112
+      },
+      "after": {
+        "low": 900,
+        "high": 914
+      },
+      "passed": true
+    },
+    {
+      "context": "CM",
+      "attribute": "jumping",
+      "metric": "aerialWon",
+      "direction": 1,
+      "before": {
+        "low": 549,
+        "high": 580
+      },
+      "after": {
+        "low": 477,
+        "high": 505
+      },
+      "passed": true
+    },
+    {
+      "context": "CM",
+      "attribute": "ballControl",
+      "metric": "passesCompleted",
+      "direction": 1,
+      "before": {
+        "low": 17669,
+        "high": 17695
+      },
+      "after": {
+        "low": 15633,
+        "high": 15737
+      },
+      "passed": true
+    },
+    {
+      "context": "CM",
+      "attribute": "dribbling",
+      "metric": "dribblesCompleted",
+      "direction": 1,
+      "before": {
+        "low": 1093,
+        "high": 1139
+      },
+      "after": {
+        "low": 900,
+        "high": 935
+      },
+      "passed": true
+    },
+    {
+      "context": "CM",
+      "attribute": "passing",
+      "metric": "passesCompleted",
+      "direction": 1,
+      "before": {
+        "low": 17669,
+        "high": 17735
+      },
+      "after": {
+        "low": 15633,
+        "high": 15974
+      },
+      "passed": true
+    },
+    {
+      "context": "CM",
+      "attribute": "crossing",
+      "metric": "keyPasses",
+      "direction": 1,
+      "before": {
+        "low": 297,
+        "high": 311
+      },
+      "after": {
+        "low": 323,
+        "high": 337
+      },
+      "passed": true
+    },
+    {
+      "context": "CM",
+      "attribute": "shooting",
+      "metric": "shotsOnTarget",
+      "direction": 1,
+      "before": {
+        "low": 165,
+        "high": 174
+      },
+      "after": {
+        "low": 184,
+        "high": 198
+      },
+      "passed": true
+    },
+    {
+      "context": "CM",
+      "attribute": "heading",
+      "metric": "aerialWon",
+      "direction": 1,
+      "before": {
+        "low": 549,
+        "high": 566
+      },
+      "after": {
+        "low": 477,
+        "high": 497
+      },
+      "passed": true
+    },
+    {
+      "context": "CM",
+      "attribute": "defending",
+      "metric": "tackles",
+      "direction": 1,
+      "before": {
+        "low": 744,
+        "high": 796
+      },
+      "after": {
+        "low": 625,
+        "high": 670
+      },
+      "passed": true
+    },
+    {
+      "context": "CM",
+      "attribute": "setPieces",
+      "metric": "shotsOnTarget",
+      "direction": 1,
+      "before": {
+        "low": 165,
+        "high": 166
+      },
+      "after": {
+        "low": 184,
+        "high": 186
+      },
+      "passed": true
+    },
+    {
+      "context": "CM",
+      "attribute": "decisions",
+      "metric": "passesCompleted",
+      "direction": 1,
+      "before": {
+        "low": 17669,
+        "high": 17682
+      },
+      "after": {
+        "low": 15633,
+        "high": 15745
+      },
+      "passed": true
+    },
+    {
+      "context": "CM",
+      "attribute": "vision",
+      "metric": "keyPasses",
+      "direction": 1,
+      "before": {
+        "low": 297,
+        "high": 325
+      },
+      "after": {
+        "low": 323,
+        "high": 348
+      },
+      "passed": true
+    },
+    {
+      "context": "CM",
+      "attribute": "anticipation",
+      "metric": "interceptions",
+      "direction": 1,
+      "before": {
+        "low": 843,
+        "high": 901
+      },
+      "after": {
+        "low": 843,
+        "high": 901
+      },
+      "passed": true
+    },
+    {
+      "context": "CM",
+      "attribute": "positioning",
+      "metric": "shots",
+      "direction": 1,
+      "before": {
+        "low": 252,
+        "high": 266
+      },
+      "after": {
+        "low": 290,
+        "high": 319
+      },
+      "passed": true
+    },
+    {
+      "context": "CM",
+      "attribute": "composure",
+      "metric": "shotsOnTarget",
+      "direction": 1,
+      "before": {
+        "low": 165,
+        "high": 167
+      },
+      "after": {
+        "low": 184,
+        "high": 188
+      },
+      "passed": true
+    },
+    {
+      "context": "CM",
+      "attribute": "concentration",
+      "metric": "passesCompleted",
+      "direction": 1,
+      "before": {
+        "low": 17669,
+        "high": 17669
+      },
+      "after": {
+        "low": 15633,
+        "high": 15685
+      },
+      "passed": true
+    },
+    {
+      "context": "CM",
+      "attribute": "teamwork",
+      "metric": "passes",
+      "direction": 1,
+      "before": {
+        "low": 18662,
+        "high": 19497
+      },
+      "after": {
+        "low": 18662,
+        "high": 19497
+      },
+      "passed": true
+    },
+    {
+      "context": "GK",
+      "attribute": "gkShotStopping",
+      "metric": "saves",
+      "direction": 1,
+      "before": {
+        "low": 1858,
+        "high": 1918
+      },
+      "after": {
+        "low": 1669,
+        "high": 1713
+      },
+      "passed": true
+    },
+    {
+      "context": "GK",
+      "attribute": "gkReflexes",
+      "metric": "saves",
+      "direction": 1,
+      "before": {
+        "low": 1858,
+        "high": 1900
+      },
+      "after": {
+        "low": 1669,
+        "high": 1701
+      },
+      "passed": true
+    },
+    {
+      "context": "GK",
+      "attribute": "gkHandling",
+      "metric": "handlingSuccesses",
+      "direction": 1,
+      "before": {
+        "low": 957,
+        "high": 1037
+      },
+      "after": {
+        "low": 825,
+        "high": 878
+      },
+      "passed": true
+    },
+    {
+      "context": "GK",
+      "attribute": "gkAerialCommand",
+      "metric": "crossesCaught+punches",
+      "direction": 1,
+      "before": {
+        "low": 1292,
+        "high": 1360
+      },
+      "after": {
+        "low": 1292,
+        "high": 1360
+      },
+      "passed": true
+    },
+    {
+      "context": "GK",
+      "attribute": "gkOneOnOnes",
+      "metric": "oneOnOneSaves",
+      "direction": 1,
+      "before": {
+        "low": 264,
+        "high": 275
+      },
+      "after": {
+        "low": 252,
+        "high": 262
+      },
+      "passed": true
+    },
+    {
+      "context": "GK",
+      "attribute": "gkPositioning",
+      "metric": "sweepingSuccesses",
+      "direction": 1,
+      "before": {
+        "low": 929,
+        "high": 966
+      },
+      "after": {
+        "low": 929,
+        "high": 966
+      },
+      "passed": true
+    },
+    {
+      "context": "GK",
+      "attribute": "gkDistribution",
+      "metric": "buildUpCompleted",
+      "direction": 1,
+      "before": {
+        "low": 4770,
+        "high": 5057
+      },
+      "after": {
+        "low": 4256,
+        "high": 4480
+      },
+      "passed": true
+    },
+    {
+      "context": "GK",
+      "attribute": "decisions",
+      "metric": "sweepingSuccesses",
+      "direction": 1,
+      "before": {
+        "low": 929,
+        "high": 981
+      },
+      "after": {
+        "low": 929,
+        "high": 981
+      },
+      "passed": true
+    },
+    {
+      "context": "GK",
+      "attribute": "concentration",
+      "metric": "handlingSuccesses",
+      "direction": 1,
+      "before": {
+        "low": 957,
+        "high": 965
+      },
+      "after": {
+        "low": 825,
+        "high": 833
+      },
+      "passed": true
+    },
+    {
+      "context": "GK",
+      "attribute": "gkDefensiveOrganization",
+      "metric": "shotsFaced",
+      "direction": -1,
+      "before": {
+        "low": 2203,
+        "high": 2075
+      },
+      "after": {
+        "low": 1951,
+        "high": 1839
+      },
+      "passed": true
+    }
+  ],
+  "all30Passed": true,
+  "tiers": {
+    "ST": [
+      {
+        "ovr": 80,
+        "before": {
+          "goals38": 9.5,
+          "assists38": 2.79,
+          "teamGF38": 45.73,
+          "teamGA38": 42.69,
+          "points38": 53.2
+        },
+        "after": {
+          "goals38": 8.36,
+          "assists38": 3.8,
+          "teamGF38": 48.01,
+          "teamGA38": 34.07,
+          "points38": 63.21
+        }
+      },
+      {
+        "ovr": 90,
+        "before": {
+          "goals38": 11.65,
+          "assists38": 3.67,
+          "teamGF38": 51.05,
+          "teamGA38": 42.05,
+          "points38": 58.9
+        },
+        "after": {
+          "goals38": 14.06,
+          "assists38": 4.31,
+          "teamGF38": 54.72,
+          "teamGA38": 33.82,
+          "points38": 68.4
+        }
+      },
+      {
+        "ovr": 95,
+        "before": {
+          "goals38": 14.57,
+          "assists38": 3.93,
+          "teamGF38": 54.34,
+          "teamGA38": 42.05,
+          "points38": 61.18
+        },
+        "after": {
+          "goals38": 22.93,
+          "assists38": 4.94,
+          "teamGF38": 66.88,
+          "teamGA38": 32.55,
+          "points38": 76.25
+        }
+      },
+      {
+        "ovr": 100,
+        "before": {
+          "goals38": 18.49,
+          "assists38": 4.31,
+          "teamGF38": 59.15,
+          "teamGA38": 41.04,
+          "points38": 65.61
+        },
+        "after": {
+          "goals38": 36.35,
+          "assists38": 5.07,
+          "teamGF38": 83.35,
+          "teamGA38": 30.15,
+          "points38": 86.89
+        }
+      },
+      {
+        "ovr": 110,
+        "before": {
+          "goals38": 20.39,
+          "assists38": 3.93,
+          "teamGF38": 60.29,
+          "teamGA38": 40.66,
+          "points38": 67.01
+        },
+        "after": {
+          "goals38": 41.42,
+          "assists38": 5.19,
+          "teamGF38": 89.05,
+          "teamGA38": 28.5,
+          "points38": 90.44
+        }
+      }
+    ],
+    "LW": [
+      {
+        "ovr": 80,
+        "before": {
+          "goals38": 6.33,
+          "assists38": 4.05,
+          "teamGF38": 44.46,
+          "teamGA38": 42.69,
+          "points38": 52.44
+        },
+        "after": {
+          "goals38": 5.07,
+          "assists38": 3.93,
+          "teamGF38": 43.57,
+          "teamGA38": 36.86,
+          "points38": 56.11
+        }
+      },
+      {
+        "ovr": 90,
+        "before": {
+          "goals38": 10.13,
+          "assists38": 5.95,
+          "teamGF38": 53.45,
+          "teamGA38": 42.05,
+          "points38": 59.28
+        },
+        "after": {
+          "goals38": 11.91,
+          "assists38": 5.83,
+          "teamGF38": 57.76,
+          "teamGA38": 33.95,
+          "points38": 68.65
+        }
+      },
+      {
+        "ovr": 95,
+        "before": {
+          "goals38": 12.03,
+          "assists38": 6.71,
+          "teamGF38": 57,
+          "teamGA38": 42.05,
+          "points38": 61.94
+        },
+        "after": {
+          "goals38": 19.13,
+          "assists38": 6.84,
+          "teamGF38": 69.92,
+          "teamGA38": 32.3,
+          "points38": 78.28
+        }
+      },
+      {
+        "ovr": 100,
+        "before": {
+          "goals38": 13.93,
+          "assists38": 7.35,
+          "teamGF38": 61.69,
+          "teamGA38": 40.66,
+          "points38": 66.75
+        },
+        "after": {
+          "goals38": 28.5,
+          "assists38": 8.36,
+          "teamGF38": 83.73,
+          "teamGA38": 29.89,
+          "points38": 86.77
+        }
+      },
+      {
+        "ovr": 110,
+        "before": {
+          "goals38": 14.57,
+          "assists38": 7.22,
+          "teamGF38": 61.31,
+          "teamGA38": 40.53,
+          "points38": 66.5
+        },
+        "after": {
+          "goals38": 31.16,
+          "assists38": 8.36,
+          "teamGF38": 87.4,
+          "teamGA38": 28.37,
+          "points38": 89.68
+        }
+      }
+    ],
+    "CAM": [
+      {
+        "ovr": 80,
+        "before": {
+          "goals38": 4.05,
+          "assists38": 6.46,
+          "teamGF38": 45.35,
+          "teamGA38": 42.56,
+          "points38": 53.58
+        },
+        "after": {
+          "goals38": 3.67,
+          "assists38": 6.33,
+          "teamGF38": 45.47,
+          "teamGA38": 36.73,
+          "points38": 57.89
+        }
+      },
+      {
+        "ovr": 90,
+        "before": {
+          "goals38": 5.32,
+          "assists38": 8.11,
+          "teamGF38": 52.57,
+          "teamGA38": 41.67,
+          "points38": 60.29
+        },
+        "after": {
+          "goals38": 6.97,
+          "assists38": 8.87,
+          "teamGF38": 58.14,
+          "teamGA38": 33.31,
+          "points38": 70.43
+        }
+      },
+      {
+        "ovr": 95,
+        "before": {
+          "goals38": 7.22,
+          "assists38": 8.99,
+          "teamGF38": 58.01,
+          "teamGA38": 41.55,
+          "points38": 63.71
+        },
+        "after": {
+          "goals38": 14.19,
+          "assists38": 10.13,
+          "teamGF38": 71.06,
+          "teamGA38": 31.79,
+          "points38": 80.56
+        }
+      },
+      {
+        "ovr": 100,
+        "before": {
+          "goals38": 9.37,
+          "assists38": 10.89,
+          "teamGF38": 63.33,
+          "teamGA38": 40.53,
+          "points38": 68.27
+        },
+        "after": {
+          "goals38": 20.14,
+          "assists38": 12.29,
+          "teamGF38": 82.71,
+          "teamGA38": 28.75,
+          "points38": 87.65
+        }
+      },
+      {
+        "ovr": 110,
+        "before": {
+          "goals38": 9.88,
+          "assists38": 11.15,
+          "teamGF38": 64.98,
+          "teamGA38": 39.65,
+          "points38": 69.92
+        },
+        "after": {
+          "goals38": 22.04,
+          "assists38": 13.05,
+          "teamGF38": 87.65,
+          "teamGA38": 26.73,
+          "points38": 91.71
+        }
+      }
+    ],
+    "RWB": [
+      {
+        "ovr": 80,
+        "before": {
+          "goals38": 1.9,
+          "assists38": 3.04,
+          "teamGF38": 44.33,
+          "teamGA38": 43.95,
+          "points38": 51.55
+        },
+        "after": {
+          "goals38": 1.77,
+          "assists38": 3.67,
+          "teamGF38": 48.77,
+          "teamGA38": 36.48,
+          "points38": 60.42
+        }
+      },
+      {
+        "ovr": 90,
+        "before": {
+          "goals38": 2.28,
+          "assists38": 3.93,
+          "teamGF38": 47.37,
+          "teamGA38": 42.05,
+          "points38": 55.48
+        },
+        "after": {
+          "goals38": 2.53,
+          "assists38": 3.93,
+          "teamGF38": 50.67,
+          "teamGA38": 33.95,
+          "points38": 63.97
+        }
+      },
+      {
+        "ovr": 95,
+        "before": {
+          "goals38": 2.66,
+          "assists38": 4.43,
+          "teamGF38": 48.77,
+          "teamGA38": 41.29,
+          "points38": 57.25
+        },
+        "after": {
+          "goals38": 4.81,
+          "assists38": 4.56,
+          "teamGF38": 55.48,
+          "teamGA38": 32.05,
+          "points38": 68.4
+        }
+      },
+      {
+        "ovr": 100,
+        "before": {
+          "goals38": 3.29,
+          "assists38": 5.07,
+          "teamGF38": 50.41,
+          "teamGA38": 38.76,
+          "points38": 60.04
+        },
+        "after": {
+          "goals38": 6.97,
+          "assists38": 5.32,
+          "teamGF38": 61.81,
+          "teamGA38": 28.63,
+          "points38": 74.99
+        }
+      },
+      {
+        "ovr": 110,
+        "before": {
+          "goals38": 3.55,
+          "assists38": 5.19,
+          "teamGF38": 50.79,
+          "teamGA38": 38.76,
+          "points38": 60.55
+        },
+        "after": {
+          "goals38": 7.09,
+          "assists38": 5.45,
+          "teamGF38": 63.21,
+          "teamGA38": 27.49,
+          "points38": 78.15
+        }
+      }
+    ],
+    "CB": [
+      {
+        "ovr": 80,
+        "before": {
+          "goals38": 0.89,
+          "assists38": 0.25,
+          "teamGF38": 47.12,
+          "teamGA38": 43.45,
+          "points38": 54.21
+        },
+        "after": {
+          "goals38": 0.76,
+          "assists38": 0.25,
+          "teamGF38": 46.74,
+          "teamGA38": 37.49,
+          "points38": 58.14
+        }
+      },
+      {
+        "ovr": 90,
+        "before": {
+          "goals38": 1.52,
+          "assists38": 0.38,
+          "teamGF38": 46.61,
+          "teamGA38": 40.41,
+          "points38": 56.62
+        },
+        "after": {
+          "goals38": 1.65,
+          "assists38": 0.38,
+          "teamGF38": 49.53,
+          "teamGA38": 32.81,
+          "points38": 63.71
+        }
+      },
+      {
+        "ovr": 95,
+        "before": {
+          "goals38": 2.03,
+          "assists38": 0.51,
+          "teamGF38": 45.6,
+          "teamGA38": 39.27,
+          "points38": 55.99
+        },
+        "after": {
+          "goals38": 2.66,
+          "assists38": 0.38,
+          "teamGF38": 51.17,
+          "teamGA38": 31.03,
+          "points38": 65.23
+        }
+      },
+      {
+        "ovr": 100,
+        "before": {
+          "goals38": 2.15,
+          "assists38": 0.76,
+          "teamGF38": 44.84,
+          "teamGA38": 37.75,
+          "points38": 57
+        },
+        "after": {
+          "goals38": 3.04,
+          "assists38": 0.63,
+          "teamGF38": 52.57,
+          "teamGA38": 26.6,
+          "points38": 69.67
+        }
+      },
+      {
+        "ovr": 110,
+        "before": {
+          "goals38": 2.15,
+          "assists38": 0.76,
+          "teamGF38": 44.21,
+          "teamGA38": 36.86,
+          "points38": 57.51
+        },
+        "after": {
+          "goals38": 3.67,
+          "assists38": 0.63,
+          "teamGF38": 53.33,
+          "teamGA38": 26.09,
+          "points38": 71.31
+        }
+      }
+    ],
+    "GK": [
+      {
+        "ovr": 80,
+        "before": {
+          "goals38": 0,
+          "assists38": 0.25,
+          "teamGF38": 48.51,
+          "teamGA38": 66.5,
+          "points38": 40.91
+        },
+        "after": {
+          "goals38": 0,
+          "assists38": 0.25,
+          "teamGF38": 46.74,
+          "teamGA38": 70.05,
+          "points38": 37.37
+        }
+      },
+      {
+        "ovr": 90,
+        "before": {
+          "goals38": 0,
+          "assists38": 0.25,
+          "teamGF38": 46.61,
+          "teamGA38": 43.7,
+          "points38": 53.45
+        },
+        "after": {
+          "goals38": 0,
+          "assists38": 0.25,
+          "teamGF38": 49.4,
+          "teamGA38": 35.72,
+          "points38": 60.8
+        }
+      },
+      {
+        "ovr": 95,
+        "before": {
+          "goals38": 0,
+          "assists38": 0.25,
+          "teamGF38": 44.59,
+          "teamGA38": 33.44,
+          "points38": 60.42
+        },
+        "after": {
+          "goals38": 0.13,
+          "assists38": 0.25,
+          "teamGF38": 50.41,
+          "teamGA38": 27.11,
+          "points38": 69.03
+        }
+      },
+      {
+        "ovr": 100,
+        "before": {
+          "goals38": 0,
+          "assists38": 0.25,
+          "teamGF38": 43.7,
+          "teamGA38": 27.61,
+          "points38": 64.98
+        },
+        "after": {
+          "goals38": 0.25,
+          "assists38": 0.25,
+          "teamGF38": 52.19,
+          "teamGA38": 23.94,
+          "points38": 72.71
+        }
+      },
+      {
+        "ovr": 110,
+        "before": {
+          "goals38": 0,
+          "assists38": 0.25,
+          "teamGF38": 42.56,
+          "teamGA38": 26.47,
+          "points38": 65.49
+        },
+        "after": {
+          "goals38": 0.25,
+          "assists38": 0.25,
+          "teamGF38": 52.31,
+          "teamGA38": 22.29,
+          "points38": 74.1
+        }
+      }
+    ]
+  },
+  "selection": {
+    "ST": {
+      "before": {
+        "starts": 215,
+        "apps": 279,
+        "minutes": 20300
+      },
+      "after": {
+        "starts": 298,
+        "apps": 300,
+        "minutes": 26146
+      }
+    },
+    "LW": {
+      "before": {
+        "starts": 215,
+        "apps": 279,
+        "minutes": 20300
+      },
+      "after": {
+        "starts": 298,
+        "apps": 300,
+        "minutes": 26146
+      }
+    },
+    "RWB": {
+      "before": {
+        "starts": 215,
+        "apps": 279,
+        "minutes": 20300
+      },
+      "after": {
+        "starts": 290,
+        "apps": 298,
+        "minutes": 25582
+      }
+    },
+    "GK": {
+      "before": {
+        "starts": 215,
+        "apps": 279,
+        "minutes": 20300
+      },
+      "after": {
+        "starts": 261,
+        "apps": 290,
+        "minutes": 23459
+      }
+    }
+  },
+  "NPCPremierLeagueGoalsPerGame": {
+    "before": 2.7824561403508774,
+    "after": 2.766666666666667
+  },
+  "conditions": "Fixed opponent Manchester City, actual calibrated squads, forced 90 minutes for tier/attribute probes, identical seeds; per38 is a projection, not an actual season. Positional selection is a separate automatic sample."
+}

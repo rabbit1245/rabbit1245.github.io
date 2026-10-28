@@ -1,0 +1,9 @@
+{
+  "tests": 326,
+  "pass": 325,
+  "fail": 0,
+  "cancelled": 0,
+  "skipped": "기존 세계 전체 30시즌 검사 1개 제외 · 실제 7시즌과 12시즌 저장 불러오기 별도 검수",
+  "command": "KBALL_SKIP_LONG_TEST=1 node --import tsx --test --test-concurrency=7 src/game/*.test.ts",
+  "durationMs": 685234.232113
+}
