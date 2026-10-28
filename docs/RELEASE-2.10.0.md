@@ -80,6 +80,10 @@
 
 ## 다운로드
 
-검수한 HTML과 ZIP을 공개한 뒤 내려받기 주소와 SHA-256 확인 결과를 기록한다.
+[K볼 2.10.0 ZIP 다운로드](https://github.com/rabbit1245/rabbit1245.github.io/raw/08153f6daf9ab81fea9bdbd0c6b77801c2238d60/Kball.zip?download=1) · 21,528,759바이트. 공개 주소에서 **HTTP 200 · application/zip**으로 다시 내려받아 ZIP CRC·SHA-256·내부 HTML의 검수 빌드 일치를 확인했다. [공개 다운로드 검증](validation/release-2.10.0/public-download.json)
+
+ZIP SHA-256: `5201bf1a2655a372420abce0dc8dd5674fc13381aa19814539905b3cfd8b1c8e`
+
+구현 소스: [03f55d5](https://github.com/rabbit1245/rabbit1245.github.io/tree/03f55d5a53a78066d696055ac66843f531f48ed2). 다운로드 파일은 `kball-playable` 브랜치의 위 고정 커밋으로 제공한다.
 
 기존 파일에서 JSON 내보내기 → 새 ZIP 압축 해제 → `Kball.html`에서 JSON 불러오기 순서로 이어 한다. 하단 **K볼 2.10.0**을 확인한다. 신규 지표는 새로 치르는 경기부터 집계하며 과거에 없던 기록을 만들어 넣지 않는다.

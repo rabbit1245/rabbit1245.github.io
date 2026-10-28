@@ -21,5 +21,8 @@
   "externalAssets": 0,
   "newMetricEventAndExportReconciliation": true,
   "protectedSystemFilesUnchanged": 9,
-  "publication": "pending"
+  "publication": "published",
+  "sourceCommit": "03f55d5a53a78066d696055ac66843f531f48ed2",
+  "artifactCommit": "08153f6daf9ab81fea9bdbd0c6b77801c2238d60",
+  "download": "https://github.com/rabbit1245/rabbit1245.github.io/raw/08153f6daf9ab81fea9bdbd0c6b77801c2238d60/Kball.zip?download=1"
 }

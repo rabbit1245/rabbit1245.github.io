@@ -1,0 +1,15 @@
+{
+  "version": "2.10.0",
+  "url": "https://github.com/rabbit1245/rabbit1245.github.io/raw/08153f6daf9ab81fea9bdbd0c6b77801c2238d60/Kball.zip?download=1",
+  "artifactBranch": "kball-playable",
+  "artifactCommit": "08153f6daf9ab81fea9bdbd0c6b77801c2238d60",
+  "sourceCommit": "03f55d5a53a78066d696055ac66843f531f48ed2",
+  "checkedAtUTC": "2026-10-28T00:38:12.079652+00:00",
+  "status": 200,
+  "contentType": "application/zip",
+  "bytes": 21528759,
+  "sha256": "5201bf1a2655a372420abce0dc8dd5674fc13381aa19814539905b3cfd8b1c8e",
+  "zipCRC": true,
+  "embeddedHTMLSha256": "c65f06e9351efc997f06a2e314e5a45df4d2de073fd1f78305786ba2b28b7471",
+  "matchesBrowserTestedBuild": true
+}

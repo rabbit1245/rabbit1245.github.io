@@ -1,0 +1,2 @@
+# Preserve exact UTF-8 BOM / CRLF and whitespace in the raw retirement export samples.
+docs/validation/release-2.10.0/retirement-*.txt -text whitespace=-blank-at-eol,-blank-at-eof,space-before-tab,cr-at-eol
