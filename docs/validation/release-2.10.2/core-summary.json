@@ -1,0 +1,10 @@
+{
+  "tests": 330,
+  "pass": 329,
+  "fail": 0,
+  "cancelled": 0,
+  "skipped": 1,
+  "todo": 0,
+  "durationMs": 540065.324993,
+  "longCareerTestSkipped": true
+}

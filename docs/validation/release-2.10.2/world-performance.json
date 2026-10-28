@@ -1,0 +1,26 @@
+{
+  "baseline": "2.10.1",
+  "trials": 3,
+  "leagueRoundsPerTrial": 2,
+  "sameMachineAlternatingTrials": true,
+  "wholeWorldAndCareerProgression": true,
+  "timesMs": {
+    "before": [
+      943.7133299999996,
+      941.9823329999999,
+      904.3818479999991
+    ],
+    "after": [
+      996.1704350000005,
+      1013.3446089999998,
+      909.0496320000002
+    ]
+  },
+  "medianBeforeMs": 941.9823329999999,
+  "medianAfterMs": 996.1704350000005,
+  "ratio": 1.057525603296002,
+  "worldFixturesPlayed": {
+    "after": 726,
+    "before": 726
+  }
+}

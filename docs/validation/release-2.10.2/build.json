@@ -1,0 +1,17 @@
+{
+  "version": "2.10.2",
+  "productionBuildAndTypecheck": true,
+  "singleHTMLBuild": true,
+  "zipCRC": true,
+  "internalHTMLMatches": true,
+  "artifacts": {
+    "Kball.html": {
+      "bytes": 28568897,
+      "sha256": "365265a1e3bfcd7c9ed2040768e1ab23ba31b49873d93065e8c523f305fdcab9"
+    },
+    "Kball.zip": {
+      "bytes": 21529899,
+      "sha256": "b205408d617ca73794f89cc14ca9ca0a646d9a7a694904e7cb0b247cb1bdbb2a"
+    }
+  }
+}

@@ -1,0 +1,459 @@
+{
+  "baseline": "2.10.1",
+  "version": "2.10.2",
+  "matchesPerPair": 300,
+  "all30Passed": true,
+  "checks": [
+    {
+      "context": "CM",
+      "attribute": "strength",
+      "metric": "tackles",
+      "direction": 1,
+      "before": {
+        "low": 625,
+        "high": 641
+      },
+      "after": {
+        "low": 625,
+        "high": 641
+      },
+      "passed": true
+    },
+    {
+      "context": "CM",
+      "attribute": "stamina",
+      "metric": "lateSuccesses",
+      "direction": 1,
+      "before": {
+        "low": 3411,
+        "high": 3863
+      },
+      "after": {
+        "low": 3411,
+        "high": 3863
+      },
+      "passed": true
+    },
+    {
+      "context": "CM",
+      "attribute": "speed",
+      "metric": "dribbleAttempts",
+      "direction": 1,
+      "before": {
+        "low": 1178,
+        "high": 1261
+      },
+      "after": {
+        "low": 1178,
+        "high": 1261
+      },
+      "passed": true
+    },
+    {
+      "context": "CM",
+      "attribute": "agility",
+      "metric": "dribblesCompleted",
+      "direction": 1,
+      "before": {
+        "low": 900,
+        "high": 914
+      },
+      "after": {
+        "low": 900,
+        "high": 914
+      },
+      "passed": true
+    },
+    {
+      "context": "CM",
+      "attribute": "jumping",
+      "metric": "aerialWon",
+      "direction": 1,
+      "before": {
+        "low": 477,
+        "high": 505
+      },
+      "after": {
+        "low": 478,
+        "high": 506
+      },
+      "passed": true
+    },
+    {
+      "context": "CM",
+      "attribute": "ballControl",
+      "metric": "passesCompleted",
+      "direction": 1,
+      "before": {
+        "low": 15633,
+        "high": 15737
+      },
+      "after": {
+        "low": 15633,
+        "high": 15737
+      },
+      "passed": true
+    },
+    {
+      "context": "CM",
+      "attribute": "dribbling",
+      "metric": "dribblesCompleted",
+      "direction": 1,
+      "before": {
+        "low": 900,
+        "high": 935
+      },
+      "after": {
+        "low": 900,
+        "high": 935
+      },
+      "passed": true
+    },
+    {
+      "context": "CM",
+      "attribute": "passing",
+      "metric": "passesCompleted",
+      "direction": 1,
+      "before": {
+        "low": 15633,
+        "high": 15974
+      },
+      "after": {
+        "low": 15633,
+        "high": 15974
+      },
+      "passed": true
+    },
+    {
+      "context": "CM",
+      "attribute": "crossing",
+      "metric": "keyPasses",
+      "direction": 1,
+      "before": {
+        "low": 323,
+        "high": 337
+      },
+      "after": {
+        "low": 338,
+        "high": 354
+      },
+      "passed": true
+    },
+    {
+      "context": "CM",
+      "attribute": "shooting",
+      "metric": "shotsOnTarget",
+      "direction": 1,
+      "before": {
+        "low": 184,
+        "high": 198
+      },
+      "after": {
+        "low": 194,
+        "high": 210
+      },
+      "passed": true
+    },
+    {
+      "context": "CM",
+      "attribute": "heading",
+      "metric": "aerialWon",
+      "direction": 1,
+      "before": {
+        "low": 477,
+        "high": 497
+      },
+      "after": {
+        "low": 478,
+        "high": 498
+      },
+      "passed": true
+    },
+    {
+      "context": "CM",
+      "attribute": "defending",
+      "metric": "tackles",
+      "direction": 1,
+      "before": {
+        "low": 625,
+        "high": 670
+      },
+      "after": {
+        "low": 625,
+        "high": 670
+      },
+      "passed": true
+    },
+    {
+      "context": "CM",
+      "attribute": "setPieces",
+      "metric": "shotsOnTarget",
+      "direction": 1,
+      "before": {
+        "low": 184,
+        "high": 186
+      },
+      "after": {
+        "low": 194,
+        "high": 198
+      },
+      "passed": true
+    },
+    {
+      "context": "CM",
+      "attribute": "decisions",
+      "metric": "passesCompleted",
+      "direction": 1,
+      "before": {
+        "low": 15633,
+        "high": 15745
+      },
+      "after": {
+        "low": 15633,
+        "high": 15745
+      },
+      "passed": true
+    },
+    {
+      "context": "CM",
+      "attribute": "vision",
+      "metric": "keyPasses",
+      "direction": 1,
+      "before": {
+        "low": 323,
+        "high": 348
+      },
+      "after": {
+        "low": 338,
+        "high": 366
+      },
+      "passed": true
+    },
+    {
+      "context": "CM",
+      "attribute": "anticipation",
+      "metric": "interceptions",
+      "direction": 1,
+      "before": {
+        "low": 843,
+        "high": 901
+      },
+      "after": {
+        "low": 843,
+        "high": 901
+      },
+      "passed": true
+    },
+    {
+      "context": "CM",
+      "attribute": "positioning",
+      "metric": "shots",
+      "direction": 1,
+      "before": {
+        "low": 290,
+        "high": 319
+      },
+      "after": {
+        "low": 304,
+        "high": 334
+      },
+      "passed": true
+    },
+    {
+      "context": "CM",
+      "attribute": "composure",
+      "metric": "shotsOnTarget",
+      "direction": 1,
+      "before": {
+        "low": 184,
+        "high": 188
+      },
+      "after": {
+        "low": 194,
+        "high": 200
+      },
+      "passed": true
+    },
+    {
+      "context": "CM",
+      "attribute": "concentration",
+      "metric": "passesCompleted",
+      "direction": 1,
+      "before": {
+        "low": 15633,
+        "high": 15685
+      },
+      "after": {
+        "low": 15633,
+        "high": 15685
+      },
+      "passed": true
+    },
+    {
+      "context": "CM",
+      "attribute": "teamwork",
+      "metric": "passes",
+      "direction": 1,
+      "before": {
+        "low": 18662,
+        "high": 19497
+      },
+      "after": {
+        "low": 18662,
+        "high": 19497
+      },
+      "passed": true
+    },
+    {
+      "context": "GK",
+      "attribute": "gkShotStopping",
+      "metric": "saves",
+      "direction": 1,
+      "before": {
+        "low": 1669,
+        "high": 1713
+      },
+      "after": {
+        "low": 1726,
+        "high": 1775
+      },
+      "passed": true
+    },
+    {
+      "context": "GK",
+      "attribute": "gkReflexes",
+      "metric": "saves",
+      "direction": 1,
+      "before": {
+        "low": 1669,
+        "high": 1701
+      },
+      "after": {
+        "low": 1726,
+        "high": 1761
+      },
+      "passed": true
+    },
+    {
+      "context": "GK",
+      "attribute": "gkHandling",
+      "metric": "handlingSuccesses",
+      "direction": 1,
+      "before": {
+        "low": 825,
+        "high": 878
+      },
+      "after": {
+        "low": 825,
+        "high": 878
+      },
+      "passed": true
+    },
+    {
+      "context": "GK",
+      "attribute": "gkAerialCommand",
+      "metric": "crossesCaught+punches",
+      "direction": 1,
+      "before": {
+        "low": 1292,
+        "high": 1360
+      },
+      "after": {
+        "low": 1292,
+        "high": 1360
+      },
+      "passed": true
+    },
+    {
+      "context": "GK",
+      "attribute": "gkOneOnOnes",
+      "metric": "oneOnOneSaves",
+      "direction": 1,
+      "before": {
+        "low": 252,
+        "high": 262
+      },
+      "after": {
+        "low": 259,
+        "high": 269
+      },
+      "passed": true
+    },
+    {
+      "context": "GK",
+      "attribute": "gkPositioning",
+      "metric": "sweepingSuccesses",
+      "direction": 1,
+      "before": {
+        "low": 929,
+        "high": 966
+      },
+      "after": {
+        "low": 929,
+        "high": 966
+      },
+      "passed": true
+    },
+    {
+      "context": "GK",
+      "attribute": "gkDistribution",
+      "metric": "buildUpCompleted",
+      "direction": 1,
+      "before": {
+        "low": 4256,
+        "high": 4480
+      },
+      "after": {
+        "low": 4256,
+        "high": 4480
+      },
+      "passed": true
+    },
+    {
+      "context": "GK",
+      "attribute": "decisions",
+      "metric": "sweepingSuccesses",
+      "direction": 1,
+      "before": {
+        "low": 929,
+        "high": 981
+      },
+      "after": {
+        "low": 929,
+        "high": 981
+      },
+      "passed": true
+    },
+    {
+      "context": "GK",
+      "attribute": "concentration",
+      "metric": "handlingSuccesses",
+      "direction": 1,
+      "before": {
+        "low": 825,
+        "high": 833
+      },
+      "after": {
+        "low": 825,
+        "high": 833
+      },
+      "passed": true
+    },
+    {
+      "context": "GK",
+      "attribute": "gkDefensiveOrganization",
+      "metric": "shotsFaced",
+      "direction": -1,
+      "before": {
+        "low": 1951,
+        "high": 1839
+      },
+      "after": {
+        "low": 2035,
+        "high": 1912
+      },
+      "passed": true
+    }
+  ],
+  "conditions": "Actual calibrated Liverpool/Manchester City squads; single attribute 90 to 100; OVR fixed at 90; forced 90 minutes; identical seeds."
+}

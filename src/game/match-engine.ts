@@ -282,6 +282,11 @@ export function simulateMatch(career:Career,fixture:Fixture,options:MatchOptions
     const keeperAt=(minute:number)=>opposition.actors.find(a=>a.position==='GK'&&a.from<minute&&a.to>=minute)??opposition.actors.find(a=>a.from<minute&&a.to>=minute)!;
     const firstKeeper=keeperAt(1);
     const organization=firstKeeper?ability(firstKeeper,'gkDefensiveOrganization'):opposition.power;
+    // Organization is judged against the defending side's outfield level. Two
+    // equally ordinary lower-division teams must not receive extra chances just
+    // because both keepers have lower absolute ratings. A keeper who organizes
+    // better than his actual defence still suppresses more opposing chances.
+    const organizationFactor=clamp(.836+(opposition.referencePower-organization)*.0048,.55,1.15);
     const powerFactor=clamp(1+(team.power-opposition.power)*.012+(side===0&&!options.neutralVenue ? .07 : 0),.45,1.8);
     const actionFactor=clamp(1+(buildUp[side]-4)*.045-(disruption[1-side]-6)*.045,.68,1.32);
     for(const shooter of team.actors){
@@ -290,7 +295,7 @@ export function simulateMatch(career:Career,fixture:Fixture,options:MatchOptions
       const clutch=shooter.user&&bigMatch?personalityEdge(career,'clutch'):0;
       const threat=a('positioning')*.28+a('anticipation')*.16+a('decisions')*.14+a('speed')*.14+a('ballControl')*.14+a('dribbling')*.14;
       const selfCreation=shooter.position==='GK'?1:clamp(1+(threat-opposition.power)*.012,.65,1.65);
-      const opportunities=SHOTS[shooter.position]*minutes*styleFactor(shooter,'shot')*powerFactor*actionFactor*tactics[side].supply*tactics[1-side].coverage*selfCreation*(.43+a('positioning')*.006+a('speed')*.002+a('decisions')*.001)*(1.22-organization*.0048)*(1+clutch*.03);
+      const opportunities=SHOTS[shooter.position]*minutes*styleFactor(shooter,'shot')*powerFactor*actionFactor*tactics[side].supply*tactics[1-side].coverage*selfCreation*(.43+a('positioning')*.006+a('speed')*.002+a('decisions')*.001)*organizationFactor*(1+clutch*.03);
       const shotRng=seededRandom(`${seed}:${shooter.id}:shots`);
       const creatorRng=seededRandom(`${seed}:${shooter.id}:creators`);
       const headerRng=seededRandom(`${actionSeed}:${shooter.id}:headers`),headerChance=headerProbability(shooter,team);

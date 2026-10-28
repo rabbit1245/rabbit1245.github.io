@@ -1,0 +1,95 @@
+{
+  "base": "17586c1f69c49df735e0f6b98581e113b967bb02",
+  "files": [
+    {
+      "file": "src/game/attributes.ts",
+      "sha256": "aa4e4484a18884b50991df3e527680e9266921ec7a197525c5ad4263b5b3f589",
+      "unchanged": true
+    },
+    {
+      "file": "src/game/play-skills.ts",
+      "sha256": "ecae3836e767b4bfc5c8479c96ba366202524bb9893e5ed9a26c5175fe8ce5d0",
+      "unchanged": true
+    },
+    {
+      "file": "src/game/growth.ts",
+      "sha256": "6b9e9b3195b38b68a9bd7a5453109f9d0fd96bbcb3791ba0e9d9e43c9ea36694",
+      "unchanged": true
+    },
+    {
+      "file": "src/game/career-systems.ts",
+      "sha256": "7b5dc86f466b41d78a24e0615bad891869d4358ba9017cdf105b87d6f7569fac",
+      "unchanged": true
+    },
+    {
+      "file": "src/game/global-honours.ts",
+      "sha256": "f7ddd96714abf7fed586831f8c46f76dbd1d95fe92987d0cf7c84a48df9522cc",
+      "unchanged": true
+    },
+    {
+      "file": "src/game/award-rules.ts",
+      "sha256": "d301639ad7adbb62584ba2d0efde88d4a2d28fba5e075d27366539ae440232c9",
+      "unchanged": true
+    },
+    {
+      "file": "src/game/extra-honours.ts",
+      "sha256": "d21fa6fc00dd19cee1c9de3c4fbbdf6ebbccc2b44faf13aeb0a3ec43a8776fd2",
+      "unchanged": true
+    },
+    {
+      "file": "src/game/tournament-awards.ts",
+      "sha256": "4c80937efdc47c672ddaaf8a255e68ed52aaa45612a4454d982ebe2399e2fb04",
+      "unchanged": true
+    },
+    {
+      "file": "src/game/achievement-evidence.ts",
+      "sha256": "39230286529ef508e9b7da000617d4256e2fa7f279fbcd2f75086bc5deb72a9a",
+      "unchanged": true
+    },
+    {
+      "file": "src/game/storage.ts",
+      "sha256": "455f612d9e1f394a74434fa76f3400db104f64f6f953b574002319ebe0a7cbe2",
+      "unchanged": true
+    },
+    {
+      "file": "src/game/career-text.ts",
+      "sha256": "01e8817865a2b5377b8ab81dc2ee1be530b2ff486bca86452641ff6481129022",
+      "unchanged": true
+    },
+    {
+      "file": "src/game/world.ts",
+      "sha256": "5e4720d6415a612e24bfd890c3d77e13848442911f64fc439ca0150de368438b",
+      "unchanged": true
+    },
+    {
+      "file": "src/game/national.ts",
+      "sha256": "5bff32fb5f5448659f111eb71e8871fbef60b6df3732fd8e4c6e2af0d5d1ed45",
+      "unchanged": true
+    },
+    {
+      "file": "src/game/club-development.ts",
+      "sha256": "415747c12984b95a32da2676726fea9a90ddceda76468a1485990dfb601b0494",
+      "unchanged": true
+    },
+    {
+      "file": "src/game/math.ts",
+      "sha256": "462eca4762d2eed01e74de326a52a5bf252d11db7280783cec7897dbf2bc1340",
+      "unchanged": true
+    },
+    {
+      "file": "src/styles.css",
+      "sha256": "9da22c7bac88247621ff78bc134ddf46cbcbcb36183d0c5c7a6380c8b2356449",
+      "unchanged": true
+    },
+    {
+      "file": "src/components/StatsNine.tsx",
+      "sha256": "60924818577ae0757f6d798fa34ae0ea6e949b7d1e34f6078204c4353d301ed3",
+      "unchanged": true
+    },
+    {
+      "file": "src/components/StatsNine.css",
+      "sha256": "22babbc9236d8fb2394825fe27bc18c3132d0161efa81513c34965ddcc5b21a7",
+      "unchanged": true
+    }
+  ]
+}

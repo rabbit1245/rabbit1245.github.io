@@ -1,0 +1,75 @@
+{
+  "version": "2.10.2",
+  "actualWorldSeasons": 2,
+  "training": [],
+  "lockedAbilitiesUnchanged": true,
+  "validLeadershipOffersAccepted": true,
+  "sourceCountersReconciled": true,
+  "JSONRoundTrip": true,
+  "profiles": {
+    "lower65": [
+      {
+        "year": 2026,
+        "ovr": 65,
+        "position": "ST",
+        "rank": 16,
+        "leagueTeams": 20,
+        "points": 43,
+        "teamGF": 52,
+        "teamGA": 62,
+        "apps": 38,
+        "starts": 34,
+        "minutes": 3091,
+        "goals": 21,
+        "assists": 6,
+        "rating": 7.102631578947368,
+        "power": 57.91,
+        "investment": 0,
+        "nationalApps": 0,
+        "clubRole": "none",
+        "awards": [
+          "언론 선정 · 세리에 C · B조 베스트 11",
+          "클럽 선정 · 구단 올해의 선수",
+          "클럽 선정 · 구단 팬 선정 올해의 선수",
+          "클럽 선정 · 구단 선수단 선정 올해의 선수",
+          "클럽 선정 · 구단 올해의 공격수",
+          "클럽 선정 · 구단 올해의 해결사",
+          "언론 선정 · 세리에 C · B조 올해의 신인",
+          "언론 선정 · 세리에 C · B조 2026-07 이달의 선수",
+          "언론 선정 · 구단 유니폼 판매 예상 1위"
+        ]
+      }
+    ],
+    "lower70": [
+      {
+        "year": 2026,
+        "ovr": 70,
+        "position": "ST",
+        "rank": 5,
+        "leagueTeams": 20,
+        "points": 58,
+        "teamGF": 53,
+        "teamGA": 43,
+        "apps": 38,
+        "starts": 37,
+        "minutes": 3247,
+        "goals": 20,
+        "assists": 5,
+        "rating": 7.244736842105263,
+        "power": 59.37,
+        "investment": 0,
+        "nationalApps": 0,
+        "clubRole": "none",
+        "awards": [
+          "클럽 선정 · 구단 올해의 선수",
+          "클럽 선정 · 구단 팬 선정 올해의 선수",
+          "클럽 선정 · 구단 선수단 선정 올해의 선수",
+          "클럽 선정 · 구단 올해의 공격수",
+          "언론 선정 · 세리에 C · B조 올해의 신인",
+          "언론 선정 · 세리에 C · B조 2026-10 이달의 선수",
+          "언론 선정 · 구단 유니폼 판매 예상 1위"
+        ]
+      }
+    ]
+  }
+}

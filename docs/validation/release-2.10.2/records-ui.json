@@ -1,0 +1,161 @@
+{
+  "url": "http://127.0.0.1:4193/Kball.html",
+  "checks": [
+    {
+      "fixture": "CB",
+      "width": 1366,
+      "bytes": 85540939,
+      "seasons": 2,
+      "importMs": 20606,
+      "locker": true,
+      "careerScopes": true,
+      "competition": true,
+      "match": true,
+      "txtExactMatch": true,
+      "JSONExport": true,
+      "reload": true,
+      "coverage": {
+        "apps": 121,
+        "minutes": 9335,
+        "known": true,
+        "partial": false
+      },
+      "abilitiesAndPastStatsUnchanged": true,
+      "noOverflow": true
+    },
+    {
+      "fixture": "GK",
+      "width": 390,
+      "bytes": 84311683,
+      "seasons": 2,
+      "importMs": 14000,
+      "locker": true,
+      "careerScopes": true,
+      "competition": true,
+      "match": true,
+      "txtExactMatch": true,
+      "JSONExport": true,
+      "reload": true,
+      "coverage": {
+        "apps": 130,
+        "minutes": 10252,
+        "known": true,
+        "partial": false
+      },
+      "abilitiesAndPastStatsUnchanged": true,
+      "noOverflow": true
+    },
+    {
+      "fixture": "legacy",
+      "width": 1366,
+      "bytes": 38816791,
+      "seasons": 1,
+      "importMs": 5901,
+      "locker": true,
+      "careerScopes": true,
+      "competition": true,
+      "match": true,
+      "txtExactMatch": true,
+      "JSONExport": true,
+      "reload": true,
+      "coverage": {
+        "apps": 0,
+        "minutes": 0,
+        "known": false,
+        "partial": true
+      },
+      "abilitiesAndPastStatsUnchanged": true,
+      "noOverflow": true
+    },
+    {
+      "fixture": "mixed",
+      "width": 390,
+      "bytes": 41857118,
+      "seasons": 1,
+      "importMs": 7717,
+      "locker": true,
+      "careerScopes": true,
+      "competition": true,
+      "match": true,
+      "txtExactMatch": true,
+      "JSONExport": true,
+      "reload": true,
+      "coverage": {
+        "apps": 33,
+        "minutes": 2609,
+        "known": true,
+        "partial": true
+      },
+      "abilitiesAndPastStatsUnchanged": true,
+      "noOverflow": true
+    },
+    {
+      "fixture": "retired",
+      "width": 1366,
+      "bytes": 85537363,
+      "seasons": 2,
+      "importMs": 11386,
+      "locker": true,
+      "careerScopes": true,
+      "competition": true,
+      "match": true,
+      "txtExactMatch": true,
+      "JSONExport": true,
+      "reload": true,
+      "coverage": {
+        "apps": 121,
+        "minutes": 9335,
+        "known": true,
+        "partial": false
+      },
+      "abilitiesAndPastStatsUnchanged": true,
+      "noOverflow": true
+    },
+    {
+      "fixture": "long",
+      "width": 1366,
+      "bytes": 83834816,
+      "seasons": 12,
+      "importMs": 10918,
+      "locker": true,
+      "careerScopes": true,
+      "competition": true,
+      "match": true,
+      "txtExactMatch": true,
+      "JSONExport": true,
+      "reload": true,
+      "coverage": {
+        "apps": 3,
+        "minutes": 173,
+        "known": true,
+        "partial": true
+      },
+      "abilitiesAndPastStatsUnchanged": true,
+      "noOverflow": true
+    },
+    {
+      "fixture": "elite",
+      "width": 1366,
+      "bytes": 49254866,
+      "seasons": 1,
+      "importMs": 7491,
+      "locker": true,
+      "careerScopes": true,
+      "competition": true,
+      "match": true,
+      "txtExactMatch": true,
+      "JSONExport": true,
+      "reload": true,
+      "coverage": {
+        "apps": 38,
+        "minutes": 3247,
+        "known": true,
+        "partial": false
+      },
+      "abilitiesAndPastStatsUnchanged": true,
+      "noOverflow": true
+    }
+  ],
+  "errors": [],
+  "external": []
+}
