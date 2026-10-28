@@ -75,4 +75,12 @@ OVR·성장·스킬·수상·저장·TXT·구단 기반·UI 등 기존 18개 소
 
 작은 추가 비용은 있으며 기존 Worker·작은 변경 저장·실제 경기 원본 보존을 유지한다. 기능이나 경기 계산을 생략하지 않았다. [순수 엔진](validation/release-2.10.2/engine-performance.json) · [세계 진행](validation/release-2.10.2/world-performance.json)
 
+## 다운로드
+
+[K볼 2.10.2 ZIP 다운로드](https://github.com/rabbit1245/rabbit1245.github.io/raw/f83adc6852e3093ad3881f5b4b8e7595eafbf7a4/Kball.zip?download=1) · 21,529,899바이트. 공개 링크에서 HTTP 200·application/zip으로 다시 내려받아 ZIP CRC·SHA-256·내부 HTML이 브라우저에서 검수한 빌드와 일치함을 확인했다. [공개 다운로드 검증](validation/release-2.10.2/public-download.json)
+
+구현 소스: [f9e45df](https://github.com/rabbit1245/rabbit1245.github.io/tree/f9e45df1367db2e5abc3663a0a67d1e7e1c323f8). 다운로드는 `kball-playable`의 위 고정 커밋이다.
+
+기존 게임에서 **JSON 내보내기 → 새 ZIP 압축 해제 → Kball.html에서 JSON 불러오기**로 이어 한다. 하단 **K볼 2.10.2**를 확인한다. 과거 확정 기록은 그대로 보존하고 다음 경기부터 새 판정을 적용한다.
+
 [20개 시드 일정 대조 드라이버](../scripts/audit-lower-league-scoring.ts) · [하부리그 회귀 검사](../src/game/lower-league-scoring.test.ts) · [선방 판정](../src/game/ability-contests.ts) · [실제 시즌 드라이버](../scripts/verify-ability-careers.ts)
