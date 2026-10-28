@@ -16,5 +16,8 @@
   "pageErrors": 0,
   "externalAssets": 0,
   "preservedSystemFiles": 18,
-  "publication": "pending"
+  "publication": "published",
+  "sourceCommit": "6c4042dc56a8383ad25c827f5f764974ca41a3f1",
+  "artifactCommit": "82521692c65fbe916a34c76529612fd11448f0bd",
+  "download": "https://github.com/rabbit1245/rabbit1245.github.io/raw/82521692c65fbe916a34c76529612fd11448f0bd/Kball.zip?download=1"
 }
