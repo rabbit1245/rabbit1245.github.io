@@ -6,8 +6,12 @@ export function seededRandom(seed:string) { let value=hashSeed(seed);return()=>{
 export const integer=(r:()=>number,min:number,max:number)=>min+Math.floor(r()*(max-min+1));
 export const CORE_STATS=['apps','starts','minutes','goals','assists','shots','shotsOnTarget','passes','passesCompleted','tackles','interceptions','saves','goalsConceded','cleanSheets','ratingSum','ratingCount','yellowCards','redCards'] as const;
 export const DETAIL_STATS=['mom','keyPasses','dribbleAttempts','dribblesCompleted','tackleAttempts','aerialAttempts','aerialWon','shotsFaced','oneOnOneAttempts','oneOnOneSaves','penaltiesFaced','penaltiesSaved','crossesFaced','crossesCaught','sweepingAttempts','sweepingSuccesses','buildUpPasses','buildUpCompleted','longKicks','longKicksCompleted','handlingAttempts','handlingSuccesses','lateActions','lateSuccesses','detailedApps'] as const;
-export const ALL_STATS=[...CORE_STATS,...DETAIL_STATS] as const;
+export const ACTION_COUNTERS=['headerGoals','pressingWins','progressivePasses','punches'] as const;
+export const ACTION_STATS=[...ACTION_COUNTERS,'actionApps','actionMinutes'] as const;
+const BASE_STATS=[...CORE_STATS,...DETAIL_STATS] as const;
+export const ALL_STATS=[...BASE_STATS,...ACTION_STATS] as const;
 const ZERO_STATS=Object.freeze(Object.fromEntries(ALL_STATS.map(k=>[k,0]))) as Readonly<PlayerStats>;
 export function emptyStats():PlayerStats { return {...ZERO_STATS}; }
-export function sumStats(records:PlayerStats[]):PlayerStats { const s=emptyStats();for(const row of records)for(const k of ALL_STATS)s[k]=round((s[k]??0)+(row[k]??0));return s; }
-export function addStats(target:PlayerStats,row:PlayerStats):PlayerStats {for(const k of ALL_STATS)target[k]=round((target[k]??0)+(row[k]??0));return target;}
+// New action counts/coverage are validated integers: exact addition avoids needless decimal conversions.
+export function sumStats(records:PlayerStats[]):PlayerStats { const s=emptyStats();for(const row of records){for(const k of BASE_STATS)s[k]=round((s[k]??0)+(row[k]??0));for(const k of ACTION_STATS)s[k]=(s[k]??0)+(row[k]??0);}return s; }
+export function addStats(target:PlayerStats,row:PlayerStats):PlayerStats {for(const k of BASE_STATS)target[k]=round((target[k]??0)+(row[k]??0));for(const k of ACTION_STATS)target[k]=(target[k]??0)+(row[k]??0);return target;}

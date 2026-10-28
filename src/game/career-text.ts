@@ -1,3 +1,4 @@
+import {actionCoverage,ACTION_LABELS} from './action-metrics';
 import {employmentLines,recordedEmployment} from './employment';
 import {playSkillsForYear,retirementPlaySkillNames} from './play-skills';
 import {moneyText,currencyText} from './currency';
@@ -9,7 +10,7 @@ import {competitionLabel,seasonHonours} from './honours';
 import type {Career,MatchRecord,PlayerStats,SeasonSummary} from './types';
 import type {CupFixture} from './revision-types';
 
-export const STAT_TEXT:Record<string,string>={apps:'출전 경기',starts:'선발 경기',minutes:'출전 시간(분)',goals:'득점(골)',assists:'도움(개)',shots:'슈팅(회)',shotsOnTarget:'유효 슈팅(회)',passes:'패스 시도(회)',passesCompleted:'패스 성공(회)',tackles:'태클 성공(회)',interceptions:'인터셉트(회)',saves:'선방(회)',goalsConceded:'실점(골)',cleanSheets:'무실점 경기',ratingSum:'평점 합계',ratingCount:'평점 집계 경기',yellowCards:'경고(회)',redCards:'퇴장(회)',mom:'경기 최우수 선수(회)',keyPasses:'키패스(회)',dribbleAttempts:'드리블 시도(회)',dribblesCompleted:'드리블 성공(회)',tackleAttempts:'태클 시도(회)',aerialAttempts:'공중볼 경합 시도(회)',aerialWon:'공중볼 경합 성공(회)',shotsFaced:'피유효슈팅(회)',oneOnOneAttempts:'일대일 대응(회)',oneOnOneSaves:'일대일 선방(회)',penaltiesFaced:'피페널티(회)',penaltiesSaved:'페널티 선방(회)',crossesFaced:'피크로스(회)',crossesCaught:'크로스 포구(회)',sweepingAttempts:'스위핑 시도(회)',sweepingSuccesses:'스위핑 성공(회)',buildUpPasses:'빌드업 패스 시도(회)',buildUpCompleted:'빌드업 패스 성공(회)',longKicks:'롱킥 시도(회)',longKicksCompleted:'롱킥 성공(회)',handlingAttempts:'공 처리 시도(회)',handlingSuccesses:'공 처리 성공(회)',lateActions:'후반 행동(회)',lateSuccesses:'후반 행동 성공(회)',detailedApps:'세부 행동 집계 경기'};
+export const STAT_TEXT:Record<string,string>={apps:'출전 경기',starts:'선발 경기',minutes:'출전 시간(분)',goals:'득점(골)',assists:'도움(개)',shots:'슈팅(회)',shotsOnTarget:'유효 슈팅(회)',passes:'패스 시도(회)',passesCompleted:'패스 성공(회)',tackles:'태클 성공(회)',interceptions:'인터셉트(회)',saves:'선방(회)',goalsConceded:'실점(골)',cleanSheets:'무실점 경기',ratingSum:'평점 합계',ratingCount:'평점 집계 경기',yellowCards:'경고(회)',redCards:'퇴장(회)',mom:'경기 최우수 선수(회)',keyPasses:'키패스(회)',dribbleAttempts:'드리블 시도(회)',dribblesCompleted:'드리블 성공(회)',tackleAttempts:'태클 시도(회)',aerialAttempts:'공중볼 경합 시도(회)',aerialWon:'공중볼 경합 성공(회)',shotsFaced:'피유효슈팅(회)',oneOnOneAttempts:'일대일 대응(회)',oneOnOneSaves:'일대일 선방(회)',penaltiesFaced:'피페널티(회)',penaltiesSaved:'페널티 선방(회)',crossesFaced:'피크로스(회)',crossesCaught:'크로스 포구(회)',sweepingAttempts:'스위핑 시도(회)',sweepingSuccesses:'스위핑 성공(회)',buildUpPasses:'빌드업 패스 시도(회)',buildUpCompleted:'빌드업 패스 성공(회)',longKicks:'롱킥 시도(회)',longKicksCompleted:'롱킥 성공(회)',handlingAttempts:'공 처리 시도(회)',handlingSuccesses:'공 처리 성공(회)',lateActions:'후반 행동(회)',lateSuccesses:'후반 행동 성공(회)',detailedApps:'세부 행동 집계 경기',headerGoals:'헤더 득점(골)',pressingWins:'압박 성공(회)',progressivePasses:'전진 패스 성공(회)',punches:'펀칭 성공(회)',actionApps:'신규 행동 집계 경기',actionMinutes:'신규 행동 집계 시간(분)'};
 const rates:[string,keyof PlayerStats,keyof PlayerStats][]=[
  ['득점 전환율','goals','shots'],['슈팅 정확도','shotsOnTarget','shots'],
  ['패스 성공률','passesCompleted','passes'],['드리블 성공률','dribblesCompleted','dribbleAttempts'],
@@ -51,7 +52,8 @@ export function careerStatsLines(stats:PlayerStats,matches:readonly MatchRecord[
  const lines=[summary(stats)];
  if(incomplete)lines.push(`세부 기록 보존: ${stats.detailedApps??0}/${stats.apps}경기 · 미집계 지표는 과거 기록 미보존으로 표시`);
  for(const key of ALL_STATS){
-  if(['ratingSum','ratingCount','detailedApps'].includes(key))continue;
+  if(['ratingSum','ratingCount','detailedApps','actionApps','actionMinutes'].includes(key))continue;
+  if(key in ACTION_LABELS){const coverage=actionCoverage(stats);lines.push(`${STAT_TEXT[key]}: ${coverage.known?`${stats[key]??0}${coverage.partial?` · 신규 집계 ${coverage.apps}/${stats.apps}경기 · 과거 미집계 제외`:''}`:'미집계 · 과거 원본 이벤트 없음'}`);continue;}
   lines.push(`${STAT_TEXT[key]}: ${known(key)?stats[key]:'과거 기록 미보존'}`);
  }
  for(const [label,numerator,denominator] of rates){

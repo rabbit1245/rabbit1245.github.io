@@ -280,7 +280,7 @@ function play(career: Career, competition: Competition, homeCountry: string, awa
       state.fatigue = Math.round(100-career.player.fitness);
       if (career.player.injuryWeeks>0) {state.status='injured';state.reason=`대표팀 경기 중 부상 · 회복 ${career.player.injuryWeeks}주. 소속팀 계약은 유지됩니다.`;}
     }
-  } else (state.teamResults ??= []).push(state.formatVersion===2&&!match.shootout&&stage!=='final'?{...match,events:match.events.filter(e=>e.type==='goal'||e.type==='red'||e.type==='yellow'||match.events.some(g=>g.type==='goal'&&g.relatedId===e.id)),performers:undefined,momPlayerId:undefined,effects:undefined,metricsVersion:undefined}:match);
+  } else (state.teamResults ??= []).push(state.formatVersion===2&&!match.shootout&&stage!=='final'?{...match,events:match.events.filter(e=>e.action!==undefined||e.type==='goal'||e.type==='red'||e.type==='yellow'||match.events.some(g=>g.type==='goal'&&g.relatedId===e.id)),performers:undefined,momPlayerId:undefined,effects:undefined,metricsVersion:undefined}:match);
   if(state.formatVersion===2&&!['qualifying','friendly'].includes(stage)){state.tournamentStats??={};const map=state.tournamentStats[competition.id]??(state.tournamentStats[competition.id]={});for(const p of match.performers??[]){const row=map[p.id]??(map[p.id]={id:p.id,name:p.name,position:p.position,stats:emptyStats()});addStats(row.stats,p.stats);}}
   for (const performer of match.performers ?? []) {
     const competitor = career.systems!.world.playerStats[performer.id];

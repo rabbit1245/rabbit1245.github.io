@@ -1,0 +1,158 @@
+{
+  "version": "2.10.0",
+  "actualWholeWorldSeasons": 4,
+  "legacyNextHalfSeason": true,
+  "sourceEventReconciliation": true,
+  "protectedSystemsUnchanged": [
+    "src/game/attributes.ts",
+    "src/game/play-skills.ts",
+    "src/game/growth.ts",
+    "src/game/career-systems.ts",
+    "src/game/global-honours.ts",
+    "src/game/award-rules.ts",
+    "src/game/tournament-awards.ts",
+    "src/game/extra-honours.ts",
+    "src/game/achievement-evidence.ts"
+  ],
+  "results": {
+    "CB": {
+      "seasons": [
+        {
+          "year": 2026,
+          "matches": 69,
+          "clubMatches": 58,
+          "nationalMatches": 11,
+          "totals": {
+            "headerGoals": 1,
+            "pressingWins": 29,
+            "progressivePasses": 229,
+            "punches": 0,
+            "actionApps": 60,
+            "actionMinutes": 4513
+          },
+          "coverage": {
+            "apps": 60,
+            "minutes": 4513,
+            "known": true,
+            "partial": false
+          }
+        },
+        {
+          "year": 2027,
+          "matches": 142,
+          "clubMatches": 120,
+          "nationalMatches": 22,
+          "totals": {
+            "headerGoals": 3,
+            "pressingWins": 70,
+            "progressivePasses": 458,
+            "punches": 0,
+            "actionApps": 121,
+            "actionMinutes": 9335
+          },
+          "coverage": {
+            "apps": 121,
+            "minutes": 9335,
+            "known": true,
+            "partial": false
+          }
+        }
+      ],
+      "retirement": true,
+      "JSONRoundTrip": true,
+      "bytes": 85540939
+    },
+    "GK": {
+      "seasons": [
+        {
+          "year": 2026,
+          "matches": 70,
+          "clubMatches": 57,
+          "nationalMatches": 13,
+          "totals": {
+            "headerGoals": 0,
+            "pressingWins": 0,
+            "progressivePasses": 0,
+            "punches": 215,
+            "actionApps": 66,
+            "actionMinutes": 5206
+          },
+          "coverage": {
+            "apps": 66,
+            "minutes": 5206,
+            "known": true,
+            "partial": false
+          }
+        },
+        {
+          "year": 2027,
+          "matches": 136,
+          "clubMatches": 113,
+          "nationalMatches": 23,
+          "totals": {
+            "headerGoals": 0,
+            "pressingWins": 0,
+            "progressivePasses": 0,
+            "punches": 430,
+            "actionApps": 130,
+            "actionMinutes": 10252
+          },
+          "coverage": {
+            "apps": 130,
+            "minutes": 10252,
+            "known": true,
+            "partial": false
+          }
+        }
+      ],
+      "retirement": true,
+      "JSONRoundTrip": true,
+      "bytes": 84311683
+    },
+    "mixedLegacy": {
+      "matches": 99,
+      "clubMatches": 88,
+      "nationalMatches": 11,
+      "totals": {
+        "headerGoals": 5,
+        "pressingWins": 37,
+        "progressivePasses": 61,
+        "punches": 0,
+        "actionApps": 33,
+        "actionMinutes": 2609
+      },
+      "coverage": {
+        "apps": 33,
+        "minutes": 2609,
+        "known": true,
+        "partial": true
+      },
+      "pastStatsUnchanged": true
+    },
+    "longLegacy": {
+      "matches": 935,
+      "clubMatches": 796,
+      "nationalMatches": 139,
+      "totals": {
+        "headerGoals": 0,
+        "pressingWins": 1,
+        "progressivePasses": 3,
+        "punches": 0,
+        "actionApps": 3,
+        "actionMinutes": 173
+      },
+      "coverage": {
+        "apps": 3,
+        "minutes": 173,
+        "known": true,
+        "partial": true
+      },
+      "pastSeasons": 12,
+      "newLeagueRounds": 2,
+      "pastRecordsUnchanged": true,
+      "existingSeasonSettlementCompleted": true,
+      "JSONRoundTrip": true,
+      "bytes": 83834816
+    }
+  }
+}

@@ -38,13 +38,13 @@ try{
  for(const view of ['national','awards','seasons']){await page.getByTestId(`quick-${view}`).click();assert.equal(await page.getByTestId(`career-view-${view}`).getAttribute('aria-pressed'),'true');await noOverflow(view);await home();}
  passed.push('national, awards and season history open their existing view in one click');
  const disclosure=page.getByTestId('season-details-disclosure');assert.equal(await disclosure.getAttribute('open'),null);
- await disclosure.locator('summary').click();assert.equal(await page.getByTestId('locker-season-details').locator('.stat-detail:visible').count(),9);
+ await disclosure.locator('summary').click();assert.equal(await page.getByTestId('locker-season-details').locator('.stat-detail:visible').count(),baseline.player.position==='GK'?10:12);
  const homeApps=await page.getByTestId('locker-season-details').locator('.shared-stats b').first().textContent();
  await page.getByRole('button',{name:'대회별 · 경기별 전체 기록',exact:true}).click();
  assert.equal(await page.getByTestId('career-view-records').getAttribute('aria-pressed'),'true');
  assert.equal(await page.getByTestId('records-scope-all').locator('span').first().textContent(),homeApps);
  await home();assert.equal(await fingerprint('season'),before,'navigation and expanding preserve every actual stored record');
- passed.push('all nine metrics remain expandable and reconcile with the detailed record book without save mutations');
+ passed.push('all role metrics remain expandable and reconcile with the detailed record book without save mutations');
  await importFixture('career-completed.json');const closedBefore=await fingerprint('offseason');
  const preview=await page.getByTestId('honours-preview').textContent();
  if(completed.history[0].rank===1)assert.ok(preview.includes(completed.history[0].competitionName),'actual champion is named before expanding');

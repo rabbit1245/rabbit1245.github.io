@@ -1,0 +1,1601 @@
+TAP version 13
+# Subtest: all 16 positions produce source-backed, non-duplicated counters and preserve input abilities
+ok 1 - all 16 positions produce source-backed, non-duplicated counters and preserve input abilities
+  ---
+  duration_ms: 1272.832573
+  ...
+# Subtest: equal-OVR aerial and technical strikers have different actual header shot and goal shares
+ok 2 - equal-OVR aerial and technical strikers have different actual header shot and goal shares
+  ---
+  duration_ms: 2051.510403
+  ...
+# Subtest: aerial centre backs head real set-piece deliveries without losing ordinary aerial contests
+ok 3 - aerial centre backs head real set-piece deliveries without losing ordinary aerial contests
+  ---
+  duration_ms: 658.382695
+  ...
+# Subtest: pressing strength and work rate distinguish equal-OVR forwards, wingers and midfielders
+ok 4 - pressing strength and work rate distinguish equal-OVR forwards, wingers and midfielders
+  ---
+  duration_ms: 5094.328703
+  ...
+# Subtest: pressure attempts require a separate possession recovery and cannot duplicate tackles or interceptions
+ok 5 - pressure attempts require a separate possession recovery and cannot duplicate tackles or interceptions
+  ---
+  duration_ms: 63.462715
+  ...
+# Subtest: equal-OVR build-up defenders and playmakers advance zones with completed passes, not sideways labels
+ok 6 - equal-OVR build-up defenders and playmakers advance zones with completed passes, not sideways labels
+  ---
+  duration_ms: 4472.663914
+  ...
+# Subtest: keepers choose between holding a cross and punching it safe; the same ball is never counted twice
+ok 7 - keepers choose between holding a cross and punching it safe; the same ball is never counted twice
+  ---
+  duration_ms: 1692.513147
+  ...
+# Subtest: 100-plus mastered attributes still affect actual header and progression decisions
+ok 8 - 100-plus mastered attributes still affect actual header and progression decisions
+  ---
+  duration_ms: 2903.858685
+  ...
+# Subtest: legacy unknown, measured zero and mixed coverage remain distinct in sums and Korean retirement text
+ok 9 - legacy unknown, measured zero and mixed coverage remain distinct in sums and Korean retirement text
+  ---
+  duration_ms: 2397.562917
+  ...
+# Subtest: new counters do not add separate award bonuses to the same old performance
+ok 10 - new counters do not add separate award bonuses to the same old performance
+  ---
+  duration_ms: 9.566829
+  ...
+# Subtest: discarded NPC details use the same decisions and counters while career and national sources cannot be disabled
+ok 11 - discarded NPC details use the same decisions and counters while career and national sources cannot be disabled
+  ---
+  duration_ms: 585.921721
+  ...
+# Subtest: real league progression saves and reloads all new event counters without changing progression systems
+ok 12 - real league progression saves and reloads all new event counters without changing progression systems
+  ---
+  duration_ms: 13407.700636
+  ...
+# Subtest: forwards retain link-up assists and creative positions supply actual assisted goals
+ok 13 - forwards retain link-up assists and creative positions supply actual assisted goals
+  ---
+  duration_ms: 9420.158125
+  ...
+# {"ST":{"goals":279,"assists":65,"goalsAll":1234,"assistsAll":922},"CAM":{"goals":146,"assists":138,"goalsAll":1286,"assistsAll":959},"RW":{"goals":204,"assists":133,"goalsAll":1262,"assistsAll":940},"CB":{"goals":25,"assists":11,"goalsAll":1007,"assistsAll":763}}
+# Subtest: local season halves end at real month boundaries and club dates avoid international breaks
+ok 14 - local season halves end at real month boundaries and club dates avoid international breaks
+  ---
+  duration_ms: 4.548687
+  ...
+# Subtest: buffered canonical bytes preserve every legacy byte across key order and Unicode chunk boundaries
+ok 15 - buffered canonical bytes preserve every legacy byte across key order and Unicode chunk boundaries
+  ---
+  duration_ms: 45.316221
+  ...
+# Subtest: canonical key order is stable for arbitrary schema extension keys
+ok 16 - canonical key order is stable for arbitrary schema extension keys
+  ---
+  duration_ms: 200.39366
+  ...
+# Subtest: a real performer gets a proposal before any role or captain term changes
+ok 17 - a real performer gets a proposal before any role or captain term changes
+  ---
+  duration_ms: 1573.552156
+  ...
+# Subtest: leadership alone cannot make an inferior player captain of a stronger club
+ok 18 - leadership alone cannot make an inferior player captain of a stronger club
+  ---
+  duration_ms: 462.301222
+  ...
+# Subtest: candidate ranking compares the same season and weights without a user-only tenure bonus
+ok 19 - candidate ranking compares the same season and weights without a user-only tenure bonus
+  ---
+  duration_ms: 444.525471
+  ...
+# Subtest: actual performances, tenure and trust constrain proposals without an age gate
+ok 20 - actual performances, tenure and trust constrain proposals without an age gate
+  ---
+  duration_ms: 1814.966602
+  ...
+# Subtest: declining is final for that team and season, and a later season re-evaluates
+ok 21 - declining is final for that team and season, and a later season re-evaluates
+  ---
+  duration_ms: 242.868458
+  ...
+# Subtest: a stale team offer cannot be accepted after the player changes club
+ok 22 - a stale team offer cannot be accepted after the player changes club
+  ---
+  duration_ms: 178.314621
+  ...
+# Subtest: national proposals require the correct age group and actual national selection
+ok 23 - national proposals require the correct age group and actual national selection
+  ---
+  duration_ms: 411.288094
+  ...
+# Subtest: an eighteen-year-old proven ace can receive a captain proposal
+ok 24 - an eighteen-year-old proven ace can receive a captain proposal
+  ---
+  duration_ms: 532.752026
+  ...
+# Subtest: market valuation reflects performance, age and injury while contract wage stays fixed
+ok 25 - market valuation reflects performance, age and injury while contract wage stays fixed
+  ---
+  duration_ms: 2.534503
+  ...
+# Subtest: 52 weeks of fixed salary are paid across a 38-round season; club transfer fees are separate
+ok 26 - 52 weeks of fixed salary are paid across a 38-round season; club transfer fees are separate
+  ---
+  duration_ms: 27.609051
+  ...
+# Subtest: contracts are offered only after the full season and obey actual club budgets
+ok 27 - contracts are offered only after the full season and obey actual club budgets
+  ---
+  duration_ms: 27.801926
+  ...
+# Subtest: an expired expensive legacy contract can renew on the actual affordable wage
+ok 28 - an expired expensive legacy contract can renew on the actual affordable wage
+  ---
+  duration_ms: 0.552135
+  ...
+# Subtest: a highly rated new signing does not become captain; tenure and actual appearances matter
+ok 29 - a highly rated new signing does not become captain; tenure and actual appearances matter
+  ---
+  duration_ms: 14.814266
+  ...
+# Subtest: eight goals cannot beat an actual teammate with fifteen; awards are idempotent and contain no invented growth trophies
+ok 30 - eight goals cannot beat an actual teammate with fifteen; awards are idempotent and contain no invented growth trophies
+  ---
+  duration_ms: 8.726176
+  ...
+# Subtest: Ballon d’Or has thirty unique candidates and World11 has goalkeeper plus required position groups
+ok 31 - Ballon d’Or has thirty unique candidates and World11 has goalkeeper plus required position groups
+  ---
+  duration_ms: 6.234546
+  ...
+# Subtest: award comparison uses performance instead of OVR and league medals require appearances
+ok 32 - award comparison uses performance instead of OVR and league medals require appearances
+  ---
+  duration_ms: 7.25199
+  ...
+# Subtest: offseason expiration uses the next-season effective year for free transfers and affordable renewal
+ok 33 - offseason expiration uses the next-season effective year for free transfers and affordable renewal
+  ---
+  duration_ms: 1.912094
+  ...
+# Subtest: captain proposals emit one reasoned event and acceptance records the term exactly once
+ok 34 - captain proposals emit one reasoned event and acceptance records the term exactly once
+  ---
+  duration_ms: 4.927516
+  ...
+# Subtest: youth development goals are excluded from the senior club top-scorer record
+ok 35 - youth development goals are excluded from the senior club top-scorer record
+  ---
+  duration_ms: 3.986467
+  ...
+# Subtest: a youth starter develops leadership through mental ability, age and actual appearances with annual command-independent growth
+ok 36 - a youth starter develops leadership through mental ability, age and actual appearances with annual command-independent growth
+  ---
+  duration_ms: 775.369479
+  ...
+# Subtest: national captain competition normalizes nationality aliases
+ok 37 - national captain competition normalizes nationality aliases
+  ---
+  duration_ms: 5.793537
+  ...
+# Subtest: initial contracts and every renewal preserve previous terms and actual signing/expiry dates
+ok 38 - initial contracts and every renewal preserve previous terms and actual signing/expiry dates
+  ---
+  duration_ms: 0.774373
+  ...
+# Subtest: successive contracts retain renewal and transfer changes while fees remain club transactions
+ok 39 - successive contracts retain renewal and transfer changes while fees remain club transactions
+  ---
+  duration_ms: 0.53533
+  ...
+# Subtest: legacy economic upgrades preserve known values and never invent old renewals or a missing season opening value
+ok 40 - legacy economic upgrades preserve known values and never invent old renewals or a missing season opening value
+  ---
+  duration_ms: 0.2646
+  ...
+# Subtest: opening market value uses recorded round-zero data and stays fixed through later valuations
+ok 41 - opening market value uses recorded round-zero data and stays fixed through later valuations
+  ---
+  duration_ms: 0.234306
+  ...
+# Subtest: cross-calendar transfer dates use the next real local season while logical contract years remain stable
+ok 42 - cross-calendar transfer dates use the next real local season while logical contract years remain stable
+  ---
+  duration_ms: 0.351849
+  ...
+# Subtest: opening a new season carries the last completed performance instead of resetting a proven player to zero games
+ok 43 - opening a new season carries the last completed performance instead of resetting a proven player to zero games
+  ---
+  duration_ms: 8.483546
+  ...
+# Subtest: legacy baselines retain an expired contract or already-agreed next-season timing without inventing a renewal
+ok 44 - legacy baselines retain an expired contract or already-agreed next-season timing without inventing a renewal
+  ---
+  duration_ms: 0.208758
+  ...
+# Subtest: 97 OVR City 25G10A receives a visible evaluation and ability cannot guarantee a Ballon win
+ok 45 - 97 OVR City 25G10A receives a visible evaluation and ability cannot guarantee a Ballon win
+  ---
+  duration_ms: 1.616615
+  ...
+# Subtest: retirement TXT contains only requested records, Korean labels and no event timelines or diagnostics
+ok 46 - retirement TXT contains only requested records, Korean labels and no event timelines or diagnostics
+  ---
+  duration_ms: 707.280173
+  ...
+# Subtest: new season snapshots validate and unknown old snapshots stay absent on hash-preserving import
+ok 47 - new season snapshots validate and unknown old snapshots stay absent on hash-preserving import
+  ---
+  duration_ms: 5157.446574
+  ...
+# Subtest: known legacy counts survive; unavailable counters and denominators never turn into fabricated zero rates
+ok 48 - known legacy counts survive; unavailable counters and denominators never turn into fabricated zero rates
+  ---
+  duration_ms: 305.149323
+  ...
+# Subtest: annual records use contemporary values, captaincy, injuries, awards and retirement status
+ok 49 - annual records use contemporary values, captaincy, injuries, awards and retirement status
+  ---
+  duration_ms: 980.585284
+  ...
+# Subtest: a next-season contract cannot rewrite the previous season wage and a queued injury is not an injury
+ok 50 - a next-season contract cannot rewrite the previous season wage and a queued injury is not an injury
+  ---
+  duration_ms: 457.341099
+  ...
+# Subtest: club final records cover shootout wins and losses, own stats, bench appearances and exclude other finals
+ok 51 - club final records cover shootout wins and losses, own stats, bench appearances and exclude other finals
+  ---
+  duration_ms: 1026.448686
+  ...
+# Subtest: two-legged finals preserve both scores, aggregate and the actual winning side
+ok 52 - two-legged finals preserve both scores, aggregate and the actual winning side
+  ---
+  duration_ms: 685.559923
+  ...
+# Subtest: national finals use exact final stage, result, shootout and individual counts without semifinal false positives
+ok 53 - national finals use exact final stage, result, shootout and individual counts without semifinal false positives
+  ---
+  duration_ms: 572.354773
+  ...
+# Subtest: completed retirement season is explicitly retired while all annual totals still reconcile
+ok 54 - completed retirement season is explicitly retired while all annual totals still reconcile
+  ---
+  duration_ms: 535.664485
+  ...
+# Subtest: team awards include runner-up medals without duplicating a championship and injuries remain annual summaries
+ok 55 - team awards include runner-up medals without duplicating a championship and injuries remain annual summaries
+  ---
+  duration_ms: 472.736795
+  ...
+# Subtest: mixed legacy coverage uses matching detailed-game denominators for percentages
+ok 56 - mixed legacy coverage uses matching detailed-game denominators for percentages
+  ---
+  duration_ms: 568.119816
+  ...
+# Subtest: national elimination rounds and third-place results are explicit even without a year-end archive
+ok 57 - national elimination rounds and third-place results are explicit even without a year-end archive
+  ---
+  duration_ms: 461.964198
+  ...
+# Subtest: manual increases require ON, obey bounds and retain a distinct growth cause through save/import
+ok 58 - manual increases require ON, obey bounds and retain a distinct growth cause through save/import
+  ---
+  duration_ms: 5589.886781
+  ...
+# Subtest: freezing aging stops age and attribute decline while calendar seasons still advance; OFF restores age progression without attribute loss
+ok 59 - freezing aging stops age and attribute decline while calendar seasons still advance; OFF restores age progression without attribute loss
+  ---
+  duration_ms: 105249.403035
+  ...
+# (node:14060) ExperimentalWarning: The MockTimers API is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: worker progress keeps a long injury command alive; silence still times out and retains the save
+ok 60 - worker progress keeps a long injury command alive; silence still times out and retains the save
+  ---
+  duration_ms: 36.872682
+  ...
+# Subtest: league overperformance funds actual roster development and prestige gradually, not a flat match bonus
+ok 61 - league overperformance funds actual roster development and prestige gradually, not a flat match bonus
+  ---
+  duration_ms: 2359.153584
+  ...
+# Subtest: personal ability follows transfers immediately and old clubs retain only their actual roster
+ok 62 - personal ability follows transfers immediately and old clubs retain only their actual roster
+  ---
+  duration_ms: 308.747256
+  ...
+# Subtest: unplayed historical seasons never acquire invented growth results
+ok 63 - unplayed historical seasons never acquire invented growth results
+  ---
+  duration_ms: 1287.872694
+  ...
+# Subtest: 같은 진행 명령을 재전송해도 경기와 기록이 중복되지 않는다
+ok 64 - 같은 진행 명령을 재전송해도 경기와 기록이 중복되지 않는다
+  ---
+  duration_ms: 3466.63502
+  ...
+# Subtest: 잘못된 진행 요청은 상태를 바꾸지 않는다
+ok 65 - 잘못된 진행 요청은 상태를 바꾸지 않는다
+  ---
+  duration_ms: 858.925333
+  ...
+# Subtest: catalogue preserves unique club identities and valid competition references
+ok 66 - catalogue preserves unique club identities and valid competition references
+  ---
+  duration_ms: 12.241076
+  ...
+# Subtest: every roster is playable, indexed by its own club, with globally unique player IDs
+ok 67 - every roster is playable, indexed by its own club, with globally unique player IDs
+  ---
+  duration_ms: 101.694058
+  ...
+# Subtest: all sixteen positions have ten distinct playable styles and valid ability profiles
+ok 68 - all sixteen positions have ten distinct playable styles and valid ability profiles
+  ---
+  duration_ms: 14.496145
+  ...
+# Subtest: OVR stays on one global scale across leagues and talent, with bounded missing/invalid inputs
+ok 69 - OVR stays on one global scale across leagues and talent, with bounded missing/invalid inputs
+  ---
+  duration_ms: 178.875794
+  ...
+# Subtest: specialist styles reward their relevant abilities rather than a fixed title bonus
+ok 70 - specialist styles reward their relevant abilities rather than a fixed title bonus
+  ---
+  duration_ms: 0.347653
+  ...
+# Subtest: same seed and commands replay exactly without mutating prior snapshots
+ok 71 - same seed and commands replay exactly without mutating prior snapshots
+  ---
+  duration_ms: 167419.219573
+  ...
+# Subtest: creation rejects invalid input and defines every field/GK attribute
+ok 72 - creation rejects invalid input and defines every field/GK attribute
+  ---
+  duration_ms: 20659.826292
+  ...
+# Subtest: double round robin is balanced, including odd team counts and byes
+ok 73 - double round robin is balanced, including odd team counts and byes
+  ---
+  duration_ms: 6.900708
+  ...
+# Subtest: selected training dominates bounded experience and development; rest recovers condition
+ok 74 - selected training dominates bounded experience and development; rest recovers condition
+  ---
+  duration_ms: 16302.390864
+  ...
+# Subtest: match goal events, personal statistics and full league standings reconcile
+ok 75 - match goal events, personal statistics and full league standings reconcile
+  ---
+  duration_ms: 98245.709411
+  ...
+# Subtest: six distinct external offers, signing, contract renewal and new league work
+ok 76 - six distinct external offers, signing, contract renewal and new league work
+  ---
+  duration_ms: 82862.807068
+  ...
+# Subtest: GK records saves without striker output; position performance differs over many matches
+ok 77 - GK records saves without striker output; position performance differs over many matches
+  ---
+  duration_ms: 6107.388112
+  ...
+# Subtest: 30 seasons preserve history, finite stats, youth promotion, age progression and retirement totals
+ok 78 - 30 seasons preserve history, finite stats, youth promotion, age progression and retirement totals # SKIP
+  ---
+  duration_ms: 0.160607
+  ...
+# Subtest: retirement during a season archives the partial ledger exactly once
+ok 79 - retirement during a season archives the partial ledger exactly once
+  ---
+  duration_ms: 6237.368943
+  ...
+# Subtest: a future effective transfer cannot leave an earlier retirement in the career ledger
+ok 80 - a future effective transfer cannot leave an earlier retirement in the career ledger
+  ---
+  duration_ms: 34956.775864
+  ...
+# Subtest: personal actions and clean sheets use the actual on-pitch interval
+ok 81 - personal actions and clean sheets use the actual on-pitch interval
+  ---
+  duration_ms: 910.467171
+  ...
+# Subtest: absolute OVR and seeds stay independent of team selection
+ok 82 - absolute OVR and seeds stay independent of team selection
+  ---
+  duration_ms: 1326.369695
+  ...
+# Subtest: the missing European awards are nine distinct additions without duplicate league MVPs or teams
+ok 83 - the missing European awards are nine distinct additions without duplicate league MVPs or teams
+  ---
+  duration_ms: 2.360135
+  ...
+# Subtest: UCL awards use only its all-participant cup ledger, including eliminated players
+ok 84 - UCL awards use only its all-participant cup ledger, including eliminated players
+  ---
+  duration_ms: 43.510641
+  ...
+# Subtest: UEL awards use only its all-participant cup ledger, including eliminated players
+ok 85 - UEL awards use only its all-participant cup ledger, including eliminated players
+  ---
+  duration_ms: 6.500028
+  ...
+# Subtest: UECL awards use only its all-participant cup ledger, including eliminated players
+ok 86 - UECL awards use only its all-participant cup ledger, including eliminated players
+  ---
+  duration_ms: 1.019065
+  ...
+# Subtest: UEFA top scoring shares a goals tie without ability, assists, minutes, popularity or shootout tie-breaks
+ok 87 - UEFA top scoring shares a goals tie without ability, assists, minutes, popularity or shootout tie-breaks
+  ---
+  duration_ms: 0.872488
+  ...
+# Subtest: unfinished, old, absent, youth and unplayed cup records never create new awards
+ok 88 - unfinished, old, absent, youth and unplayed cup records never create new awards
+  ---
+  duration_ms: 1.218319
+  ...
+# Subtest: one prolific cameo can earn the objective scorer award but not MVP or a season eleven place
+ok 89 - one prolific cameo can earn the objective scorer award but not MVP or a season eleven place
+  ---
+  duration_ms: 6.733801
+  ...
+# Subtest: the season eleven requires all eleven slots and compares goalkeepers, defenders, midfielders and forwards separately
+ok 90 - the season eleven requires all eleven slots and compares goalkeepers, defenders, midfielders and forwards separately
+  ---
+  duration_ms: 1.424333
+  ...
+# Subtest: non-European continental MVP and the existing club World Cup Golden Ball are preserved without invented new awards
+ok 91 - non-European continental MVP and the existing club World Cup Golden Ball are preserved without invented new awards
+  ---
+  duration_ms: 1.729042
+  ...
+# Subtest: 라리가 시즌 최우수 선수 is adjudicated once through season awards, with league-only eligibility
+ok 92 - 라리가 시즌 최우수 선수 is adjudicated once through season awards, with league-only eligibility
+  ---
+  duration_ms: 6578.781251
+  ...
+# Subtest: 분데스리가 시즌 최우수 선수 is adjudicated once through season awards, with league-only eligibility
+ok 93 - 분데스리가 시즌 최우수 선수 is adjudicated once through season awards, with league-only eligibility
+  ---
+  duration_ms: 3513.832854
+  ...
+# Subtest: UNFP 리그 1 올해의 선수 is adjudicated once through season awards, with league-only eligibility
+ok 94 - UNFP 리그 1 올해의 선수 is adjudicated once through season awards, with league-only eligibility
+  ---
+  duration_ms: 3043.434856
+  ...
+# Subtest: FA international performers survive archival, autosave, reload and JSON without relaxing team validation
+ok 95 - FA international performers survive archival, autosave, reload and JSON without relaxing team validation
+  ---
+  duration_ms: 39903.530629
+  ...
+# Subtest: actual ability loss and poor form still permit short contracts; voluntary FA does not create a guaranteed renewal
+ok 96 - actual ability loss and poor form still permit short contracts; voluntary FA does not create a guaranteed renewal
+  ---
+  duration_ms: 4036.572311
+  ...
+# Subtest: opening legacy proposals refreshes duration once without touching archived records or altering signed contracts
+ok 97 - opening legacy proposals refreshes duration once without touching archived records or altering signed contracts
+  ---
+  duration_ms: 120437.435927
+  ...
+# Subtest: veterans who retain first-team ability and performance receive multi-year offers
+ok 98 - veterans who retain first-team ability and performance receive multi-year offers
+  ---
+  duration_ms: 6142.069453
+  ...
+# Subtest: expiry keeps natural FA status and offers the former club as a selectable return, not forced renewal
+ok 99 - expiry keeps natural FA status and offers the former club as a selectable return, not forced renewal
+  ---
+  duration_ms: 179263.337028
+  ...
+# Subtest: supported domestic cups and UEFA fields use separate valid rules, balanced opponents and no duplicate European entry
+ok 100 - supported domestic cups and UEFA fields use separate valid rules, balanced opponents and no duplicate European entry
+  ---
+  duration_ms: 410.822416
+  ...
+# Subtest: actual cup brackets finish once with byes, two legs, penalties, elimination and league-only records intact
+ok 101 - actual cup brackets finish once with byes, two legs, penalties, elimination and league-only records intact
+  ---
+  duration_ms: 121419.718423
+  ...
+# Subtest: European qualification uses actual prior league positions, cup winners and rolls spare places without overlap
+ok 102 - European qualification uses actual prior league positions, cup winners and rolls spare places without overlap
+  ---
+  duration_ms: 971.654683
+  ...
+# Subtest: legacy midseason saves do not receive invented past cup fixtures
+ok 103 - legacy midseason saves do not receive invented past cup fixtures
+  ---
+  duration_ms: 846.439479
+  ...
+# Subtest: manual aging applies once, floors every attribute at zero, recalculates OVR and survives save/TXT
+ok 104 - manual aging applies once, floors every attribute at zero, recalculates OVR and survives save/TXT
+  ---
+  duration_ms: 13772.533161
+  ...
+# Subtest: elite young players can reach seniors while ordinary youth remain U20
+ok 105 - elite young players can reach seniors while ordinary youth remain U20
+  ---
+  duration_ms: 645.797293
+  ...
+# Subtest: expanded annual windows distinguish actual caps, starts, bench and exclusion and replay incrementally
+ok 106 - expanded annual windows distinguish actual caps, starts, bench and exclusion and replay incrementally
+  ---
+  duration_ms: 10526.411339
+  ...
+# Subtest: World Cup and continental finals have full group/knockout stages, qualification and country strength
+ok 107 - World Cup and continental finals have full group/knockout stages, qualification and country strength
+  ---
+  duration_ms: 38467.12187
+  ...
+# [{"country":"프랑스","seed":0,"qualified":true,"caps":0,"winner":"NAT:대한민국:senior"},{"country":"프랑스","seed":1,"qualified":true,"caps":0,"winner":"NAT:아일랜드:senior"},{"country":"프랑스","seed":2,"qualified":false,"caps":0,"winner":"NAT:잉글랜드:senior"},{"country":"프랑스","seed":3,"qualified":true,"caps":0,"winner":"NAT:콩고민주공화국:senior"},{"country":"프랑스","seed":4,"qualified":true,"caps":0,"winner":"NAT:네덜란드:senior"},{"country":"프랑스","seed":5,"qualified":true,"caps":0,"winner":"NAT:슬로바키아:senior"},{"country":"프랑스","seed":6,"qualified":true,"caps":0,"winner":"NAT:웨일스:senior"},{"country":"프랑스","seed":7,"qualified":true,"caps":0,"winner":"NAT:스코틀랜드:senior"},{"country":"베트남","seed":0,"qualified":false,"caps":3,"winner":"NAT:알제리:senior"},{"country":"베트남","seed":1,"qualified":false,"caps":3,"winner":"NAT:아일랜드:senior"},{"country":"베트남","seed":2,"qualified":false,"caps":2,"winner":"NAT:잉글랜드:senior"},{"country":"베트남","seed":3,"qualified":false,"caps":1,"winner":"NAT:콩고민주공화국:senior"},{"country":"베트남","seed":4,"qualified":false,"caps":3,"winner":"NAT:네덜란드:senior"},{"country":"베트남","seed":5,"qualified":false,"caps":3,"winner":"NAT:슬로바키아:senior"},{"country":"베트남","seed":6,"qualified":false,"caps":3,"winner":"NAT:포르투갈:senior"},{"country":"베트남","seed":7,"qualified":false,"caps":3,"winner":"NAT:나이지리아:senior"}]
+# Subtest: national reserve and injured players gain no phantom appearances
+ok 108 - national reserve and injured players gain no phantom appearances
+  ---
+  duration_ms: 6200.91516
+  ...
+# Subtest: distinct global awards retain organisers, own eligibility and year results without fake nominee screens
+ok 109 - distinct global awards retain organisers, own eligibility and year results without fake nominee screens
+  ---
+  duration_ms: 1623.6339
+  ...
+# Subtest: European Golden Shoe uses league goals and coefficients alone, excludes second divisions and non-Europe
+ok 110 - European Golden Shoe uses league goals and coefficients alone, excludes second divisions and non-Europe
+  ---
+  duration_ms: 1085.06262
+  ...
+# Subtest: ability participates in subjective votes but cannot replace performance, appearances or eligibility
+ok 111 - ability participates in subjective votes but cannot replace performance, appearances or eligibility
+  ---
+  duration_ms: 1379.143716
+  ...
+# Subtest: narrative achievements require evidence, diminish overlapping titles, cap at ten, and do not invent a drought
+ok 112 - narrative achievements require evidence, diminish overlapping titles, cap at ten, and do not invent a drought
+  ---
+  duration_ms: 1139.552258
+  ...
+# Subtest: historical league records exclude cup goals and old award IDs/data survive display renaming
+ok 113 - historical league records exclude cup goals and old award IDs/data survive display renaming
+  ---
+  duration_ms: 934.768449
+  ...
+# Subtest: equal output in a lower division is weighted below top-flight output in global awards
+ok 114 - equal output in a lower division is weighted below top-flight output in global awards
+  ---
+  duration_ms: 751.649224
+  ...
+# Subtest: real simulated international guests can be saved as award candidates; forged guest identities remain invalid
+ok 115 - real simulated international guests can be saved as award candidates; forged guest identities remain invalid
+  ---
+  duration_ms: 3643.329381
+  ...
+# Subtest: creation preview uses the exact final seed, values, OVR and potential
+ok 116 - creation preview uses the exact final seed, values, OVR and potential
+  ---
+  duration_ms: 1787.372929
+  ...
+# Subtest: unselected attributes never mature automatically and every selected gain reconciles by cause
+ok 117 - unselected attributes never mature automatically and every selected gain reconciles by cause
+  ---
+  duration_ms: 1084.819552
+  ...
+# Subtest: actual minutes and actions give bounded experience while non-participants gain none
+ok 118 - actual minutes and actions give bounded experience while non-participants gain none
+  ---
+  duration_ms: 704.015634
+  ...
+# Subtest: facilities and actual club minutes affect selected growth under identical seeds
+ok 119 - facilities and actual club minutes affect selected growth under identical seeds
+  ---
+  duration_ms: 1733.345989
+  ...
+# Subtest: a sustained injury reduces training volume without automatically lowering any ability
+ok 120 - a sustained injury reduces training volume without automatically lowering any ability
+  ---
+  duration_ms: 1410.886778
+  ...
+# Subtest: legacy growth starts at the known present and does not attribute an unknown past
+ok 121 - legacy growth starts at the known present and does not attribute an unknown past
+  ---
+  duration_ms: 1732.168284
+  ...
+# Subtest: annual plans confirm once and a new season never automatically decreases player attributes
+ok 122 - annual plans confirm once and a new season never automatically decreases player attributes
+  ---
+  duration_ms: 4811.796672
+  ...
+# Subtest: repeated selected-only youth-to-peak growth separates talents without free growth in unselected abilities
+ok 123 - repeated selected-only youth-to-peak growth separates talents without free growth in unselected abilities
+  ---
+  duration_ms: 37152.843691
+  ...
+# {"controlledGrowth15to28":{"D":[59,58,61,60,63,66],"A":[69,71,71,71,71,69],"S":[69,71,72,72,71,70],"SSS":[70,72,73,73,72,71]},"benchS":46,"positions":[{"position":"CB","ovr":64},{"position":"GK","ovr":62}]}
+# Subtest: a first-place midseason is not a title and season/individual honours remain distinct
+ok 124 - a first-place midseason is not a title and season/individual honours remain distinct
+  ---
+  duration_ms: 1892.306115
+  ...
+# Subtest: half-season flow fixes annual training and wage, reserving all contract choices for the end of the season
+ok 125 - half-season flow fixes annual training and wage, reserving all contract choices for the end of the season
+  ---
+  duration_ms: 107926.264238
+  ...
+# Subtest: actual promotion changes engine next-season league, opponents, schedule and club revenue
+ok 126 - actual promotion changes engine next-season league, opponents, schedule and club revenue
+  ---
+  duration_ms: 2414.988261
+  ...
+# Subtest: club + actual international ledgers equal combined totals and retirement preserves every total
+ok 127 - club + actual international ledgers equal combined totals and retirement preserves every total
+  ---
+  duration_ms: 52580.805581
+  ...
+# Subtest: league calendars split seasons locally and cross-calendar transfers never travel backwards
+ok 128 - league calendars split seasons locally and cross-calendar transfers never travel backwards
+  ---
+  duration_ms: 3103.289718
+  ...
+# Subtest: an old midseason prompt clears on a command without changing wages or blocking progress
+ok 129 - an old midseason prompt clears on a command without changing wages or blocking progress
+  ---
+  duration_ms: 5204.232579
+  ...
+# Subtest: league rankings use actual league ledgers and the same K1 sporting tie-break as awards
+ok 130 - league rankings use actual league ledgers and the same K1 sporting tie-break as awards
+  ---
+  duration_ms: 1405.272014
+  ...
+# Subtest: paired complete league schedules turn individual actions into different points and rank distributions
+ok 131 - paired complete league schedules turn individual actions into different points and rank distributions
+  ---
+  duration_ms: 21148.601459
+  ...
+# {"paired40Seasons":[{"ability":25,"meanPoints":12.25,"meanRank":7.125,"titles":0,"goals":47},{"ability":95,"meanPoints":32.025,"meanRank":1.05,"titles":38,"goals":662}]}
+# Subtest: a weak club’s 30-to-40-goal striker is included in actual scores and improves earned season points
+ok 132 - a weak club’s 30-to-40-goal striker is included in actual scores and improves earned season points
+  ---
+  duration_ms: 29114.358031
+  ...
+# {"weakClubEight38GameSeasons":[{"ability":25,"meanPoints":22.75,"meanRank":18.75,"goals":[4,3,3,3,5,3,1,3]},{"ability":90,"meanPoints":70.375,"meanRank":5.625,"goals":[43,42,38,45,49,42,36,44]},{"ability":95,"meanPoints":74.625,"meanRank":4.875,"goals":[49,46,42,52,56,46,46,46]}]}
+# Subtest: seed replay is pure, and output verbosity does not change any performance
+ok 133 - seed replay is pure, and output verbosity does not change any performance
+  ---
+  duration_ms: 35.41293
+  ...
+# Subtest: scores, shot references, saves, assists and both-team MOM reconcile over 240 games
+ok 134 - scores, shot references, saves, assists and both-team MOM reconcile over 240 games
+  ---
+  duration_ms: 1160.903922
+  ...
+# Subtest: CM: strength changes tackles in its intended direction across 240 paired games with OVR held fixed
+ok 135 - CM: strength changes tackles in its intended direction across 240 paired games with OVR held fixed
+  ---
+  duration_ms: 1086.028064
+  ...
+# Subtest: CM: stamina changes lateSuccesses in its intended direction across 240 paired games with OVR held fixed
+ok 136 - CM: stamina changes lateSuccesses in its intended direction across 240 paired games with OVR held fixed
+  ---
+  duration_ms: 891.96474
+  ...
+# Subtest: CM: speed changes dribbleAttempts in its intended direction across 240 paired games with OVR held fixed
+ok 137 - CM: speed changes dribbleAttempts in its intended direction across 240 paired games with OVR held fixed
+  ---
+  duration_ms: 405.564722
+  ...
+# Subtest: CM: agility changes dribblesCompleted in its intended direction across 240 paired games with OVR held fixed
+ok 138 - CM: agility changes dribblesCompleted in its intended direction across 240 paired games with OVR held fixed
+  ---
+  duration_ms: 492.30117
+  ...
+# Subtest: CM: jumping changes aerialWon in its intended direction across 240 paired games with OVR held fixed
+ok 139 - CM: jumping changes aerialWon in its intended direction across 240 paired games with OVR held fixed
+  ---
+  duration_ms: 470.681274
+  ...
+# Subtest: CM: ballControl changes passesCompleted in its intended direction across 240 paired games with OVR held fixed
+ok 140 - CM: ballControl changes passesCompleted in its intended direction across 240 paired games with OVR held fixed
+  ---
+  duration_ms: 641.057237
+  ...
+# Subtest: CM: dribbling changes dribblesCompleted in its intended direction across 240 paired games with OVR held fixed
+ok 141 - CM: dribbling changes dribblesCompleted in its intended direction across 240 paired games with OVR held fixed
+  ---
+  duration_ms: 450.247745
+  ...
+# Subtest: CM: passing changes passesCompleted in its intended direction across 240 paired games with OVR held fixed
+ok 142 - CM: passing changes passesCompleted in its intended direction across 240 paired games with OVR held fixed
+  ---
+  duration_ms: 600.761948
+  ...
+# Subtest: CM: crossing changes keyPasses in its intended direction across 240 paired games with OVR held fixed
+ok 143 - CM: crossing changes keyPasses in its intended direction across 240 paired games with OVR held fixed
+  ---
+  duration_ms: 555.947116
+  ...
+# Subtest: CM: shooting changes shotsOnTarget in its intended direction across 240 paired games with OVR held fixed
+ok 144 - CM: shooting changes shotsOnTarget in its intended direction across 240 paired games with OVR held fixed
+  ---
+  duration_ms: 700.890365
+  ...
+# Subtest: CM: heading changes aerialWon in its intended direction across 240 paired games with OVR held fixed
+ok 145 - CM: heading changes aerialWon in its intended direction across 240 paired games with OVR held fixed
+  ---
+  duration_ms: 453.41621
+  ...
+# Subtest: CM: defending changes tackles in its intended direction across 240 paired games with OVR held fixed
+ok 146 - CM: defending changes tackles in its intended direction across 240 paired games with OVR held fixed
+  ---
+  duration_ms: 545.892051
+  ...
+# Subtest: CM: setPieces changes shotsOnTarget in its intended direction across 240 paired games with OVR held fixed
+ok 147 - CM: setPieces changes shotsOnTarget in its intended direction across 240 paired games with OVR held fixed
+  ---
+  duration_ms: 569.905042
+  ...
+# Subtest: CM: decisions changes passesCompleted in its intended direction across 240 paired games with OVR held fixed
+ok 148 - CM: decisions changes passesCompleted in its intended direction across 240 paired games with OVR held fixed
+  ---
+  duration_ms: 522.972625
+  ...
+# Subtest: CM: vision changes keyPasses in its intended direction across 240 paired games with OVR held fixed
+ok 149 - CM: vision changes keyPasses in its intended direction across 240 paired games with OVR held fixed
+  ---
+  duration_ms: 543.828054
+  ...
+# Subtest: CM: anticipation changes interceptions in its intended direction across 240 paired games with OVR held fixed
+ok 150 - CM: anticipation changes interceptions in its intended direction across 240 paired games with OVR held fixed
+  ---
+  duration_ms: 467.339434
+  ...
+# Subtest: CM: positioning changes shots in its intended direction across 240 paired games with OVR held fixed
+ok 151 - CM: positioning changes shots in its intended direction across 240 paired games with OVR held fixed
+  ---
+  duration_ms: 598.027173
+  ...
+# Subtest: CM: composure changes shotsOnTarget in its intended direction across 240 paired games with OVR held fixed
+ok 152 - CM: composure changes shotsOnTarget in its intended direction across 240 paired games with OVR held fixed
+  ---
+  duration_ms: 529.263282
+  ...
+# Subtest: CM: concentration changes passesCompleted in its intended direction across 240 paired games with OVR held fixed
+ok 153 - CM: concentration changes passesCompleted in its intended direction across 240 paired games with OVR held fixed
+  ---
+  duration_ms: 419.148806
+  ...
+# Subtest: CM: teamwork changes passes in its intended direction across 240 paired games with OVR held fixed
+ok 154 - CM: teamwork changes passes in its intended direction across 240 paired games with OVR held fixed
+  ---
+  duration_ms: 494.666137
+  ...
+# Subtest: GK: gkShotStopping changes saves in its intended direction across 240 paired games with OVR held fixed
+ok 155 - GK: gkShotStopping changes saves in its intended direction across 240 paired games with OVR held fixed
+  ---
+  duration_ms: 501.988412
+  ...
+# Subtest: GK: gkReflexes changes saves in its intended direction across 240 paired games with OVR held fixed
+ok 156 - GK: gkReflexes changes saves in its intended direction across 240 paired games with OVR held fixed
+  ---
+  duration_ms: 509.705763
+  ...
+# Subtest: GK: gkHandling changes handlingSuccesses in its intended direction across 240 paired games with OVR held fixed
+ok 157 - GK: gkHandling changes handlingSuccesses in its intended direction across 240 paired games with OVR held fixed
+  ---
+  duration_ms: 487.652064
+  ...
+# Subtest: GK: gkAerialCommand changes crossesCaught in its intended direction across 240 paired games with OVR held fixed
+ok 158 - GK: gkAerialCommand changes crossesCaught in its intended direction across 240 paired games with OVR held fixed
+  ---
+  duration_ms: 426.304062
+  ...
+# Subtest: GK: gkOneOnOnes changes oneOnOneSaves in its intended direction across 240 paired games with OVR held fixed
+ok 159 - GK: gkOneOnOnes changes oneOnOneSaves in its intended direction across 240 paired games with OVR held fixed
+  ---
+  duration_ms: 689.059816
+  ...
+# Subtest: GK: gkPositioning changes sweepingSuccesses in its intended direction across 240 paired games with OVR held fixed
+ok 160 - GK: gkPositioning changes sweepingSuccesses in its intended direction across 240 paired games with OVR held fixed
+  ---
+  duration_ms: 387.253065
+  ...
+# Subtest: GK: gkDistribution changes buildUpCompleted in its intended direction across 240 paired games with OVR held fixed
+ok 161 - GK: gkDistribution changes buildUpCompleted in its intended direction across 240 paired games with OVR held fixed
+  ---
+  duration_ms: 359.295876
+  ...
+# Subtest: GK: decisions changes sweepingSuccesses in its intended direction across 240 paired games with OVR held fixed
+ok 162 - GK: decisions changes sweepingSuccesses in its intended direction across 240 paired games with OVR held fixed
+  ---
+  duration_ms: 368.643118
+  ...
+# Subtest: GK: concentration changes handlingSuccesses in its intended direction across 240 paired games with OVR held fixed
+ok 163 - GK: concentration changes handlingSuccesses in its intended direction across 240 paired games with OVR held fixed
+  ---
+  duration_ms: 558.625655
+  ...
+# Subtest: GK: gkDefensiveOrganization changes shotsFaced in its intended direction across 240 paired games with OVR held fixed
+ok 164 - GK: gkDefensiveOrganization changes shotsFaced in its intended direction across 240 paired games with OVR held fixed
+  ---
+  duration_ms: 506.615689
+  ...
+# Subtest: bench, injuries and red cards respect playing intervals; forced selection controls experiments
+ok 165 - bench, injuries and red cards respect playing intervals; forced selection controls experiments
+  ---
+  duration_ms: 1515.073817
+  ...
+# Subtest: national synthetic teams preserve domestic membership and non-user fixtures contain no user performance
+ok 166 - national synthetic teams preserve domestic membership and non-user fixtures contain no user performance
+  ---
+  duration_ms: 6.876222
+  ...
+# Subtest: field and goalkeeper metric displays sum denominators and support per90 rather than averaging match percentages
+ok 167 - field and goalkeeper metric displays sum denominators and support per90 rather than averaging match percentages
+  ---
+  duration_ms: 0.740823
+  ...
+# Subtest: successful passing builds actual team chances and successful defending prevents actual opposing chances
+ok 168 - successful passing builds actual team chances and successful defending prevents actual opposing chances
+  ---
+  duration_ms: 3710.818703
+  ...
+# Subtest: retained source nationality follows the player, not the country of their club
+ok 169 - retained source nationality follows the player, not the country of their club
+  ---
+  duration_ms: 0.849475
+  ...
+# Subtest: January and July season calendars use future June windows without retroactive World Cups
+ok 170 - January and July season calendars use future June windows without retroactive World Cups
+  ---
+  duration_ms: 387.110955
+  ...
+# Subtest: national windows replay exactly, preserve club contracts, and archive without duplicate statistics
+ok 171 - national windows replay exactly, preserve club contracts, and archive without duplicate statistics
+  ---
+  duration_ms: 171.656788
+  ...
+# Subtest: injury and real positional competition explain non-selection without awarding phantom appearances
+ok 172 - injury and real positional competition explain non-selection without awarding phantom appearances
+  ---
+  duration_ms: 628.63388
+  ...
+# Subtest: U20 and senior match ledgers remain separate across season changes
+ok 173 - U20 and senior match ledgers remain separate across season changes
+  ---
+  duration_ms: 385.274543
+  ...
+# Subtest: qualification uses played group scores and knockout titles use the actual final winner
+ok 174 - qualification uses played group scores and knockout titles use the actual final winner
+  ---
+  duration_ms: 28922.050598
+  ...
+# Subtest: a single star does not erase whole-country strength over repeated tournaments
+ok 175 - a single star does not erase whole-country strength over repeated tournaments
+  ---
+  duration_ms: 48477.599703
+  ...
+# {"same92OVRStar64WorldCups":[{"country":"프랑스","titles":20,"qualified":63,"finals":31},{"country":"베트남","titles":0,"qualified":35,"finals":0}]}
+# Subtest: a small continental field uses earned finalists and never invents a semifinal opponent
+ok 176 - a small continental field uses earned finalists and never invents a semifinal opponent
+  ---
+  duration_ms: 174.242803
+  ...
+# Subtest: an older in-progress semifinal bracket keeps its recorded opponents without fabricated earlier qualifiers
+ok 177 - an older in-progress semifinal bracket keeps its recorded opponents without fabricated earlier qualifiers
+  ---
+  duration_ms: 325.967699
+  ...
+# Subtest: played qualifying groups stay fixed when another country’s squad changes before the semifinal
+ok 178 - played qualifying groups stay fixed when another country’s squad changes before the semifinal
+  ---
+  duration_ms: 388.229633
+  ...
+# Subtest: goalkeepers retain keeper metrics and competitors receive exactly their national match ledger
+ok 179 - goalkeepers retain keeper metrics and competitors receive exactly their national match ledger
+  ---
+  duration_ms: 910.811675
+  ...
+# Subtest: qualification carries between seasons, intermediate windows play friendlies, and calendar switches do not replay finals
+ok 180 - qualification carries between seasons, intermediate windows play friendlies, and calendar switches do not replay finals
+  ---
+  duration_ms: 427.90913
+  ...
+# Subtest: shootout takers are the eligible players still on the pitch and do not change regular statistics
+ok 181 - shootout takers are the eligible players still on the pitch and do not change regular statistics
+  ---
+  duration_ms: 45.201583
+  ...
+# Subtest: international windows follow the local calendar and its displayed year
+ok 182 - international windows follow the local calendar and its displayed year
+  ---
+  duration_ms: 14.409107
+  ...
+# Subtest: only due international matches affect the player and the standings
+ok 183 - only due international matches affect the player and the standings
+  ---
+  duration_ms: 433.519526
+  ...
+# Subtest: incremental dates and a single due-date advance produce the same actual match ledger
+ok 184 - incremental dates and a single due-date advance produce the same actual match ledger
+  ---
+  duration_ms: 1007.745676
+  ...
+# Subtest: already completed calendar windows survive league and age-group changes without replaying a match
+ok 185 - already completed calendar windows survive league and age-group changes without replaying a match
+  ---
+  duration_ms: 341.210423
+  ...
+# Subtest: old mid-window saves skip elapsed call-ups without fabricating past player actions
+ok 186 - old mid-window saves skip elapsed call-ups without fabricating past player actions
+  ---
+  duration_ms: 114.327003
+  ...
+# Subtest: legacy whole-window records and keys remain authoritative after restoring a save
+ok 187 - legacy whole-window records and keys remain authoritative after restoring a save
+  ---
+  duration_ms: 133.714095
+  ...
+# Subtest: a restored career with played fixtures uses its last club date as its migration cursor
+ok 188 - a restored career with played fixtures uses its last club date as its migration cursor
+  ---
+  duration_ms: 66.49002
+  ...
+# Subtest: international injury is visible to the next club selection before that match is simulated
+ok 189 - international injury is visible to the next club selection before that match is simulated
+  ---
+  duration_ms: 1018.819339
+  ...
+# Subtest: inline aging alters one field/GK attribute even while locked; locks still cover automatic changes and cheats
+ok 190 - inline aging alters one field/GK attribute even while locked; locks still cover automatic changes and cheats
+  ---
+  duration_ms: 6019.682765
+  ...
+# Subtest: light snapshots share immutable world/history but isolate every mutated attribute and ledger
+ok 191 - light snapshots share immutable world/history but isolate every mutated attribute and ledger
+  ---
+  duration_ms: 1882.296909
+  ...
+# Subtest: ages 16 through 48 have no negative age-based training or experience path
+ok 192 - ages 16 through 48 have no negative age-based training or experience path
+  ---
+  duration_ms: 6062.448858
+  ...
+# Subtest: every market contains six unique external real clubs in the requested 3/1/1/1 bands, under actual budgets
+ok 193 - every market contains six unique external real clubs in the requested 3/1/1/1 bands, under actual budgets
+  ---
+  duration_ms: 46954.00841
+  ...
+# Subtest: KRW is a fixed display conversion; full integers and Korean units preserve underlying EUR
+ok 194 - KRW is a fixed display conversion; full integers and Korean units preserve underlying EUR
+  ---
+  duration_ms: 0.872388
+  ...
+# Subtest: extra honours require observed games, correct positions/ages and actual debut/transfer evidence
+ok 195 - extra honours require observed games, correct positions/ages and actual debut/transfer evidence
+  ---
+  duration_ms: 785.528624
+  ...
+# Subtest: K3 titles require verified annual license evidence and a real decided match, never automatic promotion
+ok 196 - K3 titles require verified annual license evidence and a real decided match, never automatic promotion
+  ---
+  duration_ms: 1102.077432
+  ...
+# Subtest: new continental fields preserve region, actual unique entrants and group opponent rules
+ok 197 - new continental fields preserve region, actual unique entrants and group opponent rules
+  ---
+  duration_ms: 1295.412024
+  ...
+# Subtest: season injury queues at the half boundary, excludes all remaining games and ends with that season
+ok 198 - season injury queues at the half boundary, excludes all remaining games and ends with that season
+  ---
+  duration_ms: 156757.825271
+  ...
+# Subtest: injury absences count only the player’s actual club/national fixtures, including a transfer
+ok 199 - injury absences count only the player’s actual club/national fixtures, including a transfer
+  ---
+  duration_ms: 283.527303
+  ...
+# Subtest: wingback crossing creates real additional teammate shots while preserving two centre backs
+ok 200 - wingback crossing creates real additional teammate shots while preserving two centre backs
+  ---
+  duration_ms: 2583.696482
+  ...
+# Subtest: appointed captain and deputy provide small action-level organization gains only while playing
+ok 201 - appointed captain and deputy provide small action-level organization gains only while playing
+  ---
+  duration_ms: 3474.014882
+  ...
+# Subtest: actual season-long elite performances unlock mid-table reinvestment; an OVR label without appearances does not
+ok 202 - actual season-long elite performances unlock mid-table reinvestment; an OVR label without appearances does not
+  ---
+  duration_ms: 300.768973
+  ...
+# Subtest: funded core-player investment raises the club scale gradually while the locked player stays unchanged
+ok 203 - funded core-player investment raises the club scale gradually while the locked player stays unchanged
+  ---
+  duration_ms: 1170.271085
+  ...
+# Subtest: all-attribute locks allow real manual injury progress and retain exact abilities and lock state
+ok 204 - all-attribute locks allow real manual injury progress and retain exact abilities and lock state
+  ---
+  duration_ms: 77747.840578
+  ...
+# Subtest: locked offseason injury queues without advancing records and activates on the destination season calendar
+ok 205 - locked offseason injury queues without advancing records and activates on the destination season calendar
+  ---
+  duration_ms: 83735.268079
+  ...
+# Subtest: five independent personality controls preserve attributes and OVR, journal, JSON and legacy absence
+ok 206 - five independent personality controls preserve attributes and OVR, journal, JSON and legacy absence
+  ---
+  duration_ms: 8684.321451
+  ...
+# Subtest: unaffected clubs cannot become superclubs from inherited investment; all requested established clubs are protected
+ok 207 - unaffected clubs cannot become superclubs from inherited investment; all requested established clubs are protected
+  ---
+  duration_ms: 1808.046398
+  ...
+# Subtest: the first command repairs legacy current club powers on a copy without rewriting historic games or the original
+ok 208 - the first command repairs legacy current club powers on a copy without rewriting historic games or the original
+  ---
+  duration_ms: 2605.197174
+  ...
+# Subtest: an elite 40-year-old retains meaningful value, multi-year first-team offers and the same selection as a 27-year-old
+ok 209 - an elite 40-year-old retains meaningful value, multi-year first-team offers and the same selection as a 27-year-old
+  ---
+  duration_ms: 2230.124218
+  ...
+# Subtest: fair play 10 produces no cards, while 1 produces materially more real disciplinary events
+ok 210 - fair play 10 produces no cards, while 1 produces materially more real disciplinary events
+  ---
+  duration_ms: 2230.764028
+  ...
+# Subtest: stardom changes valuation and leadership changes captain assessment without changing ability
+ok 211 - stardom changes valuation and leadership changes captain assessment without changing ability
+  ---
+  duration_ms: 1624.677628
+  ...
+# Subtest: leadership improves the use of real paid investment rather than creating free money
+ok 212 - leadership improves the use of real paid investment rather than creating free money
+  ---
+  duration_ms: 3245.419287
+  ...
+# Subtest: stardom gives a noticeable bounded subjective vote bonus but never changes a Golden Shoe goal count
+ok 213 - stardom gives a noticeable bounded subjective vote bonus but never changes a Golden Shoe goal count
+  ---
+  duration_ms: 1547.270617
+  ...
+# Subtest: clutch only boosts big stages; winning helps actual on-pitch team chances and never absent players
+ok 214 - clutch only boosts big stages; winning helps actual on-pitch team chances and never absent players
+  ---
+  duration_ms: 7586.39954
+  ...
+# Subtest: five edited values commit atomically in one revision and use the small change journal
+ok 215 - five edited values commit atomically in one revision and use the small change journal
+  ---
+  duration_ms: 10333.961814
+  ...
+# Subtest: invalid or partial edit buffers cannot apply any values, and retirement remains read-only
+ok 216 - invalid or partial edit buffers cannot apply any values, and retirement remains read-only
+  ---
+  duration_ms: 2086.949557
+  ...
+# Subtest: batch and legacy personality commands bypass the game Worker and retain incremental saving
+ok 217 - batch and legacy personality commands bypass the game Worker and retain incremental saving
+  ---
+  duration_ms: 1382.510558
+  ...
+# Subtest: annual retirement skills explain the specialty for field players and keepers
+ok 218 - annual retirement skills explain the specialty for field players and keepers
+  ---
+  duration_ms: 2145.434721
+  ...
+# Subtest: all 30 skill mappings and all 24 OVR ranges are complete, unique by context and have five examples
+ok 219 - all 30 skill mappings and all 24 OVR ranges are complete, unique by context and have five examples
+  ---
+  duration_ms: 0.523623
+  ...
+# Subtest: choosing skills adds no abilities, OVR or hidden bonus; sixth choice and wrong-position skills are rejected
+ok 220 - choosing skills adds no abilities, OVR or hidden bonus; sixth choice and wrong-position skills are rejected
+  ---
+  duration_ms: 4440.64685
+  ...
+# Normal growth reachability: [{"position":"GK","age":25,"ovr":120},{"position":"CB","age":26,"ovr":120},{"position":"LB","age":26,"ovr":120},{"position":"RB","age":25,"ovr":120},{"position":"LWB","age":25,"ovr":120},{"position":"RWB","age":26,"ovr":120},{"position":"CDM","age":25,"ovr":120},{"position":"CM","age":25,"ovr":120},{"position":"CAM","age":24,"ovr":120},{"position":"LM","age":26,"ovr":120},{"position":"RM","age":25,"ovr":120},{"position":"LW","age":25,"ovr":120},{"position":"RW","age":25,"ovr":120},{"position":"CF","age":25,"ovr":120},{"position":"SS","age":25,"ovr":120},{"position":"ST","age":25,"ovr":120}]
+# Subtest: locks, explicit manual aging, deletion above 100 and a complete export/import preserve the skill history
+ok 221 - locks, explicit manual aging, deletion above 100 and a complete export/import preserve the skill history
+  ---
+  duration_ms: 5309.003219
+  ...
+# Subtest: 110 mental attributes keep derived leadership within its percentage scale and remain saveable after a real round
+ok 222 - 110 mental attributes keep derived leadership within its percentage scale and remain saveable after a real round
+  ---
+  duration_ms: 4799.427584
+  ...
+# Subtest: annual retirement skills start at acquisition and disappear from deletion year; neither skills nor narratives enter totals
+ok 223 - annual retirement skills start at acquisition and disappear from deletion year; neither skills nor narratives enter totals
+  ---
+  duration_ms: 2088.405632
+  ...
+# Subtest: every position and tactical style can reach exactly 120 with five fully grown core skills, never with four
+ok 224 - every position and tactical style can reach exactly 120 with five fully grown core skills, never with four
+  ---
+  duration_ms: 47.95389
+  ...
+# Subtest: actual training and experience, without cheat increases or automatic unchecked growth, reach 120 in all sixteen positions
+ok 225 - actual training and experience, without cheat increases or automatic unchecked growth, reach 120 in all sixteen positions
+  ---
+  duration_ms: 20769.344801
+  ...
+# Subtest: a forward earns credit for observed ball winning, key passes and aerial work without gifted goals or higher OVR
+ok 226 - a forward earns credit for observed ball winning, key passes and aerial work without gifted goals or higher OVR
+  ---
+  duration_ms: 1631.81438
+  ...
+# Subtest: regular in-season leadership reviews offer a proven newcomer vice captaincy before a season boundary
+ok 227 - regular in-season leadership reviews offer a proven newcomer vice captaincy before a season boundary
+  ---
+  duration_ms: 1245.606286
+  ...
+# Subtest: accepting a vice captain offer does not block a deserved captain upgrade in the same season
+ok 228 - accepting a vice captain offer does not block a deserved captain upgrade in the same season
+  ---
+  duration_ms: 1493.725876
+  ...
+# Subtest: an unanswered vice offer upgrades cleanly; a declined offer stays final, and an expired one can be reconsidered
+ok 229 - an unanswered vice offer upgrades cleanly; a declined offer stays final, and an expired one can be reconsidered
+  ---
+  duration_ms: 3815.213509
+  ...
+# Subtest: leadership personality can beat close established candidates without granting a weak player a role
+ok 230 - leadership personality can beat close established candidates without granting a weak player a role
+  ---
+  duration_ms: 1598.051707
+  ...
+# Subtest: inflated internal NPC ratings never give a different club/national ability or false captain XI average
+ok 231 - inflated internal NPC ratings never give a different club/national ability or false captain XI average
+  ---
+  duration_ms: 3060.636991
+  ...
+# Subtest: 26-man national squads still exclude injuries and preserve real forward competition
+ok 232 - 26-man national squads still exclude injuries and preserve real forward competition
+  ---
+  duration_ms: 1624.634309
+  ...
+# Subtest: 17 league goals and 10 assists by a major contributor to an Inter treble compete for Ballon shortlist and Serie A XI
+ok 233 - 17 league goals and 10 assists by a major contributor to an Inter treble compete for Ballon shortlist and Serie A XI
+  ---
+  duration_ms: 6464.17694
+  ...
+# Subtest: weak or absent performances do not earn awards just by joining a treble winner
+ok 234 - weak or absent performances do not earn awards just by joining a treble winner
+  ---
+  duration_ms: 1850.729649
+  ...
+# Subtest: career identity omits one ambiguous overall while each annual ability record remains intact
+ok 235 - career identity omits one ambiguous overall while each annual ability record remains intact
+  ---
+  duration_ms: 1736.844185
+  ...
+# Subtest: real retained nationalities are independent of whether the old club mapper recognised the club
+ok 236 - real retained nationalities are independent of whether the old club mapper recognised the club
+  ---
+  duration_ms: 0.235989
+  ...
+# Subtest: German and Spanish squads use source players, not elite substitutes from league strength
+ok 237 - German and Spanish squads use source players, not elite substitutes from league strength
+  ---
+  duration_ms: 1597.828543
+  ...
+# Subtest: every retained real OVR equals its source; generated depth stays below an empirical league scale
+ok 238 - every retained real OVR equals its source; generated depth stays below an empirical league scale
+  ---
+  duration_ms: 1567.591913
+  ...
+# Subtest: published old hash stays unchanged on validation/export; first command corrects future NPC strength on a copy
+ok 239 - published old hash stays unchanged on validation/export; first command corrects future NPC strength on a copy
+  ---
+  duration_ms: 11788.444686
+  ...
+# Subtest: club-level repair keeps every NPC, personal profile and played record intact; it is idempotent
+ok 240 - club-level repair keeps every NPC, personal profile and played record intact; it is idempotent
+  ---
+  duration_ms: 3977.724885
+  ...
+# Subtest: club base power survives inflated replacement generations while the user keeps intrinsic ability
+ok 241 - club base power survives inflated replacement generations while the user keeps intrinsic ability
+  ---
+  duration_ms: 1778.243491
+  ...
+# Subtest: light controls durably replay every field without replacing the large snapshot
+ok 242 - light controls durably replay every field without replacing the large snapshot
+  ---
+  duration_ms: 25698.514349
+  ...
+# Subtest: compaction retains the previous logical revision as backup and identical autosaves keep it
+ok 243 - compaction retains the previous logical revision as backup and identical autosaves keep it
+  ---
+  duration_ms: 14871.12897
+  ...
+# Subtest: corrupt write-ahead records fail validation and restore without displacing the good backup
+ok 244 - corrupt write-ahead records fail validation and restore without displacing the good backup
+  ---
+  duration_ms: 7547.57371
+  ...
+# Subtest: a changed engine receipt falls back to full validation instead of persisting a malformed delta
+ok 245 - a changed engine receipt falls back to full validation instead of persisting a malformed delta
+  ---
+  duration_ms: 3035.904755
+  ...
+# Subtest: parallel forks cannot overwrite the first durable light command
+ok 246 - parallel forks cannot overwrite the first durable light command
+  ---
+  duration_ms: 3161.490064
+  ...
+# Subtest: a checkpoint overlapping a new command preserves the newer head and its backup
+ok 247 - a checkpoint overlapping a new command preserves the newer head and its backup
+  ---
+  duration_ms: 10425.08698
+  ...
+# Subtest: an external tab update blocks a local journal even if metadata is stale
+ok 248 - an external tab update blocks a local journal even if metadata is stale
+  ---
+  duration_ms: 7006.159817
+  ...
+# Subtest: malformed patch paths cannot alter prototypes and deleted slots cannot be revived
+ok 249 - malformed patch paths cannot alter prototypes and deleted slots cannot be revived
+  ---
+  duration_ms: 2457.665411
+  ...
+# Subtest: offseason training confirmation uses the same durable change path
+ok 250 - offseason training confirmation uses the same durable change path
+  ---
+  duration_ms: 31433.845521
+  ...
+# Subtest: a modified previous mutable state cannot inherit a trusted incremental receipt
+ok 251 - a modified previous mutable state cannot inherit a trusted incremental receipt
+  ---
+  duration_ms: 1490.840098
+  ...
+# (node:15005) ExperimentalWarning: The MockTimers API is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: save Worker cancellation preserves full requests and clears settled request timers
+ok 252 - save Worker cancellation preserves full requests and clears settled request timers
+  ---
+  duration_ms: 58.061626
+  ...
+# Subtest: a 25-goal K2 prospect earns realistic higher-division attention and affordable proposals without guaranteed elite offers
+ok 253 - a 25-goal K2 prospect earns realistic higher-division attention and affordable proposals without guaranteed elite offers
+  ---
+  duration_ms: 3760.244608
+  ...
+# Subtest: potential and role-specific actual performance help scouting without bypassing present ability
+ok 254 - potential and role-specific actual performance help scouting without bypassing present ability
+  ---
+  duration_ms: 3169.226493
+  ...
+# Subtest: a youth player sees the real U19 stage and no predicted senior or international cups
+ok 255 - a youth player sees the real U19 stage and no predicted senior or international cups
+  ---
+  duration_ms: 348.20545
+  ...
+# Subtest: actual national appearances are deduplicated, age-scoped and retain the qualifying stage
+ok 256 - actual national appearances are deduplicated, age-scoped and retain the qualifying stage
+  ---
+  duration_ms: 383.113308
+  ...
+# Subtest: a stale called flag cannot fabricate participation for a new season or age group
+ok 257 - a stale called flag cannot fabricate participation for a new season or age group
+  ---
+  duration_ms: 452.276399
+  ...
+# Subtest: a verified current-season callup shows selection without inventing an appearance
+ok 258 - a verified current-season callup shows selection without inventing an appearance
+  ---
+  duration_ms: 540.02156
+  ...
+# Subtest: offseason transfers do not relabel the club competition just completed
+ok 259 - offseason transfers do not relabel the club competition just completed
+  ---
+  duration_ms: 885.346524
+  ...
+# Subtest: home projections preserve legacy totals, exclude other seasons and share the deduplicated national ledger
+ok 260 - home projections preserve legacy totals, exclude other seasons and share the deduplicated national ledger
+  ---
+  duration_ms: 2118.592585
+  ...
+# Subtest: combined club and national match lists follow actual dates instead of incomparable round numbers
+ok 261 - combined club and national match lists follow actual dates instead of incomparable round numbers
+  ---
+  duration_ms: 7.425531
+  ...
+# Subtest: a 22-year-old national ace with strong mental attributes is not blocked by lifetime reputation or age
+ok 262 - a 22-year-old national ace with strong mental attributes is not blocked by lifetime reputation or age
+  ---
+  duration_ms: 4001.103543
+  ...
+# Subtest: each of the four mental skills changes the leadership assessment independently
+ok 263 - each of the four mental skills changes the leadership assessment independently
+  ---
+  duration_ms: 3694.256581
+  ...
+# Subtest: a national debut, poor form and missing selection do not earn a captaincy by ability alone
+ok 264 - a national debut, poor form and missing selection do not earn a captaincy by ability alone
+  ---
+  duration_ms: 4405.526581
+  ...
+# Subtest: 31 goals and 23 assists fund meaningful lower-league development, without free growth from an unused OVR
+ok 265 - 31 goals and 23 assists fund meaningful lower-league development, without free growth from an unused OVR
+  ---
+  duration_ms: 1095.648489
+  ...
+# Subtest: career-long national team results exceed one-season limits while every score still validates
+ok 266 - career-long national team results exceed one-season limits while every score still validates
+  ---
+  duration_ms: 29380.374577
+  ...
+# Subtest: original v1 envelopes retain their checksum and all legacy fields through load, export and import
+ok 267 - original v1 envelopes retain their checksum and all legacy fields through load, export and import
+  ---
+  duration_ms: 108.329253
+  ...
+# Subtest: published v2 envelopes preserve their checksum and do not invent new improvement ledgers while loading
+ok 268 - published v2 envelopes preserve their checksum and do not invent new improvement ledgers while loading
+  ---
+  duration_ms: 3358.548999
+  ...
+# Subtest: contract snapshots reconcile renewals, transfers and known season-opening values without inventing previous terms
+ok 269 - contract snapshots reconcile renewals, transfers and known season-opening values without inventing previous terms
+  ---
+  duration_ms: 11158.262573
+  ...
+# Subtest: dated national windows reject malformed cursors, future periods and duplicate callups while keeping old processed keys
+ok 270 - dated national windows reject malformed cursors, future periods and duplicate callups while keeping old processed keys
+  ---
+  duration_ms: 3331.343963
+  ...
+# Subtest: legacy detail fields remain optional while malformed and future detailed records are rejected
+ok 271 - legacy detail fields remain optional while malformed and future detailed records are rejected
+  ---
+  duration_ms: 62.899159
+  ...
+# Subtest: v2 saves validate world membership, international scope, references and separate income ledgers
+ok 272 - v2 saves validate world membership, international scope, references and separate income ledgers
+  ---
+  duration_ms: 17179.097413
+  ...
+# Subtest: IndexedDB round trip preserves Korean names, match ledgers and selected training
+ok 273 - IndexedDB round trip preserves Korean names, match ledgers and selected training
+  ---
+  duration_ms: 56.819335
+  ...
+# Subtest: autosaves atomically retain a previous-good backup and identical saves do not replace it
+ok 274 - autosaves atomically retain a previous-good backup and identical saves do not replace it
+  ---
+  duration_ms: 241.495062
+  ...
+# Subtest: a damaged current slot can be recovered without displacing its previous-good backup
+ok 275 - a damaged current slot can be recovered without displacing its previous-good backup
+  ---
+  duration_ms: 150.036496
+  ...
+# Subtest: stale autosaves and equal-revision conflicting branches cannot overwrite a slot
+ok 276 - stale autosaves and equal-revision conflicting branches cannot overwrite a slot
+  ---
+  duration_ms: 105.213564
+  ...
+# Subtest: another tab changing a slot is detected even when a local branch has a higher revision
+ok 277 - another tab changing a slot is detected even when a local branch has a higher revision
+  ---
+  duration_ms: 93.555335
+  ...
+# Subtest: JSON import validates its checksum and creates a separate slot without changing its simulation seed
+ok 278 - JSON import validates its checksum and creates a separate slot without changing its simulation seed
+  ---
+  duration_ms: 184.973556
+  ...
+# Subtest: edited, truncated, future-version and prototype-poisoned save files are rejected
+ok 279 - edited, truncated, future-version and prototype-poisoned save files are rejected
+  ---
+  duration_ms: 80.018424
+  ...
+# Subtest: damaged statistics, league tables and shot-to-goal references are rejected before writing
+ok 280 - damaged statistics, league tables and shot-to-goal references are rejected before writing
+  ---
+  duration_ms: 143.618733
+  ...
+# Subtest: the first editable command upgrades legacy systems without rewriting old match metrics or income
+ok 281 - the first editable command upgrades legacy systems without rewriting old match metrics or income
+  ---
+  duration_ms: 6297.180595
+  ...
+# Subtest: a continued v1 career retains old match coverage and saves new detailed matches beside it
+ok 282 - a continued v1 career retains old match coverage and saves new detailed matches beside it
+  ---
+  duration_ms: 29381.089213
+  ...
+# Subtest: only explicitly named club reserve snapshots may lack a persistent world roster entry
+ok 283 - only explicitly named club reserve snapshots may lack a persistent world roster entry
+  ---
+  duration_ms: 3364.594454
+  ...
+# Subtest: historical award snapshots survive retirement of the ranked NPC without relaxing live references
+ok 284 - historical award snapshots survive retirement of the ranked NPC without relaxing live references
+  ---
+  duration_ms: 4142.997233
+  ...
+# Subtest: actual international goalkeeper matches and their attempt denominators survive export/import
+ok 285 - actual international goalkeeper matches and their attempt denominators survive export/import
+  ---
+  duration_ms: 37553.954943
+  ...
+# Subtest: deleting a slot also deletes its backup and blocks a delayed autosave from reviving it
+ok 286 - deleting a slot also deletes its backup and blocks a delayed autosave from reviving it
+  ---
+  duration_ms: 60.250281
+  ...
+# Subtest: FIFA personal awards compare the whole played finals field, excluding club and qualifying goals
+ok 287 - FIFA personal awards compare the whole played finals field, excluding club and qualifying goals
+  ---
+  duration_ms: 57.320399
+  ...
+# Subtest: Golden Boot tie-breaks use assists and then actual minutes, preserving exact ties
+ok 288 - Golden Boot tie-breaks use assists and then actual minutes, preserving exact ties
+  ---
+  duration_ms: 0.865486
+  ...
+# Subtest: unfinished finals and qualifier-only appearances create no personal tournament awards
+ok 289 - unfinished finals and qualifier-only appearances create no personal tournament awards
+  ---
+  duration_ms: 0.847711
+  ...
+# Subtest: Golden Glove compares only actual goalkeeper performance and U20 uses its own real award names
+ok 290 - Golden Glove compares only actual goalkeeper performance and U20 uses its own real award names
+  ---
+  duration_ms: 0.637069
+  ...
+# Subtest: archived/current duplicate fixtures are counted once and old completed tournaments are not awarded again
+ok 291 - archived/current duplicate fixtures are counted once and old completed tournaments are not awarded again
+  ---
+  duration_ms: 0.761544
+  ...
+# Subtest: zero selected attributes forbid all automatic gains despite youth, talent and strong match actions
+ok 292 - zero selected attributes forbid all automatic gains despite youth, talent and strong match actions
+  ---
+  duration_ms: 2503.908217
+  ...
+# Subtest: only checked field/GK attributes can gain training, experience or maturation
+ok 293 - only checked field/GK attributes can gain training, experience or maturation
+  ---
+  duration_ms: 3713.341251
+  ...
+# Subtest: an empty offseason plan is valid and an unconfirmed plan starts the next season without carrying old selections
+ok 294 - an empty offseason plan is valid and an unconfirmed plan starts the next season without carrying old selections
+  ---
+  duration_ms: 7071.00179
+  ...
+# Subtest: whole-player locks toggle atomically, retain partial locks before commands, and persist through saves
+ok 295 - whole-player locks toggle atomically, retain partial locks before commands, and persist through saves
+  ---
+  duration_ms: 9595.198773
+  ...
+# Subtest: manual aging overrides locks without unlocking or enabling automatic recovery and remains in the ledger
+ok 296 - manual aging overrides locks without unlocking or enabling automatic recovery and remains in the ledger
+  ---
+  duration_ms: 8386.741432
+  ...
+# Subtest: manual aging floors a locked ability at zero and unlocking never restores discarded growth
+ok 297 - manual aging floors a locked ability at zero and unlocking never restores discarded growth
+  ---
+  duration_ms: 1243.992844
+  ...
+# Subtest: skill mastery above 100 accumulates tiny gains; no automatic injury or age loss
+ok 298 - skill mastery above 100 accumulates tiny gains; no automatic injury or age loss
+  ---
+  duration_ms: 1485.134639
+  ...
+# Subtest: FA release removes squad membership and wages, advances halves, signs instantly and survives JSON
+ok 299 - FA release removes squad membership and wages, advances halves, signs instantly and survives JSON
+  ---
+  duration_ms: 108313.392146
+  ...
+# Subtest: FA entire seasons preserve world simulation, year and half-year retirement records
+ok 300 - FA entire seasons preserve world simulation, year and half-year retirement records
+  ---
+  duration_ms: 75767.611126
+  ...
+# Subtest: manual injury 5 is queued, actually excludes games and retains attributes
+ok 301 - manual injury 5 is queued, actually excludes games and retains attributes
+  ---
+  duration_ms: 34383.439521
+  ...
+# Subtest: manual injury 10 is queued, actually excludes games and retains attributes
+ok 302 - manual injury 10 is queued, actually excludes games and retains attributes
+  ---
+  duration_ms: 25621.215607
+  ...
+# Subtest: manual injury 20 is queued, actually excludes games and retains attributes
+ok 303 - manual injury 20 is queued, actually excludes games and retains attributes
+  ---
+  duration_ms: 25088.265278
+  ...
+# Subtest: manual injury season is queued, actually excludes games and retains attributes
+ok 304 - manual injury season is queued, actually excludes games and retains attributes
+  ---
+  duration_ms: 24705.108589
+  ...
+# Subtest: wage offers for a young first-team player are not uniformly forced 10 percent cuts
+ok 305 - wage offers for a young first-team player are not uniformly forced 10 percent cuts
+  ---
+  duration_ms: 397.692092
+  ...
+# Subtest: expiry releases automatically after the final paid season and next year starts without mandatory renewal
+ok 306 - expiry releases automatically after the final paid season and next year starts without mandatory renewal
+  ---
+  duration_ms: 28029.446449
+  ...
+# Subtest: release after playing preserves prior match records and the former club final position
+ok 307 - release after playing preserves prior match records and the former club final position
+  ---
+  duration_ms: 27051.781001
+  ...
+# Subtest: a midseason FA move keeps league scoring, prizes and shoe coefficients in their actual leagues
+ok 308 - a midseason FA move keeps league scoring, prizes and shoe coefficients in their actual leagues
+  ---
+  duration_ms: 435.198594
+  ...
+# Subtest: the persistent world contains every retained club, independently generated fixtures and real squad strength
+ok 309 - the persistent world contains every retained club, independently generated fixtures and real squad strength
+  ---
+  duration_ms: 2287.338066
+  ...
+# Subtest: one world round reconciles actual scores and both teams individual statistics and is idempotent
+ok 310 - one world round reconciles actual scores and both teams individual statistics and is idempotent
+  ---
+  duration_ms: 1799.078477
+  ...
+# Subtest: promotion changes real membership, next opponents and fixtures while retaining every league capacity
+ok 311 - promotion changes real membership, next opponents and fixtures while retaining every league capacity
+  ---
+  duration_ms: 2591.629012
+  ...
+# Subtest: closed US leagues and unverified Korea K2/K3 and Dutch 2/3 connections never swap members
+ok 312 - closed US leagues and unverified Korea K2/K3 and Dutch 2/3 connections never swap members
+  ---
+  duration_ms: 3280.872832
+  ...
+# Subtest: squad age, retirements and finances explain next-season power without an annual random reset
+ok 313 - squad age, retirements and finances explain next-season power without an annual random reset
+  ---
+  duration_ms: 2796.431458
+  ...
+# Subtest: a legacy season imports its known personal match only and does not fabricate NPC history
+ok 314 - a legacy season imports its known personal match only and does not fabricate NPC history
+  ---
+  duration_ms: 3624.799457
+  ...
+# Subtest: youth fixtures remain separate from the senior table, player statistics and promotion results
+ok 315 - youth fixtures remain separate from the senior table, player statistics and promotion results
+  ---
+  duration_ms: 3892.241493
+  ...
+# Subtest: academy squads retain eligible young players and visibly replace only missing positional depth
+ok 316 - academy squads retain eligible young players and visibly replace only missing positional depth
+  ---
+  duration_ms: 1492.448146
+  ...
+1..316
+# tests 316
+# suites 0
+# pass 315
+# fail 0
+# cancelled 0
+# skipped 1
+# todo 0
+# duration_ms 638937.834823

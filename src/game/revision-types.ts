@@ -8,6 +8,8 @@ export interface MatchOptions {
   scope?: 'club'|'national'; competitionId?: string; date?: string; userParticipates?: boolean; detailed?: boolean;
   forceSelection?: { from: number; to: number; started: boolean };
   neutralVenue?:boolean;
+  /** False only for world/cup NPC results that are discarded after aggregation. Career and national sources always override it. */
+  recordActionEvents?:boolean;
 }
 export interface WorldPlayer { id: string; clubId: string; name: string; position: Position; age: number; ovr: number; potential: number; injuryWeeks: number; nationality: string; leadership: number; joinedYear?:number; transferFee?:number; leagueDebutYear?:number; }
 export interface ClubStarContribution {playerId:string;name:string;position:Position;ovr:number;apps:number;minutes:number;rating:number;influence:number;retained:boolean;}

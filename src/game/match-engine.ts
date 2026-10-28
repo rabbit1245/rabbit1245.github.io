@@ -1,7 +1,8 @@
 import {playingAbility,leadershipAbility} from './attributes';
 import {personalityEdge,personality} from './personality';
+import {phasePasses,resolvePressing,resolveAirClaims,headerProbability,headerDelivery,aerialQuality,type ActionEmitter} from './match-actions';
 import { CLUBS, ROSTERS } from './data';
-import { clamp, emptyStats, integer, round, seededRandom } from './math';
+import { clamp, emptyStats, hashSeed, integer, round, seededRandom } from './math';
 import type { MatchOptions, MatchParticipant, MatchPerformance } from './revision-types';
 import type { AttributeKey, Career, Club, Fixture, MatchEvent, MatchRecord, PlayerStats, Position } from './types';
 
@@ -94,7 +95,7 @@ function makeTeam(career:Career,club:Club,provided:MatchParticipant[]|undefined,
   return {club,actors,power,leadership:0};
 }
 
-function sampleActions(actor:Actor,opponentPower:number,rng:()=>number,emit:(type:MatchEvent['type'],actor:Actor,minute:number,detail:string,relatedId?:string)=>string,detailed:boolean){
+function sampleActions(actor:Actor,opponentPower:number,rng:()=>number,emit:ActionEmitter,detailed:boolean,team:Team,opposition:Team,seed:string,recordActions:boolean){
   const s=actor.stats, a=(key:AttributeKey)=>ability(actor,key), f=duration(actor);
   const count=(mean:number)=>roundedCount(mean*f,rng);
   const success=(attempts:number,probability:number)=>Math.min(attempts,roundedCount(attempts*clamp(probability,.03,.98),rng));
@@ -103,18 +104,21 @@ function sampleActions(actor:Actor,opponentPower:number,rng:()=>number,emit:(typ
   const lateEnergy=Math.min(1,.48+a('stamina')*.0052);
   const endurance=1-(1-lateEnergy)*lateMinutes/Math.max(1,actor.minutes);
   s.apps=actor.minutes>0?1:0;s.starts=actor.started?1:0;s.minutes=actor.minutes;s.detailedApps=1;
+  s.actionApps=s.apps;s.actionMinutes=s.minutes;
+  let loggedPasses=0,loggedCompleted=0;
   if(actor.position==='GK'){
     s.buildUpPasses=count(PASSES.GK*styleFactor(actor,'pass'));
     s.buildUpCompleted=success(s.buildUpPasses,.24+a('gkDistribution')*.005+a('decisions')*.002-resistance);
     s.longKicks=count(7.5);s.longKicksCompleted=success(s.longKicks,.12+a('gkDistribution')*.0055+a('decisions')*.0012-resistance);
     s.passes=s.buildUpPasses+s.longKicks;s.passesCompleted=s.buildUpCompleted+s.longKicksCompleted;
-    s.crossesFaced=count(5.5);s.crossesCaught=success(s.crossesFaced,.08+a('gkAerialCommand')*.006+a('gkHandling')*.002-resistance);
     s.sweepingAttempts=count(2.6*styleFactor(actor,'sweep'));
     s.sweepingSuccesses=success(s.sweepingAttempts,.08+a('decisions')*.0045+a('gkPositioning')*.0032-resistance);
     s.handlingAttempts=count(3.8);s.handlingSuccesses=success(s.handlingAttempts,.15+a('gkHandling')*.007+a('concentration')*.001-resistance);
   }else{
     s.passes=count(PASSES[actor.position]*styleFactor(actor,'pass')*(.66+a('teamwork')*.005)*endurance);
-    s.passesCompleted=success(s.passes,(.33+a('passing')*.0045+a('ballControl')*.0012+a('decisions')*.0013+a('concentration')*.0009-resistance)*endurance);
+    const passProbability=clamp((.33+a('passing')*.0045+a('ballControl')*.0012+a('decisions')*.0013+a('concentration')*.0009-resistance)*endurance,.03,.98);
+    const phases=phasePasses(actor,team,opposition,seed,emit,detailed,styleFactor(actor,'pass'),endurance,passProbability,recordActions);
+    s.passesCompleted=phases.completed+success(s.passes-phases.attempts,passProbability);loggedPasses=phases.logged;loggedCompleted=phases.loggedCompleted;
     const wide=['LW','RW','LM','RM','LB','RB','LWB','RWB'].includes(actor.position);
     actor.creation=(.15+a('vision')*.021+a('passing')*.007+a('crossing')*(wide?.019:.008)+a('decisions')*.006+a('setPieces')*.006+a('teamwork')*.005)*CREATION_ROLE[actor.position]*styleFactor(actor,'pass')*endurance;
     s.dribbleAttempts=count((FORWARD.has(actor.position)?5.2:MIDFIELD.has(actor.position)?3.4:1.9)*styleFactor(actor,'dribble')*(.55+a('speed')*.007)*endurance);
@@ -131,7 +135,7 @@ function sampleActions(actor:Actor,opponentPower:number,rng:()=>number,emit:(typ
   s.lateSuccesses=success(s.lateActions,(.35+a('concentration')*.0025)*lateEnergy);
   if(detailed&&actor.user){
     const rows:[MatchEvent['type'],number,number,string][]=[
-      ['pass',s.passes,s.passesCompleted,'패스'],
+      ['pass',s.passes-loggedPasses,s.passesCompleted-loggedCompleted,'패스'],
       ['dribble',s.dribbleAttempts??0,s.dribblesCompleted??0,'드리블'],['tackle',s.tackleAttempts??0,s.tackles,'태클'],
       ['interception',s.interceptions,s.interceptions,'패스 차단'],['aerial',s.aerialAttempts??0,s.aerialWon??0,'공중볼 경합'],
       ['handling',s.handlingAttempts??0,s.handlingSuccesses??0,'공 처리'],['sweep',s.sweepingAttempts??0,s.sweepingSuccesses??0,'뒷공간 처리'],
@@ -203,6 +207,7 @@ export function simulateMatch(career:Career,fixture:Fixture,options:MatchOptions
   const home=options.home??CLUB_INDEX.get(fixture.homeId),away=options.away??CLUB_INDEX.get(fixture.awayId);
   if(!home||!away)throw new Error('경기를 치를 두 팀의 데이터가 필요합니다.');
   const seed=`${career.seed}:match-v2:${career.season.year}:${fixture.id}`;
+  const actionSeed=hashSeed(seed).toString(36);
   const stage=(fixture as Fixture&{stage?:string}).stage;
   const bigMatch=!!stage&&/^(결승|준결승|8강|16강|final|semifinal|quarterfinal|round16)$/.test(stage)||/(?:^|[|:])(final|semifinal|quarterfinal|round16)(?:[|:]|$)/.test(fixture.id)||home.power>=80&&away.power>=80&&Math.abs(home.power-away.power)<=8;
   const rng=seededRandom(seed),selectRng=seededRandom(`${seed}:selection`);
@@ -233,13 +238,14 @@ export function simulateMatch(career:Career,fixture:Fixture,options:MatchOptions
   assignCaptain(career,teams[1],userTeam,options.scope??'club',options.awayPlayers);
   const events:MatchEvent[]=[];
   let eventIndex=0;
-  const emit=(type:MatchEvent['type'],actor:Actor,minute:number,detail:string,relatedId?:string)=>{
-    const id=`${fixture.id}:e${eventIndex++}`;events.push({id,minute,type,teamId:actor.teamId,playerName:actor.name,playerId:actor.id,detail,...(relatedId?{relatedId}:{})});return id;
+  const emit:ActionEmitter=(type,actor,minute,detail,relatedId,action)=>{
+    const id=`${fixture.id}:e${eventIndex++}`;events.push({id,minute,type,teamId:actor.teamId??actor.clubId,playerName:actor.name,playerId:actor.id,detail,...(relatedId?{relatedId}:{}),...(action?{action}:{})});return id;
   };
   const detailed=options.detailed??!!userTeam;
+  const recordActions=options.recordActionEvents!==false||!!userTeam||options.scope==='national';
   for(let side=0;side<2;side++)for(const actor of teams[side].actors){
     // Action RNG is isolated from log verbosity and other players' action counts.
-    sampleActions(actor,teams[1-side].power,seededRandom(`${seed}:${actor.id}:actions`),emit,detailed);
+    sampleActions(actor,teams[1-side].power,seededRandom(`${seed}:${actor.id}:actions`),emit,detailed,teams[side],teams[1-side],actionSeed,recordActions);
     if(!actor.started&&actor.minutes>0)emit('substitution',actor,actor.from,'교체 투입');
   }
   const userActor=teams.flatMap(t=>t.actors).find(actor=>actor.user);
@@ -247,10 +253,11 @@ export function simulateMatch(career:Career,fixture:Fixture,options:MatchOptions
   if(userActor&&injuryMinute)emit('injury',userActor,injuryMinute,`${injuryWeeks}주 치료가 필요한 부상`);
   const fair=personality(career).fairPlay,discipline=(10-fair)/5*(fair<=2?2:1);
   if(userActor&&!redMinute&&selectRng()<.12*discipline*duration(userActor)){userActor.stats.yellowCards=1;emit('yellow',userActor,integer(selectRng,userActor.from+1,userActor.to),'경고');}
+  resolvePressing(teams,actionSeed,emit,detailed,recordActions);resolveAirClaims(teams,actionSeed,emit,recordActions);
   // Successful build-up and defensive actions change the chances that reach either goal.
   // These totals already reflect each actor's actual minutes, including substitutions.
-  const buildUp=teams.map(t=>t.actors.reduce((n,a)=>n+a.stats.passesCompleted*.004+(a.stats.dribblesCompleted??0)*.09+(a.stats.lateSuccesses??0)*.006,0));
-  const disruption=teams.map(t=>t.actors.reduce((n,a)=>n+a.stats.tackles*.12+a.stats.interceptions*.16+(a.stats.aerialWon??0)*.04+(a.stats.crossesCaught??0)*.12+(a.stats.sweepingSuccesses??0)*.12,0));
+  const buildUp=teams.map(t=>t.actors.reduce((n,a)=>n+(a.stats.passesCompleted-(a.stats.progressivePasses??0))*.004+(a.stats.progressivePasses??0)*.012+(a.stats.dribblesCompleted??0)*.09+(a.stats.lateSuccesses??0)*.006,0));
+  const disruption=teams.map(t=>t.actors.reduce((n,a)=>n+a.stats.tackles*.12+a.stats.interceptions*.16+(a.stats.pressingWins??0)*.14+(a.stats.aerialWon??0)*.04+(a.stats.crossesCaught??0)*.12+(a.stats.punches??0)*.12+(a.stats.sweepingSuccesses??0)*.12,0));
   const tactics=teams.map((team,index)=>tacticalImpact(team,teams[1-index].power,career));
   const scores=[0,0];
   for(let side=0;side<2;side++){
@@ -267,32 +274,38 @@ export function simulateMatch(career:Career,fixture:Fixture,options:MatchOptions
       const opportunities=SHOTS[shooter.position]*minutes*styleFactor(shooter,'shot')*powerFactor*actionFactor*tactics[side].supply*tactics[1-side].coverage*(.43+a('positioning')*.006+a('speed')*.002+a('decisions')*.001)*(1.22-organization*.0048)*(1+clutch*.03);
       const shotRng=seededRandom(`${seed}:${shooter.id}:shots`);
       const creatorRng=seededRandom(`${seed}:${shooter.id}:creators`);
+      const headerRng=seededRandom(`${actionSeed}:${shooter.id}:headers`),headerChance=headerProbability(shooter,team);
       const count=roundedCount(opportunities*(.65+shotRng()*.7),shotRng);
       for(let index=0;index<count;index++){
         const minute=integer(shotRng,shooter.from+1,Math.max(shooter.from+1,shooter.to));
         const keeper=keeperAt(minute);if(!keeper)continue;
         const k=(key:AttributeKey)=>ability(keeper,key);
         const typeRoll=shotRng();
-        const shotType=typeRoll<.02?'penalty':typeRoll<.11?'setPiece':typeRoll<.30?'header':typeRoll<.48?'oneOnOne':'open';
-        const shotId=emit('shot',shooter,minute,shotType==='penalty'?'페널티킥':shotType==='setPiece'?'프리킥 슈팅':shotType==='header'?'헤더 슈팅':shotType==='oneOnOne'?'일대일 슈팅':'슈팅');
+        const shotType=typeRoll<.02?'penalty':typeRoll<.11?'setPiece':typeRoll<.11+headerChance?'header':typeRoll<.29+headerChance?'oneOnOne':'open';
+        const header=shotType==='header'?headerDelivery(team,opposition,shooter,keeper,minute,headerRng,emit,recordActions):undefined;
+        if(shotType==='header'&&!header?.won)continue;
+        const shotId=emit('shot',shooter,minute,shotType==='penalty'?'페널티킥':shotType==='setPiece'?'프리킥 슈팅':shotType==='header'?'헤더 슈팅':shotType==='oneOnOne'?'일대일 슈팅':'슈팅',recordActions?header?.crossId:undefined,recordActions&&header?{kind:'headerShot',phase:header.phase,duelId:header.duelId}:undefined);
         shooter.stats.shots++;
         // A key pass is an actual final pass before this shot, never an independent estimated count.
         const creatorGate=creatorRng(),creatorPick=creatorRng();
         let creator:Actor|undefined;
         const supplied=shotType==='header'?.96:shotType==='oneOnOne'?.82:.90;
-        if(shotType!=='penalty'&&shotType!=='setPiece'&&creatorGate<supplied){
+        if(header){
+          // A retained cross already identifies the actual last supplier; do not pick another assist source.
+          if(header.crosser.stats.passesCompleted>(header.crosser.stats.keyPasses??0))creator=header.crosser;
+        }else if(shotType!=='penalty'&&shotType!=='setPiece'&&creatorGate<supplied){
           const creators=team.actors.filter(actor=>actor.id!==shooter.id&&actor.from<minute&&actor.to>=minute&&actor.stats.passesCompleted>(actor.stats.keyPasses??0));
           const weights=creators.map(actor=>actor.position==='GK'?.12:actor.creation);
           let pick=creatorPick*weights.reduce((total,weight)=>total+weight,0);
           for(let i=0;i<creators.length;i++){pick-=weights[i];if(pick<=0){creator=creators[i];break;}}
-          if(creator){creator.stats.keyPasses=(creator.stats.keyPasses??0)+1;if(detailed)emit('keyPass',creator,minute,'동료의 슈팅으로 연결한 패스',shotId);}
         }
+        if(creator){creator.stats.keyPasses=(creator.stats.keyPasses??0)+1;if(detailed)emit('keyPass',creator,minute,'동료의 슈팅으로 연결한 패스',shotId);}
         const late=minute>60?Math.min(1,.62+a('stamina')*.0038):1;
-        const aim=clamp((.12+a('shooting')*.0042+a('composure')*.0015+a('setPieces')*(shotType==='setPiece'||shotType==='penalty'?.003:.00045)+(shotType==='header'?a('heading')*.0033:0))*late*(1+clutch*.018),.07,.96);
+        const aim=clamp((shotType==='header'?.12+a('heading')*.0044+a('jumping')*.0016+a('positioning')*.0018+a('strength')*.001+a('composure')*.0011:.12+a('shooting')*.0042+a('composure')*.0015+a('setPieces')*(shotType==='setPiece'||shotType==='penalty'?.003:.00045))*late*(1+clutch*.018),.07,.96);
         const onTarget=shotRng()<(shotType==='penalty'?Math.max(.78,aim):aim);
         if(!onTarget)continue;
         shooter.stats.shotsOnTarget++;keeper.stats.shotsFaced=(keeper.stats.shotsFaced??0)+1;
-        let saveChance=.50+k('gkShotStopping')*.003+k('gkReflexes')*.0015+k('gkPositioning')*.001+k('concentration')*.0007+k('gkHandling')*.0004-a('shooting')*.001-a('composure')*.001;
+        let saveChance=.50+k('gkShotStopping')*.003+k('gkReflexes')*.0015+k('gkPositioning')*.001+k('concentration')*.0007+k('gkHandling')*.0004-(shotType==='header'?aerialQuality(shooter):a('shooting'))*.001-a('composure')*.001;
         if(shotType==='oneOnOne'){keeper.stats.oneOnOneAttempts=(keeper.stats.oneOnOneAttempts??0)+1;saveChance=.10+k('gkOneOnOnes')*.0038+k('gkReflexes')*.0012+k('gkPositioning')*.001+k('decisions')*.001-a('composure')*.0016;}
         if(shotType==='penalty'){keeper.stats.penaltiesFaced=(keeper.stats.penaltiesFaced??0)+1;saveChance=.04+k('gkOneOnOnes')*.0023+k('gkReflexes')*.0008+k('gkPositioning')*.0007-a('setPieces')*.0007;}
         if(keeper.user&&bigMatch)saveChance+=personalityEdge(career,'clutch')*.012;
@@ -304,7 +317,8 @@ export function simulateMatch(career:Career,fixture:Fixture,options:MatchOptions
           emit('save',keeper,minute,shotType==='penalty'?'페널티킥 선방':shotType==='oneOnOne'?'일대일 선방':'선방',shotId);
         }else{
           shooter.stats.goals++;scores[side]++;keeper.stats.goalsConceded++;
-          const goalId=emit('goal',shooter,minute,'득점',shotId);
+          if(shotType==='header')shooter.stats.headerGoals=(shooter.stats.headerGoals??0)+1;
+          const goalId=emit('goal',shooter,minute,shotType==='header'?'헤더 득점':'득점',shotId);
           if(creator){creator.stats.assists++;emit('assist',creator,minute,'득점으로 연결한 마지막 패스',goalId);}
         }
       }
@@ -334,7 +348,7 @@ export function simulateMatch(career:Career,fixture:Fixture,options:MatchOptions
     id:`match:${career.season.year}:${fixture.id}`,fixtureId:fixture.id,round:fixture.round,seasonYear:career.season.year,
     homeId:home.id,awayId:away.id,homeGoals:scores[0],awayGoals:scores[1],homeName:home.name,awayName:away.name,
     events,playerClubId:userTeam??p.clubId,playerPlayed:minutes>0,playerStarted:userActor?.started??false,playerMinutes:minutes,playerRating:rating,playerStats,seed,
-    metricsVersion:2,scope:options.scope??'club',competitionId:options.competitionId??home.leagueId,date:options.date,performers,momPlayerId:mom?.id,
+    metricsVersion:2,...(recordActions?{actionVersion:1 as const}:{}),scope:options.scope??'club',competitionId:options.competitionId??home.leagueId,date:options.date,performers,momPlayerId:mom?.id,
     effects:{fitnessAfter:round(clamp(p.fitness-minutes/90*(25-stamina*.13),15,100)),moraleAfter:round(clamp(p.morale+(minutes?(userScore>opponentScore?2:userScore<opponentScore?-2:0)+(rating-6.5)*1.4:-.4),5,100)),formAfter:round(clamp(minutes?p.form*.84+rating*1.6:p.form*.98+1,20,100)),injuryWeeksAfter:injuryWeeks||p.injuryWeeks,trustAfter:round(clamp(career.managerTrust+(minutes?(rating-6.35)*1.2:-.25),0,100))},
   };
 }

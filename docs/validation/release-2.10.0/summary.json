@@ -1,0 +1,25 @@
+{
+  "version": "2.10.0",
+  "core": {
+    "tests": 316,
+    "pass": 315,
+    "fail": 0,
+    "skipped": 1
+  },
+  "newActionTests": 12,
+  "layoutCases": 240,
+  "actualWholeWorldSeasons": 4,
+  "legacyNextHalfSeason": true,
+  "longLegacy": {
+    "pastSeasons": 12,
+    "newLeagueRounds": 2,
+    "pastRecordsUnchanged": true
+  },
+  "playableFlowChecks": 11,
+  "recordBrowserFixtures": 6,
+  "pageErrors": 0,
+  "externalAssets": 0,
+  "newMetricEventAndExportReconciliation": true,
+  "protectedSystemFilesUnchanged": 9,
+  "publication": "pending"
+}

@@ -1,4 +1,5 @@
 import {validateAchievementEvidence} from './achievement-evidence';
+import {validateActionLedger} from './action-metrics';
 import {internationalRoster} from './international-clubs';
 import {validatePlaySkills} from './play-skill-validation';
 import {canonicalBytes} from './canonical-bytes';
@@ -7,7 +8,7 @@ import {decodeStored,isBlobCareer,prepareStored,metadataFor,journalEntry,storedH
 import {validateCompetitionData} from './competition-validation';
 import { validateCareerExtensions } from './extension-validation';
 import { CLUBS, LEAGUES, INTERNATIONAL_CLUBS, INTERNATIONAL_LEAGUES } from './data';
-import { CORE_STATS, DETAIL_STATS } from './math';
+import { CORE_STATS, DETAIL_STATS, ACTION_STATS, ACTION_COUNTERS } from './math';
 import type { Career, MatchRecord, PlayerStats, SaveEnvelope, SaveSlot } from './types';
 
 const DATABASE = 'kball-careers';
@@ -20,7 +21,7 @@ const fieldAttributes = ['strength', 'stamina', 'speed', 'agility', 'jumping', '
 const keeperAttributes = ['gkShotStopping', 'gkReflexes', 'gkHandling', 'gkAerialCommand', 'gkOneOnOnes', 'gkPositioning', 'gkDistribution', 'decisions', 'concentration', 'gkDefensiveOrganization'];
 const allAttributes = new Set([...fieldAttributes, ...keeperAttributes]);
 const statKeys = CORE_STATS;
-const eventTypes = new Set(['shot', 'goal', 'save', 'assist', 'yellow', 'red', 'injury', 'substitution', 'pass', 'keyPass', 'dribble', 'tackle', 'interception', 'aerial', 'handling', 'sweep', 'longKick']);
+const eventTypes = new Set(['shot', 'goal', 'save', 'assist', 'yellow', 'red', 'injury', 'substitution', 'pass', 'keyPass', 'dribble', 'tackle', 'interception', 'aerial', 'handling', 'sweep', 'longKick','pressure','recovery','cross','catch','punch','setPiece']);
 const poisonedKeys = new Set(['__proto__', 'prototype', 'constructor']);
 
 interface SlotMetadata extends SaveSlot { hash: string; deleted?: boolean }
@@ -194,10 +195,19 @@ function matchingTerms(a: Record<string, unknown>, b: Record<string, unknown>): 
   return ['clubId', 'wage', 'years', 'signedYear', 'expiresYear', 'role', 'signedDate', 'expiresDate'].every(key => a[key] === b[key]);
 }
 
-function stats(value: unknown, label: string, detailed = false): PlayerStats {
+function stats(value: unknown, label: string, detailed = false, actions=false): PlayerStats {
   const values = object(value, label);
   for (const key of statKeys) number(values[key], `${label}.${key}`, 0, 100_000_000, key !== 'ratingSum');
   for (const key of DETAIL_STATS) if (detailed || values[key] !== undefined) number(values[key], `${label}.${key}`, 0, 100_000_000, true);
+  for(const key of ACTION_STATS)if(actions||values[key]!==undefined)number(values[key],`${label}.${key}`,0,100_000_000,true);
+  if(actions||Number(values.actionApps)>0){
+    for(const key of ACTION_STATS)number(values[key],`${label}.${key}`,0,100_000_000,true);
+    assert(Number(values.actionApps)<=Number(values.apps)&&Number(values.actionMinutes)<=Number(values.minutes),`${label}의 신규 집계 경기·시간이 전체를 초과합니다.`);
+    assert(Number(values.punches)+Number(values.crossesCaught??0)<=Number(values.crossesFaced??0),`${label}의 포구·펀칭이 크로스 수보다 많습니다.`);
+  }
+  assert(Number(values.headerGoals??0)<=Number(values.goals),`${label}의 헤더 득점이 전체 득점보다 많습니다.`);
+  assert(Number(values.progressivePasses??0)<=Number(values.passesCompleted),`${label}의 전진 패스 성공이 전체 패스 성공보다 많습니다.`);
+  if(ACTION_COUNTERS.some(k=>Number(values[k])>0))assert(Number(values.actionApps)>0,`${label}의 신규 행동 집계 범위가 없습니다.`);
   assert(Number(values.starts) <= Number(values.apps), `${label}의 선발 수가 출전 수보다 많습니다.`);
   assert(Number(values.minutes) <= Number(values.apps) * 130, `${label}의 출전 시간이 올바르지 않습니다.`);
   assert(Number(values.goals) <= Number(values.shotsOnTarget) && Number(values.shotsOnTarget) <= Number(values.shots), `${label}의 득점·슈팅 합계가 일치하지 않습니다.`);
@@ -245,6 +255,7 @@ function matches(value: unknown, label: string, playerId: string, national = fal
     number(match.round, `${prefix}.round`, 1, 150, true);
     number(match.seasonYear, `${prefix}.seasonYear`, 1900, 2500, true);
     if (match.metricsVersion !== undefined) assert(match.metricsVersion === 2, `${prefix}의 경기 지표 버전을 지원하지 않습니다.`);
+    if(match.actionVersion!==undefined)assert(match.actionVersion===1,`${prefix}의 신규 행동 버전을 지원하지 않습니다.`);
     if (match.scope !== undefined) assert(match.scope === (national ? 'national' : 'club'), `${prefix}의 경기 범위가 올바르지 않습니다.`);
     if (national) assert(match.scope === 'national', `${prefix}의 국가대표 경기 범위가 없습니다.`);
     if (national || match.competitionId !== undefined) text(match.competitionId, `${prefix}.competitionId`);
@@ -262,7 +273,8 @@ function matches(value: unknown, label: string, playerId: string, national = fal
     assert(!started || played, `${prefix}의 선발·출장 정보가 일치하지 않습니다.`);
     const minutes = number(match.playerMinutes, `${prefix}.playerMinutes`, 0, 130, true);
     const rating = number(match.playerRating, `${prefix}.playerRating`, 0, 10);
-    const personal = stats(match.playerStats, `${prefix}.playerStats`, match.metricsVersion === 2);
+    const personal = stats(match.playerStats, `${prefix}.playerStats`, match.metricsVersion === 2,match.actionVersion===1);
+    if((personal.actionApps??0)>0)assert(match.actionVersion===1,`${prefix}의 신규 지표 원장 버전이 없습니다.`);
     assert(personal.apps === Number(played) && personal.starts === Number(started) && personal.minutes === minutes, `${prefix}의 출장 집계가 일치하지 않습니다.`);
     assert(personal.ratingCount === Number(played) && Math.abs(personal.ratingSum - rating) < 0.000001, `${prefix}의 평점 집계가 일치하지 않습니다.`);
     assert(played || (minutes === 0 && rating === 0), `${prefix}의 미출전 기록이 올바르지 않습니다.`);
@@ -324,12 +336,12 @@ function matches(value: unknown, label: string, playerId: string, national = fal
         if (row.attributes !== undefined) attributes(row.attributes, `${prefix}.performer.attributes`);
         if (row.captain !== undefined) bool(row.captain, `${prefix}.performer.captain`);
         if (row.teamId !== undefined) assert(row.teamId === home || row.teamId === away, `${prefix}의 경기 선수 출전 팀이 올바르지 않습니다.`);
-        const performerStats = stats(row.stats, `${prefix}.performer.stats`, match.metricsVersion === 2);
+        const performerStats = stats(row.stats, `${prefix}.performer.stats`, match.metricsVersion === 2,match.actionVersion===1);
         const performerMinutes = number(row.minutes, `${prefix}.performer.minutes`, 0, 130, true);
         const performerRating = number(row.rating, `${prefix}.performer.rating`, 0, 10);
         const performerStarted = bool(row.started, `${prefix}.performer.started`);
         assert(performerStats.minutes === performerMinutes && performerStats.starts === Number(performerStarted) && performerStats.ratingSum === performerRating, `${prefix}의 경기 선수 집계가 일치하지 않습니다.`);
-        if (row.id === playerId) for (const key of [...statKeys, ...DETAIL_STATS]) assert((performerStats[key] ?? 0) === (personal[key] ?? 0), `${prefix}의 개인 기록과 경기 선수 기록이 다릅니다.`);
+        if (row.id === playerId) for (const key of [...statKeys, ...DETAIL_STATS,...ACTION_STATS]) assert((performerStats[key] ?? 0) === (personal[key] ?? 0), `${prefix}의 개인 기록과 경기 선수 기록이 다릅니다.`);
       }
       if (match.momPlayerId !== undefined) {
         assert(performers.some(row => row.id === text(match.momPlayerId, `${prefix}.momPlayerId`)), `${prefix}의 MOM 선수가 경기 명단에 없습니다.`);
@@ -339,6 +351,7 @@ function matches(value: unknown, label: string, playerId: string, national = fal
         }
       }
     } else assert(match.momPlayerId === undefined, `${prefix}의 MOM 경기 명단이 없습니다.`);
+    if(match.actionVersion===1)validateActionLedger(match as unknown as MatchRecord,playerId);
     if (match.shootout !== undefined) {
       assert((national && homeGoals === awayGoals)||(!national&&match.aggregate&&typeof match.aggregate==='object'&&Number((match.aggregate as any).home)===Number((match.aggregate as any).away)), `${prefix}의 승부차기 경기 범위·점수가 올바르지 않습니다.`);
       const shootout = object(match.shootout, `${prefix}.shootout`);
@@ -369,7 +382,7 @@ function reconciledStats(value: unknown, records: MatchRecord[], label: string):
     const sum = records.reduce((total, match) => total + match.playerStats[key], 0);
     assert(Math.abs(totals[key] - sum) < 0.000001, `${label}.${key}가 경기 원장 합계와 다릅니다.`);
   }
-  for (const key of DETAIL_STATS) if (totals[key] !== undefined) {
+  for (const key of [...DETAIL_STATS,...ACTION_STATS]) if (totals[key] !== undefined) {
     const sum = records.reduce((total, match) => total + (match.playerStats[key] ?? 0), 0);
     assert(Math.abs(totals[key]! - sum) < 0.000001, `${label}.${key}가 경기 원장 합계와 다릅니다.`);
   }

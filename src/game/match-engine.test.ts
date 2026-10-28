@@ -126,8 +126,9 @@ for(const [position,attributes,targets] of [['CM',FIELD_ATTRIBUTES,fieldTargets]
       const lower={...baseline,seed,player:{...baseline.player,attributes:{...baseline.player.attributes,[attribute]:25}}};
       const higher={...baseline,seed,player:{...baseline.player,attributes:{...baseline.player.attributes,[attribute]:95}}};
       assert.equal(lower.player.ovr,higher.player.ovr);
-      low+=value(simulateMatch(lower,fixture,settings).playerStats,target);
-      high+=value(simulateMatch(higher,fixture,settings).playerStats,target);
+      const a=simulateMatch(lower,fixture,settings).playerStats,b=simulateMatch(higher,fixture,settings).playerStats;
+      low+=value(a,target)+(attribute==='gkAerialCommand'?(a.punches??0):0);
+      high+=value(b,target)+(attribute==='gkAerialCommand'?(b.punches??0):0);
     }
     const direction=attribute==='gkDefensiveOrganization'?-1:1;
     assert.ok((high-low)*direction>0,`${attribute}: low ${low/240}, high ${high/240}, target ${target}`);
@@ -164,10 +165,10 @@ test('national synthetic teams preserve domestic membership and non-user fixture
   assert.ok(!generic.performers!.some(p=>p.id===input.player.id));
 });
 
-test('nine metric displays sum denominators and support per90 rather than averaging match percentages',()=>{
+test('field and goalkeeper metric displays sum denominators and support per90 rather than averaging match percentages',()=>{
   const first={...emptyStats(),minutes:90,passes:10,passesCompleted:10},second={...emptyStats(),minutes:30,passes:90,passesCompleted:45};
   const total=sumStats([first,second]);
-  assert.equal(fieldMetrics(total).length,9);assert.equal(goalkeeperMetrics(total).length,9);
+  assert.equal(fieldMetrics(total).length,12);assert.equal(goalkeeperMetrics(total).length,10);
   assert.equal(successRate(total.passesCompleted,total.passes),55);
   assert.equal(successRate(0,0),null);assert.equal(per90(4,120),3);
 });

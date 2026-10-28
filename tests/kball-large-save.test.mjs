@@ -20,7 +20,7 @@ const expected = JSON.parse(execFileSync(process.execPath, ['-e', `
   const club=sum([...c.history.map(h=>h.stats),...(!c.history.some(h=>h.year===c.season.year)?[c.season.playerStats]:[])]);
   const n=c.systems.national,seen=new Set(),nationalMatches=[...n.history.flatMap(h=>h.matches),...n.matches].filter(m=>{if(seen.has(m.id))return false;seen.add(m.id);return true;});
   const national=sum(nationalMatches.map(m=>m.playerStats));
-  process.stdout.write(JSON.stringify({format:envelope.format,id:c.id,playerId:c.player.id,playerName:c.player.name,seed:c.seed,stage:c.stage,year:c.season.year,revision:c.revision,historyCount:c.history.length,matchCount:c.history.reduce((s,h)=>s+h.matches.length,0),nationalMatchCount:nationalMatches.length,club,national,all:sum([club,national])}));
+  process.stdout.write(JSON.stringify({format:envelope.format,id:c.id,playerId:c.player.id,playerName:c.player.name,position:c.player.position,seed:c.seed,stage:c.stage,year:c.season.year,revision:c.revision,historyCount:c.history.length,matchCount:c.history.reduce((s,h)=>s+h.matches.length,0),nationalMatchCount:nationalMatches.length,club,national,all:sum([club,national])}));
 `, sourcePath], { encoding: 'utf8', maxBuffer: 64 * 1024 }));
 assert.equal(expected.format, 'kball-save');
 assert.equal(expected.historyCount, 30);
@@ -40,7 +40,7 @@ async function storedSummary() {
    const add=(s,r)=>{for(const [key,value]of Object.entries(r))s[key]=Number(((s[key]||0)+value).toFixed(2));return s;},sum=rows=>rows.reduce(add,{});
    const club=sum([...c.history.map(h=>h.stats),...(!c.history.some(h=>h.year===c.season.year)?[c.season.playerStats]:[])]),n=c.systems.national,seen=new Set();
    const nationalMatches=[...n.history.flatMap(h=>h.matches),...n.matches].filter(m=>{if(seen.has(m.id))return false;seen.add(m.id);return true;}),national=sum(nationalMatches.map(m=>m.playerStats));
-   resolve({slotCount:active.length,id:c.id,playerId:c.player.id,playerName:c.player.name,seed:c.seed,stage:c.stage,year:c.season.year,revision:c.revision,historyCount:c.history.length,matchCount:c.history.reduce((s,h)=>s+h.matches.length,0),nationalMatchCount:nationalMatches.length,metadataMatchesHash:active[0].hash===logicalHash,club,national,all:sum([club,national])});
+   resolve({slotCount:active.length,id:c.id,playerId:c.player.id,playerName:c.player.name,position:c.player.position,seed:c.seed,stage:c.stage,year:c.season.year,revision:c.revision,historyCount:c.history.length,matchCount:c.history.reduce((s,h)=>s+h.matches.length,0),nationalMatchCount:nationalMatches.length,metadataMatchesHash:active[0].hash===logicalHash,club,national,all:sum([club,national])});
   }catch(e){reject(e);}};tx.onabort=()=>reject(tx.error);
  }}));
 }
@@ -64,7 +64,7 @@ async function verifyDOM() {
     const values=await page.getByTestId(`records-scope-${scope}`).evaluate(button=>[...button.children].slice(1).map(e=>e.textContent));const stats=expected[scope];
     assert.equal(Number(values[0].replace(/[^\d]/g,'')),stats.apps||0,`${scope} DOM apps`);assert.equal(Number(values[1].replace(/[^\d]/g,'')),stats.minutes||0,`${scope} DOM minutes`);assert.equal(Number(values[2].replace(/[^\d]/g,'')),stats.goals||0,`${scope} DOM goals`);assert.equal(Number(values[3].replace(/[^\d]/g,'')),stats.assists||0,`${scope} DOM assists`);assert.equal(values[4],stats.ratingCount?(stats.ratingSum/stats.ratingCount).toFixed(2):'—',`${scope} DOM rating`);
   }
-  await page.getByTestId('records-scope-all').click();assert.equal(await page.getByTestId('role-metrics').locator('.stat-detail').count(),9);
+  await page.getByTestId('records-scope-all').click();assert.equal(await page.getByTestId('role-metrics').locator('.stat-detail').count(),expected.position==='GK'?10:12);
 }
 try{
   const context=await browser.newContext({viewport:{width:1440,height:1000},reducedMotion:'reduce'});page=await context.newPage();page.setDefaultTimeout(90_000);page.on('pageerror',error=>errors.push(String(error)));

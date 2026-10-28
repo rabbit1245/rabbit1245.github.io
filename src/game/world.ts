@@ -271,7 +271,7 @@ function updateAvailability(career: Career, world: WorldState, clubIds: string[]
 function playWorldFixture(career: Career, world: WorldState, fixture: Fixture, leagueId: string): MatchRecord {
   const home={...getClub(fixture.homeId),leagueId,power:world.clubs[fixture.homeId].power};
   const away={...getClub(fixture.awayId),leagueId,power:world.clubs[fixture.awayId].power};
-  return simulateMatch(career,fixture,{home,away,homePlayers:getWorldClubPlayers(career,home.id),awayPlayers:getWorldClubPlayers(career,away.id),userParticipates:false,detailed:false,competitionId:leagueId});
+  return simulateMatch(career,fixture,{home,away,homePlayers:getWorldClubPlayers(career,home.id),awayPlayers:getWorldClubPlayers(career,away.id),userParticipates:false,detailed:false,recordActionEvents:false,competitionId:leagueId});
 }
 
 /** Advance all competitions from real fixtures and aggregate the returned individual performances. */

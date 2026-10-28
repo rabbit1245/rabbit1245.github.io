@@ -150,7 +150,7 @@ export function processClubCompetitions(c:Career,onMatch:(match:MatchRecord)=>vo
     if(own){const last=[...c.season.matches,...cupMatches(c,c.season.year),...c.systems!.national.matches].filter(x=>x.date&&x.date<schedule.date).sort((a,b)=>a.date!.localeCompare(b.date!)).at(-1);if(last?.date)c.player.fitness=Math.min(100,c.player.fitness+Math.min(18,Math.max(0,(Date.parse(schedule.date)-Date.parse(last.date))/86400000)*5));}
     if(own)syncManualInjury(c,schedule.date);
     const teams=[f.homeId,f.awayId].map(id=>({...getClub(id),power:getClubWorldPower(c,id)}));
-    const m=simulateMatch(c,f,{home:teams[0],away:teams[1],homePlayers:getWorldClubPlayers(c,f.homeId),awayPlayers:getWorldClubPlayers(c,f.awayId),scope:'club',competitionId:t.id,date:schedule.date,userParticipates:own,detailed:own,neutralVenue:f.stage==='결승'});
+    const m=simulateMatch(c,f,{home:teams[0],away:teams[1],homePlayers:getWorldClubPlayers(c,f.homeId),awayPlayers:getWorldClubPlayers(c,f.awayId),scope:'club',competitionId:t.id,date:schedule.date,userParticipates:own,detailed:own,recordActionEvents:own,neutralVenue:f.stage==='결승'});
     f.homeGoals=m.homeGoals;f.awayGoals=m.awayGoals;f.date=schedule.date;f.played=true;
     const tie=t.fixtures.filter(x=>x.tieId===f.tieId),last=f.leg===Math.max(...tie.map(x=>x.leg));
     if(t.phase==='knockout'&&last){

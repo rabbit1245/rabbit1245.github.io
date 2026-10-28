@@ -28,17 +28,28 @@ export interface PlayerStats {
   buildUpPasses?: number; buildUpCompleted?: number; longKicks?: number; longKicksCompleted?: number;
   handlingAttempts?: number; handlingSuccesses?: number; lateActions?: number; lateSuccesses?: number;
   detailedApps?: number;
+  headerGoals?: number; pressingWins?: number; progressivePasses?: number; punches?: number;
+  actionApps?: number; actionMinutes?: number;
 }
 export interface Standing { clubId: string; played: number; won: number; drawn: number; lost: number; goalsFor: number; goalsAgainst: number; points: number }
 export interface Fixture { id: string; round: number; homeId: string; awayId: string; played: boolean; homeGoals?: number; awayGoals?: number }
-export interface MatchEvent { id: string; minute: number; type: 'shot'|'goal'|'save'|'assist'|'yellow'|'red'|'injury'|'substitution'|'pass'|'keyPass'|'dribble'|'tackle'|'interception'|'aerial'|'handling'|'sweep'|'longKick'; teamId: string; playerName: string; playerId?: string; relatedId?: string; detail: string }
+export type MatchAction =
+  | {kind:'phasePass';fromZone:number;toZone:number;completed:boolean;receiverId:string}
+  | {kind:'pressure';possessionId:string;holderId:string;holderTeamId:string;recovered:boolean}
+  | {kind:'recovery';possessionId:string;fromTeamId:string}
+  | {kind:'cross';keeperId:string;claimable:boolean;phase:'open'|'setPiece'}
+  | {kind:'airClaim';success:boolean;destination:'held'|'safe'|'danger'}
+  | {kind:'setPiece';delivery:'corner'|'freeKick'}
+  | {kind:'headerDuel';attackerId:string;defenderId:string;winnerId:string}
+  | {kind:'headerShot';phase:'open'|'setPiece';duelId:string};
+export interface MatchEvent { id: string; minute: number; type: 'shot'|'goal'|'save'|'assist'|'yellow'|'red'|'injury'|'substitution'|'pass'|'keyPass'|'dribble'|'tackle'|'interception'|'aerial'|'handling'|'sweep'|'longKick'|'pressure'|'recovery'|'cross'|'catch'|'punch'|'setPiece'; teamId: string; playerName: string; playerId?: string; relatedId?: string; detail: string; action?:MatchAction }
 export interface MatchRecord {
   aggregate?:{home:number;away:number};nationalSelection?:{called:boolean;role:'starter'|'substitute'|'bench'|'excluded';reason:string;};
   id: string; fixtureId: string; round: number; seasonYear: number; homeId: string; awayId: string;
   homeGoals: number; awayGoals: number; events: MatchEvent[]; playerClubId: string;
   playerPlayed: boolean; playerStarted: boolean; playerMinutes: number; playerRating: number;
   playerStats: PlayerStats; seed: string;
-  metricsVersion?: 2; scope?: 'club'|'national'; competitionId?: string; date?: string;
+  metricsVersion?: 2; actionVersion?:1; scope?: 'club'|'national'; competitionId?: string; date?: string;
   homeName?: string; awayName?: string; performers?: MatchPerformance[]; momPlayerId?: string; effects?: MatchEffects;
   shootout?: { home: number; away: number; winnerId: string; attempts: { teamId: string; playerId: string; scored: boolean }[] };
 }

@@ -1,0 +1,23 @@
+{
+  "version": "2.10.0",
+  "builtAt": "2026-10-28T00:21:25.475413+00:00",
+  "sourceBase": "c8b4293a7dfbdaea4d6ac08a9709e646f842b0db",
+  "typecheckAndProductionBuild": true,
+  "portableBuild": true,
+  "html": {
+    "bytes": 28567813,
+    "sha256": "c65f06e9351efc997f06a2e314e5a45df4d2de073fd1f78305786ba2b28b7471"
+  },
+  "zip": {
+    "bytes": 21528759,
+    "sha256": "5201bf1a2655a372420abce0dc8dd5674fc13381aa19814539905b3cfd8b1c8e",
+    "crc": true,
+    "embeddedHTMLMatches": true,
+    "files": [
+      "Kball.html",
+      "읽어주세요.txt",
+      "FONT-LICENSE.txt",
+      "CREST-LICENSE.txt"
+    ]
+  }
+}

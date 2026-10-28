@@ -25,7 +25,7 @@ test('retirement TXT contains only requested records, Korean labels and no event
  const c=retireCareer(fresh()),before=JSON.stringify(c),text=buildCareerText(c);
  assert.equal(text.charCodeAt(0),0xfeff);assert.match(careerTextFilename(c),/^K볼_한글 선수_은퇴커리어\.txt$/);
  for(const section of ['A. 선수 기본 정보','B. 통산 총합 스탯 · 팀 수상','C. 연도별 기록'])assert.ok(text.includes(section),section);
- for(const key of ALL_STATS.filter(k=>!['ratingSum','ratingCount','detailedApps'].includes(k)))assert.ok(text.includes(STAT_TEXT[key]),key);
+ for(const key of ALL_STATS.filter(k=>!['ratingSum','ratingCount','detailedApps','actionApps','actionMinutes'].includes(k)))assert.ok(text.includes(STAT_TEXT[key]),key);
  for(const label of ['이름:','국적:','신체정보:','팀:','능력점수:','포지션:','세부 역할:','부 포지션:','은퇴나이:','소속팀:','몸값:','주급:','주장/부주장 여부:','부상 유무:','팀 수상:','대회별 팀 성적:','개인 수상:','결승 기록:'])assert.ok(text.includes(label),label);
  assert.match(text,/오른발/);assert.match(text,/선방률/);assert.match(text,new RegExp(`\\[${c.season.year}시즌\\] 은퇴`));
  assert.doesNotMatch(text,/전체 대진|전체 순위표|수동 노화|고정 능력치|훈련 이력|분단위 로그|90분당|\/ 90분|"history"|"playerId"|평점 합계/);
