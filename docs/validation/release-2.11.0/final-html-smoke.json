@@ -1,0 +1,12 @@
+{
+  "scheme": "http:",
+  "browser": "Linux Chromium; not Windows Edge",
+  "legacyRecovery": true,
+  "actualHalfProgress": true,
+  "IndexedDBAutosave": true,
+  "BlobJSONExport": true,
+  "reload": true,
+  "exportedBytes": 42176242,
+  "errors": [],
+  "http": []
+}

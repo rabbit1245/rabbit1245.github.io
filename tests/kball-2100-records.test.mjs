@@ -28,7 +28,7 @@ try{
     p.on('pageerror',e=>errors.push(String(e)));p.on('request',r=>{if(/^https?:/.test(r.url())&&r.url()!==url)external.push(r.url());});
     await p.goto(url,{waitUntil:'networkidle'});await context.setOffline(true);const start=performance.now();await p.getByLabel('K볼 저장 파일 가져오기').setInputFiles(path.resolve(file));await ready(p);const importMs=performance.now()-start;
     assert.ok((await p.getByTestId('game-version').innerText()).includes(version));
-    await p.getByTestId('season-details-disclosure').locator('summary').click();await metrics(p.getByTestId('locker-season-details').getByTestId('role-metrics'),seasonOverview(original).combined,position);
+    await p.getByTestId('season-details-disclosure').locator(':scope > summary').click();await metrics(p.getByTestId('locker-season-details').getByTestId('role-metrics'),seasonOverview(original).combined,position);
     await p.getByTestId('career-tab').click();await p.getByTestId('career-view-records').click();await p.getByRole('button',{name:'통산',exact:true}).click();
     for(const scope of ['all','club','national']){await p.getByTestId(`records-scope-${scope}`).click();await metrics(p.getByTestId('role-metrics'),totals[scope],position);}
     await p.getByTestId('records-scope-all').click();const competition=all.find(m=>m.playerPlayed&&m.competitionId)?.competitionId;assert.ok(competition);

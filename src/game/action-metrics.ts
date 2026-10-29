@@ -1,5 +1,6 @@
 import {ACTION_COUNTERS} from './math';
 import type {MatchEvent,MatchRecord,PlayerStats} from './types';
+import {matchInterval} from './keeper-recovery';
 
 export const ACTION_LABELS={headerGoals:'헤더 득점',pressingWins:'압박 성공',progressivePasses:'전진 패스 성공',punches:'펀칭 성공'} as const;
 export type ActionCounter=keyof typeof ACTION_LABELS;
@@ -32,6 +33,18 @@ export function validateActionLedger(m:MatchRecord,playerId:string):void{
   const recoveries=new Map<string,MatchEvent>(),claims=new Set<string>(),headers=new Set<string>();
   const text=(v:unknown)=>typeof v==='string'&&v.length>0&&v.length<=500;
   const opposite=(a:string,b:string)=>a!==b&&[m.homeId,m.awayId].includes(a)&&[m.homeId,m.awayId].includes(b);
+  const keeps=(id:string,minute:number)=>{const p=actors.get(id);return !!p&&(p.position==='GK'||!!p.emergencyGoalkeeper&&minute>p.emergencyGoalkeeper.from&&minute<=p.emergencyGoalkeeper.to);};
+  for(const p of actors.values())if(p.emergencyGoalkeeper){
+    const role=p.emergencyGoalkeeper,span=matchInterval(m,p),team=p.teamId??p.clubId;
+    fail(m.lineupVersion!==2&&p.position!=='GK'&&span&&Number.isInteger(role.from)&&Number.isInteger(role.to)&&role.from>=span.from&&role.to<=span.to&&role.from<role.to,'기존 긴급 골키퍼 출전 구간');
+    fail(![...actors.values()].some(q=>q.position==='GK'&&(q.teamId??q.clubId)===team&&(()=>{const k=matchInterval(m,q);return k&&k.from<role.to&&k.to>role.from;})()),'긴급 골키퍼와 정규 골키퍼 중복');
+    fail(events.some(e=>e.action?.kind==='cross'&&e.action.keeperId===p.id&&e.minute>role.from&&e.minute<=role.to&&opposite(e.teamId,team)),'긴급 골키퍼 원본 근거');
+  }
+  if(m.lineupVersion===2&&actors.size)for(const team of [m.homeId,m.awayId]){
+    const slots=[...actors.values()].filter(p=>(p.teamId??p.clubId)===team&&p.position==='GK').map(p=>matchInterval(m,p)).sort((a,b)=>(a?.from??-1)-(b?.from??-1));let end=0;
+    for(const slot of slots){fail(slot&&slot.from===end&&slot.to>slot.from,'골키퍼 출전 공백·중복');if(slot)end=slot.to;}
+    fail(end===90,'골키퍼 출전 공백·중복');
+  }
   const active=(id:string,minute:number,team?:string)=>{
     if(!actors.size)return;
     const p=actors.get(id);fail(p,'행동 선수가 경기 명단에 없습니다.');
@@ -51,7 +64,7 @@ export function validateActionLedger(m:MatchRecord,playerId:string):void{
       fail(!recoveries.has(a.possessionId),'같은 소유권을 두 번 회복');recoveries.set(a.possessionId,e);
     }else if(a.kind==='cross'){
       fail(e.type==='cross'&&text(a.keeperId)&&typeof a.claimable==='boolean'&&['open','setPiece'].includes(a.phase),'크로스');
-      const keeper=actors.get(a.keeperId);if(actors.size)fail(keeper?.position==='GK'&&opposite(keeper.teamId??keeper.clubId,e.teamId),'크로스 상대 골키퍼');active(a.keeperId,e.minute);
+      const keeper=actors.get(a.keeperId);if(actors.size)fail(keeper&&keeps(a.keeperId,e.minute)&&opposite(keeper.teamId??keeper.clubId,e.teamId),'크로스 상대 골키퍼');active(a.keeperId,e.minute);
       if(a.phase==='setPiece'){const s=index.get(e.relatedId??'');fail(s?.type==='setPiece'&&s.action?.kind==='setPiece'&&s.minute===e.minute&&s.teamId===e.teamId,'실제 세트피스 공급');}
     }else if(a.kind==='airClaim'){
       const cross=index.get(e.relatedId??'');fail(['catch','punch'].includes(e.type)&&typeof a.success==='boolean'&&cross?.type==='cross'&&cross.action?.kind==='cross','공중볼 처리의 원본 크로스');
@@ -77,7 +90,7 @@ export function validateActionLedger(m:MatchRecord,playerId:string):void{
   const check=(id:string,s:PlayerStats)=>{
     const t=totals.get(id)??empty();for(const key of ACTION_COUNTERS)fail(s[key]===t[key],`${key} 집계와 원본 이벤트 불일치`);
     fail(s.actionApps===s.apps&&s.actionMinutes===s.minutes,'신규 집계 경기·시간');
-    if(actors.get(id)?.position==='GK')fail(s.crossesFaced===t.crossesFaced&&s.crossesCaught===t.crossesCaught,'크로스 포구·펀칭 원장');
+    if(actors.get(id)?.position==='GK'||actors.get(id)?.emergencyGoalkeeper)fail(s.crossesFaced===t.crossesFaced&&s.crossesCaught===t.crossesCaught,'크로스 포구·펀칭 원장');
   };
   check(playerId,m.playerStats);for(const p of actors.values())check(p.id,p.stats);
 }

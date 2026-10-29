@@ -1,7 +1,9 @@
 import type { AttributeKey, Attributes, Award, Club, Fixture, MatchRecord, PlayerStats, Position, Standing } from './types';
+export interface WorldState {financeVersion?:1;}
+export interface Economics {valuationVersion?:1;}
 
 export interface MatchParticipant { id: string; name: string; position: Position; ovr: number; attributes?: Attributes; nationality?: string; clubId: string }
-export interface MatchPerformance extends MatchParticipant { stats: PlayerStats; rating: number; minutes: number; started: boolean; captain?: boolean; teamId?: string }
+export interface MatchPerformance extends MatchParticipant { stats: PlayerStats; rating: number; minutes: number; started: boolean; captain?: boolean; teamId?: string; emergencyGoalkeeper?:{from:number;to:number} }
 export interface MatchEffects { fitnessAfter: number; moraleAfter: number; formAfter: number; injuryWeeksAfter: number; trustAfter: number }
 export interface MatchOptions {
   home?: Club; away?: Club; homePlayers?: MatchParticipant[]; awayPlayers?: MatchParticipant[];
@@ -49,6 +51,7 @@ export interface TrainingPlan {forYear:number;confirmed:boolean;confirmedAtRound
 export interface GrowthReport { year: number; half: 'first'|'season'; fromRound: number; toRound: number; startAttributes: Attributes; endAttributes: Attributes; ovrStart: number; ovrEnd: number; stats: PlayerStats; previousStats: PlayerStats; valueStart: number; valueEnd: number; context: string; growth?:GrowthLedger; offseasonAging?:AgingReport }
 export interface PresentationEvent { id: string; year: number; round: number; type: 'mom'|'injury'|'national'|'transfer'|'renewal'|'captain'|'award'|'growth'|'promotion'|'retirement'; title: string; body: string; importance: 'brief'|'decision'|'milestone' }
 export interface CareerSystems {
+  commercial?:import('./commercial').CommercialState;
   personality?:import('./personality').Personality;
   employment?:EmploymentPeriod[];
   achievementEvidence?:import('./achievement-evidence').AchievementEvidence;

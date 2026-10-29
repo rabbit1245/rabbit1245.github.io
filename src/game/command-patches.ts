@@ -7,7 +7,7 @@ const receipts=new WeakMap<Career,{previous:WeakRef<Career>;patches:CareerPatch[
 const MAX_PATCH_BYTES=512*1024;
 function sameRows(a:readonly unknown[],b:readonly unknown[]){return a.length===b.length&&a.every((v,i)=>v===b[i]);}
 function eligible(a:Career,b:Career){
- return a.id===b.id&&a.seed===b.seed&&Number.isSafeInteger(b.revision)&&b.revision<=100_000_000&&b.processedCommands.length<=100_000&&(b.systems?.economics.valueHistory.length??0)<=100_000&&(b.systems?.economics.contractHistory?.length??0)<=1000&&b.revision===a.revision+1&&a.season.year===b.season.year&&a.season.week===b.season.week&&a.stage===b.stage&&a.player.clubId===b.player.clubId&&!!a.systems&&!!b.systems&&a.systems.world===b.systems.world&&a.systems.national===b.systems.national&&a.systems.clubCompetitions===b.systems.clubCompetitions&&sameRows(a.systems.rankings,b.systems.rankings)&&sameRows(a.systems.growthReports,b.systems.growthReports)&&sameRows(a.history,b.history)&&sameRows(a.season.matches,b.season.matches);
+ return a.id===b.id&&a.seed===b.seed&&Number.isSafeInteger(b.revision)&&b.revision<=100_000_000&&b.processedCommands.length<=100_000&&(b.systems?.economics.valueHistory.length??0)<=100_000&&(b.systems?.economics.contractHistory?.length??0)<=1000&&b.revision===a.revision+1&&a.season.year===b.season.year&&a.season.week===b.season.week&&a.stage===b.stage&&a.player.clubId===b.player.clubId&&!!a.systems&&!!b.systems&&a.systems.world===b.systems.world&&a.systems.national===b.systems.national&&a.systems.clubCompetitions===b.systems.clubCompetitions&&a.systems.commercial===b.systems.commercial&&sameRows(a.systems.rankings,b.systems.rankings)&&sameRows(a.systems.growthReports,b.systems.growthReports)&&sameRows(a.history,b.history)&&sameRows(a.season.matches,b.season.matches);
 }
 function difference(a:unknown,b:unknown,path:(string|number)[],out:CareerPatch[]):void{
  if(a===b)return;
@@ -63,6 +63,6 @@ export function controlFingerprint(c:Career):string{
  const {history,systems,season,...root}=c;
  const {matches,...current}=season;
  if(!systems)return JSON.stringify([root,current]);
- const {world,national,clubCompetitions,rankings,growthReports,monthlyLeague,...control}=systems;
+ const {world,national,clubCompetitions,rankings,growthReports,monthlyLeague,commercial,...control}=systems;
  return JSON.stringify([root,current,control]);
 }

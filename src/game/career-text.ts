@@ -164,6 +164,8 @@ export function careerSeasonRecords(c:Career){
   const leagueMatches=h?.matches??(current?c.season.matches:[]),clubMatches=unique([...leagueMatches,...cupMatches(c,year)]),nationalMatches=ledger.national.filter(m=>m.seasonYear===year);
   const clubStats=sumStats([h?.stats??(current?c.season.playerStats:emptyStats()),cupStats(c,year)]),nationalStats=sumStats(nationalMatches.map(m=>m.playerStats));
   const retired=c.stage==='retired'&&year===(c.retiredYear??c.season.year),completed=h?.completed??c.season.completed;
+  const sales=c.systems?.commercial?.seasons.find(s=>s.year===year);
+  const shirtSales=sales?`${sales.playerUnits.toLocaleString('ko-KR')}장 · ${sales.playerRank?`세계 ${sales.playerRank.toLocaleString('ko-KR')}위`:'판매 기록 없음'}${sales.completed?'':' · 은퇴 시점 부분 집계'}${sales.playerClubs.length?' · '+sales.playerClubs.map(r=>`${name(r.clubId)} ${r.units.toLocaleString('ko-KR')}장 (구단 내 ${r.rank}위)`).join(' / '):''}`:year<(c.systems?.commercial?.firstYear??c.season.year+(c.stage==='season'?0:1))?'미집계 · 시장 도입 전':completed?'미집계':'시즌 종료 후 집계';
   const rank=h?.rank??(c.season.table.findIndex(t=>t.clubId===clubId)+1),leagueName=h?.competitionName??c.season.competitionName;
   const row=h?.details?.table.find(t=>t.clubId===clubId)??(!h?c.season.table.find(t=>t.clubId===clubId):undefined);
   const leagueResult=`${leagueName} · ${rank>0?`${rank}위`:'순위 미보존'}${completed?' (최종)':retired?' (은퇴 시점)':' (진행 중)'}${row?` · ${row.won}승 ${row.drawn}무 ${row.lost}패 · 승점 ${row.points}점`:''}`;
@@ -172,7 +174,7 @@ export function careerSeasonRecords(c:Career){
   const cups=cupLedger(c,year).flatMap(t=>[...own].filter(id=>t.entrants.includes(id)).map(id=>`${t.name} · ${name(id)} · ${tournamentResult(t,id)==='결승 탈락'?'준우승 (결승 탈락)':tournamentResult(t,id)}`));
   const judging=c.systems?.rankings.find(r=>r.year===year),globalNames=/발롱도르|FIFPRO|The Best FIFA|야신 트로피|코파 트로피|유러피언 골든슈/;
   const awardResults=(judging?.diagnostics??[]).filter(d=>d.eligible&&globalNames.test(d.name)).map(d=>`${d.name}: ${d.name==='발롱도르'&&d.result==='미선정'?(d.detail.match(/전체 (\d+)위/)?.[1]?d.detail.match(/전체 (\d+)위/)![1]+'위':'후보권 밖')+' · 30인 후보 제외':d.result}`);
-  return {year,employment:employmentLines(c,year),awardResults,playSkills:retirementPlaySkillNames(h?.position??c.player.position,playSkillsForYear(c,year)),age:h?.age??c.player.age,clubId,clubName:recordedEmployment(c,year).length?[...new Set(recordedEmployment(c,year).map(r=>name(r.clubId)))].join(' → '):h?.clubName??name(clubId),
+  return {year,shirtSales,employment:employmentLines(c,year),awardResults,playSkills:retirementPlaySkillNames(h?.position??c.player.position,playSkillsForYear(c,year)),age:h?.age??c.player.age,clubId,clubName:recordedEmployment(c,year).length?[...new Set(recordedEmployment(c,year).map(r=>name(r.clubId)))].join(' → '):h?.clubName??name(clubId),
    status:retired?`은퇴${completed?' (시즌 종료 후)':' (시즌 도중)'}`:completed?'시즌 종료':'진행 중',
    ovrStart:h?.ovrStart??c.season.ovrStart,ovrEnd:h?.ovrEnd??c.player.ovr,
    ...financials(c,year,h,clubId),leadership:seasonLeadership(c,year,h,clubId),injury:seasonInjuries(c,year,[...clubMatches,...nationalMatches]),
@@ -211,6 +213,7 @@ export function* careerTextChunks(c:Career):Generator<string>{
   for(const period of h.employment)yield line(`소속 기간: ${period}`);
   yield line(`몸값: ${h.value}`);yield line(`주급: ${h.wage}`);
   yield line(`능력점수: ${h.ovrStart} → ${h.ovrEnd}`);
+  yield line(`유니폼 판매: ${h.shirtSales}`);
   if(h.playSkills.length)yield line(`플레이스타일: ${h.playSkills.join(' / ')}`);
   yield line(`주장/부주장 여부: ${h.leadership}`);yield line(`부상 유무: ${h.injury}`);
   yield line(`팀 수상: ${h.teamAwards.join(' / ')||'없음'}`);

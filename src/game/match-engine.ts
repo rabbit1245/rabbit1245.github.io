@@ -50,6 +50,11 @@ function makeTeam(career:Career,club:Club,provided:MatchParticipant[]|undefined,
   // Synthetic national teams and injury-depleted clubs still field a complete, explicitly fictional side.
   const fallback:Position[]=['GK','CB','CB','LB','RB','CDM','CM','CAM','LW','RW','ST','CM'];
   for(let i=0;candidates.length<13;i++)candidates.push({id:`${club.id}:reserve:${i}`,name:`${club.name} 예비 선수 ${i+1} (가상)`,clubId:club.id,position:fallback[i%fallback.length],ovr:Math.max(20,club.power-8)});
+  // Headcount alone does not guarantee a keeper (e.g. injured/retired keepers).
+  // Reserve IDs 0 and 12 are already the catalogue's explicit fictional GK slots.
+  let keepers=0;for(const p of candidates)if(p.position==='GK')keepers++;let field=candidates.length-keepers;
+  for(const slot of [0,12])if(keepers<2&&!candidates.some(p=>p.id===`${club.id}:reserve:${slot}`)){candidates.push({id:`${club.id}:reserve:${slot}`,name:`${club.name} 예비 선수 ${slot+1} (가상)`,clubId:club.id,position:'GK',ovr:Math.max(20,club.power-8)});keepers++;}
+  for(let slot=1;slot<=11&&field<11;slot++)if(!candidates.some(p=>p.id===`${club.id}:reserve:${slot}`)){candidates.push({id:`${club.id}:reserve:${slot}`,name:`${club.name} 예비 선수 ${slot+1} (가상)`,clubId:club.id,position:fallback[slot],ovr:Math.max(20,club.power-8)});field++;}
   const desired:Position[]=['GK','CB','CB','LB','RB','CDM','CM','CAM','LW','RW','ST'];
   const chosen:MatchParticipant[]=[];
   const used=new Set<string>();
@@ -57,6 +62,7 @@ function makeTeam(career:Career,club:Club,provided:MatchParticipant[]|undefined,
     let best:MatchParticipant|undefined;let bestScore=-Infinity;
     for(const candidate of candidates){
       if(used.has(candidate.id))continue;
+      if((candidate.position==='GK')!==(position==='GK'))continue;
       const score=candidate.ovr+(candidate.position===position?55:group(candidate.position)===group(position)?20:-80);
       if(score>bestScore){best=candidate;bestScore=score;}
     }
@@ -65,6 +71,9 @@ function makeTeam(career:Career,club:Club,provided:MatchParticipant[]|undefined,
   const includesUser=userTeam===club.id&&selection.to>selection.from;
   const userParticipant:MatchParticipant={id:user.id,name:user.name,clubId:user.clubId,position:user.position,ovr:user.ovr,attributes:{...user.attributes},nationality:user.nationality};
   const closestIndex=()=>chosen.reduce((best,p,i)=>{
+    if(user.position==='GK')return p.position==='GK'?i:best;
+    if(p.position==='GK')return best;
+    if(chosen[best].position==='GK')return i;
     const flank=user.position==='LWB'?'LB':user.position==='RWB'?'RB':user.position==='LB'?'LWB':user.position==='RB'?'RWB':undefined;
     const quality=(q:MatchParticipant,index:number)=>(q.position===user.position?100:flank&&(q.position===flank||desired[index]===flank)?85:group(q.position)===group(user.position)?35:-100)-q.ovr*.01;
     return quality(p,i)>quality(chosen[best],best)?i:best;
@@ -250,7 +259,14 @@ export function simulateMatch(career:Career,fixture:Fixture,options:MatchOptions
     else if(selectRng()<.012+(100-p.fitness)*.00025){injuryMinute=integer(selectRng,Math.max(2,selection.from+1),selection.to);selection.to=injuryMinute;injuryWeeks=integer(selectRng,1,5);}
   }
   const teams=[makeTeam(career,home,options.homePlayers,userTeam,selection,selectRng),makeTeam(career,away,options.awayPlayers,userTeam,selection,selectRng)];
-  if(redMinute){const team=teams.find(t=>t.club.id===userTeam)!;team.actors=team.actors.filter(a=>a.user||a.from!==redMinute);}
+  if(redMinute){const team=teams.find(t=>t.club.id===userTeam)!;
+    if(p.position==='GK'){
+      // Bring on the reserve keeper by withdrawing an outfield player: ten men,
+      // with a real keeper still present, rather than silently using an RB as GK.
+      const withdrawn=team.actors.filter(a=>!a.user&&a.position!=='GK'&&a.from<redMinute&&a.to>redMinute).sort((a,b)=>a.ovr-b.ovr||a.id.localeCompare(b.id))[0];
+      if(withdrawn){withdrawn.to=redMinute;withdrawn.minutes=redMinute-withdrawn.from;}
+    }else team.actors=team.actors.filter(a=>a.user||a.from!==redMinute);
+  }
   assignCaptain(career,teams[0],userTeam,options.scope??'club',options.homePlayers);
   assignCaptain(career,teams[1],userTeam,options.scope??'club',options.awayPlayers);
   const events:MatchEvent[]=[];
@@ -375,7 +391,7 @@ export function simulateMatch(career:Career,fixture:Fixture,options:MatchOptions
     id:`match:${career.season.year}:${fixture.id}`,fixtureId:fixture.id,round:fixture.round,seasonYear:career.season.year,
     homeId:home.id,awayId:away.id,homeGoals:scores[0],awayGoals:scores[1],homeName:home.name,awayName:away.name,
     events,playerClubId:userTeam??p.clubId,playerPlayed:minutes>0,playerStarted:userActor?.started??false,playerMinutes:minutes,playerRating:rating,playerStats,seed,
-    metricsVersion:2,...(recordActions?{actionVersion:1 as const}:{}),scope:options.scope??'club',competitionId:options.competitionId??home.leagueId,date:options.date,performers,momPlayerId:mom?.id,
+    metricsVersion:2,lineupVersion:2,...(recordActions?{actionVersion:1 as const}:{}),scope:options.scope??'club',competitionId:options.competitionId??home.leagueId,date:options.date,performers,momPlayerId:mom?.id,
     effects:{fitnessAfter:round(clamp(p.fitness-minutes/90*(25-stamina*.13),15,100)),moraleAfter:round(clamp(p.morale+(minutes?(userScore>opponentScore?2:userScore<opponentScore?-2:0)+(rating-6.5)*1.4:-.4),5,100)),formAfter:round(clamp(minutes?p.form*.84+rating*1.6:p.form*.98+1,20,100)),injuryWeeksAfter:injuryWeeks||p.injuryWeeks,trustAfter:round(clamp(career.managerTrust+(minutes?(rating-6.35)*1.2:-.25),0,100))},
   };
 }

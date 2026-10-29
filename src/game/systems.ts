@@ -1,5 +1,6 @@
 import type { Career } from './types';
-import { createWorld, repairLegacyRosterScale,repairClubBalance } from './world';
+import { createWorld, repairLegacyRosterScale,repairClubBalance,repairFinancialScale } from './world';
+import {ensureCommercial} from './commercial';
 import { createNational } from './national';
 import { createEconomics, createLeadership } from './career-systems';
 import { TALENT_PROFILES } from './talent';
@@ -9,6 +10,7 @@ export function initializeSystems(career: Career, legacyMetrics = true): void {
   if (career.systems) {
     repairLegacyRosterScale(career);
     repairClubBalance(career);
+    repairFinancialScale(career);ensureCommercial(career);
     if(career.systems.growthModelVersion!==2){career.player.potential=Math.max(career.player.potential,TALENT_PROFILES[career.player.talent].potential[0]);career.systems.growthModelVersion=2;}
     return;
   }
@@ -25,4 +27,5 @@ export function initializeSystems(career: Career, legacyMetrics = true): void {
     attributes: { ...career.season.attributeStart }, stats: { ...career.season.playerStats },
     ovr: career.season.ovrStart, value: career.systems.economics.marketValue, round: career.season.week,
   };
+  repairFinancialScale(career);ensureCommercial(career);
 }

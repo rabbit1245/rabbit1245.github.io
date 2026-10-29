@@ -44,12 +44,14 @@ export async function replayJournal(c:Career,versionHash:string,entries:JournalE
 export async function decodeStored(r:StoredCareer):Promise<DecodedSave>{
  if(!isBlobCareer(r)){
   const envelope=await verifyEnvelope(r?.envelope);if(envelope.career.id!==r.id)throw Error('슬롯 ID와 저장 내용이 일치하지 않습니다.');
-  return {career:envelope.career,versionHash:envelope.hash,normalized:packEnvelope(envelope).record};
+  return {career:envelope.career,versionHash:r.envelope.hash,normalized:packEnvelope(envelope,r.envelope.hash).record};
  }
  if(!(r.blob instanceof Blob)||r.blob.size>256*1024*1024+4096||!Array.isArray(r.journal)||r.journal.length>512||!/^[a-f0-9]{64}$/.test(r.versionHash))throw Error('저장 스냅샷 형식이 올바르지 않습니다.');
  let value:unknown;try{value=JSON.parse(await r.blob.text());}catch{throw Error('저장 스냅샷을 읽을 수 없습니다.');}
- const envelope=await verifyEnvelope(value);
- if(envelope.career.id!==r.id||envelope.career.revision!==r.revision||envelope.hash!==r.hash)throw Error('저장 스냅샷의 검사 정보가 일치하지 않습니다.');
+ const original=value as {hash?:string};
+ const envelope=await verifyEnvelope(value,true);
+ if(envelope.career.id!==r.id||envelope.career.revision!==r.revision||original.hash!==r.hash)throw Error('저장 스냅샷의 검사 정보가 일치하지 않습니다.');
  const replayed=await replayJournal(envelope.career,r.versionHash,r.journal);
- return {...replayed,career:r.journal.length?validateCareer(replayed.career):replayed.career};
+ const career=r.journal.length?validateCareer(replayed.career,true):replayed.career;
+ return {...replayed,career,...(envelope.hash!==original.hash?{normalized:packEnvelope(await prepareEnvelope(career,true),replayed.versionHash).record}:{})};
 }

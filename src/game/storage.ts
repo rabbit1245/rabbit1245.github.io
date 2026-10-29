@@ -3,6 +3,7 @@ import {validateActionLedger} from './action-metrics';
 import {internationalRoster} from './international-clubs';
 import {validatePlaySkills} from './play-skill-validation';
 import {canonicalBytes} from './canonical-bytes';
+import {recoverCareerKeeperRoles} from './keeper-recovery';
 import {commandChange,controlFingerprint} from './command-patches';
 import {decodeStored,isBlobCareer,prepareStored,metadataFor,journalEntry,storedHead,recordFingerprint,type StoredCareer,type BlobCareer,type PreparedSave,type DecodedSave} from './save-codec';
 import {validateCompetitionData} from './competition-validation';
@@ -256,6 +257,7 @@ function matches(value: unknown, label: string, playerId: string, national = fal
     number(match.seasonYear, `${prefix}.seasonYear`, 1900, 2500, true);
     if (match.metricsVersion !== undefined) assert(match.metricsVersion === 2, `${prefix}의 경기 지표 버전을 지원하지 않습니다.`);
     if(match.actionVersion!==undefined)assert(match.actionVersion===1,`${prefix}의 신규 행동 버전을 지원하지 않습니다.`);
+    if(match.lineupVersion!==undefined)assert(match.lineupVersion===2,`${prefix}의 출전 명단 버전을 지원하지 않습니다.`);
     if (match.scope !== undefined) assert(match.scope === (national ? 'national' : 'club'), `${prefix}의 경기 범위가 올바르지 않습니다.`);
     if (national) assert(match.scope === 'national', `${prefix}의 국가대표 경기 범위가 없습니다.`);
     if (national || match.competitionId !== undefined) text(match.competitionId, `${prefix}.competitionId`);
@@ -336,6 +338,7 @@ function matches(value: unknown, label: string, playerId: string, national = fal
         if (row.attributes !== undefined) attributes(row.attributes, `${prefix}.performer.attributes`);
         if (row.captain !== undefined) bool(row.captain, `${prefix}.performer.captain`);
         if (row.teamId !== undefined) assert(row.teamId === home || row.teamId === away, `${prefix}의 경기 선수 출전 팀이 올바르지 않습니다.`);
+        if(row.emergencyGoalkeeper!==undefined){const role=object(row.emergencyGoalkeeper,`${prefix}.emergencyGoalkeeper`);number(role.from,`${prefix}.emergencyGoalkeeper.from`,0,89,true);number(role.to,`${prefix}.emergencyGoalkeeper.to`,1,90,true);}
         const performerStats = stats(row.stats, `${prefix}.performer.stats`, match.metricsVersion === 2,match.actionVersion===1);
         const performerMinutes = number(row.minutes, `${prefix}.performer.minutes`, 0, 130, true);
         const performerRating = number(row.rating, `${prefix}.performer.rating`, 0, 10);
@@ -689,8 +692,10 @@ function validateSystems(career: Record<string, unknown>, player: Record<string,
 }
 
 /** Validate a complete, isolated JSON copy before replacing any live game state. */
-export function validateCareer(value: unknown): Career {
-  const parsed: unknown = JSON.parse(stringify(value));
+export function validateCareer(value: unknown,ownedJSON=false): Career {
+  // Worker messages and parsed files already own their snapshot. Re-serializing
+  // and parsing that entire career used to retain another full copy at save time.
+  const parsed: unknown = ownedJSON?value:JSON.parse(stringify(value));
   ensureSafeJSON(parsed);
   const career = object(parsed, 'career');
   assert(career.schemaVersion === 1, '지원하지 않는 저장 버전입니다. 게임을 업데이트하거나 이전 백업을 사용하세요.');
@@ -889,22 +894,34 @@ export function validateCareer(value: unknown): Career {
 
 async function checksum(career: Career): Promise<string> {
   if (!globalThis.crypto?.subtle) throw new Error('안전한 저장을 위해 HTTPS 또는 localhost에서 게임을 열어 주세요.');
-  const digest = await globalThis.crypto.subtle.digest('SHA-256', canonicalBytes(career));
+  const bytes=canonicalBytes(career);assert(bytes.byteLength<=MAX_SAVE_BYTES,'저장 파일은 256MB 이하여야 합니다.');
+  const digest = await globalThis.crypto.subtle.digest('SHA-256', bytes);
   return [...new Uint8Array(digest)].map(byte => byte.toString(16).padStart(2, '0')).join('');
 }
 
-export async function prepareEnvelope(career: Career): Promise<SaveEnvelope> {
-  const copy = validateCareer(career);
+export async function prepareEnvelope(career: Career,ownedJSON=false): Promise<SaveEnvelope> {
+  const copy=ownedJSON?career:JSON.parse(stringify(career));
+  ensureSafeJSON(copy);recoverCareerKeeperRoles(copy);validateCareer(copy,true);
   return { format: 'kball-save', schemaVersion: 1, hash: await checksum(copy), savedAt: new Date().toISOString(), career: copy };
 }
 
-export async function verifyEnvelope(value: unknown): Promise<SaveEnvelope> {
+export async function verifyEnvelope(value: unknown,ownedJSON=false): Promise<SaveEnvelope> {
   const envelope = object(value, '파일');
   assert(envelope.format === 'kball-save', 'K볼 저장 파일이 아닙니다.');
   assert(envelope.schemaVersion === 1, '지원하지 않는 저장 버전입니다. 게임을 업데이트하거나 이전 백업을 사용하세요.');
   assert(typeof envelope.hash === 'string' && /^[a-f0-9]{64}$/.test(envelope.hash), '파일 검사 정보가 없습니다.');
   date(envelope.savedAt, 'savedAt');
-  const career = validateCareer(envelope.career);
+  const snapshot=ownedJSON?envelope.career:JSON.parse(stringify(envelope.career));
+  let career:Career;
+  try{career=validateCareer(snapshot,true);}catch(error){
+    if(!(error instanceof Error)||!error.message.includes('신규 행동 원장 · 크로스 상대 골키퍼'))throw error;
+    // A repair is never permission to accept an edited/corrupt file. Verify the
+    // original bytes first, then infer the emergency role from its own events.
+    ensureSafeJSON(snapshot);assert(await checksum(snapshot as Career)===envelope.hash,'파일 내용이 변경되었거나 손상되었습니다. 정상 백업을 사용하세요.');
+    if(!recoverCareerKeeperRoles(snapshot as Career))throw error;
+    career=validateCareer(snapshot,true);
+    return {format:'kball-save',schemaVersion:1,savedAt:String(envelope.savedAt),hash:await checksum(career),career};
+  }
   assert(await checksum(career) === envelope.hash, '파일 내용이 변경되었거나 손상되었습니다. 정상 백업을 사용하세요.');
   return { format: 'kball-save', schemaVersion: 1, savedAt: String(envelope.savedAt), hash: String(envelope.hash), career };
 }
@@ -1147,13 +1164,18 @@ export async function restoreBackup(id: string): Promise<Career> {
 export async function exportCareer(career: Career): Promise<string> {
   return stringify(await prepareEnvelope(career));
 }
+/** Browser downloads use the fully validated Worker Blob directly. Converting a
+ * long career to another main-thread JSON string/clone caused large memory spikes. */
+export async function exportCareerBlob(career:Career):Promise<Blob>{
+ return (await prepareSnapshot(career)).record.blob;
+}
 
 /** Untrusted files always receive the original complete checks, including poison-key checks. */
 export async function verifySaveText(source:string):Promise<Career>{
   assert(typeof source === 'string' && new TextEncoder().encode(source).byteLength <= MAX_SAVE_BYTES, '저장 파일은 256MB 이하여야 합니다.');
   let parsed:unknown;
   try{parsed=JSON.parse(source);}catch{throw new Error('저장 파일을 읽을 수 없습니다. 올바른 JSON 백업을 선택해 주세요.');}
-  ensureSafeJSON(parsed);return (await verifyEnvelope(parsed)).career;
+  ensureSafeJSON(parsed);return (await verifyEnvelope(parsed,true)).career;
 }
 /** Imported saves always become new slots; no existing game or legacy localStorage is overwritten. */
 export async function importCareer(source:string):Promise<Career>{

@@ -5,6 +5,8 @@ import {copySystems} from './snapshot';
 import {playSkillDefinitions,playSkillNames} from './play-skills';
 import {removeSkillMastery} from './growth';
 import {trackMonthlyLeague} from './extra-honours';
+import {settleShirtMarket} from './commercial';
+import {ensureEconomicMarket} from './career-systems';
 import {moneyText} from './currency';
 import {syncManualInjury,recordManualAbsences,activatePendingInjury} from './manual-injury';
 import {initializeClubCompetitions,processClubCompetitions,europeanEntries,cupStats} from './club-competitions';
@@ -24,7 +26,7 @@ import { TALENT_PROFILES } from './talent';
 import type { AttributeKey, Attributes, Career, CreateOptions, Fixture, GameProgress, Intensity, MatchRecord, Player, PlayerStats, SeasonState, SeasonSummary, Standing, Talent, TransferOffer } from './types';
 import type { PresentationEvent } from './revision-types';
 
-export const ENGINE_VERSION = '2.10.2';
+export const ENGINE_VERSION = '2.11.0';
 export const overall = calculateOverall;
 export { addStats, emptyStats, hashSeed, seededRandom } from './math';
 const TALENT_ORDER: Talent[] = ['D','C','B','A','S','SS','SSS'];
@@ -39,6 +41,7 @@ function editable(career:Career,light=false):Career {
   };
   initializeSystems(next);
   ensureEconomicHistory(next);
+  ensureEconomicMarket(next);
   ensureGrowthTracking(next);
   initializeClubCompetitions(next);
   if(!next.systems!.trainingPlan)next.systems!.trainingPlan={forYear:next.season.year+(next.stage==='offseason'?1:0),confirmed:true,confirmedAtRound:next.season.week,source:'legacy'};
@@ -180,6 +183,7 @@ function halfway(career:Career) {
 }
 function archive(career:Career,completed:boolean) {
   if(career.history.some(row=>row.year===career.season.year))return;
+  settleShirtMarket(career,completed);
   const {player,season}=career;
   const awards=completed?evaluateAwards(career):[];
   const changes:Attributes={};

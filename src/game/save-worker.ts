@@ -10,7 +10,7 @@ self.addEventListener('message',(event:MessageEvent<{id:string;operation:string;
    let result:unknown;
    if(operation==='prepare'){
     resident=undefined;
-    const envelope=await prepareEnvelope(payload as Career);resident={career:envelope.career,versionHash:envelope.hash};result=packEnvelope(envelope);
+    const envelope=await prepareEnvelope(payload as Career,true);resident={career:envelope.career,versionHash:envelope.hash};result=packEnvelope(envelope);
    }else if(operation==='verifyFile'){
     resident=undefined;
     result=await verifySaveText(payload);
@@ -27,7 +27,7 @@ self.addEventListener('message',(event:MessageEvent<{id:string;operation:string;
     }
     state??=await decodeStored(payload);
     if(state.career.revision!==targetRevision||state.versionHash!==targetHash)throw Error('배경 스냅샷의 변경 기록이 일치하지 않습니다.');
-    const envelope=await prepareEnvelope(state.career);resident={career:envelope.career,versionHash:targetHash};result=packEnvelope(envelope,targetHash);
+    const envelope=await prepareEnvelope(state.career,true);resident={career:envelope.career,versionHash:targetHash};result=packEnvelope(envelope,targetHash);
    }else throw Error('지원하지 않는 저장 요청입니다.');
    self.postMessage({id,result});
   }catch(e){self.postMessage({id,error:e instanceof Error?e.message:'저장 검사 실패'});}

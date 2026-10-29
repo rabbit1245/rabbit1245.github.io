@@ -1,0 +1,20 @@
+{
+  "version": "2.11.0",
+  "typecheck": true,
+  "production": true,
+  "singleHTML": true,
+  "ZIPCRC": true,
+  "HTMLMatches": true,
+  "finalBrowserSmoke": true,
+  "finalMarketAndRecoveryUI": true,
+  "artifacts": {
+    "Kball.html": {
+      "bytes": 28591002,
+      "sha256": "373d9c3ec95df9c6a1be0778ca224241da4b0f6edccee6af16baaa9bebc0ce8d"
+    },
+    "Kball.zip": {
+      "bytes": 21545429,
+      "sha256": "e4ac2000104bd0fc66ddf4f44a194bb6feeece5a0189a7b421ef4e4d3de9ecb2"
+    }
+  }
+}

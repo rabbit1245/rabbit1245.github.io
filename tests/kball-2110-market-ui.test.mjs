@@ -1,0 +1,26 @@
+import {chromium} from 'playwright';
+import assert from 'node:assert/strict';
+import {readFile,writeFile,mkdir,stat} from 'node:fs/promises';
+import path from 'node:path';
+const url=process.env.KBALL_TEST_URL||'http://127.0.0.1:4194/Kball.html',out=process.env.KBALL_TEST_RESULTS_DIR||'test-results/release-2.11.0/market-ui';await mkdir(out,{recursive:true});
+const icon=JSON.parse(await readFile('test-results/release-2.11.0/icon/career-1.json','utf8')).career,market=icon.systems.commercial.seasons[0];
+assert.equal(market.playerRank,1);assert.ok(icon.awards.some(a=>a.name==='K볼 유니폼 판매 1위'));
+const browser=await chromium.launch({headless:true,executablePath:'/usr/bin/chromium'}),checks=[],errors=[],external=[];
+async function ready(p){await p.locator('.processing').waitFor({state:'hidden'});await p.getByTestId('save-status').filter({hasText:'자동 저장됨'}).waitFor({state:'attached'});assert.deepEqual(await p.getByRole('alert').allTextContents(),[]);}
+async function exportJSON(p,name){await p.getByTestId('common-menu').click();const [file]=await Promise.all([p.waitForEvent('download'),p.getByRole('dialog').getByRole('button',{name:'JSON 내보내기',exact:true}).click()]);const dest=path.join(out,name);await file.saveAs(dest);await p.getByRole('dialog').getByRole('button',{name:'닫기',exact:true}).click();return JSON.parse(await readFile(dest,'utf8')).career;}
+try{
+ for(const width of [1366,390]){
+  const context=await browser.newContext({viewport:{width,height:900},reducedMotion:'reduce',acceptDownloads:true}),p=await context.newPage();p.setDefaultTimeout(180000);p.on('pageerror',e=>errors.push(String(e)));p.on('request',r=>{if(/^https?:/.test(r.url())&&r.url()!==url)external.push(r.url());});
+  await p.goto(url,{waitUntil:'networkidle'});await context.setOffline(true);await p.getByLabel('K볼 저장 파일 가져오기').setInputFiles(path.resolve('test-results/release-2.11.0/icon/career-1.json'));await ready(p);
+  await p.getByTestId('career-tab').click();await p.getByTestId('career-view-awards').click();const sales=p.getByTestId('shirt-sales');assert.equal(await sales.getByTestId('shirt-units').innerText(),`${market.playerUnits.toLocaleString('ko-KR')}장`);assert.ok((await sales.getByTestId('shirt-rank').innerText()).includes('세계 1위'));
+  const awards=p.getByTestId('award-disclosure');for(let i=0;i<await awards.count();i++){assert.equal(await awards.nth(i).getAttribute('open'),null);assert.equal(await awards.nth(i).getByTestId('award-criteria').isVisible(),false);}
+  await p.getByLabel('수상 범위',{exact:true}).selectOption('commercial');const medal=p.getByTestId('award-disclosure').filter({hasText:'K볼 유니폼 판매 1위'});assert.equal(await medal.count(),1);await medal.locator(':scope > summary').click();assert.ok((await medal.getByTestId('award-criteria').innerText()).includes(market.playerUnits.toLocaleString('ko-KR')));await medal.locator(':scope > summary').click();assert.equal(await medal.getByTestId('award-criteria').isVisible(),false);
+  await sales.locator('.shirt-market-details > summary').click();assert.equal(await sales.locator('tbody tr').count(),20);assert.ok(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));await p.evaluate(()=>window.scrollTo(0,0));await p.screenshot({path:path.join(out,`market-${width}.png`),fullPage:true});
+  const exported=await exportJSON(p,`market-${width}.json`);assert.deepEqual(exported.systems.commercial,icon.systems.commercial);assert.deepEqual(exported.season.playerStats,icon.season.playerStats);assert.deepEqual(exported.history.map(h=>h.stats),icon.history.map(h=>h.stats));assert.deepEqual(exported.player.attributes,icon.player.attributes);
+  checks.push({width,actualSales:market.playerUnits,actualWorldRank:1,actualPersonalSalesMedal:true,criteriaInitiallyHidden:true,criteriaToggle:true,all20Leaders:true,noOverflow:true,offlineAssets:true,JSONRoundTrip:true});await context.close();
+ }
+ const brokenFile='test-results/release-2.11.0/fixtures/legacy-broken.json',original=JSON.parse(await readFile(brokenFile,'utf8')).career,context=await browser.newContext({viewport:{width:1366,height:900},reducedMotion:'reduce',acceptDownloads:true}),p=await context.newPage();p.setDefaultTimeout(180000);p.on('pageerror',e=>errors.push(String(e)));
+ await p.goto(url,{waitUntil:'networkidle'});await p.getByLabel('K볼 저장 파일 가져오기').setInputFiles(path.resolve(brokenFile));await ready(p);const recovered=await exportJSON(p,'recovered.json');assert.deepEqual(recovered.season.playerStats,original.season.playerStats);assert.deepEqual(recovered.season.matches.map(m=>m.events),original.season.matches.map(m=>m.events));assert.deepEqual(recovered.player.attributes,original.player.attributes);assert.ok(recovered.season.matches.some(m=>m.performers.some(p=>p.emergencyGoalkeeper)));
+ await p.reload({waitUntil:'networkidle'});await p.getByRole('button',{name:'이어서 플레이',exact:true}).click();await ready(p);checks.push({knownBadLegacyFile:true,import:true,originalChecksumVerified:true,sourceAndStatsPreserved:true,autosave:true,BlobJSONExport:true,reload:true});await context.close();assert.deepEqual(errors,[]);assert.deepEqual(external,[]);
+ await writeFile(path.join(out,'results.json'),JSON.stringify({checks,errors,external},null,2)+'\n');console.log(JSON.stringify({checks,errors,external}));
+}finally{await browser.close();}

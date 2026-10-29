@@ -9,7 +9,7 @@ const avg=(s:PlayerStats)=>s.ratingCount?s.ratingSum/s.ratingCount:0;
 const role=(p:Position)=>p==='GK'?'GK':/^(CB|LB|RB|LWB|RWB)$/.test(p)?'DEF':/^(CDM|CM|CAM|LM|RM)$/.test(p)?'MID':'FWD';
 export interface MonthlyPlayer {id:string;name:string;position:Position;age:number;clubId:string;stats:PlayerStats;}
 export interface MonthlyLedger {year:number;leagueId:string;months:Record<string,Record<string,MonthlyPlayer>>;}
-export const EXTRA_HONOUR_KINDS=['구단 올해의 선수','구단 팬 선정 올해의 선수','구단 선수단 선정 올해의 선수','구단 올해의 유망주','구단 올해의 영입','구단 올해의 공격수','구단 올해의 미드필더','구단 올해의 수비수','구단 올해의 골키퍼','구단 올해의 해결사','리그 이달의 선수','리그 이달의 유망주','리그 올해의 유망주','리그 올해의 신인','리그 올해의 영입','국내 컵대회 최우수 선수','대륙 클럽대회 최우수 선수','FIFA 클럽 월드컵 최우수 선수','국가대표 올해의 선수','구단 유니폼 판매 1위'] as const;
+export const EXTRA_HONOUR_KINDS=['구단 올해의 선수','구단 팬 선정 올해의 선수','구단 선수단 선정 올해의 선수','구단 올해의 유망주','구단 올해의 영입','구단 올해의 공격수','구단 올해의 미드필더','구단 올해의 수비수','구단 올해의 골키퍼','구단 올해의 해결사','리그 이달의 선수','리그 이달의 유망주','리그 올해의 유망주','리그 올해의 신인','리그 올해의 영입','국내 컵대회 최우수 선수','대륙 클럽대회 최우수 선수','FIFA 클럽 월드컵 최우수 선수','국가대표 올해의 선수','K볼 유니폼 판매 1위','K볼 유니폼 판매 2위','K볼 유니폼 판매 3위'] as const;
 export function trackMonthlyLeague(c:Career,matches:MatchRecord[]):void{
  if(!c.systems||c.player.squad!=='senior')return;
  const ledger=c.systems.monthlyLeague;
@@ -67,6 +67,7 @@ export function evaluateExtraHonours(c:Career,scoreSeason:(r:CompetitorSeason)=>
  const natRows=new Map<string,MonthlyPlayer>();for(const m of natGames)for(const r of m.performers??[]){if((r.teamId??r.clubId)!==m.playerClubId)continue;const row=natRows.get(r.id)??{id:r.id,name:r.name,position:r.position,age:99,clubId,stats:emptyStats()};addStats(row.stats,r.stats);natRows.set(r.id,row);}
  const nationals=[...natRows.values()].filter(r=>r.stats.apps>=4&&r.stats.minutes>=240&&avg(r.stats)>=6.7).sort((a,b)=>tournamentPerformance(b)-tournamentPerformance(a)||a.id.localeCompare(b.id));
  if(nationals[0]?.id===p.id)awards.push({id:`${year}:extra:national-player:${p.id}`,year,clubId,name:`언론 선정 · ${c.systems.national.country} 국가대표 올해의 선수`,category:'national-individual',official:false,organiser:'언론 평가 모형',verification:'game-model',description:`해당 게임 연도 실제 성인 대표팀 ${nationals[0].stats.apps}경기 · 같은 대표팀 실제 출전 ${nationals.length}명 비교. U20·클럽 기록 제외.`});
- if(own)add('shirt-sales','구단 유니폼 판매 예상 1위','commercial',club,popularity,`구단 팬 규모(수입 지표)·명성·실적·재적 기간·득점/도움·스타성으로 추정한 구단 내 인기 순위`,true);
+ // Historical estimated popularity awards remain intact. New sales medals use
+ // the conserved world merchandise market, not a second popularity-only award.
  return awards.filter(a=>!c.awards.some(old=>old.id===a.id));
 }

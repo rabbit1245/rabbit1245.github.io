@@ -38,7 +38,7 @@ try{
  for(const view of ['national','awards','seasons']){await page.getByTestId(`quick-${view}`).click();assert.equal(await page.getByTestId(`career-view-${view}`).getAttribute('aria-pressed'),'true');await noOverflow(view);await home();}
  passed.push('national, awards and season history open their existing view in one click');
  const disclosure=page.getByTestId('season-details-disclosure');assert.equal(await disclosure.getAttribute('open'),null);
- await disclosure.locator('summary').click();assert.equal(await page.getByTestId('locker-season-details').locator('.stat-detail:visible').count(),baseline.player.position==='GK'?10:12);
+ await disclosure.locator(':scope > summary').click();assert.equal(await page.getByTestId('locker-season-details').locator('.stat-detail:visible').count(),baseline.player.position==='GK'?10:12);
  const homeApps=await page.getByTestId('locker-season-details').locator('.shared-stats b').first().textContent();
  await page.getByRole('button',{name:'대회별 · 경기별 전체 기록',exact:true}).click();
  assert.equal(await page.getByTestId('career-view-records').getAttribute('aria-pressed'),'true');
@@ -48,7 +48,7 @@ try{
  await importFixture('career-completed.json');const closedBefore=await fingerprint('offseason');
  const preview=await page.getByTestId('honours-preview').textContent();
  if(completed.history[0].rank===1)assert.ok(preview.includes(completed.history[0].competitionName),'actual champion is named before expanding');
- await page.getByTestId('honours-disclosure').locator('summary').click();assert.ok(await page.getByRole('heading',{name:'우승한 대회',exact:true}).isVisible());
+ await page.getByTestId('honours-disclosure').locator(':scope > summary').click();assert.ok(await page.getByRole('heading',{name:'우승한 대회',exact:true}).isVisible());
  await page.screenshot({path:path.join(output,'home-honours-expanded.png'),fullPage:true});
  assert.equal(await page.getByTestId('quick-training').count(),0,'unconfirmed offseason training has one primary path');
  assert.equal(await page.getByTestId('training-plan').count(),1);assert.equal(await page.getByTestId('advance-half').isDisabled(),!completed.transferDecision);

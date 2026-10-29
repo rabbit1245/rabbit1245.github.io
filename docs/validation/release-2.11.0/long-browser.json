@@ -1,0 +1,42 @@
+{
+  "initialYears": 5,
+  "additionalActualWorldSeasons": 3,
+  "totalActualWorldSeasons": 8,
+  "metadataOnlyPolling": true,
+  "errors": [],
+  "external": [],
+  "steps": [
+    {
+      "year": 2031,
+      "ovr": 90,
+      "shirtUnits": "209,325장",
+      "revision": 239,
+      "mainPageHeapUsed": 510046104,
+      "mainPageHeapTotal": 599752704,
+      "saveReload": true
+    },
+    {
+      "year": 2032,
+      "ovr": 90,
+      "shirtUnits": "230,024장",
+      "revision": 279,
+      "mainPageHeapUsed": 609141232,
+      "mainPageHeapTotal": 700530688,
+      "saveReload": true
+    },
+    {
+      "year": 2033,
+      "ovr": 90,
+      "shirtUnits": "221,999장",
+      "revision": 319,
+      "mainPageHeapUsed": 705773164,
+      "mainPageHeapTotal": 812015616,
+      "saveReload": true
+    }
+  ],
+  "exported": {
+    "file": "test-results/release-2.11.0/long-browser/eight-seasons.json",
+    "bytes": 177500585
+  },
+  "retirementTXT": true
+}

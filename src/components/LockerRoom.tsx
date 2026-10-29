@@ -1,3 +1,4 @@
+import ShirtSales from './ShirtSales';
 import {getClub,getLeague} from '../game/data';
 import {needsContractOfferRefresh} from '../game/career-systems';
 import {expiryReturnClub} from '../game/employment';
@@ -99,8 +100,8 @@ export default function LockerRoom({career,busy,command,onMatch,onTraining,onCar
       </Panel>
     </div><NearbyTable career={career}/></div>
     <details className="locker-detail locker-season-details" data-testid="season-details-disclosure" key={`${career.id}:${s.year}`}>
-      <summary><strong>이번 시즌 통합 세부 기록</strong><span>{combined.apps}경기 · {combined.minutes.toLocaleString()}분 · 평점 {average(combined)}</span><span className="disclosure-cue">9개 지표 <ChevronRight size={17}/></span></summary>
-      <div className="panel-body" data-testid="locker-season-details"><StatsNine stats={combined} detailedStats={detailed} position={p.position}/>{onCareer&&<button className="text-button" onClick={()=>onCareer('records')}>대회별 · 경기별 전체 기록<ArrowRight size={16}/></button>}</div>
+      <summary><strong>이번 시즌 통합 세부 기록</strong><span>{combined.apps}경기 · {combined.minutes.toLocaleString()}분 · 평점 {average(combined)}</span><span className="disclosure-cue">{p.position==='GK'?10:12}개 지표 <ChevronRight size={17}/></span></summary>
+      <div className="panel-body" data-testid="locker-season-details"><StatsNine stats={combined} detailedStats={detailed} position={p.position}/><ShirtSales career={career}/>{onCareer&&<button className="text-button" onClick={()=>onCareer('records')}>대회별 · 경기별 전체 기록<ArrowRight size={16}/></button>}</div>
     </details>
     {!!career.systems?.manualInjuries?.length&&<details className="locker-detail injury-history" data-testid="injury-history"><summary>부상 · 결장 이력</summary><div className="panel-body">{[...career.systems.manualInjuries].reverse().slice(0,12).map(r=><p key={r.id}>{r.year}시즌 · {typeof r.duration==='number'?`${r.duration}경기 부상`:r.selectionVersion===2?'시즌 전체 부상':r.duration==='half'?'반 시즌 부상':'한 시즌 부상'} · {r.pendingNextSeason?'다음 시즌 예약':r.returned?'복귀 완료':'회복 중'} · 클럽 {r.missed.filter(m=>m.scope==='club').length} / 국대 {r.missed.filter(m=>m.scope==='national').length}경기 결장{r.remainingMatches!==undefined&&!r.returned?` · 클럽 ${r.remainingMatches}경기 남음`:''}</p>)}</div></details>}
     <ClubDevelopment career={career}/>

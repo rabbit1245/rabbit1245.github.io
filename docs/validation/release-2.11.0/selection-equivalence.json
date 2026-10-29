@@ -1,0 +1,8 @@
+{
+  "pairedScenarios": 500,
+  "includesEmptySquads": true,
+  "includesMissingGK": true,
+  "includesMissingOutfield": true,
+  "includesAutomaticSelection": true,
+  "completeMatchResultsAndSourceEventsIdentical": true
+}

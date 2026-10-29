@@ -44,6 +44,7 @@ export type MatchAction =
   | {kind:'headerShot';phase:'open'|'setPiece';duelId:string};
 export interface MatchEvent { id: string; minute: number; type: 'shot'|'goal'|'save'|'assist'|'yellow'|'red'|'injury'|'substitution'|'pass'|'keyPass'|'dribble'|'tackle'|'interception'|'aerial'|'handling'|'sweep'|'longKick'|'pressure'|'recovery'|'cross'|'catch'|'punch'|'setPiece'; teamId: string; playerName: string; playerId?: string; relatedId?: string; detail: string; action?:MatchAction }
 export interface MatchRecord {
+  lineupVersion?:2;
   aggregate?:{home:number;away:number};nationalSelection?:{called:boolean;role:'starter'|'substitute'|'bench'|'excluded';reason:string;};
   id: string; fixtureId: string; round: number; seasonYear: number; homeId: string; awayId: string;
   homeGoals: number; awayGoals: number; events: MatchEvent[]; playerClubId: string;

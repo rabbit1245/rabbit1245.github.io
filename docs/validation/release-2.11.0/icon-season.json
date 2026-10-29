@@ -1,0 +1,39 @@
+{
+  "version": "2.11.0",
+  "actualFullWorldSeasons": 1,
+  "initialReputation": 1,
+  "abilitiesLockedAndUnchanged": true,
+  "sourceValidationEveryHalf": true,
+  "JSONRoundTrip": true,
+  "commercialRoundTrip": true,
+  "retirementTXT": true,
+  "rows": [
+    {
+      "year": 2026,
+      "age": 27,
+      "ovr": 110,
+      "rank": 1,
+      "goals": 61,
+      "assists": 16,
+      "shirtUnits": 891259,
+      "shirtRank": 1,
+      "clubPopularity": 1.09,
+      "worldMarketUnits": 60174850,
+      "candidates": 18549,
+      "shirtAwards": [
+        "K볼 유니폼 판매 1위"
+      ],
+      "marketValueEUR": 133159000,
+      "wageEUR": 19020,
+      "power": 89.35,
+      "elapsedMs": 25768.719257999997,
+      "memory": {
+        "rss": 539074560,
+        "heapTotal": 384393216,
+        "heapUsed": 329908216,
+        "external": 3039699,
+        "arrayBuffers": 252851
+      }
+    }
+  ]
+}

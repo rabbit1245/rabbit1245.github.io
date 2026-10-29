@@ -7,7 +7,7 @@ import type { PresentationEvent } from './game/revision-types';
 import { CLUBS, DATA_PROVENANCE } from './game/data';
 import { createCareer, ENGINE_VERSION } from './game/engine';
 import { runGameCommand } from './game/client';
-import { deleteSlot, exportCareer, importCareer, listSlots, loadCareer, restoreBackup, saveCareer, saveCareerChange } from './game/storage';
+import { deleteSlot, exportCareerBlob, importCareer, listSlots, loadCareer, restoreBackup, saveCareer, saveCareerChange } from './game/storage';
 import { sumStats } from './game/math';
 import { careerTextChunks,careerTextFilename } from './game/career-text';
 import Creation from './components/Creation';
@@ -137,7 +137,7 @@ export default function App() {
   async function exportFile() {
     const exporting = careerRef.current;
     if (!exporting) return;
-    try { const text = await exportCareer(exporting); const url = URL.createObjectURL(new Blob([text], { type: 'application/json;charset=utf-8' })); const link = document.createElement('a'); link.href = url; link.download = `K볼_${exporting.player.name}_${exporting.season.year}.json`; link.click(); window.setTimeout(() => URL.revokeObjectURL(url), 1000); setToast('커리어를 JSON 파일로 내보냈습니다.'); }
+    try { const blob = await exportCareerBlob(exporting); const url = URL.createObjectURL(blob); const link = document.createElement('a'); link.href = url; link.download = `K볼_${exporting.player.name}_${exporting.season.year}.json`; link.click(); window.setTimeout(() => URL.revokeObjectURL(url), 1000); setToast('커리어를 JSON 파일로 내보냈습니다.'); }
     catch (e) { setError(errorMessage(e)); }
   }
   async function importFile(event: ChangeEvent<HTMLInputElement>) {

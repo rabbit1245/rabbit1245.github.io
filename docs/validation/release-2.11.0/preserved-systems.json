@@ -1,0 +1,105 @@
+{
+  "base": "f28027a",
+  "files": [
+    {
+      "file": "src/game/attributes.ts",
+      "unchanged": true,
+      "sha256": "aa4e4484a18884b50991df3e527680e9266921ec7a197525c5ad4263b5b3f589"
+    },
+    {
+      "file": "src/game/growth.ts",
+      "unchanged": true,
+      "sha256": "6b9e9b3195b38b68a9bd7a5453109f9d0fd96bbcb3791ba0e9d9e43c9ea36694"
+    },
+    {
+      "file": "src/game/play-skills.ts",
+      "unchanged": true,
+      "sha256": "ecae3836e767b4bfc5c8479c96ba366202524bb9893e5ed9a26c5175fe8ce5d0"
+    },
+    {
+      "file": "src/game/talent.ts",
+      "unchanged": true,
+      "sha256": "df0e3ea25c15042798b92567094353403d1ce42e8ccb9067face66d50175c30f"
+    },
+    {
+      "file": "src/game/math.ts",
+      "unchanged": true,
+      "sha256": "462eca4762d2eed01e74de326a52a5bf252d11db7280783cec7897dbf2bc1340"
+    },
+    {
+      "file": "src/game/match-actions.ts",
+      "unchanged": true,
+      "sha256": "7cb9145f1d0f9d45fa0578f739e1f93d0667ab0ff8e716d51b916e9032165332"
+    },
+    {
+      "file": "src/game/ability-contests.ts",
+      "unchanged": true,
+      "sha256": "3085ec901fd3d3edd586ac8ecd64cf040d75f5bd626ee374bd8a0e6b0d8a905e"
+    },
+    {
+      "file": "src/game/metrics.ts",
+      "unchanged": true,
+      "sha256": "807cb5dc9013de30accb2a5357e127fb3b0a97ab7907a38706ce59c2e4b0e995"
+    },
+    {
+      "file": "src/game/global-honours.ts",
+      "unchanged": true,
+      "sha256": "f7ddd96714abf7fed586831f8c46f76dbd1d95fe92987d0cf7c84a48df9522cc"
+    },
+    {
+      "file": "src/game/award-rules.ts",
+      "unchanged": true,
+      "sha256": "d301639ad7adbb62584ba2d0efde88d4a2d28fba5e075d27366539ae440232c9"
+    },
+    {
+      "file": "src/game/award-selection.ts",
+      "unchanged": true,
+      "sha256": "73904c46e0c3b2bc530a464c84923dd173275fc2ec05d9dcff78c64f5ef50e7d"
+    },
+    {
+      "file": "src/game/tournament-awards.ts",
+      "unchanged": true,
+      "sha256": "4c80937efdc47c672ddaaf8a255e68ed52aaa45612a4454d982ebe2399e2fb04"
+    },
+    {
+      "file": "src/game/captain.ts",
+      "unchanged": true,
+      "sha256": "955e6ef97f016c126d5b4ada3eb7b9b821e6c52ddf86193fc2f4376bfec78481"
+    },
+    {
+      "file": "src/game/manual-injury.ts",
+      "unchanged": true,
+      "sha256": "ce4e9591a223fdeda9ce90e49ff526ab7b9ca9f0729169a27b43fd6e40a0acba"
+    },
+    {
+      "file": "src/game/club-balance.ts",
+      "unchanged": true,
+      "sha256": "21fc42133d27998f148feefb5b6c7274b42c4228c21076679ab35d8023a3e32b"
+    },
+    {
+      "file": "src/game/club-development.ts",
+      "unchanged": true,
+      "sha256": "415747c12984b95a32da2676726fea9a90ddceda76468a1485990dfb601b0494"
+    },
+    {
+      "file": "src/game/canonical-bytes.ts",
+      "unchanged": true,
+      "sha256": "4f6c9699685a98ce27a75e770e07c97ea3d7a7158b85d2d1d76030bb29aae2db"
+    },
+    {
+      "file": "src/styles.css",
+      "unchanged": true,
+      "sha256": "9da22c7bac88247621ff78bc134ddf46cbcbcb36183d0c5c7a6380c8b2356449"
+    },
+    {
+      "file": "src/components/StatsNine.tsx",
+      "unchanged": true,
+      "sha256": "60924818577ae0757f6d798fa34ae0ea6e949b7d1e34f6078204c4353d301ed3"
+    },
+    {
+      "file": "src/components/StatsNine.css",
+      "unchanged": true,
+      "sha256": "22babbc9236d8fb2394825fe27bc18c3132d0161efa81513c34965ddcc5b21a7"
+    }
+  ]
+}

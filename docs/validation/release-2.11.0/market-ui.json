@@ -1,0 +1,39 @@
+{
+  "checks": [
+    {
+      "width": 1366,
+      "actualSales": 891259,
+      "actualWorldRank": 1,
+      "actualPersonalSalesMedal": true,
+      "criteriaInitiallyHidden": true,
+      "criteriaToggle": true,
+      "all20Leaders": true,
+      "noOverflow": true,
+      "offlineAssets": true,
+      "JSONRoundTrip": true
+    },
+    {
+      "width": 390,
+      "actualSales": 891259,
+      "actualWorldRank": 1,
+      "actualPersonalSalesMedal": true,
+      "criteriaInitiallyHidden": true,
+      "criteriaToggle": true,
+      "all20Leaders": true,
+      "noOverflow": true,
+      "offlineAssets": true,
+      "JSONRoundTrip": true
+    },
+    {
+      "knownBadLegacyFile": true,
+      "import": true,
+      "originalChecksumVerified": true,
+      "sourceAndStatsPreserved": true,
+      "autosave": true,
+      "BlobJSONExport": true,
+      "reload": true
+    }
+  ],
+  "errors": [],
+  "external": []
+}

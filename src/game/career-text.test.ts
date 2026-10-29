@@ -46,10 +46,10 @@ test('annual records use contemporary values, captaincy, injuries, awards and re
  const c=fresh(),year=c.season.year,m=match(c,'league');c.season.matches=[m];c.season.week=1;c.season.playerStats={...m.playerStats};
  const h=archive(c,year-1);h.details=captureSeasonDetails(c)!;h.details.marketValue=100;h.details.contract.wage=10;h.details.captain.club='vice';h.details.table=c.season.table;
  c.history=[h];c.systems!.economics.marketValue=900;c.player.wage=90;c.player.injuryWeeks=3;
- c.awards=[{id:'personal',name:'리그 올해의 선수',year,clubId:c.player.clubId,description:'검증',category:'individual'},{id:'sales',name:'유니폼 판매',year,clubId:c.player.clubId,description:'제외',category:'commercial'}];
+ c.awards=[{id:'personal',name:'리그 올해의 선수',year,clubId:c.player.clubId,description:'검증',category:'individual'},{id:'sales',name:'구단 유니폼 판매 예상 1위',year,clubId:c.player.clubId,description:'제외',category:'commercial'}];
  const retired=retireCareer(c),rows=careerSeasonRecords(retired),text=buildCareerText(retired);
  assert.equal(rows.length,2);assert.match(rows[0].value,/150,000원/);assert.match(rows[0].wage,/15,000원/);assert.match(rows[0].leadership,/부주장/);assert.equal(rows[0].ovrEnd,75);
- assert.match(rows[1].status,/은퇴 \(시즌 도중\)/);assert.match(rows[1].injury,/부상 있음/);assert.ok(rows[1].results[0].includes('은퇴 시점'));assert.match(text,/리그 올해의 선수/);assert.doesNotMatch(text,/유니폼 판매|분단위 로그 제외 검증 문구/);
+ assert.match(rows[1].status,/은퇴 \(시즌 도중\)/);assert.match(rows[1].injury,/부상 있음/);assert.ok(rows[1].results[0].includes('은퇴 시점'));assert.match(text,/리그 올해의 선수/);assert.doesNotMatch(text,/구단 유니폼 판매 예상 1위|분단위 로그 제외 검증 문구/);assert.match(text,/유니폼 판매:/);
  const total=careerRecordTotals(retired);assert.equal(total.all.goals,h.stats.goals+m.playerStats.goals);assert.equal(total.all.apps,3);
  const unknown=fresh();unknown.history=[archive(unknown,year-1)];unknown.systems!.economics.valueHistory=[];unknown.systems!.economics.contractHistory=[];
  const old=careerSeasonRecords(unknown)[0];assert.equal(old.value,'과거 기록 미보존');assert.equal(old.wage,'과거 기록 미보존');assert.equal(old.injury,'과거 기록 미보존');

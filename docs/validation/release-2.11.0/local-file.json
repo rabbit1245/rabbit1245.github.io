@@ -1,0 +1,6 @@
+{
+  "scheme": "file:",
+  "skipped": true,
+  "reason": "Managed cloud browser policy blocks file:// navigation; no policy bypass attempted.",
+  "HTTPStandaloneTestsSeparate": true
+}

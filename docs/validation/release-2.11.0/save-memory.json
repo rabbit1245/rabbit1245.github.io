@@ -1,0 +1,198 @@
+{
+  "baseline": "2.10.2",
+  "version": "2.11.0",
+  "conditions": "Five actual seasons, identical JSON-owned Worker payload, isolated Node 20 processes, 3 alternating trials, full validation and canonical checksum in both versions; not a Windows Edge memory measurement.",
+  "allChecksumsIdentical": true,
+  "summary": {
+    "before": {
+      "medianMs": 5539.889402,
+      "medianPeakRSS": 1125683200
+    },
+    "after": {
+      "medianMs": 4078.241437,
+      "medianPeakRSS": 843001856
+    }
+  },
+  "runs": [
+    {
+      "label": "before",
+      "bytes": 122084012,
+      "elapsedMs": 5814.74301,
+      "startMemory": {
+        "rss": 452194304,
+        "heapTotal": 408940544,
+        "heapUsed": 370482680,
+        "external": 2343520,
+        "arrayBuffers": 25091
+      },
+      "endMemory": {
+        "rss": 1130532864,
+        "heapTotal": 688410624,
+        "heapUsed": 503492344,
+        "external": 246528732,
+        "arrayBuffers": 244192791
+      },
+      "retainedMemory": {
+        "rss": 1109118976,
+        "heapTotal": 422780928,
+        "heapUsed": 276007912,
+        "external": 246528732,
+        "arrayBuffers": 121260678
+      },
+      "peakRSS": 1138778112,
+      "hash": "c03860ca3a50a5cb4ad6628d662dc89d6759857832a866276aa158f76654c336",
+      "ownedReference": false,
+      "trial": 0
+    },
+    {
+      "label": "after",
+      "bytes": 122084012,
+      "elapsedMs": 4078.241437,
+      "startMemory": {
+        "rss": 450461696,
+        "heapTotal": 408682496,
+        "heapUsed": 370566744,
+        "external": 2343520,
+        "arrayBuffers": 25091
+      },
+      "endMemory": {
+        "rss": 843001856,
+        "heapTotal": 411303936,
+        "heapUsed": 372637512,
+        "external": 246528732,
+        "arrayBuffers": 244192791
+      },
+      "retainedMemory": {
+        "rss": 834170880,
+        "heapTotal": 184209408,
+        "heapUsed": 145366256,
+        "external": 246528732,
+        "arrayBuffers": 121331978
+      },
+      "peakRSS": 843001856,
+      "hash": "c03860ca3a50a5cb4ad6628d662dc89d6759857832a866276aa158f76654c336",
+      "ownedReference": true,
+      "trial": 0
+    },
+    {
+      "label": "after",
+      "bytes": 122084012,
+      "elapsedMs": 4053.750532,
+      "startMemory": {
+        "rss": 673730560,
+        "heapTotal": 408420352,
+        "heapUsed": 370581064,
+        "external": 2868759,
+        "arrayBuffers": 25091
+      },
+      "endMemory": {
+        "rss": 834719744,
+        "heapTotal": 411041792,
+        "heapUsed": 372939608,
+        "external": 246528732,
+        "arrayBuffers": 244192791
+      },
+      "retainedMemory": {
+        "rss": 830074880,
+        "heapTotal": 184471552,
+        "heapUsed": 145237320,
+        "external": 246528732,
+        "arrayBuffers": 120979437
+      },
+      "peakRSS": 834719744,
+      "hash": "c03860ca3a50a5cb4ad6628d662dc89d6759857832a866276aa158f76654c336",
+      "ownedReference": true,
+      "trial": 1
+    },
+    {
+      "label": "before",
+      "bytes": 122084012,
+      "elapsedMs": 5519.629290999999,
+      "startMemory": {
+        "rss": 673165312,
+        "heapTotal": 408416256,
+        "heapUsed": 370488232,
+        "external": 2868559,
+        "arrayBuffers": 25091
+      },
+      "endMemory": {
+        "rss": 1117552640,
+        "heapTotal": 688934912,
+        "heapUsed": 503399112,
+        "external": 246528732,
+        "arrayBuffers": 244192791
+      },
+      "retainedMemory": {
+        "rss": 1110818816,
+        "heapTotal": 423305216,
+        "heapUsed": 275987248,
+        "external": 246528732,
+        "arrayBuffers": 121260678
+      },
+      "peakRSS": 1125683200,
+      "hash": "c03860ca3a50a5cb4ad6628d662dc89d6759857832a866276aa158f76654c336",
+      "ownedReference": false,
+      "trial": 1
+    },
+    {
+      "label": "before",
+      "bytes": 122084012,
+      "elapsedMs": 5539.889402,
+      "startMemory": {
+        "rss": 670388224,
+        "heapTotal": 408678400,
+        "heapUsed": 370535624,
+        "external": 2868559,
+        "arrayBuffers": 25091
+      },
+      "endMemory": {
+        "rss": 1116504064,
+        "heapTotal": 688934912,
+        "heapUsed": 503414600,
+        "external": 246528732,
+        "arrayBuffers": 244192791
+      },
+      "retainedMemory": {
+        "rss": 1109762048,
+        "heapTotal": 423305216,
+        "heapUsed": 276118904,
+        "external": 246528732,
+        "arrayBuffers": 121260678
+      },
+      "peakRSS": 1124519936,
+      "hash": "c03860ca3a50a5cb4ad6628d662dc89d6759857832a866276aa158f76654c336",
+      "ownedReference": false,
+      "trial": 2
+    },
+    {
+      "label": "after",
+      "bytes": 122084012,
+      "elapsedMs": 5137.836499,
+      "startMemory": {
+        "rss": 676597760,
+        "heapTotal": 408682496,
+        "heapUsed": 370601024,
+        "external": 2868559,
+        "arrayBuffers": 25091
+      },
+      "endMemory": {
+        "rss": 848183296,
+        "heapTotal": 414449664,
+        "heapUsed": 373028336,
+        "external": 246528732,
+        "arrayBuffers": 244192791
+      },
+      "retainedMemory": {
+        "rss": 841564160,
+        "heapTotal": 184733696,
+        "heapUsed": 145236664,
+        "external": 246528732,
+        "arrayBuffers": 121260678
+      },
+      "peakRSS": 848183296,
+      "hash": "c03860ca3a50a5cb4ad6628d662dc89d6759857832a866276aa158f76654c336",
+      "ownedReference": true,
+      "trial": 2
+    }
+  ]
+}

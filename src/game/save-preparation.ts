@@ -12,7 +12,8 @@ function request<T>(operation:Operation,payload:unknown):Promise<T>{
   worker.addEventListener('error',()=>stop('저장 데이터를 검사하지 못했습니다. JSON으로 보관해 주세요.'));
   worker.addEventListener('messageerror',()=>stop('저장 검사 결과를 읽지 못했습니다.'));
  }
- const id=crypto.randomUUID();return new Promise((resolve,reject)=>{const timer=setTimeout(()=>stop('저장 검사 시간이 초과되었습니다. 현재 진행과 변경 기록은 유지됩니다.'),60000);pending.set(id,{resolve,reject,timer,operation});try{worker!.postMessage({id,operation,payload});}catch{stop('저장 검사 요청 실패');}});
+ const large=typeof payload==='string'?payload.length>32*1024*1024:payload&&typeof payload==='object'&&('blob' in payload?(payload as BlobCareer).blob?.size>32*1024*1024:'history' in payload&&((payload as Career).history?.length??0)>=4);
+ const id=crypto.randomUUID();return new Promise((resolve,reject)=>{const timer=setTimeout(()=>stop('저장 검사 시간이 초과되었습니다. 현재 진행과 변경 기록은 유지됩니다.'),large?180000:60000);pending.set(id,{resolve,reject,timer,operation});try{worker!.postMessage({id,operation,payload});}catch{stop('저장 검사 요청 실패');}});
 }
 export const prepareSaveOffThread=(career:Career)=>request<PreparedSave>('prepare',career);
 export const decodeSaveOffThread=(record:StoredCareer)=>request<DecodedSave>('decode',record);

@@ -1,4 +1,5 @@
 import {playingAbility} from './attributes';
+import {benchmarkRevenue} from './market-benchmarks';
 import {ESTABLISHED_CLUBS,userInfluencedClub} from './club-balance';
 import {personalityEdge} from './personality';
 import {reviewK3Promotion} from './korean-promotion';
@@ -53,7 +54,16 @@ function competition(leagueId: string, ids: string[], year: number, retained?: F
 const financialFactor: Record<string,number> = {'대한민국':.18,'일본':.26,'중국':.32,'미국':.65,'브라질':.4,'영국':1.3,'이탈리아':.9,'프랑스':.8,'포르투갈':.45,'벨기에':.35,'네덜란드':.45,'튀르키예':.45};
 function seasonRevenue(club: ClubWorld): number {
   const league=getLeague(club.leagueId);
-  return Math.round(Math.max(250_000, 180_000_000*Math.pow(club.power/80,5)*(financialFactor[league.country]??1)/Math.sqrt(league.tier)));
+  return benchmarkRevenue(club.id,club.power)??Math.round(Math.max(250_000, 180_000_000*Math.pow(club.power/80,5)*(financialFactor[league.country]??1)/Math.sqrt(league.tier)));
+}
+/** Rebase documented major-club revenues once, without reducing earned funds or
+ * changing an already signed player contract. Reinvestment still uses real results. */
+export function repairFinancialScale(c:Career):void{
+ const w=c.systems?.world;if(!w||w.financeVersion===1)return;
+ for(const club of Object.values(w.clubs)){
+  const reference=benchmarkRevenue(club.id,club.power);if(reference===undefined||reference<=club.revenue)continue;
+  const increase=reference-club.revenue;club.revenue=reference;club.budget+=Math.round(increase*.22);club.wageBudget=Math.max(club.wageBudget,Math.round(reference*.52));
+ }w.financeVersion=1;
 }
 
 function userWorldPlayer(career: Career): WorldPlayer {
