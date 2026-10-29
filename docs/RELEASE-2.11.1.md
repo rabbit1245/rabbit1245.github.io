@@ -74,3 +74,15 @@ JSON은 작은 조각으로 만들어 한 번에 큰 문자열을 생성하지 �
 최종 단일 HTML에서 273MB 파일을 별도 슬롯으로 가져온 뒤 자동 저장·일반 JSON 다운로드·재실행, 재계약·다음 시즌·실제 다음 전반기를 진행하고 **295,898,438바이트 JSON**을 다시 내보낸 뒤 재실행했다. 각 완료 단계에서 상주 전용 Worker가 **0개**였고 오류·renderer 종료·외부 자산 요청은 없었다. 마지막 내부 압축 저장은 **21,064,958바이트**였다. 재실행 후 메인 페이지 JS 힙은 약 379MB였으며 강제 GC 없이 읽었다. 이 수치를 전체 브라우저 RAM으로 표현하지 않는다.
 
 가져오기/내보내기의 모든 필드를 새 슬롯 ID만 제외하고 대조했고, 다음 반 시즌 뒤에도 원본 14시즌의 경기·기록·수상·국가대표 과거 기록·모든 능력치가 같았다. 별도로 PC/모바일 전체 플레이 흐름 11항목도 통과했다. [대용량 브라우저](validation/release-2.11.1/large-browser.json) · [원본/출력 대조](validation/release-2.11.1/records-verified.json) · [계속 진행한 화면](validation/release-2.11.1/continued.png) · [PC/모바일 흐름](validation/release-2.11.1/playable-flow.json) · [빌드/압축/파일 해시](validation/release-2.11.1/build.json)
+
+## 다운로드 배포
+
+[K볼 2.11.1 ZIP 다운로드](https://github.com/rabbit1245/rabbit1245.github.io/raw/568b46ea89ffb0145053450f95943985a009ba7b/Kball.zip?download=1)
+
+압축을 풀고 `Kball.html`을 연 뒤 기존 JSON을 불러오면 이어 할 수 있다. 새 개인 기회 배분은 이후 경기, 계약 평가는 새 미확정 제안부터 적용한다. 과거 기록과 체결한 계약은 보존한다. 다운로드판을 배포했으며 별도 메인 사이트의 GitHub Pages 배포는 변경하지 않았다.
+
+- 소스: `727dcbe210452de3e5cb4e58e0c1e5da63481705`
+- 배포: `568b46ea89ffb0145053450f95943985a009ba7b`
+- ZIP: **21,552,345바이트**, SHA-256 `417d17f1e96091d343fd063f18622893e5f13720da081e8bcf7e176a27c760c9`
+
+로그인 없는 공개 URL을 다시 다운로드해 HTTP 200·압축 형식·정확한 크기와 SHA-256·ZIP CRC를 확인했다. 동봉 HTML은 위 브라우저 검수 파일과 바이트 단위로 같다. [공개 다운로드 검증](validation/release-2.11.1/public-download.json)
