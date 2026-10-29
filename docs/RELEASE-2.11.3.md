@@ -69,3 +69,15 @@
 검수 브라우저는 Linux Chromium이다. 관리형 브라우저의 file:// 차단으로 같은 독립 HTML을 localhost로 전달했으며 Windows Edge 직접 검수와 구분한다. 대용량 검수는 다른 코어/실제 시즌 검사와 동시에 수행했으므로 시간을 2.11.2 성능 대조와 비교하지 않는다. 2.11.2의 저장 인코딩·Worker 수명·경량 변경 경로는 그대로다. 새 보조 자료는 판정 호출/경기 안에서만 유지하며 과거 기록을 복제해 쌓지 않는다.
 
 [코어](validation/release-2.11.3/core.json) · [TAP](validation/release-2.11.3/core.tap) · [PC/모바일](validation/release-2.11.3/playable-flow.json) · [대용량](validation/release-2.11.3/large-browser.json) · [기록 왕복](validation/release-2.11.3/records-verified.json) · [유지한 시스템](validation/release-2.11.3/preserved-systems.json) · [빌드·CRC·해시](validation/release-2.11.3/build.json)
+
+## 다운로드 배포
+
+[K볼 2.11.3 ZIP 다운로드](https://github.com/rabbit1245/rabbit1245.github.io/raw/77e67ad6c3726f479f14616b792ab7303dfc74f9/Kball.zip?download=1)
+
+압축을 풀고 `Kball.html`에서 기존 JSON을 가져오면 이어 한다. 새 경기와 이후 미확정 시즌 심사에 적용하고 과거 확정 기록은 보존한다. 다운로드판을 갱신했으며 별도 메인 사이트 GitHub Pages 배포는 변경하지 않았다.
+
+- 소스: `a60f7dcbae3c9c9721acb31894c8d51c982ca7d0`
+- 배포: `77e67ad6c3726f479f14616b792ab7303dfc74f9`
+- ZIP: **21,553,326바이트**, SHA-256 `200a11c066ceb80c2fda3ffdfe8436fae0e9686ef06835dd3d18540dd91fe3fb`
+
+공개 URL을 다시 다운로드해 HTTP 200·파일 크기·SHA-256·ZIP CRC와 동봉 HTML의 검수 파일 일치를 확인했다. [공개 다운로드 검증](validation/release-2.11.3/public-download.json)
