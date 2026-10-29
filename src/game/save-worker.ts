@@ -1,6 +1,7 @@
 import {prepareEnvelope,verifySaveText} from './storage';
-import {decodeStored,isBlobCareer,packEnvelope,replayJournal,type StoredCareer} from './save-codec';
+import {decodeStored,isBlobCareer,packStored,replayJournal,type StoredCareer} from './save-codec';
 import type {Career} from './types';
+import {jsonBlob} from './json-blob';
 let resident:{career:Career;versionHash:string}|undefined;
 let queue=Promise.resolve();
 self.addEventListener('message',(event:MessageEvent<{id:string;operation:string;payload:any}>)=>{
@@ -10,10 +11,13 @@ self.addEventListener('message',(event:MessageEvent<{id:string;operation:string;
    let result:unknown;
    if(operation==='prepare'){
     resident=undefined;
-    const envelope=await prepareEnvelope(payload as Career,true);resident={career:envelope.career,versionHash:envelope.hash};result=packEnvelope(envelope);
+    const envelope=await prepareEnvelope(payload as Career,true);resident={career:envelope.career,versionHash:envelope.hash};result=await packStored(envelope);
+   }else if(operation==='export'){
+    resident=undefined;
+    result=jsonBlob(await prepareEnvelope(payload as Career,true));
    }else if(operation==='verifyFile'){
     resident=undefined;
-    result=await verifySaveText(payload);
+    result=await verifySaveText(typeof payload==='string'?payload:await (payload as Blob).text());
    }else if(operation==='decode'){
     resident=undefined;
     const decoded=await decodeStored(payload as StoredCareer);resident={career:decoded.career,versionHash:decoded.versionHash};result=decoded;
@@ -27,7 +31,7 @@ self.addEventListener('message',(event:MessageEvent<{id:string;operation:string;
     }
     state??=await decodeStored(payload);
     if(state.career.revision!==targetRevision||state.versionHash!==targetHash)throw Error('배경 스냅샷의 변경 기록이 일치하지 않습니다.');
-    const envelope=await prepareEnvelope(state.career,true);resident={career:envelope.career,versionHash:targetHash};result=packEnvelope(envelope,targetHash);
+    const envelope=await prepareEnvelope(state.career,true);resident={career:envelope.career,versionHash:targetHash};result=await packStored(envelope,targetHash);
    }else throw Error('지원하지 않는 저장 요청입니다.');
    self.postMessage({id,result});
   }catch(e){self.postMessage({id,error:e instanceof Error?e.message:'저장 검사 실패'});}

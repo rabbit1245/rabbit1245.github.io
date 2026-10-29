@@ -1,0 +1,10 @@
+{
+  "actualSeasons": 30,
+  "retirementAge": 43,
+  "clubMatches": 102,
+  "nationalMatches": 314,
+  "TXTBytes": 96591,
+  "regressionPassed": true,
+  "originalRunIncludedAnEarlierShotSharingTestFailure": "Fixed and covered by the subsequent full 359-test run and targeted checks.",
+  "saveBytes": 429188509
+}

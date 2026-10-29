@@ -4,6 +4,11 @@ type Pending = { resolve: (value: Career) => void; reject: (reason: Error) => vo
 let worker: Worker | undefined;
 let resident:Career|undefined;
 const pending = new Map<string, Pending>();
+/** Long careers must not keep another full graph alive between commands. */
+export function releaseIdleGameWorker():void {
+  if(pending.size)return;
+  worker?.terminate();worker=undefined;resident=undefined;
+}
 
 function stopWorker(message: string) {
   worker?.terminate();
@@ -30,7 +35,7 @@ export async function runGameCommand(career: Career, command: GameCommand,onProg
       if(event.data.progress){request.timeout=setTimeout(()=>stopWorker('계산 응답이 오래 멈췄습니다. 저장된 상태는 유지됩니다.'),60_000);request.onProgress?.(event.data.progress);return;}
       pending.delete(event.data.id);
       if (event.data.error || !event.data.career) request.reject(new Error(event.data.error || '경기 결과를 불러오지 못했습니다.'));
-      else {resident=event.data.career;request.resolve(event.data.career);}
+      else {resident=event.data.career;request.resolve(event.data.career);if(resident.history.length>=6)releaseIdleGameWorker();}
     });
     worker.addEventListener('error', () => stopWorker('경기 계산을 완료하지 못했습니다. 다시 진행해 주세요.'));
     worker.addEventListener('messageerror', () => stopWorker('경기 데이터를 읽지 못했습니다. 다시 진행해 주세요.'));

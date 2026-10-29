@@ -1,0 +1,99 @@
+{
+  "version": "2.11.0",
+  "actualSeasons": 14,
+  "source": "test-results/release-2.11.0/long-browser/eight-seasons.json",
+  "JSONBytes": 272717105,
+  "compressedBytes": 19685078,
+  "compressedRatio": 0.07218131037288622,
+  "oldRecordsPreserved": true,
+  "allAttributesPreserved": true,
+  "fullValidationAndOriginalChecksum": true,
+  "compressedDecode": true,
+  "totalsAndTXTEqual": true,
+  "rows": [
+    {
+      "year": 2034,
+      "seasons": 9,
+      "goals": 10,
+      "value": 92366000,
+      "role": "핵심 선수",
+      "memory": {
+        "rss": 1800167424,
+        "heapTotal": 1057165312,
+        "heapUsed": 376028016,
+        "external": 2399647,
+        "arrayBuffers": 25091
+      }
+    },
+    {
+      "year": 2035,
+      "seasons": 10,
+      "goals": 12,
+      "value": 94283000,
+      "role": "핵심 선수",
+      "memory": {
+        "rss": 1516572672,
+        "heapTotal": 1178312704,
+        "heapUsed": 1122592256,
+        "external": 2399655,
+        "arrayBuffers": 25091
+      }
+    },
+    {
+      "year": 2036,
+      "seasons": 11,
+      "goals": 9,
+      "value": 94006000,
+      "role": "핵심 선수",
+      "memory": {
+        "rss": 881512448,
+        "heapTotal": 553480192,
+        "heapUsed": 517354904,
+        "external": 2399655,
+        "arrayBuffers": 25091
+      }
+    },
+    {
+      "year": 2037,
+      "seasons": 12,
+      "goals": 18,
+      "value": 97395000,
+      "role": "핵심 선수",
+      "memory": {
+        "rss": 999727104,
+        "heapTotal": 671174656,
+        "heapUsed": 529278912,
+        "external": 2399655,
+        "arrayBuffers": 25091
+      }
+    },
+    {
+      "year": 2038,
+      "seasons": 13,
+      "goals": 16,
+      "value": 92348000,
+      "role": "핵심 선수",
+      "memory": {
+        "rss": 1565593600,
+        "heapTotal": 1237458944,
+        "heapUsed": 1190658272,
+        "external": 2399655,
+        "arrayBuffers": 25091
+      }
+    },
+    {
+      "year": 2039,
+      "seasons": 14,
+      "goals": 15,
+      "value": 86999000,
+      "role": "핵심 선수",
+      "memory": {
+        "rss": 1380286464,
+        "heapTotal": 1052536832,
+        "heapUsed": 465417008,
+        "external": 2399655,
+        "arrayBuffers": 25091
+      }
+    }
+  ]
+}

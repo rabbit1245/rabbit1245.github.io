@@ -8,7 +8,7 @@ import path from 'node:path';
 
 // Exercise the portable save adapter without creating a playable HTML or ZIP.
 const shared={bundle:true,minify:true,write:false,platform:'browser',target:'es2022',format:'iife'};
-const worker=await build({...shared,entryPoints:['src/game/save-worker.ts'],plugins:[{name:'no-nested-save-worker',setup(b){b.onLoad({filter:/save-preparation\.ts$/},()=>({contents:"export function prepareSaveOffThread(){throw Error('nested Worker');}export const decodeSaveOffThread=prepareSaveOffThread,checkpointOffThread=prepareSaveOffThread,verifyFileOffThread=prepareSaveOffThread;export function cancelCheckpointPreparation(){}",loader:'ts'}));}}]});
+const worker=await build({...shared,entryPoints:['src/game/save-worker.ts'],plugins:[{name:'no-nested-save-worker',setup(b){b.onLoad({filter:/save-preparation\.ts$/},()=>({contents:"export function prepareSaveOffThread(){throw Error('nested Worker');}export const decodeSaveOffThread=prepareSaveOffThread,checkpointOffThread=prepareSaveOffThread,verifyFileOffThread=prepareSaveOffThread,exportJSONOffThread=prepareSaveOffThread;export function cancelCheckpointPreparation(){}",loader:'ts'}));}}]});
 const source=worker.outputFiles[0].text;
 new Function(source);
 const adapter=await build({...shared,stdin:{contents:"import * as rpc from './src/game/save-preparation';globalThis.__saveRPC=rpc;",resolveDir:process.cwd()},plugins:[{name:'portable-worker-adapter',setup(b){b.onLoad({filter:/save-preparation\.ts$/},async args=>{

@@ -58,7 +58,7 @@ test('new proposals use modern weekly wage ratios within real club funding; exis
 });
 test('valuation migration preserves historical values and the signed wage',()=>{
  const c=fresh();proof(c);const e=c.systems!.economics;delete e.valuationVersion;const wage=c.player.wage,contract=structuredClone(e.contract),before=structuredClone(e.valueHistory);
- ensureEconomicMarket(c);assert.deepEqual(e.contract,contract);assert.equal(c.player.wage,wage);assert.deepEqual(e.valueHistory.slice(0,-1),before);const once=structuredClone(e);ensureEconomicMarket(c);assert.deepEqual(e,once);
+ ensureEconomicMarket(c);assert.deepEqual(e.contract,contract);assert.equal(c.player.wage,wage);assert.deepEqual(e.valueHistory,before);const once=structuredClone(e);ensureEconomicMarket(c);assert.deepEqual(e,once);
 });
 test('choosing a celebrity display name does not grant the user a celebrity fanbase',()=>{
  const a=fresh('ES1_01',25,90),b=structuredClone(a);b.player.name='Lionel Messi';assert.equal(finish(a).playerUnits,finish(b).playerUnits);

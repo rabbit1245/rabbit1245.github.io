@@ -1,0 +1,73 @@
+{
+  "baseline": "4aeef2a",
+  "files": [
+    {
+      "file": "src/game/attributes.ts",
+      "same": true
+    },
+    {
+      "file": "src/game/growth.ts",
+      "same": true
+    },
+    {
+      "file": "src/game/play-skills.ts",
+      "same": true
+    },
+    {
+      "file": "src/game/talent.ts",
+      "same": true
+    },
+    {
+      "file": "src/game/math.ts",
+      "same": true
+    },
+    {
+      "file": "src/game/match-actions.ts",
+      "same": true
+    },
+    {
+      "file": "src/game/metrics.ts",
+      "same": true
+    },
+    {
+      "file": "src/game/global-honours.ts",
+      "same": true
+    },
+    {
+      "file": "src/game/award-rules.ts",
+      "same": true
+    },
+    {
+      "file": "src/game/award-selection.ts",
+      "same": true
+    },
+    {
+      "file": "src/game/tournament-awards.ts",
+      "same": true
+    },
+    {
+      "file": "src/game/captain.ts",
+      "same": true
+    },
+    {
+      "file": "src/game/manual-injury.ts",
+      "same": true
+    },
+    {
+      "file": "src/game/club-balance.ts",
+      "same": true
+    },
+    {
+      "file": "src/game/club-development.ts",
+      "same": true
+    },
+    {
+      "file": "src/game/canonical-bytes.ts",
+      "same": true
+    },
+    {
+      "file": "src/game/career-text.ts",
+      "same": true
+    }
+  ]
+}

@@ -5,7 +5,8 @@ import {chromium as engine} from 'playwright';
 function install(){
  window.__readKballStored=async record=>{
   if(record.envelope)return record.envelope.career;
-  const c=JSON.parse(await record.blob.text()).career;
+  const source=record.encoding==='gzip'?await new Response(record.blob.stream().pipeThrough(new DecompressionStream('gzip'))).text():await record.blob.text();
+  const c=JSON.parse(source).career;
   for(const entry of record.journal??[])for(const patch of entry.patches){
    let parent=c;for(const key of patch.path.slice(0,-1))parent=parent[key];const key=patch.path.at(-1);
    if(patch.op==='delete')delete parent[key];else if(patch.op==='length')parent[key].length=patch.value;else parent[key]=structuredClone(patch.value);

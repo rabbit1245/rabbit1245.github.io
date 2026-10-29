@@ -32,5 +32,11 @@ test('save Worker cancellation preserves full requests and clears settled reques
   t.mock.timers.tick(60_001);assert.equal(worker.terminated,false,'completed requests leave no live timeout');
   const stalled=api.prepareSaveOffThread(career),timeout=assert.rejects(stalled,/초과/);
   t.mock.timers.tick(60_001);await timeout;assert.equal(worker.terminated,true);
+  const large={history:Array(6).fill({})} as unknown as Career;
+  const heavy=api.prepareSaveOffThread(large),active=FakeWorker.instances.at(-1)!;
+  const queued=api.verifyFileOffThread('another source');active.reply(0,result);assert.equal(await heavy,result);assert.equal(active.terminated,false,'a large result must not terminate another queued job');
+  active.reply(1,career);assert.equal(await queued,career);assert.equal(active.terminated,true,'the long-career graph is released after all work completes');
+  const exported=api.exportJSONOffThread(large),exporter=FakeWorker.instances.at(-1)!,blob=new Blob(['{}']);exporter.reply(0,blob);assert.equal(await exported,blob);assert.ok(exporter.terminated);
+  t.mock.timers.tick(180_001);
  }finally{t.mock.timers.reset();globalThis.Worker=original;}
 });

@@ -2,9 +2,11 @@ import type {Career,SaveEnvelope,SaveSlot} from './types';
 import {applyCareerPatches,validatePatches,type CareerPatch} from './command-patches';
 import {prepareEnvelope,verifyEnvelope,validateCareer} from './storage';
 import {getClub} from './data';
+import {MAX_SAVE_BYTES} from './save-limits';
+import {jsonBlob} from './json-blob';
 
 export interface JournalEntry {id:string;revision:number;previousRevision:number;previousHash:string;hash:string;patches:CareerPatch[]}
-export interface BlobCareer {id:string;format:'kball-blob-v1';revision:number;hash:string;versionHash:string;writeId:string;blob:Blob;journal:JournalEntry[]}
+export interface BlobCareer {id:string;format:'kball-blob-v1';revision:number;hash:string;versionHash:string;writeId:string;blob:Blob;encoding?:'gzip';rawBytes?:number;journal:JournalEntry[]}
 export interface LegacyCareer {id:string;envelope:SaveEnvelope}
 export type StoredCareer=BlobCareer|LegacyCareer;
 export interface StoredMetadata extends SaveSlot {hash:string;deleted?:false}
@@ -25,9 +27,17 @@ export function metadataFor(c:Career,hash:string,savedAt:string):StoredMetadata{
 }
 export function packEnvelope(envelope:SaveEnvelope,versionHash=envelope.hash):PreparedSave{
  const c=envelope.career;
- return {record:{id:c.id,format:'kball-blob-v1',revision:c.revision,hash:envelope.hash,versionHash,writeId:crypto.randomUUID(),blob:new Blob([JSON.stringify(envelope)],{type:'application/json'}),journal:[]},metadata:metadataFor(c,versionHash,envelope.savedAt)};
+ return {record:{id:c.id,format:'kball-blob-v1',revision:c.revision,hash:envelope.hash,versionHash,writeId:crypto.randomUUID(),blob:jsonBlob(envelope),journal:[]},metadata:metadataFor(c,versionHash,envelope.savedAt)};
 }
-export async function prepareStored(c:Career):Promise<PreparedSave>{return packEnvelope(await prepareEnvelope(c));}
+export async function packStored(envelope:SaveEnvelope,versionHash=envelope.hash):Promise<PreparedSave>{
+ const prepared=packEnvelope(envelope,versionHash),record=prepared.record;
+ if(record.blob.size>32*1024*1024&&typeof CompressionStream!=='undefined'){
+  const rawBytes=record.blob.size,blob=await new Response(record.blob.stream().pipeThrough(new CompressionStream('gzip'))).blob();
+  if(blob.size<rawBytes)Object.assign(record,{blob,encoding:'gzip',rawBytes});
+ }
+ return prepared;
+}
+export async function prepareStored(c:Career):Promise<PreparedSave>{return packStored(await prepareEnvelope(c));}
 export async function journalEntry(id:string,previousRevision:number,revision:number,previousHash:string,patches:CareerPatch[]):Promise<JournalEntry>{
  validatePatches(patches);const data={id,revision,previousRevision,previousHash,patches};return {...data,hash:await digest(JSON.stringify(data))};
 }
@@ -44,14 +54,23 @@ export async function replayJournal(c:Career,versionHash:string,entries:JournalE
 export async function decodeStored(r:StoredCareer):Promise<DecodedSave>{
  if(!isBlobCareer(r)){
   const envelope=await verifyEnvelope(r?.envelope);if(envelope.career.id!==r.id)throw Error('슬롯 ID와 저장 내용이 일치하지 않습니다.');
-  return {career:envelope.career,versionHash:r.envelope.hash,normalized:packEnvelope(envelope,r.envelope.hash).record};
+  return {career:envelope.career,versionHash:r.envelope.hash,normalized:(await packStored(envelope,r.envelope.hash)).record};
  }
- if(!(r.blob instanceof Blob)||r.blob.size>256*1024*1024+4096||!Array.isArray(r.journal)||r.journal.length>512||!/^[a-f0-9]{64}$/.test(r.versionHash))throw Error('저장 스냅샷 형식이 올바르지 않습니다.');
- let value:unknown;try{value=JSON.parse(await r.blob.text());}catch{throw Error('저장 스냅샷을 읽을 수 없습니다.');}
+ if(!(r.blob instanceof Blob)||r.blob.size>MAX_SAVE_BYTES+4096||r.encoding!==undefined&&r.encoding!=='gzip'||!Array.isArray(r.journal)||r.journal.length>512||!/^[a-f0-9]{64}$/.test(r.versionHash))throw Error('저장 스냅샷 형식이 올바르지 않습니다.');
+ let value:unknown;try{
+  let blob=r.blob;
+  if(r.encoding==='gzip'){
+   if(!Number.isSafeInteger(r.rawBytes)||r.rawBytes! > MAX_SAVE_BYTES+4096||r.rawBytes! < 1)throw Error('압축 저장 크기');
+   const reader=blob.stream().pipeThrough(new DecompressionStream('gzip')).getReader(),parts:BlobPart[]=[];let size=0;
+   while(true){const {value:part,done}=await reader.read();if(done)break;size+=part.byteLength;if(size>r.rawBytes!||size>MAX_SAVE_BYTES+4096){await reader.cancel();throw Error('압축 저장 범위');}parts.push(part);}
+   if(size!==r.rawBytes)throw Error('압축 저장 크기 불일치');blob=new Blob(parts);
+  }
+  value=JSON.parse(await blob.text());
+ }catch{throw Error('저장 스냅샷을 읽을 수 없습니다.');}
  const original=value as {hash?:string};
  const envelope=await verifyEnvelope(value,true);
  if(envelope.career.id!==r.id||envelope.career.revision!==r.revision||original.hash!==r.hash)throw Error('저장 스냅샷의 검사 정보가 일치하지 않습니다.');
  const replayed=await replayJournal(envelope.career,r.versionHash,r.journal);
  const career=r.journal.length?validateCareer(replayed.career,true):replayed.career;
- return {...replayed,career,...(envelope.hash!==original.hash?{normalized:packEnvelope(await prepareEnvelope(career,true),replayed.versionHash).record}:{})};
+ return {...replayed,career,...(envelope.hash!==original.hash?{normalized:(await packStored(await prepareEnvelope(career,true),replayed.versionHash)).record}:{})};
 }

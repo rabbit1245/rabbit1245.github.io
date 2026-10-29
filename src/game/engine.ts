@@ -23,10 +23,10 @@ import { fixtureDate, nextCalendarYear, seasonDate, seasonHalfEndDate } from './
 import { captureSeasonDetails } from './season-details';
 import { applyMatchExperience, beginGrowthSeason, ensureGrowthTracking, trainRound,increaseAttribute,applyManualAging } from './growth';
 import { TALENT_PROFILES } from './talent';
-import type { AttributeKey, Attributes, Career, CreateOptions, Fixture, GameProgress, Intensity, MatchRecord, Player, PlayerStats, SeasonState, SeasonSummary, Standing, Talent, TransferOffer } from './types';
+import type { Award, AttributeKey, Attributes, Career, CreateOptions, Fixture, GameProgress, Intensity, MatchRecord, Player, PlayerStats, SeasonState, SeasonSummary, Standing, Talent, TransferOffer } from './types';
 import type { PresentationEvent } from './revision-types';
 
-export const ENGINE_VERSION = '2.11.0';
+export const ENGINE_VERSION = '2.11.1';
 export const overall = calculateOverall;
 export { addStats, emptyStats, hashSeed, seededRandom } from './math';
 const TALENT_ORDER: Talent[] = ['D','C','B','A','S','SS','SSS'];
@@ -181,11 +181,11 @@ function halfway(career:Career) {
   systems.phase='midseason';
   career.offers=isFreeAgent(career)?makeContractOffers(career,'midseason'):[];systems.pendingChoice=undefined;
 }
-function archive(career:Career,completed:boolean) {
+function archive(career:Career,completed:boolean,reviewedAwards?:Award[]) {
   if(career.history.some(row=>row.year===career.season.year))return;
   settleShirtMarket(career,completed);
   const {player,season}=career;
-  const awards=completed?evaluateAwards(career):[];
+  const awards=reviewedAwards??(completed?evaluateAwards(career):[]);
   const changes:Attributes={};
   for(const key of Object.keys(player.attributes) as AttributeKey[])changes[key]=round((player.attributes[key]??0)-(season.attributeStart[key]??0));
   const priorIncome=career.history.reduce((s,h)=>s+h.income,0);
@@ -207,11 +207,13 @@ function finishSeason(career:Career) {
   const systems=career.systems!;
   processInternationalThrough(career,seasonHalfEndDate(career.season,'second'));
   updateLeadership(career,'club',true);updateLeadership(career,'national',true);
-  updateMarketValue(career,'시즌 종료 평가');
-  growthReport(career,'season');
   syncManualInjury(career,new Date(Date.parse(seasonHalfEndDate(career.season,'second'))+86400000).toISOString());
   archiveNationalSeason(career);
-  archive(career,true);
+  settleShirtMarket(career,true);
+  const awards=evaluateAwards(career);
+  updateMarketValue(career,'시즌 종료 평가 · 실제 수상과 누적 시장 위상');
+  growthReport(career,'season');
+  archive(career,true,awards);
   career.player.contractYears=Math.max(0,systems.economics.contract.expiresYear-(career.season.year+1));
   if(career.player.contractYears===0&&!isFreeAgent(career))releaseInPlace(career,'expiry',true);
   career.offers=generateOffers(career);career.transferDecision=isFreeAgent(career)?'stay':undefined;

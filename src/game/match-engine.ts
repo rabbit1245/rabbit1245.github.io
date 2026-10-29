@@ -1,6 +1,6 @@
 import {playingAbility,leadershipAbility} from './attributes';
 import {personalityEdge,personality} from './personality';
-import {skillSuccess,openPlaySaveChance} from './ability-contests';
+import {skillSuccess,openPlaySaveChance,shareShotSupply} from './ability-contests';
 import {phasePasses,resolvePressing,resolveAirClaims,headerProbability,headerDelivery,aerialQuality,type ActionEmitter} from './match-actions';
 import { CLUBS, ROSTERS } from './data';
 import { clamp, emptyStats, hashSeed, integer, round, seededRandom } from './math';
@@ -305,16 +305,23 @@ export function simulateMatch(career:Career,fixture:Fixture,options:MatchOptions
     const organizationFactor=clamp(.836+(opposition.referencePower-organization)*.0048,.55,1.15);
     const powerFactor=clamp(1+(team.power-opposition.power)*.012+(side===0&&!options.neutralVenue ? .07 : 0),.45,1.8);
     const actionFactor=clamp(1+(buildUp[side]-4)*.045-(disruption[1-side]-6)*.045,.68,1.32);
-    for(const shooter of team.actors){
+    const shotSupply=team.actors.map(shooter=>{
       const a=(key:AttributeKey)=>ability(shooter,key);
       const minutes=duration(shooter);
       const clutch=shooter.user&&bigMatch?personalityEdge(career,'clutch'):0;
       const threat=a('positioning')*.28+a('anticipation')*.16+a('decisions')*.14+a('speed')*.14+a('ballControl')*.14+a('dribbling')*.14;
       const selfCreation=shooter.position==='GK'?1:clamp(1+(threat-opposition.power)*.012,.65,1.65);
       const opportunities=SHOTS[shooter.position]*minutes*styleFactor(shooter,'shot')*powerFactor*actionFactor*tactics[side].supply*tactics[1-side].coverage*selfCreation*(.43+a('positioning')*.006+a('speed')*.002+a('decisions')*.001)*organizationFactor*(1+clutch*.03);
+      const headerChance=headerProbability(shooter,team),finishing=a('shooting')*(1-headerChance)+aerialQuality(shooter)*headerChance;
+      return {opportunities,headerChance,contest:FORWARD.has(shooter.position),quality:finishing*.45+a('positioning')*.2+a('composure')*.15+a('anticipation')*.1+a('decisions')*.1};
+    });
+    const shared=shareShotSupply(shotSupply,team.power);
+    for(const [actorIndex,shooter] of team.actors.entries()){
+      const a=(key:AttributeKey)=>ability(shooter,key),clutch=shooter.user&&bigMatch?personalityEdge(career,'clutch'):0;
+      const opportunities=shared[actorIndex];
       const shotRng=seededRandom(`${seed}:${shooter.id}:shots`);
       const creatorRng=seededRandom(`${seed}:${shooter.id}:creators`);
-      const headerRng=seededRandom(`${actionSeed}:${shooter.id}:headers`),headerChance=headerProbability(shooter,team);
+      const headerRng=seededRandom(`${actionSeed}:${shooter.id}:headers`),headerChance=shotSupply[actorIndex].headerChance;
       const count=roundedCount(opportunities*(.65+shotRng()*.7),shotRng);
       for(let index=0;index<count;index++){
         const minute=integer(shotRng,shooter.from+1,Math.max(shooter.from+1,shooter.to));

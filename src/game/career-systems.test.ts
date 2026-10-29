@@ -36,6 +36,7 @@ function match(career: Career, round: number): MatchRecord {
 
 test('market valuation reflects performance, age and injury while contract wage stays fixed', () => {
   const c = makeCareer(), e = c.systems!.economics, initial = e.marketValue;
+  e.assessment!.round=0; // The quote predates the newly completed season.
   c.season.playerStats.goals = 32; c.season.playerStats.ratingSum = 270;
   updateMarketValue(c, '시즌 활약');
   assert.ok(e.marketValue > initial);
@@ -310,6 +311,7 @@ test('opening a new season carries the last completed performance instead of res
   const c=makeCareer(),e=c.systems!.economics;
   c.season.playerStats=statistics({goals:32,assists:14,ratingSum:270});
   c.season.matches=Array.from({length:38},(_,i)=>match(c,i+1));
+  e.assessment!.round=0;
   updateMarketValue(c,'완료시즌활약');const provenValue=e.marketValue,wage=c.player.wage;
   c.history.push({year:c.season.year,clubId:c.player.clubId,clubName:'test',leagueId:c.season.leagueId,competitionName:'test',age:c.player.age,position:c.player.position,squad:'senior',rank:1,ovrStart:c.player.ovr,ovrEnd:c.player.ovr,stats:structuredClone(c.season.playerStats),matches:c.season.matches,awards:[],attributeGrowth:{},income:0,completed:true});
   c.season.year++;c.season.week=0;c.stage='season';c.season.playerStats=emptyStats();c.season.matches=[];

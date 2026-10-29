@@ -6,7 +6,7 @@ import type { Career, CreateOptions, GameCommand, GameProgress, MatchRecord, Sav
 import type { PresentationEvent } from './game/revision-types';
 import { CLUBS, DATA_PROVENANCE } from './game/data';
 import { createCareer, ENGINE_VERSION } from './game/engine';
-import { runGameCommand } from './game/client';
+import { runGameCommand,releaseIdleGameWorker } from './game/client';
 import { deleteSlot, exportCareerBlob, importCareer, listSlots, loadCareer, restoreBackup, saveCareer, saveCareerChange } from './game/storage';
 import { sumStats } from './game/math';
 import { careerTextChunks,careerTextFilename } from './game/career-text';
@@ -86,7 +86,7 @@ export default function App() {
   }
   function mainMenu() {
     if (locked.current || !confirmReplace('메인 메뉴로 돌아갈까요')) return;
-    careerRef.current = null; setCareer(null); setCommon(false); setSelectedMatch(null); setMobileOpen(false); setError('');
+    releaseIdleGameWorker();careerRef.current = null; setCareer(null); setCommon(false); setSelectedMatch(null); setMobileOpen(false); setError('');
   }
   const closeCreation = () => { if (!locked.current) setCreation(false); };
   const closeMatch = () => setSelectedMatch(null);
@@ -115,7 +115,7 @@ export default function App() {
   }
   async function newCareer(options: CreateOptions) {
     if (locked.current) return;
-    locked.current = true; setBusy(true); setError('');
+    locked.current = true; setBusy(true); setError('');releaseIdleGameWorker();
     try { const next = createCareer(options); await commit(next); setCreation(false); navigate('locker'); setToast('당신의 커리어가 시작되었습니다.'); }
     catch (e) { setError(errorMessage(e)); throw e; }
     finally { locked.current = false; setBusy(false); setProgress(null); }
@@ -123,7 +123,7 @@ export default function App() {
   async function load(id: string) {
     if (locked.current) return;
     if (!confirmReplace('다른 저장을 불러올까요')) return;
-    locked.current = true; setBusy(true); setError('');
+    locked.current = true; setBusy(true); setError('');releaseIdleGameWorker();
     try { const next = await loadCareer(id); display(next); setSelectedMatch(null); setSaveStatus('saved'); setCommon(false); navigate('locker'); setToast('커리어를 불러왔습니다.'); }
     catch (e) { setError(errorMessage(e)); }
     finally { locked.current = false; setBusy(false); setProgress(null); }
@@ -135,16 +135,19 @@ export default function App() {
     finally { locked.current = false; setBusy(false); setProgress(null); }
   }
   async function exportFile() {
+    if(locked.current)return;
     const exporting = careerRef.current;
     if (!exporting) return;
+    locked.current=true;setBusy(true);releaseIdleGameWorker();
     try { const blob = await exportCareerBlob(exporting); const url = URL.createObjectURL(blob); const link = document.createElement('a'); link.href = url; link.download = `K볼_${exporting.player.name}_${exporting.season.year}.json`; link.click(); window.setTimeout(() => URL.revokeObjectURL(url), 1000); setToast('커리어를 JSON 파일로 내보냈습니다.'); }
     catch (e) { setError(errorMessage(e)); }
+    finally {locked.current=false;setBusy(false);}
   }
   async function importFile(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0]; event.target.value = '';
     if (!file || locked.current || !confirmReplace('가져온 커리어를 열까요')) return;
     locked.current = true; setBusy(true); setError('');
-    try { if (file.size > 256 * 1024 * 1024) throw new Error('256MB 이하의 K볼 저장 파일을 선택해 주세요.'); const next = await importCareer(await file.text()); const saved = await commit(next); setSelectedMatch(null); setCommon(false); navigate('locker'); if (saved) setToast('별도 슬롯으로 커리어를 가져왔습니다.'); }
+    try { const next = await importCareer(file); const saved = await commit(next); setSelectedMatch(null); setCommon(false); navigate('locker'); if (saved) setToast('별도 슬롯으로 커리어를 가져왔습니다.'); }
     catch (e) { setError(errorMessage(e)); }
     finally { locked.current = false; setBusy(false); setProgress(null); }
   }

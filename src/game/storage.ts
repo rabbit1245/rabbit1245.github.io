@@ -3,6 +3,8 @@ import {validateActionLedger} from './action-metrics';
 import {internationalRoster} from './international-clubs';
 import {validatePlaySkills} from './play-skill-validation';
 import {canonicalBytes} from './canonical-bytes';
+import {MAX_SAVE_BYTES,utf8Size} from './save-limits';
+import {jsonBlob} from './json-blob';
 import {recoverCareerKeeperRoles} from './keeper-recovery';
 import {commandChange,controlFingerprint} from './command-patches';
 import {decodeStored,isBlobCareer,prepareStored,metadataFor,journalEntry,storedHead,recordFingerprint,type StoredCareer,type BlobCareer,type PreparedSave,type DecodedSave} from './save-codec';
@@ -14,7 +16,6 @@ import type { Career, MatchRecord, PlayerStats, SaveEnvelope, SaveSlot } from '.
 
 const DATABASE = 'kball-careers';
 const DATABASE_VERSION = 1;
-const MAX_SAVE_BYTES = 256 * 1024 * 1024;
 const clubs = new Map([...CLUBS,...INTERNATIONAL_CLUBS].map(club => [club.id, club]));
 const leagues = new Set([...LEAGUES,...INTERNATIONAL_LEAGUES].map(league => league.id));
 const positions = new Set(['GK', 'CB', 'LB', 'RB', 'LWB', 'RWB', 'CDM', 'CM', 'CAM', 'LM', 'RM', 'LW', 'RW', 'CF', 'SS', 'ST']);
@@ -100,7 +101,7 @@ function ensureSafeJSON(value: unknown): void {
   let visited = 0;
   while (stack.length) {
     const current = stack.pop()!;
-    assert(++visited <= 16_000_000 && current.depth <= 64, '저장 구조가 지나치게 크거나 깊습니다.');
+    assert(++visited <= 64_000_000 && current.depth <= 64, '저장 구조가 지나치게 크거나 깊습니다.');
     if (!current.value || typeof current.value !== 'object') continue;
     for (const [key, item] of Object.entries(current.value)) {
       assert(!poisonedKeys.has(key), '허용하지 않는 속성이 포함되어 있습니다.');
@@ -114,7 +115,7 @@ function stringify(value: unknown): string {
   try { serialized = JSON.stringify(value); }
   catch { throw new Error('저장 데이터를 JSON으로 변환할 수 없습니다.'); }
   assert(typeof serialized === 'string', '저장할 내용이 없습니다.');
-  assert(new TextEncoder().encode(serialized).byteLength <= MAX_SAVE_BYTES, '저장 파일은 256MB 이하여야 합니다.');
+  assert(utf8Size(serialized) <= MAX_SAVE_BYTES, '저장 파일이 지원하는 1GB 범위를 초과했습니다.');
   return serialized;
 }
 
@@ -550,6 +551,8 @@ function validateSystems(career: Record<string, unknown>, player: Record<string,
     reconciledStats(row.stats, matches(row.matches, 'national.history.matches', playerId, true), 'national.history.stats');
   }
   const economy = object(systems.economics, 'systems.economics');
+  if(economy.valuationVersion!==undefined)assert(economy.valuationVersion===1||economy.valuationVersion===2,'시장 평가 버전이 올바르지 않습니다.');
+  if(economy.assessment!==undefined){const a=object(economy.assessment,'시장 평가 기준');number(a.year,'평가 연도',1900,currentYear,true);number(a.round,'평가 라운드',0,150,true);number(a.totalRounds,'평가 시즌 길이',1,150,true);assert(Number(a.round)<=Number(a.totalRounds),'평가 라운드가 시즌 길이를 초과합니다.');number(a.ability,'평가 기량',1,120);number(a.injuryWeeks,'평가 부상',0,1000,true);number(a.stardom,'평가 스타성',1,10,true);}
   for (const key of ['marketValue', 'previousValue', 'peakValue', 'salaryIncome', 'bonusIncome', 'totalTransferFees', 'highestWage']) number(economy[key], `economics.${key}`, 0, 1e15);
   assert(Number(economy.peakValue) >= Number(economy.marketValue), '최고 몸값이 현재 몸값보다 작습니다.');
   assert(Math.abs(Number(economy.salaryIncome) + Number(economy.bonusIncome) - Number(career.careerIncome)) < 0.01, '급여·보너스와 커리어 수입 합계가 다릅니다.');
@@ -894,7 +897,7 @@ export function validateCareer(value: unknown,ownedJSON=false): Career {
 
 async function checksum(career: Career): Promise<string> {
   if (!globalThis.crypto?.subtle) throw new Error('안전한 저장을 위해 HTTPS 또는 localhost에서 게임을 열어 주세요.');
-  const bytes=canonicalBytes(career);assert(bytes.byteLength<=MAX_SAVE_BYTES,'저장 파일은 256MB 이하여야 합니다.');
+  const bytes=canonicalBytes(career);assert(bytes.byteLength<=MAX_SAVE_BYTES,'저장 파일이 지원하는 1GB 범위를 초과했습니다.');
   const digest = await globalThis.crypto.subtle.digest('SHA-256', bytes);
   return [...new Uint8Array(digest)].map(byte => byte.toString(16).padStart(2, '0')).join('');
 }
@@ -1167,18 +1170,19 @@ export async function exportCareer(career: Career): Promise<string> {
 /** Browser downloads use the fully validated Worker Blob directly. Converting a
  * long career to another main-thread JSON string/clone caused large memory spikes. */
 export async function exportCareerBlob(career:Career):Promise<Blob>{
- return (await prepareSnapshot(career)).record.blob;
+ return typeof Worker==='undefined'?jsonBlob(await prepareEnvelope(career)):(await import('./save-preparation')).exportJSONOffThread(career);
 }
 
 /** Untrusted files always receive the original complete checks, including poison-key checks. */
 export async function verifySaveText(source:string):Promise<Career>{
-  assert(typeof source === 'string' && new TextEncoder().encode(source).byteLength <= MAX_SAVE_BYTES, '저장 파일은 256MB 이하여야 합니다.');
+  assert(typeof source === 'string' && utf8Size(source) <= MAX_SAVE_BYTES, '저장 파일이 지원하는 1GB 범위를 초과했습니다.');
   let parsed:unknown;
   try{parsed=JSON.parse(source);}catch{throw new Error('저장 파일을 읽을 수 없습니다. 올바른 JSON 백업을 선택해 주세요.');}
   ensureSafeJSON(parsed);return (await verifyEnvelope(parsed,true)).career;
 }
 /** Imported saves always become new slots; no existing game or legacy localStorage is overwritten. */
-export async function importCareer(source:string):Promise<Career>{
-  const imported=typeof Worker==='undefined'?await verifySaveText(source):await (await import('./save-preparation')).verifyFileOffThread(source);
+export async function importCareer(source:string|Blob):Promise<Career>{
+  if(source instanceof Blob)assert(source.size<=MAX_SAVE_BYTES,'저장 파일이 지원하는 1GB 범위를 초과했습니다.');
+  const imported=typeof Worker==='undefined'?await verifySaveText(typeof source==='string'?source:await source.text()):await (await import('./save-preparation')).verifyFileOffThread(source);
   imported.id=`career-${globalThis.crypto.randomUUID()}`;return imported;
 }

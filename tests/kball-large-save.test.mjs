@@ -9,7 +9,7 @@ const sourcePath = path.resolve(process.env.KBALL_LARGE_SAVE_FILE || 'test-resul
 const results = path.resolve(process.env.KBALL_TEST_RESULTS_DIR || 'test-results/browser-large-save');
 const size = (await stat(sourcePath)).size;
 assert.ok(size > 64 * 1024 * 1024, `Expected a real save above the previous 64MB limit; received ${size} bytes`);
-assert.ok(size <= 256 * 1024 * 1024, 'The actual thirty-season save must fit the documented 256MB limit');
+assert.ok(size <= 1024 * 1024 * 1024, 'The actual thirty-season save must fit the documented 1GB resource guard');
 await mkdir(results, { recursive: true });
 
 // Release the large source JSON heap before the browser imports another copy.
@@ -73,6 +73,6 @@ try{
   const importMs=Date.now()-started;console.log('Large save DOM totals verified');
   await page.locator('.record-book').screenshot({path:path.join(results,'kball-large-save-records.png')});
   await page.reload({waitUntil:'networkidle'});await page.getByRole('button',{name:'이어서 플레이',exact:true}).click();await waitSaved('reload');const reloaded=await storedSummary();validateStored(reloaded);assert.equal(reloaded.id,imported.id);await verifyDOM();assert.deepEqual(errors,[]);
-  const report={passed:['actual thirty-season save above 64MB imported into a new slot','256MB UI guard and persistent IndexedDB slot accepted the actual large save','retired state, all 30 seasons and every match count preserved','combined/club/national DOM totals match source before and after reload'],baseURL,bytes:size,importMs,historyCount:expected.historyCount,matchCount:expected.matchCount,nationalMatchCount:expected.nationalMatchCount,pageErrors:errors};
+  const report={passed:['actual thirty-season save above 64MB imported into a new slot','File import and persistent IndexedDB slot accepted the actual large save','retired state, all 30 seasons and every match count preserved','combined/club/national DOM totals match source before and after reload'],baseURL,bytes:size,importMs,historyCount:expected.historyCount,matchCount:expected.matchCount,nationalMatchCount:expected.nationalMatchCount,pageErrors:errors};
   await writeFile(path.join(results,'large-save-results.json'),JSON.stringify(report,null,2));console.log('Kball large-save browser verification passed:',JSON.stringify(report));
 }catch(error){if(page&&!page.isClosed())await page.screenshot({path:path.join(results,'large-save-failure.png'),fullPage:false}).catch(()=>{});await writeFile(path.join(results,'large-save-results.json'),JSON.stringify({failure:String(error),bytes:size,pageErrors:errors},null,2));throw error;}finally{await browser.close();}

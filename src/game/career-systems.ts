@@ -5,6 +5,10 @@ import {evaluateClubAwards} from './club-awards';
 import {personalityEdge} from './personality';
 import {shirtSalesAwards} from './commercial';
 import {playingAbility} from './attributes';
+import {marketEstimate,marketQuote,assessmentNow} from './market-value';
+export {marketEstimate} from './market-value';
+import {careerStanding,productionEvidence} from './career-standing';
+import {getClubRatingOffset} from './world';
 import {globalVoting,additionalGlobalHonours} from './global-honours';
 import {isFreeAgent,expiryReturnClub,changeEmployment,careerLeagueEntries} from './employment';
 import {evaluateExtraHonours} from './extra-honours';
@@ -26,38 +30,10 @@ import type { BallonDorYear, CompetitorSeason, ContractSnapshot, ContractTermsSn
 
 const avgRating = (s: PlayerStats) => s.ratingCount ? s.ratingSum / s.ratingCount : 0;
 const clubPower = (career: Career, clubId: string) => career.systems?.world.clubs[clubId]?.power ?? getClub(clubId).power;
-export function marketEstimate(career: Career): number {
-  const p = career.player;
-  const previous=career.history.at(-1);
-  const opening=career.season.week===0&&previous?.completed&&previous.year<career.season.year;
-  const s=opening?previous.stats:career.season.playerStats;
-  const evaluationRounds=opening?previous.matches.length:career.season.week;
-  const leagueId = career.systems?.world.clubs[p.clubId]?.leagueId ?? career.season.leagueId;
-  const tier = getLeague(leagueId).tier;
-  const youth = p.age <= 23 ? 1.15 + (23 - p.age) * .025 : p.age > 29 ? Math.max(.42, 1 - (p.age - 29) * .04) : 1.1;
-  const ability=playingAbility(p);
-  const quality = Math.pow(Math.max(10, ability - 25), 3.35) * 20;
-  const potential = 1 + Math.max(0, p.potential - ability) / 65;
-  const per90 = s.minutes ? (s.goals + .75 * s.assists) * 90 / s.minutes : 0;
-  const form = s.apps ? clamp(.76 + avgRating(s) / 18 + Math.min(.28, per90 * .22), .6, 1.6) : .9;
-  const minutes = .65 + .35 * clamp(s.minutes / Math.max(90, evaluationRounds * 70), 0, 1);
-  const prestige = (.45 + clubPower(career, p.clubId) / 100) / Math.sqrt(tier);
-  const demand = 1 + Math.min(.2, career.offers.filter(o => o.type === 'transfer').length * .035);
-  const international = 1 + Math.min(.15, (career.systems?.national.reputation ?? 0) / 650);
-  const injury = Math.max(.45, 1 - p.injuryWeeks * .035);
-  const major=tier===1&&['영국','스페인','독일','이탈리아','프랑스'].includes(getLeague(leagueId).country);
-  // Proven breakout seasons used to hit a tiny per90 bonus; 15G/10A and vastly
-  // less production could be priced almost alike. Require real minutes/volume.
-  const production=p.position==='GK'?clamp((s.cleanSheets-6)/10,0,1.3):clamp((s.goals+s.assists*.8-10)/13,0,1.3);
-  const reliability=clamp(s.minutes/2200,0,1)*clamp(s.apps/24,0,1);
-  const breakout=1+clamp((24-p.age)/5,0,1.2)*1.25*production*reliability*(major?1:1/Math.pow(tier,1.5))*(major?1:.6);
-  return Math.max(1_000, Math.min(350_000_000,Math.round(quality * youth * potential * form * minutes * prestige * demand * injury * international * breakout * (1+personalityEdge(career,'stardom')*.06) / 1_000) * 1_000));
-}
-/** Current valuation only; archived values and signed wages are historical facts. */
+/** Initialize inertia without repricing an already-held, hash-verified asset. */
 export function ensureEconomicMarket(c:Career):void{
- const e=c.systems?.economics;if(!e||e.valuationVersion===1)return;
- e.valuationVersion=1;e.previousValue=e.marketValue;e.marketValue=marketEstimate(c);e.peakValue=Math.max(e.peakValue,e.marketValue);
- e.valueHistory.push({year:c.season.year,round:c.season.week,value:e.marketValue,reason:'시장 평가 기준 갱신 · 기존 계약·과거 몸값 보존'});
+ const e=c.systems?.economics;if(!e||e.valuationVersion===2&&e.assessment)return;
+ e.valuationVersion=2;e.assessment=assessmentNow(c);
 }
 function dateOnly(value:string):string { return value.slice(0,10); }
 function contractEndDate(startYear:number,startMonth:number,years:number):string {
@@ -83,7 +59,7 @@ export function createEconomics(career: Career,legacy=false): Economics {
   const value = marketEstimate(career),years=Math.max(legacy?0:1,career.player.contractYears);
   const signedDate=dateOnly(seasonDate(career.season,0));
   const economics:Economics = {
-    valuationVersion:1,
+    valuationVersion:2,assessment:assessmentNow(career),
     marketValue: value, previousValue: value, peakValue: value,
     valueHistory: [{ year: career.season.year, round: career.season.week, value, reason: '현재 능력·나이·잠재력·리그 수준으로 평가 시작' }],
     salaryIncome: career.careerIncome, bonusIncome: 0,
@@ -110,9 +86,14 @@ export function updateMarketValue(career: Career, reason: string): void {
   if (!career.systems) return;
   ensureEconomicHistory(career);
   const e = career.systems.economics;
-  e.valuationVersion=1;
+  ensureEconomicMarket(career);
   e.previousValue = e.marketValue;
-  e.marketValue = marketEstimate(career);
+  e.marketValue = marketQuote(career);
+  const before=e.assessment!,now=assessmentNow(career);
+  const elapsed=now.year-before.year+now.round/now.totalRounds-before.round/before.totalRounds;
+  // Keep the last observed ability through administrative/no-match updates.
+  // Otherwise manual decline would reset its own reference before being tested in games.
+  if(elapsed>0||now.injuryWeeks>=before.injuryWeeks+4||now.stardom>before.stardom)e.assessment=now;
   e.peakValue = Math.max(e.peakValue, e.marketValue);
   const entry = { year: career.season.year, round: career.season.week, value: e.marketValue, reason };
   const previous = e.valueHistory.at(-1);
@@ -138,15 +119,26 @@ export function payBonus(career: Career, amount: number): void {
   career.careerIncome = round(e.salaryIncome + e.bonusIncome, 2);
 }
 
-function roleFor(career: Career, power: number): string {
-  const delta = career.player.ovr - power;
-  return delta >= 9 ? '핵심 선수' : delta >= -2 ? '주전' : delta >= -10 ? '로테이션' : '유망주';
+export function contractRole(career:Career,clubId:string):string {
+ const standing=careerStanding(career),club=career.systems!.world.clubs[clubId],p=career.player;
+ const group=(position:string)=>position==='GK'?'GK':/^(CB|LB|RB|LWB|RWB)$/.test(position)?'DEF':/^(CDM|CM|CAM|LM|RM)$/.test(position)?'MID':'FWD';
+ const offset=getClubRatingOffset(career,clubId),levels=club.rosterIds.map(id=>career.systems!.world.players[id]).filter(row=>row&&row.id!==p.id&&group(row.position)===group(p.position)).map(row=>clamp(row.ovr+offset,25,99)).sort((a,b)=>b-a).slice(0,p.position==='GK'?1:3);
+ const competition=levels.length?levels.reduce((a,b)=>a+b,0)/levels.length:club.power;
+ const delta=standing.ability+standing.proven*.75-competition;
+ let role=delta>=7?'핵심 선수':delta>=-3?'주전':delta>=-11?'로테이션':'유망주';
+ // An incumbent's actual high-level production and repeated selection cannot be
+ // overruled by comparing raw OVR to a team-wide power score.
+ const proof=standing.rows.find(r=>!r.youth&&r.stats.minutes>=1800&&r.year>=career.season.year-1&&getLeague(r.leagueId).tier<=getLeague(club.leagueId).tier);
+ if(proof){const s=proof.stats,rating=s.ratingCount?s.ratingSum/s.ratingCount:0,impact=productionEvidence(s,proof.position),own=proof.clubId===clubId;
+  if((impact>=.8&&rating>=7||standing.worldRank!==null&&standing.worldRank<=30)&&delta>=-16)role=own&&((impact>=1.05&&rating>=7.2)||standing.worldRank!==null&&standing.worldRank<=10)?'핵심 선수':'주전';
+ }
+ return role;
 }
 function individualWageLimit(career: Career, clubId: string): number {
   const club = career.systems?.world.clubs[clubId];
   return club ? Math.max(0, Math.floor(club.wageBudget / 52 * .14)) : 0;
 }
-const CONTRACT_OFFER_MODEL='offseason-v2110';
+const CONTRACT_OFFER_MODEL='offseason-v2111';
 /** Old proposals are refreshed once when opened, after the save hash is verified. */
 export function needsContractOfferRefresh(career:Career):boolean{
  return career.stage!=='retired'&&(career.stage==='offseason'||isFreeAgent(career))&&(!career.transferDecision||isFreeAgent(career))&&
@@ -193,14 +185,14 @@ export function makeContractOffers(career:Career,timing:'midseason'|'offseason')
  for(let i=0;i<3;i++)choose(candidates,'similar',power=>Math.abs(power-target));
  if(selected.length!==6)throw new Error('실제 구단과 예산을 충족하는 6개 제안을 편성할 수 없습니다.');
  const offer=(id:string,renew:boolean,band?:TransferOffer['band']):TransferOffer=>{
-  const club=world.clubs[id],limit=individualWageLimit(career,id),justified=marketEstimate(career)/(52*12)*(p.age<=20?.72:p.age<=23?.88:1)*(1+Math.max(0,avgRating(career.season.playerStats)-6.5)*.08);
-  const demand=reports.get(id)?.need??.25,role=roleFor(career,club.power);
+  const club=world.clubs[id],limit=individualWageLimit(career,id),justified=Math.max(e.marketValue,marketQuote(career))/(52*12)*(p.age<=20?.72:p.age<=23?.88:1)*(1+Math.max(0,avgRating(career.season.playerStats)-6.5)*.08);
+  const demand=reports.get(id)?.need??.25,role=contractRole(career,id);
   const exceptionalCut=declined&&['로테이션','유망주'].includes(role);
   const salaryFloor=priorWage*(exceptionalCut?.78+rng()*.12:renew?1.04:1.03+rng()*.17+demand*.08);
   const wage=Math.round(Math.min(limit,Math.max(150,justified*(.96+rng()*.2),salaryFloor)));
   const asking=renew||remaining===0?0:Math.round(e.marketValue*clamp(.45+remaining*.18+rng()*.12,.45,1.35)),fee=Math.min(asking,Math.floor(club.budget*.75));
   const years=contractYears(career,role,rng),labels={similar:'동급 경쟁',lower:'하위 전력 · 핵심 기용',higher:'상위 전력 · 우승 경쟁',wild:'극단적 랜덤 · 도전 제안'};
-  return {id:`${career.season.year}:${CONTRACT_OFFER_MODEL}:${renew?'renew':'transfer'}:${id}`,clubId:id,wage,years,role,fee,type:renew?'renew':'transfer',...(band?{band}:{}),expiresRound:career.season.totalWeeks,effective:'nextSeason',currentWage:p.wage,budgetLimit:club.budget,reason:`${band?labels[band]:'재계약'} · 팀 전력 ${club.power.toFixed(1)} · ${role}. 포지션 수요 ${Math.round((reports.get(id)?.need??0)*100)}%. 현재 주급 ${moneyText(p.wage)} → ${moneyText(wage)} · ${years}년. 계약 기간은 현재 기량·최근 경기력·기대 역할과 나이를 함께 반영합니다.${fee<asking?' 요구 이적료보다 낮은 예산 한도 내 입찰이며 수락 여부는 선수가 결정합니다.':''}${club.power>p.ovr+12?' 즉시 주전 보장 없는 장기 육성·로테이션 계약.':''}${higher.length===0&&band==='higher'?' 현재 수준보다 강한 팀이 없어 실제 최상위 경쟁 구단으로 대체.':''}${lower.length===0&&band==='lower'?' 현재 수준보다 낮은 팀이 없어 가능한 낮은 전력의 실제 비교 구단으로 대체.':''}`};
+  return {id:`${career.season.year}:${CONTRACT_OFFER_MODEL}:${renew?'renew':'transfer'}:${id}`,clubId:id,wage,years,role,fee,type:renew?'renew':'transfer',...(band?{band}:{}),expiresRound:career.season.totalWeeks,effective:'nextSeason',currentWage:p.wage,budgetLimit:club.budget,reason:`${band?labels[band]:'재계약'} · 팀 전력 ${club.power.toFixed(1)} · ${role}. 포지션 수요 ${Math.round((reports.get(id)?.need??0)*100)}%. 현재 주급 ${moneyText(p.wage)} → ${moneyText(wage)} · ${years}년. 현재 기량 ${playingAbility(p).toFixed(1)} · 실전 위상 보정 ${careerStanding(career).proven.toFixed(1)}. 역할과 계약 기간은 포지션 경쟁·최근 실적·세계 수상 평가와 나이를 함께 반영합니다.${fee<asking?' 요구 이적료보다 낮은 예산 한도 내 입찰이며 수락 여부는 선수가 결정합니다.':''}${['유망주','로테이션'].includes(role)&&club.power>playingAbility(p)+12?' 즉시 주전 보장 없는 장기 육성·로테이션 계약.':''}${higher.length===0&&band==='higher'?' 현재 수준보다 강한 팀이 없어 실제 최상위 경쟁 구단으로 대체.':''}${lower.length===0&&band==='lower'?' 현재 수준보다 낮은 팀이 없어 가능한 낮은 전력의 실제 비교 구단으로 대체.':''}`};
  };
  const result=selected.sort((a,b)=>({similar:0,lower:1,higher:2,wild:3}[a.band]-{similar:0,lower:1,higher:2,wild:3}[b.band])).map(row=>offer(row.id,false,row.band));
  if(canRenew){

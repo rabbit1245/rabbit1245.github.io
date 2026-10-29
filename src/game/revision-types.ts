@@ -1,6 +1,7 @@
 import type { AttributeKey, Attributes, Award, Club, Fixture, MatchRecord, PlayerStats, Position, Standing } from './types';
 export interface WorldState {financeVersion?:1;}
-export interface Economics {valuationVersion?:1;}
+export interface MarketAssessment {year:number;round:number;totalRounds:number;ability:number;injuryWeeks:number;stardom:number;}
+export interface Economics {valuationVersion?:1|2;assessment?:MarketAssessment;}
 
 export interface MatchParticipant { id: string; name: string; position: Position; ovr: number; attributes?: Attributes; nationality?: string; clubId: string }
 export interface MatchPerformance extends MatchParticipant { stats: PlayerStats; rating: number; minutes: number; started: boolean; captain?: boolean; teamId?: string; emergencyGoalkeeper?:{from:number;to:number} }

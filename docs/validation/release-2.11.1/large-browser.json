@@ -1,0 +1,85 @@
+{
+  "browser": "Linux Chromium; not Windows Edge",
+  "sourceBytes": 272717105,
+  "realExistingSeasons": 14,
+  "metadataOnlyPolling": true,
+  "FileImport": true,
+  "losslessCompressedAutosave": true,
+  "plainJSONExport": true,
+  "renewal": true,
+  "nextSeason": true,
+  "actualNextHalf": true,
+  "reload": true,
+  "imported": {
+    "file": "test-results/coherence/large-browser/imported.json",
+    "bytes": 272717105
+  },
+  "progressed": {
+    "file": "test-results/coherence/large-browser/progressed.json",
+    "bytes": 295898438
+  },
+  "steps": [
+    {
+      "stage": "import-and-autosave",
+      "year": 2039,
+      "revision": 559,
+      "ovr": 90,
+      "bytes": 19811193,
+      "rawBytes": 272717105,
+      "encoding": "gzip",
+      "journal": 0,
+      "retainedDedicatedWorkers": 0,
+      "mainPageHeapUsed": 333742732
+    },
+    {
+      "stage": "reload",
+      "year": 2039,
+      "revision": 559,
+      "ovr": 90,
+      "bytes": 19811193,
+      "rawBytes": 272717105,
+      "encoding": "gzip",
+      "journal": 0,
+      "retainedDedicatedWorkers": 0,
+      "mainPageHeapUsed": 348364864
+    },
+    {
+      "stage": "next-season",
+      "year": 2040,
+      "revision": 561,
+      "ovr": 90,
+      "bytes": 17199643,
+      "rawBytes": 239117454,
+      "encoding": "gzip",
+      "journal": 0,
+      "retainedDedicatedWorkers": 0,
+      "mainPageHeapUsed": 877264512
+    },
+    {
+      "stage": "actual-next-half",
+      "year": 2040,
+      "revision": 580,
+      "ovr": 90,
+      "bytes": 21064958,
+      "rawBytes": 295898438,
+      "encoding": "gzip",
+      "journal": 0,
+      "retainedDedicatedWorkers": 0,
+      "mainPageHeapUsed": 907970192
+    },
+    {
+      "stage": "progressed-reload",
+      "year": 2040,
+      "revision": 580,
+      "ovr": 90,
+      "bytes": 21064958,
+      "rawBytes": 295898438,
+      "encoding": "gzip",
+      "journal": 0,
+      "retainedDedicatedWorkers": 0,
+      "mainPageHeapUsed": 379387828
+    }
+  ],
+  "errors": [],
+  "external": []
+}

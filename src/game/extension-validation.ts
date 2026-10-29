@@ -19,7 +19,7 @@ function details(h:SeasonSummary){const d=h.details;if(!d)return;check(d.version
 export function validateCareerExtensions(c:Career){
  validateCommercial(c);
  if(c.systems?.world.financeVersion!==undefined)check(c.systems.world.financeVersion===1,'재정 기준 버전');
- if(c.systems?.economics.valuationVersion!==undefined)check(c.systems.economics.valuationVersion===1,'몸값 평가 버전');
+ if(c.systems?.economics.valuationVersion!==undefined)check([1,2].includes(c.systems.economics.valuationVersion),'몸값 평가 버전');
  if(c.systems?.personality!==undefined){const p=c.systems.personality;check(p!==null&&typeof p==='object'&&!Array.isArray(p)&&Object.keys(p).length===5,'성향 형식');for(const key of PERSONALITY_KEYS)num(p[key],`성향 ${key}`,1,10,true);}
  if(c.systems?.growthModelVersion!==undefined)check(c.systems.growthModelVersion===2,'성장 기준 버전');
  if(c.systems?.cheats!==undefined){check(c.systems.cheats!==null&&typeof c.systems.cheats==='object'&&!Array.isArray(c.systems.cheats),'치트 설정');for(const key of ['enabled','freezeAging','used'] as const)check(typeof c.systems.cheats[key]==='boolean','치트 설정');}
