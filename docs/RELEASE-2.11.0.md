@@ -98,3 +98,15 @@ OVR·성장·스킬·기존 골 판정/행동·평점·축구 개인상·주장�
 - 세계 전체/커리어 2라운드·3회 중앙값: **1014.27→1058.90ms**, 약 +4.4%·약 45ms. 양쪽 모두 리그 726경기를 계산했다.
 
 경기 계산·원본·세부 기능을 생략해 속도를 낸 변경은 없다. [저장 메모리/시간](validation/release-2.11.0/save-memory.json) · [순수 경기](validation/release-2.11.0/engine-performance.json) · [세계 진행](validation/release-2.11.0/world-performance.json)
+
+## 다운로드 배포
+
+[K볼 2.11.0 ZIP 다운로드](https://github.com/rabbit1245/rabbit1245.github.io/raw/658caa0ff3b068c2685230c8ac91e4b3dc574340/Kball.zip?download=1)
+
+압축을 풀고 `Kball.html`을 연다. 기존 JSON 저장을 불러오면 이어 할 수 있다. 도입 전 판매량은 미집계로 남고 기존 경기·수상·체결 계약은 보존한다. 다운로드판을 배포했으며 별도 메인 사이트의 GitHub Pages 배포는 변경하지 않았다.
+
+- 소스: `7cf1054dc14a5a3825d0216cafd257128625cac8`
+- 다운로드 배포: `658caa0ff3b068c2685230c8ac91e4b3dc574340`
+- ZIP: **21,545,429바이트**, SHA-256 `e4ac2000104bd0fc66ddf4f44a194bb6feeece5a0189a7b421ef4e4d3de9ecb2`
+
+로그인 없는 공개 링크로 다시 다운로드해 HTTP 200·ZIP 형식·정확한 크기와 해시·압축 무결성을 확인했다. 내부 HTML도 최종 브라우저 검수 파일과 바이트 단위로 같다. [공개 다운로드 검증](validation/release-2.11.0/public-download.json)
