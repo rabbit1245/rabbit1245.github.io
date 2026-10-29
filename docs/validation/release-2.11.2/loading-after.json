@@ -1,0 +1,273 @@
+{
+  "browser": "Linux Chromium; localhost standalone HTML; not Windows Edge",
+  "url": "http://127.0.0.1:4194/Kball.html",
+  "source": "test-results/coherence/large/career.json",
+  "sourceBytes": 272717105,
+  "initial": {
+    "year": 2039,
+    "revision": 559,
+    "ovr": 90,
+    "bytes": 19811190,
+    "rawBytes": 272717105,
+    "encoding": "gzip",
+    "journal": 0
+  },
+  "trained": {
+    "year": 2039,
+    "revision": 560,
+    "ovr": 90,
+    "bytes": 19811190,
+    "rawBytes": 272717105,
+    "encoding": "gzip",
+    "journal": 1
+  },
+  "progressed": {
+    "year": 2040,
+    "revision": 600,
+    "ovr": 90,
+    "bytes": 21919657,
+    "rawBytes": 305876862,
+    "encoding": "gzip",
+    "journal": 0
+  },
+  "samples": [
+    {
+      "name": "boot",
+      "ms": 3033,
+      "workers": []
+    },
+    {
+      "name": "import-and-save",
+      "ms": 27395,
+      "workers": [
+        {
+          "kind": "copy-send",
+          "worker": 1,
+          "operation": "verifyFile",
+          "ms": 0
+        },
+        {
+          "kind": "worker",
+          "worker": 1,
+          "operation": "verifyFile",
+          "ms": 11076.80000000447
+        },
+        {
+          "kind": "copy-send",
+          "worker": 2,
+          "operation": "prepare",
+          "ms": 959.7999999970198
+        },
+        {
+          "kind": "worker",
+          "worker": 2,
+          "operation": "prepare",
+          "ms": 15583.29999999702
+        }
+      ]
+    },
+    {
+      "name": "load-slot",
+      "ms": 11319,
+      "workers": [
+        {
+          "kind": "copy-send",
+          "worker": 1,
+          "operation": "decode",
+          "ms": 0.10000000149011612
+        },
+        {
+          "kind": "worker",
+          "worker": 1,
+          "operation": "decode",
+          "ms": 10293.10000000149
+        }
+      ]
+    },
+    {
+      "name": "training-open",
+      "ms": 95,
+      "workers": []
+    },
+    {
+      "name": "training-selection",
+      "ms": 48,
+      "workers": []
+    },
+    {
+      "name": "training-confirm",
+      "ms": 146,
+      "workers": []
+    },
+    {
+      "name": "transfer-open",
+      "ms": 86,
+      "workers": []
+    },
+    {
+      "name": "transfer-accept",
+      "ms": 23268,
+      "workers": [
+        {
+          "kind": "copy-send",
+          "worker": 2,
+          "operation": "transfer",
+          "ms": 960.3000000044703
+        },
+        {
+          "kind": "copy-send",
+          "worker": 3,
+          "operation": "checkpoint",
+          "ms": 0.5
+        },
+        {
+          "kind": "worker",
+          "worker": 2,
+          "operation": "transfer",
+          "ms": 6369
+        },
+        {
+          "kind": "copy-send",
+          "worker": 4,
+          "operation": "prepare",
+          "ms": 943.5
+        },
+        {
+          "kind": "worker",
+          "worker": 4,
+          "operation": "prepare",
+          "ms": 16296.5
+        }
+      ]
+    },
+    {
+      "name": "next-season",
+      "ms": 18626,
+      "workers": [
+        {
+          "kind": "copy-send",
+          "worker": 5,
+          "operation": "nextSeason",
+          "ms": 897
+        },
+        {
+          "kind": "worker",
+          "worker": 5,
+          "operation": "nextSeason",
+          "ms": 5016.60000000149
+        },
+        {
+          "kind": "copy-send",
+          "worker": 6,
+          "operation": "prepare",
+          "ms": 823.6000000014901
+        },
+        {
+          "kind": "worker",
+          "worker": 6,
+          "operation": "prepare",
+          "ms": 13260.60000000149
+        }
+      ]
+    },
+    {
+      "name": "first-half",
+      "ms": 34425,
+      "workers": [
+        {
+          "kind": "copy-send",
+          "worker": 7,
+          "operation": "advanceHalf",
+          "ms": 862.1000000014901
+        },
+        {
+          "kind": "worker",
+          "worker": 7,
+          "operation": "advanceHalf",
+          "ms": 17040.79999999702
+        },
+        {
+          "kind": "copy-send",
+          "worker": 8,
+          "operation": "prepare",
+          "ms": 1072
+        },
+        {
+          "kind": "worker",
+          "worker": 8,
+          "operation": "prepare",
+          "ms": 17062.10000000149
+        }
+      ]
+    },
+    {
+      "name": "second-half",
+      "ms": 30599,
+      "workers": [
+        {
+          "kind": "copy-send",
+          "worker": 9,
+          "operation": "continueHalf",
+          "ms": 1157.4000000059605
+        },
+        {
+          "kind": "worker",
+          "worker": 9,
+          "operation": "continueHalf",
+          "ms": 13662.60000000149
+        },
+        {
+          "kind": "copy-send",
+          "worker": 10,
+          "operation": "prepare",
+          "ms": 1105.8000000044703
+        },
+        {
+          "kind": "worker",
+          "worker": 10,
+          "operation": "prepare",
+          "ms": 16638.80000000447
+        }
+      ]
+    },
+    {
+      "name": "export-json",
+      "ms": 13621,
+      "workers": [
+        {
+          "kind": "copy-send",
+          "worker": 11,
+          "operation": "export",
+          "ms": 1212.5
+        },
+        {
+          "kind": "worker",
+          "worker": 11,
+          "operation": "export",
+          "ms": 12881.69999999553
+        }
+      ]
+    },
+    {
+      "name": "progressed-reload",
+      "ms": 12679,
+      "workers": [
+        {
+          "kind": "copy-send",
+          "worker": 1,
+          "operation": "decode",
+          "ms": 0
+        },
+        {
+          "kind": "worker",
+          "worker": 1,
+          "operation": "decode",
+          "ms": 11529.89999999851
+        }
+      ]
+    }
+  ],
+  "retainedDedicatedWorkers": 0,
+  "errors": [],
+  "external": []
+}

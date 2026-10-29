@@ -1,0 +1,15 @@
+{
+  "tests": 53,
+  "pass": 53,
+  "fail": 0,
+  "skipped": 0,
+  "files": [
+    "loading-optimizations",
+    "career-coherence",
+    "storage",
+    "save-performance",
+    "save-preparation",
+    "worker-lifecycle",
+    "keeper-save-recovery"
+  ]
+}

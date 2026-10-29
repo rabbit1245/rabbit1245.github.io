@@ -1,0 +1,277 @@
+TAP version 13
+# Subtest: a proven 80-rated incumbent with 30 league goals is offered a first-team role, while an unproven peer still competes
+ok 1 - a proven 80-rated incumbent with 30 league goals is offered a first-team role, while an unproven peer still competes
+  ---
+  duration_ms: 1172.129904
+  ...
+# Subtest: a Ballon d’Or top-ten season reinforces the incumbent role without changing ability or award outcomes
+ok 2 - a Ballon d’Or top-ten season reinforces the incumbent role without changing ability or award outcomes
+  ---
+  duration_ms: 876.037014
+  ...
+# Subtest: lower-division production alone does not give the same proven top-flight role
+ok 3 - lower-division production alone does not give the same proven top-flight role
+  ---
+  duration_ms: 578.91832
+  ...
+# Subtest: a young 30→20 goal season retains a market reputation instead of losing half its value
+ok 4 - a young 30→20 goal season retains a market reputation instead of losing half its value
+  ---
+  duration_ms: 590.18977
+  ...
+# Subtest: manual ability changes and birthdays before new matches do not immediately mark down the market quote
+ok 5 - manual ability changes and birthdays before new matches do not immediately mark down the market quote
+  ---
+  duration_ms: 456.873109
+  ...
+# Subtest: deferred manual decline keeps the old ability reference until actual new games support a revaluation
+ok 6 - deferred manual decline keeps the old ability reference until actual new games support a revaluation
+  ---
+  duration_ms: 1085.000769
+  ...
+# Subtest: repeated poor periods can reduce value, and repeated clicks cannot compound the same decline
+ok 7 - repeated poor periods can reduce value, and repeated clicks cannot compound the same decline
+  ---
+  duration_ms: 651.366561
+  ...
+# Subtest: existing quoted values, signed contracts and archived records survive the one-time market migration
+ok 8 - existing quoted values, signed contracts and archived records survive the one-time market migration
+  ---
+  duration_ms: 636.628582
+  ...
+# Subtest: shot sharing conserves the original team supply and distinguishes real finishing attributes
+ok 9 - shot sharing conserves the original team supply and distinguishes real finishing attributes
+  ---
+  duration_ms: 0.447151
+  ...
+# Subtest: chunked export is byte-equivalent JSON, including Korean text and undefined object fields
+ok 10 - chunked export is byte-equivalent JSON, including Korean text and undefined object fields
+  ---
+  duration_ms: 5.540068
+  ...
+# Subtest: compressed snapshots retain full validation and reject damaged streams or misleading expanded sizes
+ok 11 - compressed snapshots retain full validation and reject damaged streams or misleading expanded sizes
+  ---
+  duration_ms: 3885.621816
+  ...
+# Subtest: missing healthy GK depth fields explicitly fictional keepers instead of an unlabelled outfielder
+ok 12 - missing healthy GK depth fields explicitly fictional keepers instead of an unlabelled outfielder
+  ---
+  duration_ms: 902.549928
+  ...
+# Subtest: outfield insertion cannot evict a goalkeeper when its positional group is absent
+ok 13 - outfield insertion cannot evict a goalkeeper when its positional group is absent
+  ---
+  duration_ms: 885.787099
+  ...
+# Subtest: a sent-off goalkeeper is replaced by withdrawing an outfielder, retaining exactly ten active players
+ok 14 - a sent-off goalkeeper is replaced by withdrawing an outfielder, retaining exactly ten active players
+  ---
+  duration_ms: 770.129994
+  ...
+# Subtest: old emergency roles are inferred from their own source; new invalid lineups are never repaired
+ok 15 - old emergency roles are inferred from their own source; new invalid lineups are never repaired
+  ---
+  duration_ms: 813.113677
+  ...
+# Subtest: a hash-verified affected file and durable Blob recover without bypassing integrity or changing statistics
+ok 16 - a hash-verified affected file and durable Blob recover without bypassing integrity or changing statistics
+  ---
+  duration_ms: 11842.619849
+  ...
+# Subtest: owned Worker snapshots avoid another deep copy while receiving the same validation and checksum
+ok 17 - owned Worker snapshots avoid another deep copy while receiving the same validation and checksum
+  ---
+  duration_ms: 1885.463632
+  ...
+# Subtest: encoded JSON chunks preserve long tokens, chunk boundaries, Unicode and every byte
+ok 18 - encoded JSON chunks preserve long tokens, chunk boundaries, Unicode and every byte
+  ---
+  duration_ms: 93.428742
+  ...
+# Subtest: canonical property token reuse preserves legacy ordering, undefined arrays and escaped keys
+ok 19 - canonical property token reuse preserves legacy ordering, undefined arrays and escaped keys
+  ---
+  duration_ms: 20.467562
+  ...
+# Subtest: refreshing transfer proposals preserves incremental persistence instead of copying a full career into a worker
+ok 20 - refreshing transfer proposals preserves incremental persistence instead of copying a full career into a worker
+  ---
+  duration_ms: 1307.244241
+  ...
+# Subtest: light controls durably replay every field without replacing the large snapshot
+ok 21 - light controls durably replay every field without replacing the large snapshot
+  ---
+  duration_ms: 10065.717062
+  ...
+# Subtest: compaction retains the previous logical revision as backup and identical autosaves keep it
+ok 22 - compaction retains the previous logical revision as backup and identical autosaves keep it
+  ---
+  duration_ms: 5641.975659
+  ...
+# Subtest: corrupt write-ahead records fail validation and restore without displacing the good backup
+ok 23 - corrupt write-ahead records fail validation and restore without displacing the good backup
+  ---
+  duration_ms: 2351.226222
+  ...
+# Subtest: a changed engine receipt falls back to full validation instead of persisting a malformed delta
+ok 24 - a changed engine receipt falls back to full validation instead of persisting a malformed delta
+  ---
+  duration_ms: 1111.432326
+  ...
+# Subtest: parallel forks cannot overwrite the first durable light command
+ok 25 - parallel forks cannot overwrite the first durable light command
+  ---
+  duration_ms: 1006.220096
+  ...
+# Subtest: a checkpoint overlapping a new command preserves the newer head and its backup
+ok 26 - a checkpoint overlapping a new command preserves the newer head and its backup
+  ---
+  duration_ms: 3142.699201
+  ...
+# Subtest: an external tab update blocks a local journal even if metadata is stale
+ok 27 - an external tab update blocks a local journal even if metadata is stale
+  ---
+  duration_ms: 2239.613857
+  ...
+# Subtest: malformed patch paths cannot alter prototypes and deleted slots cannot be revived
+ok 28 - malformed patch paths cannot alter prototypes and deleted slots cannot be revived
+  ---
+  duration_ms: 521.985046
+  ...
+# Subtest: offseason training confirmation uses the same durable change path
+ok 29 - offseason training confirmation uses the same durable change path
+  ---
+  duration_ms: 10359.077114
+  ...
+# Subtest: a modified previous mutable state cannot inherit a trusted incremental receipt
+ok 30 - a modified previous mutable state cannot inherit a trusted incremental receipt
+  ---
+  duration_ms: 639.357772
+  ...
+# (node:48684) ExperimentalWarning: The MockTimers API is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: save Worker cancellation preserves full requests and clears settled request timers
+ok 31 - save Worker cancellation preserves full requests and clears settled request timers
+  ---
+  duration_ms: 12.95438
+  ...
+# Subtest: career-long national team results exceed one-season limits while every score still validates
+ok 32 - career-long national team results exceed one-season limits while every score still validates
+  ---
+  duration_ms: 16410.065591
+  ...
+# Subtest: original v1 envelopes retain their checksum and all legacy fields through load, export and import
+ok 33 - original v1 envelopes retain their checksum and all legacy fields through load, export and import
+  ---
+  duration_ms: 69.777569
+  ...
+# Subtest: published v2 envelopes preserve their checksum and do not invent new improvement ledgers while loading
+ok 34 - published v2 envelopes preserve their checksum and do not invent new improvement ledgers while loading
+  ---
+  duration_ms: 1750.359992
+  ...
+# Subtest: contract snapshots reconcile renewals, transfers and known season-opening values without inventing previous terms
+ok 35 - contract snapshots reconcile renewals, transfers and known season-opening values without inventing previous terms
+  ---
+  duration_ms: 4201.097367
+  ...
+# Subtest: dated national windows reject malformed cursors, future periods and duplicate callups while keeping old processed keys
+ok 36 - dated national windows reject malformed cursors, future periods and duplicate callups while keeping old processed keys
+  ---
+  duration_ms: 1362.336703
+  ...
+# Subtest: legacy detail fields remain optional while malformed and future detailed records are rejected
+ok 37 - legacy detail fields remain optional while malformed and future detailed records are rejected
+  ---
+  duration_ms: 12.265214
+  ...
+# Subtest: v2 saves validate world membership, international scope, references and separate income ledgers
+ok 38 - v2 saves validate world membership, international scope, references and separate income ledgers
+  ---
+  duration_ms: 4634.802794
+  ...
+# Subtest: IndexedDB round trip preserves Korean names, match ledgers and selected training
+ok 39 - IndexedDB round trip preserves Korean names, match ledgers and selected training
+  ---
+  duration_ms: 10.918885
+  ...
+# Subtest: autosaves atomically retain a previous-good backup and identical saves do not replace it
+ok 40 - autosaves atomically retain a previous-good backup and identical saves do not replace it
+  ---
+  duration_ms: 32.790115
+  ...
+# Subtest: a damaged current slot can be recovered without displacing its previous-good backup
+ok 41 - a damaged current slot can be recovered without displacing its previous-good backup
+  ---
+  duration_ms: 27.32534
+  ...
+# Subtest: stale autosaves and equal-revision conflicting branches cannot overwrite a slot
+ok 42 - stale autosaves and equal-revision conflicting branches cannot overwrite a slot
+  ---
+  duration_ms: 15.26745
+  ...
+# Subtest: another tab changing a slot is detected even when a local branch has a higher revision
+ok 43 - another tab changing a slot is detected even when a local branch has a higher revision
+  ---
+  duration_ms: 15.91681
+  ...
+# Subtest: JSON import validates its checksum and creates a separate slot without changing its simulation seed
+ok 44 - JSON import validates its checksum and creates a separate slot without changing its simulation seed
+  ---
+  duration_ms: 24.778891
+  ...
+# Subtest: edited, truncated, future-version and prototype-poisoned save files are rejected
+ok 45 - edited, truncated, future-version and prototype-poisoned save files are rejected
+  ---
+  duration_ms: 9.85557
+  ...
+# Subtest: damaged statistics, league tables and shot-to-goal references are rejected before writing
+ok 46 - damaged statistics, league tables and shot-to-goal references are rejected before writing
+  ---
+  duration_ms: 21.704769
+  ...
+# Subtest: the first editable command upgrades legacy systems without rewriting old match metrics or income
+ok 47 - the first editable command upgrades legacy systems without rewriting old match metrics or income
+  ---
+  duration_ms: 2360.18046
+  ...
+# Subtest: a continued v1 career retains old match coverage and saves new detailed matches beside it
+ok 48 - a continued v1 career retains old match coverage and saves new detailed matches beside it
+  ---
+  duration_ms: 12766.668154
+  ...
+# Subtest: only explicitly named club reserve snapshots may lack a persistent world roster entry
+ok 49 - only explicitly named club reserve snapshots may lack a persistent world roster entry
+  ---
+  duration_ms: 1438.835533
+  ...
+# Subtest: historical award snapshots survive retirement of the ranked NPC without relaxing live references
+ok 50 - historical award snapshots survive retirement of the ranked NPC without relaxing live references
+  ---
+  duration_ms: 2205.017831
+  ...
+# Subtest: actual international goalkeeper matches and their attempt denominators survive export/import
+ok 51 - actual international goalkeeper matches and their attempt denominators survive export/import
+  ---
+  duration_ms: 11577.532372
+  ...
+# Subtest: deleting a slot also deletes its backup and blocks a delayed autosave from reviving it
+ok 52 - deleting a slot also deletes its backup and blocks a delayed autosave from reviving it
+  ---
+  duration_ms: 13.995043
+  ...
+# Subtest: game workers keep short-career caching and release long-career copies after complete results
+ok 53 - game workers keep short-career caching and release long-career copies after complete results
+  ---
+  duration_ms: 51.347904
+  ...
+1..53
+# tests 53
+# suites 0
+# pass 53
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 63160.197045

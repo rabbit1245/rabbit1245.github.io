@@ -1,0 +1,18 @@
+{
+  "version": "2.11.2",
+  "typecheck": true,
+  "production": true,
+  "standaloneHTML": true,
+  "artifacts": {
+    "Kball.html": {
+      "bytes": 28598950,
+      "sha256": "ba9fe4f06743fee5d0aa2f9c9e6ad2eb832019d43e322df87ed7ce85b8a35a4a"
+    },
+    "Kball.zip": {
+      "bytes": 21552484,
+      "sha256": "a8435554dbe49c49a588148688fc537fb8546b8f2142e937fb1c3db7cf74f342"
+    }
+  },
+  "ZIPCRC": true,
+  "internalHTMLMatches": true
+}

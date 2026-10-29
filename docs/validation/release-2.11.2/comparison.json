@@ -1,0 +1,95 @@
+{
+  "beforeVersion": "2.11.1",
+  "afterVersion": "2.11.2",
+  "sourceBytes": 272717105,
+  "singleSequentialRunPerVersion": true,
+  "browser": "Linux Chromium; localhost standalone HTML; not Windows Edge",
+  "results": [
+    {
+      "stage": "boot",
+      "beforeMs": 2835,
+      "afterMs": 3033,
+      "reductionPercent": -7.0
+    },
+    {
+      "stage": "import-and-save",
+      "beforeMs": 36618,
+      "afterMs": 27395,
+      "reductionPercent": 25.2
+    },
+    {
+      "stage": "load-slot",
+      "beforeMs": 14127,
+      "afterMs": 11319,
+      "reductionPercent": 19.9
+    },
+    {
+      "stage": "training-open",
+      "beforeMs": 97,
+      "afterMs": 95,
+      "reductionPercent": 2.1
+    },
+    {
+      "stage": "training-selection",
+      "beforeMs": 46,
+      "afterMs": 48,
+      "reductionPercent": -4.3
+    },
+    {
+      "stage": "training-confirm",
+      "beforeMs": 140,
+      "afterMs": 146,
+      "reductionPercent": -4.3
+    },
+    {
+      "stage": "transfer-open",
+      "beforeMs": 95,
+      "afterMs": 86,
+      "reductionPercent": 9.5
+    },
+    {
+      "stage": "transfer-accept",
+      "beforeMs": 32030,
+      "afterMs": 23268,
+      "reductionPercent": 27.4
+    },
+    {
+      "stage": "next-season",
+      "beforeMs": 25663,
+      "afterMs": 18626,
+      "reductionPercent": 27.4
+    },
+    {
+      "stage": "first-half",
+      "beforeMs": 43295,
+      "afterMs": 34425,
+      "reductionPercent": 20.5
+    },
+    {
+      "stage": "second-half",
+      "beforeMs": 44949,
+      "afterMs": 30599,
+      "reductionPercent": 31.9
+    },
+    {
+      "stage": "export-json",
+      "beforeMs": 25191,
+      "afterMs": 13621,
+      "reductionPercent": 45.9
+    },
+    {
+      "stage": "progressed-reload",
+      "beforeMs": 15253,
+      "afterMs": 12679,
+      "reductionPercent": 16.9
+    }
+  ],
+  "beforeHTML": {
+    "bytes": 28598782,
+    "sha256": "be1f345097c850f4358cdf37947f08d7a6480236c654162777bb577a224d9bad"
+  },
+  "afterHTML": {
+    "bytes": 28598950,
+    "sha256": "ba9fe4f06743fee5d0aa2f9c9e6ad2eb832019d43e322df87ed7ce85b8a35a4a"
+  }
+}

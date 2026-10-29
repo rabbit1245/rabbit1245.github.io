@@ -1,4 +1,5 @@
 import type { Career, GameCommand,GameProgress } from './types';
+import {LIGHT_COMMANDS} from './command-patches';
 
 type Pending = { resolve: (value: Career) => void; reject: (reason: Error) => void; timeout: ReturnType<typeof setTimeout>;onProgress?:(p:GameProgress)=>void };
 let worker: Worker | undefined;
@@ -22,7 +23,7 @@ function stopWorker(message: string) {
 
 export async function runGameCommand(career: Career, command: GameCommand,onProgress?:(p:GameProgress)=>void): Promise<Career> {
   const id = crypto.randomUUID();
-  if (typeof Worker === 'undefined'||['personality','personalitySet','playSkill','manualAging','attributeLock','attributeLockAll','training','cheatSettings','increaseAttribute'].includes(command.type)) {
+  if (typeof Worker === 'undefined'||LIGHT_COMMANDS.has(command.type)) {
     const { executeCommand } = await import('./commands');
     return executeCommand(career, command, id,onProgress);
   }
