@@ -47,3 +47,15 @@
 최종 HTML에서 같은 실제 커리어를 가져와 훈련 확정·재계약·다음 시즌·실제 전/후반기를 진행한 뒤 **305,876,862바이트 JSON**을 내보내고 다시 불러왔다. 페이지 오류·자동 저장 오류·renderer 종료·외부 자산 요청은 없었고, 마지막 재실행 완료 후 상주 전용 Worker는 0개였다.
 
 원본 14시즌의 클럽 경기·스탯·수상, 국가대표 과거 기록과 모든 능력치가 같았다. 개선 전/후에 새로 계산한 시즌의 개인 스탯·전체 경기 이벤트·리그 표도 바이트 해시가 같았다. 전체 저장 검증과 정규 SHA-256을 다시 통과했고, 큰 JSON의 바이트 해시는 native JSON.stringify 결과와도 일치했다. [기록·경기 결과·바이트 대조](validation/release-2.11.2/records-verified.json) · [계속 진행한 화면](validation/release-2.11.2/continued.png)
+
+## 다운로드 배포
+
+[K볼 2.11.2 ZIP 다운로드](https://github.com/rabbit1245/rabbit1245.github.io/raw/b21445756140a5cb6fdfa6d8b8421daa95e0c2a3/Kball.zip?download=1)
+
+압축을 풀고 `Kball.html`을 연 뒤 기존 JSON을 가져오면 이어 할 수 있다. 다운로드판을 갱신했으며 별도 메인 사이트의 GitHub Pages 배포는 변경하지 않았다.
+
+- 소스: `9558f40a13db9bb5bec77609f057d9715cdf39f4`
+- 배포: `b21445756140a5cb6fdfa6d8b8421daa95e0c2a3`
+- ZIP: **21,552,484바이트**, SHA-256 `a8435554dbe49c49a588148688fc537fb8546b8f2142e937fb1c3db7cf74f342`
+
+로그인 없는 공개 다운로드를 다시 받아 HTTP 200·압축 형식·크기·SHA-256·ZIP CRC를 확인했다. ZIP 안의 HTML은 실제 검수한 파일과 바이트 단위로 같다. [공개 다운로드 검증](validation/release-2.11.2/public-download.json)
