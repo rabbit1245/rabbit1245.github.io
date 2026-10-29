@@ -1,0 +1,8 @@
+{
+  "tests": 367,
+  "pass": 366,
+  "fail": 0,
+  "skipped": 1,
+  "skippedCase": "30-season full resimulation; existing long-save preservation verified separately",
+  "command": "KBALL_SKIP_LONG_TEST=1 node --test-concurrency=5 --import tsx --test src/game/*.test.ts"
+}

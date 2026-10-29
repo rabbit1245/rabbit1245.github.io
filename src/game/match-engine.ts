@@ -212,7 +212,9 @@ function tacticalImpact(team:Team,opponentPower:number,career:Career):{supply:nu
     // Averaging one player into eleven used to erase this effect almost entirely.
     // Use real ball/mental skills, role and minutes for every actor, never the user ID.
     const retention=ability(actor,'ballControl')*.22+ability(actor,'dribbling')*.18+ability(actor,'passing')*.20+ability(actor,'decisions')*.16+ability(actor,'composure')*.12+ability(actor,'teamwork')*.12;
-    const dominance=Math.pow(clamp((retention-opponentPower)/26,0,1),1.25);
+    // Ordinary squad strength is already reflected by team power and skill
+    // contests. Count exceptional ball retention, not that advantage eleven times.
+    const dominance=Math.pow(clamp((retention-Math.max(opponentPower,team.referencePower))/26,0,1),1.25);
     const controlRole=MIDFIELD.has(actor.position)?1:FORWARD.has(actor.position)?.85:wide?.65:.4;
     control+=dominance*controlRole*duration(actor);
   }
@@ -292,7 +294,7 @@ export function simulateMatch(career:Career,fixture:Fixture,options:MatchOptions
   const buildUp=teams.map(t=>t.actors.reduce((n,a)=>n+(a.stats.passesCompleted-(a.stats.progressivePasses??0))*.004+(a.stats.progressivePasses??0)*.012+(a.stats.dribblesCompleted??0)*.09+(a.stats.lateSuccesses??0)*.006,0));
   const disruption=teams.map(t=>t.actors.reduce((n,a)=>n+a.stats.tackles*.12+a.stats.interceptions*.16+(a.stats.pressingWins??0)*.14+(a.stats.aerialWon??0)*.04+(a.stats.crossesCaught??0)*.12+(a.stats.punches??0)*.12+(a.stats.sweepingSuccesses??0)*.12,0));
   const tactics=teams.map((team,index)=>tacticalImpact(team,teams[1-index].power,career));
-  const scores=[0,0];
+  const scores=[0,0],goalMinutes:number[][]=[[],[]];
   for(let side=0;side<2;side++){
     const team=teams[side],opposition=teams[1-side];
     const keeperAt=(minute:number)=>opposition.actors.find(a=>a.position==='GK'&&a.from<minute&&a.to>=minute)??opposition.actors.find(a=>a.from<minute&&a.to>=minute)!;
@@ -366,7 +368,7 @@ export function simulateMatch(career:Career,fixture:Fixture,options:MatchOptions
           if(shotType==='penalty')keeper.stats.penaltiesSaved=(keeper.stats.penaltiesSaved??0)+1;
           emit('save',keeper,minute,shotType==='penalty'?'페널티킥 선방':shotType==='oneOnOne'?'일대일 선방':'선방',shotId);
         }else{
-          shooter.stats.goals++;scores[side]++;keeper.stats.goalsConceded++;
+          shooter.stats.goals++;scores[side]++;goalMinutes[side].push(minute);keeper.stats.goalsConceded++;
           if(shotType==='header')shooter.stats.headerGoals=(shooter.stats.headerGoals??0)+1;
           const goalId=emit('goal',shooter,minute,shotType==='header'?'헤더 득점':'득점',shotId);
           if(creator){creator.stats.assists++;emit('assist',creator,minute,'득점으로 연결한 마지막 패스',goalId);}
@@ -377,6 +379,9 @@ export function simulateMatch(career:Career,fixture:Fixture,options:MatchOptions
   for(let side=0;side<2;side++)for(const actor of teams[side].actors){
     const s=actor.stats;
     if(actor.position==='GK'&&actor.minutes>=60&&s.goalsConceded===0)s.cleanSheets=1;
+    // Existing defender award rules read this field, but only keepers used to
+    // receive it. Credit an actual >=60-minute clean spell, including substitutions.
+    if(DEFENCE.has(actor.position)&&actor.minutes>=60&&!goalMinutes[1-side].some(minute=>minute>actor.from&&minute<=actor.to))s.cleanSheets=1;
     const isGK=actor.position==='GK';
     const contribution=isGK?s.saves*.20+(s.oneOnOneSaves??0)*.12+(s.penaltiesSaved??0)*.65+s.cleanSheets*.45-s.goalsConceded*.38+(s.crossesCaught??0)*.035+(s.sweepingSuccesses??0)*.04:
       s.goals*.95+s.assists*.65+(s.keyPasses??0)*.07+s.tackles*(FORWARD.has(actor.position)?.12:.075)+s.interceptions*(FORWARD.has(actor.position)?.11:.065)+(s.dribblesCompleted??0)*.055+(s.aerialWon??0)*.025+s.shotsOnTarget*.055-(s.passes-s.passesCompleted)*.018-((s.dribbleAttempts??0)-(s.dribblesCompleted??0))*.035;

@@ -19,7 +19,7 @@ test('worker progress keeps a long injury command alive; silence still times out
  t.mock.timers.enable({apis:['setTimeout']});
  try{
   const {runGameCommand}=await import('./client');
-  const career={id:'long-injury',revision:0} as Career,progress:unknown[]=[];
+  const career={id:'long-injury',revision:0,history:[]} as unknown as Career,progress:unknown[]=[];
   const pending=runGameCommand(career,{type:'manualInjury',duration:'season'},p=>progress.push(p));
   const worker=FakeWorker.instance,id=worker.sent[0].id;
   for(let round=1;round<=3;round++){t.mock.timers.tick(59_000);worker.emit({id,progress:{year:2027,round,total:38}});assert.equal(worker.terminated,false);}

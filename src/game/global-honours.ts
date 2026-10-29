@@ -4,6 +4,7 @@ import {clamp,round,emptyStats} from './math';
 import {worldPlayerAbility} from './world';
 import {EUROPEAN_COUNTRIES} from './cup-rules';
 import {currentNationality,normalizeNationality} from './national-data';
+import {awardPositionGroup} from './award-selection';
 import {achievementBonus,finishAchievementSeason,type AchievementContext} from './achievement-evidence';
 import type {Award,Career} from './types';
 import type {CompetitorSeason,RankingCandidate} from './revision-types';
@@ -21,12 +22,18 @@ export function globalVoting(c:Career,rows:CompetitorSeason[],performance:(r:Com
  }
  const eligible=rows.filter(r=>r.stats.minutes>=900).map(r=>raw.get(r.playerId)??0).sort((a,b)=>a-b);
  const scale=Math.max(80,(eligible[Math.floor(eligible.length*.95)]??100)*1.15);
+ // Judge exceptional role performance against the same role. A single global
+ // reference was dominated by attackers' goals/MOM, excluding even elite defenders.
+ // League strength is already included in raw; the floor keeps weak output weak.
+ const roleValues=new Map<string,number[]>(),roleScales=new Map<string,number>();
+ for(const r of rows)if(r.stats.minutes>=900){const group=awardPositionGroup(r.position),values=roleValues.get(group)??[];values.push(raw.get(r.playerId)??0);roleValues.set(group,values);}
+ for(const [group,values]of roleValues)if(values.length>=5){values.sort((a,b)=>a-b);roleScales.set(group,Math.max(65,values[Math.floor(values.length*.95)]*1.15));}
  const ability=(r:CompetitorSeason)=>r.playerId===c.player.id?c.player.ovr:c.systems!.world.players[r.playerId]?worldPlayerAbility(c,c.systems!.world.players[r.playerId],offsets):r.ovr;
  const evidence=new Map(rows.map(r=>[r.playerId,achievementBonus(c,r,context)]));
  const base=(r:CompetitorSeason,kind:VoteKind)=>{
   const [personal,team,skill]=weights[kind],n=r.nationalStats;
   const national=n?.minutes?clamp((n.ratingCount?n.ratingSum/n.ratingCount:0)-6,0,3)*Math.min(8,n.apps)*.5:0;
-  const individual=clamp(((raw.get(r.playerId)??0)+national)/scale,0,1.35);
+  const individual=clamp(((raw.get(r.playerId)??0)+national)/(roleScales.get(awardPositionGroup(r.position))??scale),0,1.35);
   const achievement=(context.leagueTitles.get(r.clubId)??0)/Math.sqrt(getLeague(r.leagueId).tier)+(context.cupTitles.get(r.playerId)??0)+(nationalTitles.get(r.playerId)??0)+(context.teamScore.get(r.clubId)??0)*.25;
   return personal*individual+team*clamp(achievement/36,0,1)+skill*clamp((ability(r)-50)/70,0,1);
  };

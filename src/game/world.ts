@@ -1,6 +1,6 @@
 import {playingAbility} from './attributes';
 import {benchmarkRevenue} from './market-benchmarks';
-import {ESTABLISHED_CLUBS,userInfluencedClub} from './club-balance';
+import {ESTABLISHED_CLUBS,userInfluencedClub,effectiveDevelopmentGain} from './club-balance';
 import {personalityEdge} from './personality';
 import {reviewK3Promotion} from './korean-promotion';
 import {internationalRoster} from './international-clubs';
@@ -99,7 +99,7 @@ function teamBase(career:Career,world:WorldState,club:ClubWorld):number {
   let form=cache.values.get(club.id);
   if(form===undefined){const rng=seededRandom(`${career.seed}|club-season-form|${world.year}|${club.id}`);form=(rng()+rng()-1)*2;cache.values.set(club.id,form);}
   const investment=clamp(d?.investmentPower??0,0,influenced?22:2.5);
-  const power=base+progress+investment+form;
+  const power=base+(influenced?effectiveDevelopmentGain(base,progress+investment):progress+investment)+form;
   return ESTABLISHED_CLUBS.has(club.id)?Math.max(base-.5,power+.5):power;
 }
 

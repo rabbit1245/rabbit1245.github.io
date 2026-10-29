@@ -1,0 +1,51 @@
+{
+  "rejudged": [
+    {
+      "position": "CB",
+      "before": 19,
+      "after": 4,
+      "diagnostic": {
+        "name": "발롱도르",
+        "scope": "리그·클럽 컵·국가대표",
+        "eligible": true,
+        "result": "4위 · 미선정",
+        "detail": "경기력 점수 101.75 · 전체 4위 · 우승/대회 기여 16.0점 · 전체 비교 11303명 · 클럽 58경기 · 국대 10경기. 발롱도르는 30인 후보 중 1위, 월드 11은 포지션별 비교와 총 30경기 이상."
+      },
+      "sameActualMatchesAndNPCStats": true,
+      "existingSavedJudgementUnchanged": true,
+      "analysisOnly": true
+    },
+    {
+      "position": "RWB",
+      "before": 12,
+      "after": 3,
+      "diagnostic": {
+        "name": "발롱도르",
+        "scope": "리그·클럽 컵·국가대표",
+        "eligible": true,
+        "result": "3위 · 미선정",
+        "detail": "경기력 점수 103.97 · 전체 3위 · 우승/대회 기여 16.0점 · 전체 비교 11303명 · 클럽 58경기 · 국대 10경기. 발롱도르는 30인 후보 중 1위, 월드 11은 포지션별 비교와 총 30경기 이상."
+      },
+      "sameActualMatchesAndNPCStats": true,
+      "existingSavedJudgementUnchanged": true,
+      "analysisOnly": true
+    }
+  ],
+  "currentCareer": {
+    "position": "CB",
+    "ovr": 92,
+    "ballonRank": 3,
+    "leagueCleanSheets": 21,
+    "clubCleanSheets": 36,
+    "nationalCleanSheets": 5,
+    "JSONRoundTripAllFields": true,
+    "fullValidationAndChecksum": true,
+    "KoreanTXT": true
+  },
+  "oldLargeCareer": {
+    "seasons": 14,
+    "bytes": 272717105,
+    "allFieldsExceptNewSlotIDIdentical": true,
+    "legacyAdjudicationPreserved": true
+  }
+}

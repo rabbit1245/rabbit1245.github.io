@@ -1,0 +1,63 @@
+{
+  "base": "5472f51",
+  "unchanged": [
+    {
+      "file": "src/game/attributes.ts",
+      "sha256": "aa4e4484a18884b50991df3e527680e9266921ec7a197525c5ad4263b5b3f589"
+    },
+    {
+      "file": "src/game/play-skills.ts",
+      "sha256": "ecae3836e767b4bfc5c8479c96ba366202524bb9893e5ed9a26c5175fe8ce5d0"
+    },
+    {
+      "file": "src/game/growth.ts",
+      "sha256": "6b9e9b3195b38b68a9bd7a5453109f9d0fd96bbcb3791ba0e9d9e43c9ea36694"
+    },
+    {
+      "file": "src/game/market-value.ts",
+      "sha256": "4ffdb4fd9697478f23c3418e41c08d8ec00e12cf6f31e0493532adf1172604e2"
+    },
+    {
+      "file": "src/game/career-text.ts",
+      "sha256": "9ce253fb11964a9c1536652ae1f06952fd09f37ebb18005a6c137e2ae6af4b5a"
+    },
+    {
+      "file": "src/game/national.ts",
+      "sha256": "5bff32fb5f5448659f111eb71e8871fbef60b6df3732fd8e4c6e2af0d5d1ed45"
+    },
+    {
+      "file": "src/game/club-competitions.ts",
+      "sha256": "dbfe6579da4f98ed811c18b3372176042d90e9aa4ed7e6e380e01f29261908d3"
+    },
+    {
+      "file": "src/game/storage.ts",
+      "sha256": "c9886dffb34a705467eaffadf23267c634392fb3153db27544daf03b1a897e48"
+    },
+    {
+      "file": "src/game/save-codec.ts",
+      "sha256": "5036c05dbd3a5fbee40ffad96f0e2f4dad91b9e121b44a3b9ddd369fa4738e8c"
+    },
+    {
+      "file": "src/game/json-blob.ts",
+      "sha256": "cb36e624e35fdf9154702134b521430f4906186b80025fd4834dcafeb02bdd28"
+    },
+    {
+      "file": "src/game/canonical-bytes.ts",
+      "sha256": "5cdc87cf4df7e34b0df2500a282caaced3cb8b2d3b774273c57f5eb12541a738"
+    },
+    {
+      "file": "src/game/client.ts",
+      "sha256": "e8aa50a851e4fa9792e36965aed508f17462078a8027d5d156c669a067c01a4d"
+    },
+    {
+      "file": "src/game/save-preparation.ts",
+      "sha256": "bbe58a5f46c0c2a8085db3fd50f709073c5e8905d043cceda1850d12162b6859"
+    },
+    {
+      "file": "src/game/save-worker.ts",
+      "sha256": "07115c261d870776051741d050c3aa7506fb7bafd6464bacd9cf1d9ef682894f"
+    }
+  ],
+  "saveSchemaUnchanged": true,
+  "newPersistentFields": false
+}

@@ -1,6 +1,6 @@
 import type {Award} from './types';
 /** Real award names and organisers. Numerical voting below is a game model, never an official vote. */
-export const AWARD_MODEL_VERSION='kball-awards-2.9.6';
+export const AWARD_MODEL_VERSION='kball-awards-2.11.3';
 export const AWARD_VERIFICATION_NOTE='게임 경기 기록으로 선정하는 모형입니다. 대상 연도의 공식 규정·평가 기간을 모두 검증한 결과는 아닙니다.';
 export interface AwardRule {
   id: string; name: string; organiser: string; criterion: string; sourceUrl: string;

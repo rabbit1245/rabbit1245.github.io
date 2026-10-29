@@ -1,0 +1,89 @@
+{
+  "url": "http://127.0.0.1:4194/Kball.html",
+  "samples": [
+    {
+      "name": "boot",
+      "ms": 7069,
+      "workers": []
+    },
+    {
+      "name": "import-and-save",
+      "ms": 65674,
+      "workers": [
+        {
+          "kind": "copy-send",
+          "worker": 1,
+          "operation": "verifyFile",
+          "ms": 0
+        },
+        {
+          "kind": "worker",
+          "worker": 1,
+          "operation": "verifyFile",
+          "ms": 33008.09999999404
+        },
+        {
+          "kind": "copy-send",
+          "worker": 2,
+          "operation": "prepare",
+          "ms": 2097.60000000149
+        },
+        {
+          "kind": "worker",
+          "worker": 2,
+          "operation": "prepare",
+          "ms": 31734.10000000149
+        }
+      ]
+    },
+    {
+      "name": "load-slot",
+      "ms": 24345,
+      "workers": [
+        {
+          "kind": "copy-send",
+          "worker": 1,
+          "operation": "decode",
+          "ms": 0
+        },
+        {
+          "kind": "worker",
+          "worker": 1,
+          "operation": "decode",
+          "ms": 22403.79999999702
+        }
+      ]
+    },
+    {
+      "name": "export-json",
+      "ms": 18487,
+      "workers": [
+        {
+          "kind": "copy-send",
+          "worker": 1,
+          "operation": "decode",
+          "ms": 0
+        },
+        {
+          "kind": "worker",
+          "worker": 1,
+          "operation": "decode",
+          "ms": 22403.79999999702
+        },
+        {
+          "kind": "copy-send",
+          "worker": 2,
+          "operation": "export",
+          "ms": 1902.5
+        },
+        {
+          "kind": "worker",
+          "worker": 2,
+          "operation": "export",
+          "ms": 17175
+        }
+      ]
+    }
+  ],
+  "errors": []
+}
