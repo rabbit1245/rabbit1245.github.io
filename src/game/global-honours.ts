@@ -10,7 +10,7 @@ import type {Award,Career} from './types';
 import type {CompetitorSeason,RankingCandidate} from './revision-types';
 
 export type VoteKind='ballon'|'fifa'|'fifa11'|'fifpro'|'yashin'|'fifa-gk'|'kopa';
-export interface VotingTeamContext extends AchievementContext {leagueTitles:Map<string,number>;cupTitles:Map<string,number>;teamScore:Map<string,number>;prestige?:Map<string,number>}
+export interface VotingTeamContext extends AchievementContext {leagueTitles:Map<string,number>;cupTitles:Map<string,number>;teamScore:Map<string,number>;prestige?:Map<string,number>;performanceRoles?:Map<string,ReturnType<typeof awardPositionGroup>>}
 const weights:Record<VoteKind,[number,number,number]>={ballon:[60,20,20],fifa:[65,20,15],fifa11:[70,15,15],fifpro:[75,10,15],yashin:[65,20,15],'fifa-gk':[70,15,15],kopa:[65,20,15]};
 const avg=(r:CompetitorSeason)=>r.stats.ratingCount?r.stats.ratingSum/r.stats.ratingCount:0;
 export function globalVoting(c:Career,rows:CompetitorSeason[],performance:(r:CompetitorSeason)=>number,context:VotingTeamContext){
@@ -26,14 +26,18 @@ export function globalVoting(c:Career,rows:CompetitorSeason[],performance:(r:Com
  // reference was dominated by attackers' goals/MOM, excluding even elite defenders.
  // League strength is already included in raw; the floor keeps weak output weak.
  const roleValues=new Map<string,number[]>(),roleScales=new Map<string,number>();
- for(const r of rows)if(r.stats.minutes>=900){const group=awardPositionGroup(r.position),values=roleValues.get(group)??[];values.push(raw.get(r.playerId)??0);roleValues.set(group,values);}
+ const performanceRole=(r:CompetitorSeason)=>context.performanceRoles?.get(r.playerId)??awardPositionGroup(r.position);
+ for(const r of rows)if(r.stats.minutes>=900){const group=performanceRole(r),values=roleValues.get(group)??[];values.push(raw.get(r.playerId)??0);roleValues.set(group,values);}
  for(const [group,values]of roleValues)if(values.length>=5){values.sort((a,b)=>a-b);roleScales.set(group,Math.max(65,values[Math.floor(values.length*.95)]*1.15));}
  const ability=(r:CompetitorSeason)=>r.playerId===c.player.id?c.player.ovr:c.systems!.world.players[r.playerId]?worldPlayerAbility(c,c.systems!.world.players[r.playerId],offsets):r.ovr;
  const evidence=new Map(rows.map(r=>[r.playerId,achievementBonus(c,r,context)]));
  const base=(r:CompetitorSeason,kind:VoteKind)=>{
   const [personal,team,skill]=weights[kind],n=r.nationalStats;
   const national=n?.minutes?clamp((n.ratingCount?n.ratingSum/n.ratingCount:0)-6,0,3)*Math.min(8,n.apps)*.5:0;
-  const individual=clamp(((raw.get(r.playerId)??0)+national)/(roleScales.get(awardPositionGroup(r.position))??scale),0,1.35);
+  const observed=Math.max(0,((raw.get(r.playerId)??0)+national)/(roleScales.get(performanceRole(r))??scale));
+  // Preserve the former scale below its cap, then keep rewarding exceptional
+  // output with diminishing returns instead of flattening every top season.
+  const individual=observed<=1.35?observed:1.35+.3*-Math.expm1(-(observed-1.35)/.3);
   const achievement=(context.leagueTitles.get(r.clubId)??0)/Math.sqrt(getLeague(r.leagueId).tier)+(context.cupTitles.get(r.playerId)??0)+(nationalTitles.get(r.playerId)??0)+(context.teamScore.get(r.clubId)??0)*.25;
   return personal*individual+team*clamp(achievement/36,0,1)+skill*clamp((ability(r)-50)/70,0,1);
  };

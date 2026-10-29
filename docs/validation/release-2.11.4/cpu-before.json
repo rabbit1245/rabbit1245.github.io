@@ -1,0 +1,156 @@
+{
+  "sampledProfile": "CPU.20261029.155818.66439.0.001.cpuprofile",
+  "note": "CPU profiling adds overhead; compare quiet sequential runs separately. Aggregated self time by call frame, not inclusive tree time.",
+  "topFunctions": [
+    {
+      "function": "poolFor",
+      "file": "file://src/game/national.ts",
+      "line": 2,
+      "selfMs": 8305.47
+    },
+    {
+      "function": "(garbage collector)",
+      "file": "",
+      "line": 0,
+      "selfMs": 5956.14
+    },
+    {
+      "function": "",
+      "file": "file://src/game/canonical-bytes.ts",
+      "line": 2,
+      "selfMs": 3780.95
+    },
+    {
+      "function": "(idle)",
+      "file": "",
+      "line": 0,
+      "selfMs": 3276.85
+    },
+    {
+      "function": "",
+      "file": "file:///tmp/kball-late-profile/engine.mts",
+      "line": 1,
+      "selfMs": 2601.28
+    },
+    {
+      "function": "",
+      "file": "file://src/game/json-blob.ts",
+      "line": 2,
+      "selfMs": 2463.93
+    },
+    {
+      "function": "",
+      "file": "file://src/game/match-engine.ts",
+      "line": 2,
+      "selfMs": 2029.49
+    },
+    {
+      "function": "simulateMatch",
+      "file": "file://src/game/match-engine.ts",
+      "line": 2,
+      "selfMs": 1959.18
+    },
+    {
+      "function": "currentNationality",
+      "file": "file://src/game/national-data.ts",
+      "line": 2,
+      "selfMs": 1865.43
+    },
+    {
+      "function": "ensureSafeJSON",
+      "file": "file://src/game/storage.ts",
+      "line": 2,
+      "selfMs": 1853.82
+    },
+    {
+      "function": "encodeUtf8String",
+      "file": "",
+      "line": 0,
+      "selfMs": 1364.12
+    },
+    {
+      "function": "",
+      "file": "file://src/game/match-actions.ts",
+      "line": 2,
+      "selfMs": 1248.16
+    },
+    {
+      "function": "aggregateMatch",
+      "file": "file://src/game/world.ts",
+      "line": 2,
+      "selfMs": 931.03
+    },
+    {
+      "function": "",
+      "file": "file://src/game/math.ts",
+      "line": 2,
+      "selfMs": 793.28
+    },
+    {
+      "function": "write",
+      "file": "node:string_decoder",
+      "line": 94,
+      "selfMs": 767.14
+    },
+    {
+      "function": "copySystems",
+      "file": "file://src/game/snapshot.ts",
+      "line": 2,
+      "selfMs": 661.42
+    },
+    {
+      "function": "makeTeam",
+      "file": "file://src/game/match-engine.ts",
+      "line": 2,
+      "selfMs": 605.77
+    },
+    {
+      "function": "set natives",
+      "file": "",
+      "line": 0,
+      "selfMs": 564.7
+    },
+    {
+      "function": "encode",
+      "file": "node:internal/encoding",
+      "line": 351,
+      "selfMs": 537.38
+    },
+    {
+      "function": "",
+      "file": "",
+      "line": 0,
+      "selfMs": 500.65
+    },
+    {
+      "function": "rosterFor",
+      "file": "file://src/game/national.ts",
+      "line": 2,
+      "selfMs": 470.26
+    },
+    {
+      "function": "emptyStats",
+      "file": "file://src/game/math.ts",
+      "line": 2,
+      "selfMs": 456.49
+    },
+    {
+      "function": "sampleActions",
+      "file": "file://src/game/match-engine.ts",
+      "line": 2,
+      "selfMs": 402.71
+    },
+    {
+      "function": "seededRandom",
+      "file": "file://src/game/math.ts",
+      "line": 2,
+      "selfMs": 398.71
+    },
+    {
+      "function": "matches",
+      "file": "file://src/game/storage.ts",
+      "line": 2,
+      "selfMs": 370.46
+    }
+  ]
+}

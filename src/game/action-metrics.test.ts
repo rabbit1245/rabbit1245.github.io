@@ -110,8 +110,10 @@ test('legacy unknown, measured zero and mixed coverage remain distinct in sums a
   const source=gunzipSync(readFileSync(new URL('../../tests/fixtures/v2-career.json.gz',import.meta.url))).toString();const legacy=JSON.parse(source),loaded=await verifySaveText(source);assert.equal(JSON.stringify(loaded),JSON.stringify(legacy.career));assert.equal(loaded.season.playerStats.actionApps,undefined);
 });
 
-test('new counters do not add separate award bonuses to the same old performance',()=>{
-  const c=profile('ST'),m=game(c,10),row={playerId:c.player.id,name:c.player.name,clubId:c.player.clubId,leagueId:c.season.leagueId,position:c.player.position,nationality:c.player.nationality,ovr:c.player.ovr,stats:m.playerStats},copy={...row,stats:{...row.stats,headerGoals:999,pressingWins:999,progressivePasses:999,punches:999}};
+test('header goal subsets and goalkeeper punch counts do not duplicate field-player award credit',()=>{
+  // Pressure recoveries and progression now explicitly inform role-neutral
+  // judging; the header subset must still never award the same goal twice.
+  const c=profile('ST'),m=game(c,10),row={playerId:c.player.id,name:c.player.name,clubId:c.player.clubId,leagueId:c.season.leagueId,position:c.player.position,nationality:c.player.nationality,ovr:c.player.ovr,stats:{...m.playerStats,headerGoals:0}},copy={...row,stats:{...row.stats,headerGoals:row.stats.goals,punches:10}};
   assert.equal(performanceScore(row,c),performanceScore(copy,c));assert.equal(tournamentPerformance({id:c.player.id,...row}),tournamentPerformance({id:c.player.id,...copy}));
 });
 

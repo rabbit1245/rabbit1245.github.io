@@ -1,0 +1,618 @@
+{
+  "source": "existing saved career; 31 years old, 14 completed seasons; 272717105 byte envelope",
+  "execution": "Node 20, quiet sequential runs, same seed and commands; one sample per phase; actual national windows, all world matches and cups retained",
+  "baseline": {
+    "age": 32,
+    "seasons": 14,
+    "sizes": {
+      "world": 21975115,
+      "national": 138441709,
+      "economics": 14845,
+      "leadership": 49561,
+      "clubCompetitions": 56242953,
+      "commercial": 2030265,
+      "achievementEvidence": 161684,
+      "nationalChildren": {
+        "formatVersion": 1,
+        "country": 14,
+        "squad": 8,
+        "status": 8,
+        "reason": 152,
+        "competitionId": 11,
+        "competitionName": 18,
+        "phase": 12,
+        "points": 2,
+        "rank": 1,
+        "qualified": 4,
+        "fatigue": 1,
+        "reputation": 3,
+        "processedWindows": 3361,
+        "timingVersion": 1,
+        "processedThrough": 26,
+        "windowSquads": 1331,
+        "qualifyingDraws": 13617,
+        "windowQualifiers": 2104,
+        "schedule": 30607,
+        "finalDraws": 3740,
+        "tournamentStats": 2774030,
+        "matches": 1057805,
+        "history": 13830875,
+        "teamResults": 120723624
+      }
+    },
+    "samples": [
+      {
+        "name": "attribute-lock-0",
+        "ms": 5.290342999999666,
+        "memory": {
+          "rss": 1742061568,
+          "heapTotal": 868282368,
+          "heapUsed": 831321600,
+          "external": 2346709,
+          "arrayBuffers": 25992
+        }
+      },
+      {
+        "name": "fingerprint-0",
+        "ms": 3.02302200000031,
+        "memory": {
+          "rss": 1742061568,
+          "heapTotal": 868282368,
+          "heapUsed": 832301960,
+          "external": 2346749,
+          "arrayBuffers": 25992
+        }
+      },
+      {
+        "name": "attribute-lock-1",
+        "ms": 2.8037010000007285,
+        "memory": {
+          "rss": 1742323712,
+          "heapTotal": 868282368,
+          "heapUsed": 835392784,
+          "external": 2346936,
+          "arrayBuffers": 26179
+        }
+      },
+      {
+        "name": "fingerprint-1",
+        "ms": 2.9883600000002843,
+        "memory": {
+          "rss": 1742323712,
+          "heapTotal": 868282368,
+          "heapUsed": 836327064,
+          "external": 2346936,
+          "arrayBuffers": 26179
+        }
+      },
+      {
+        "name": "attribute-lock-2",
+        "ms": 2.8118130000002566,
+        "memory": {
+          "rss": 1742585856,
+          "heapTotal": 868282368,
+          "heapUsed": 839424416,
+          "external": 2347115,
+          "arrayBuffers": 26358
+        }
+      },
+      {
+        "name": "fingerprint-2",
+        "ms": 3.534904999999526,
+        "memory": {
+          "rss": 1725603840,
+          "heapTotal": 868282368,
+          "heapUsed": 840381704,
+          "external": 2347115,
+          "arrayBuffers": 26358
+        }
+      },
+      {
+        "name": "attribute-lock-3",
+        "ms": 3.584057999999459,
+        "memory": {
+          "rss": 1693188096,
+          "heapTotal": 868282368,
+          "heapUsed": 843479704,
+          "external": 2347302,
+          "arrayBuffers": 26545
+        }
+      },
+      {
+        "name": "fingerprint-3",
+        "ms": 4.252497999999832,
+        "memory": {
+          "rss": 1658978304,
+          "heapTotal": 868282368,
+          "heapUsed": 844433680,
+          "external": 2347302,
+          "arrayBuffers": 26545
+        }
+      },
+      {
+        "name": "attribute-lock-4",
+        "ms": 12.916881000000103,
+        "memory": {
+          "rss": 1393668096,
+          "heapTotal": 868282368,
+          "heapUsed": 832440336,
+          "external": 2347481,
+          "arrayBuffers": 26724
+        }
+      },
+      {
+        "name": "fingerprint-4",
+        "ms": 4.446090000000368,
+        "memory": {
+          "rss": 1355182080,
+          "heapTotal": 868282368,
+          "heapUsed": 833449488,
+          "external": 2347481,
+          "arrayBuffers": 26724
+        }
+      },
+      {
+        "name": "next-season",
+        "ms": 1107.6884309999996,
+        "memory": {
+          "rss": 556204032,
+          "heapTotal": 474578944,
+          "heapUsed": 435988824,
+          "external": 2345848,
+          "arrayBuffers": 25091
+        }
+      },
+      {
+        "name": "first-half",
+        "ms": 22899.994500999997,
+        "memory": {
+          "rss": 644063232,
+          "heapTotal": 530952192,
+          "heapUsed": 464567096,
+          "external": 2345848,
+          "arrayBuffers": 25091
+        }
+      },
+      {
+        "name": "prepare",
+        "ms": 9761.977005000004,
+        "memory": {
+          "rss": 1457344512,
+          "heapTotal": 476983296,
+          "heapUsed": 404662520,
+          "external": 594013586,
+          "arrayBuffers": 591675357
+        }
+      },
+      {
+        "name": "pack",
+        "ms": 7384.537188000002,
+        "memory": {
+          "rss": 1224781824,
+          "heapTotal": 463089664,
+          "heapUsed": 405615336,
+          "external": 341503061,
+          "arrayBuffers": 654506108
+        }
+      }
+    ],
+    "packedBytes": 20961886,
+    "hashes": {
+      "player": "5b6a16c7416169d71d82895e5f7a2a5a0a63c5517dce3986a03e72d44b3fe4ab",
+      "season": "61f6d4ff70c537637a461c39d754a5f132d298e4cd06742dd4e7e9d66e49d22c",
+      "world": "c539d40bf92e94a676a3d0b0f34626f70b38e69bb3cac673fa2491c0a1975ca9",
+      "national": "d62dc8ee19bbffb6f841e745118a6487ae7dc41c31f32283a8fb94bae8518d0b",
+      "cups": "802ece09c008e2a0bdf966fa835c961f2dc6dd9934e90713eb72b2529f6bdcbf"
+    }
+  },
+  "performanceOnlyPrototype": {
+    "age": 32,
+    "seasons": 14,
+    "sizes": {
+      "world": 21975115,
+      "national": 138441709,
+      "economics": 14845,
+      "leadership": 49561,
+      "clubCompetitions": 56242953,
+      "commercial": 2030265,
+      "achievementEvidence": 161684,
+      "nationalChildren": {
+        "formatVersion": 1,
+        "country": 14,
+        "squad": 8,
+        "status": 8,
+        "reason": 152,
+        "competitionId": 11,
+        "competitionName": 18,
+        "phase": 12,
+        "points": 2,
+        "rank": 1,
+        "qualified": 4,
+        "fatigue": 1,
+        "reputation": 3,
+        "processedWindows": 3361,
+        "timingVersion": 1,
+        "processedThrough": 26,
+        "windowSquads": 1331,
+        "qualifyingDraws": 13617,
+        "windowQualifiers": 2104,
+        "schedule": 30607,
+        "finalDraws": 3740,
+        "tournamentStats": 2774030,
+        "matches": 1057805,
+        "history": 13830875,
+        "teamResults": 120723624
+      }
+    },
+    "samples": [
+      {
+        "name": "attribute-lock-0",
+        "ms": 5.3927190000003975,
+        "memory": {
+          "rss": 1747017728,
+          "heapTotal": 868806656,
+          "heapUsed": 831373096,
+          "external": 2346709,
+          "arrayBuffers": 26000
+        }
+      },
+      {
+        "name": "fingerprint-0",
+        "ms": 3.024137000000337,
+        "memory": {
+          "rss": 1747017728,
+          "heapTotal": 868806656,
+          "heapUsed": 832353456,
+          "external": 2346749,
+          "arrayBuffers": 26000
+        }
+      },
+      {
+        "name": "attribute-lock-1",
+        "ms": 2.770325000000412,
+        "memory": {
+          "rss": 1747148800,
+          "heapTotal": 868806656,
+          "heapUsed": 835444280,
+          "external": 2346936,
+          "arrayBuffers": 26187
+        }
+      },
+      {
+        "name": "fingerprint-1",
+        "ms": 2.9278720000002068,
+        "memory": {
+          "rss": 1747148800,
+          "heapTotal": 868806656,
+          "heapUsed": 836378560,
+          "external": 2346936,
+          "arrayBuffers": 26187
+        }
+      },
+      {
+        "name": "attribute-lock-2",
+        "ms": 2.8062199999994846,
+        "memory": {
+          "rss": 1747410944,
+          "heapTotal": 868806656,
+          "heapUsed": 839475912,
+          "external": 2347115,
+          "arrayBuffers": 26366
+        }
+      },
+      {
+        "name": "fingerprint-2",
+        "ms": 3.232210000000123,
+        "memory": {
+          "rss": 1734348800,
+          "heapTotal": 868806656,
+          "heapUsed": 840433200,
+          "external": 2347115,
+          "arrayBuffers": 26366
+        }
+      },
+      {
+        "name": "attribute-lock-3",
+        "ms": 3.4646990000001097,
+        "memory": {
+          "rss": 1707159552,
+          "heapTotal": 868806656,
+          "heapUsed": 843531200,
+          "external": 2347302,
+          "arrayBuffers": 26553
+        }
+      },
+      {
+        "name": "fingerprint-3",
+        "ms": 3.6227969999999914,
+        "memory": {
+          "rss": 1680789504,
+          "heapTotal": 868806656,
+          "heapUsed": 844485176,
+          "external": 2347302,
+          "arrayBuffers": 26553
+        }
+      },
+      {
+        "name": "attribute-lock-4",
+        "ms": 12.528527999999824,
+        "memory": {
+          "rss": 1415127040,
+          "heapTotal": 868806656,
+          "heapUsed": 832491832,
+          "external": 2347481,
+          "arrayBuffers": 26732
+        }
+      },
+      {
+        "name": "fingerprint-4",
+        "ms": 3.837239999999838,
+        "memory": {
+          "rss": 1385431040,
+          "heapTotal": 868806656,
+          "heapUsed": 833481400,
+          "external": 2347481,
+          "arrayBuffers": 26732
+        }
+      },
+      {
+        "name": "next-season",
+        "ms": 1045.1029239999998,
+        "memory": {
+          "rss": 558780416,
+          "heapTotal": 474841088,
+          "heapUsed": 436071504,
+          "external": 2345848,
+          "arrayBuffers": 25099
+        }
+      },
+      {
+        "name": "first-half",
+        "ms": 13731.409314,
+        "memory": {
+          "rss": 723673088,
+          "heapTotal": 571641856,
+          "heapUsed": 492342136,
+          "external": 2345848,
+          "arrayBuffers": 25091
+        }
+      },
+      {
+        "name": "prepare",
+        "ms": 9607.318862,
+        "memory": {
+          "rss": 1507131392,
+          "heapTotal": 469643264,
+          "heapUsed": 404681136,
+          "external": 594013586,
+          "arrayBuffers": 591675357
+        }
+      },
+      {
+        "name": "pack",
+        "ms": 8360.936833000003,
+        "memory": {
+          "rss": 1282236416,
+          "heapTotal": 463089664,
+          "heapUsed": 405693000,
+          "external": 341787380,
+          "arrayBuffers": 654790427
+        }
+      }
+    ],
+    "packedBytes": 20961886,
+    "hashes": {
+      "player": "5b6a16c7416169d71d82895e5f7a2a5a0a63c5517dce3986a03e72d44b3fe4ab",
+      "season": "61f6d4ff70c537637a461c39d754a5f132d298e4cd06742dd4e7e9d66e49d22c",
+      "world": "c539d40bf92e94a676a3d0b0f34626f70b38e69bb3cac673fa2491c0a1975ca9",
+      "national": "d62dc8ee19bbffb6f841e745118a6487ae7dc41c31f32283a8fb94bae8518d0b",
+      "cups": "802ece09c008e2a0bdf966fa835c961f2dc6dd9934e90713eb72b2529f6bdcbf"
+    }
+  },
+  "performanceOnlyAllFiveHashesIdentical": true,
+  "finalCodeBeforeVersionBump": {
+    "age": 32,
+    "seasons": 14,
+    "sizes": {
+      "world": 21975115,
+      "national": 138441709,
+      "economics": 14845,
+      "leadership": 49561,
+      "clubCompetitions": 56242953,
+      "commercial": 2030265,
+      "achievementEvidence": 161684,
+      "nationalChildren": {
+        "formatVersion": 1,
+        "country": 14,
+        "squad": 8,
+        "status": 8,
+        "reason": 152,
+        "competitionId": 11,
+        "competitionName": 18,
+        "phase": 12,
+        "points": 2,
+        "rank": 1,
+        "qualified": 4,
+        "fatigue": 1,
+        "reputation": 3,
+        "processedWindows": 3361,
+        "timingVersion": 1,
+        "processedThrough": 26,
+        "windowSquads": 1331,
+        "qualifyingDraws": 13617,
+        "windowQualifiers": 2104,
+        "schedule": 30607,
+        "finalDraws": 3740,
+        "tournamentStats": 2774030,
+        "matches": 1057805,
+        "history": 13830875,
+        "teamResults": 120723624
+      }
+    },
+    "samples": [
+      {
+        "name": "attribute-lock-0",
+        "ms": 5.503169999999955,
+        "memory": {
+          "rss": 1738268672,
+          "heapTotal": 868425728,
+          "heapUsed": 831343672,
+          "external": 2346709,
+          "arrayBuffers": 25992
+        }
+      },
+      {
+        "name": "fingerprint-0",
+        "ms": 2.934972000000016,
+        "memory": {
+          "rss": 1738268672,
+          "heapTotal": 868425728,
+          "heapUsed": 832324032,
+          "external": 2346749,
+          "arrayBuffers": 25992
+        }
+      },
+      {
+        "name": "attribute-lock-1",
+        "ms": 2.5781349999997474,
+        "memory": {
+          "rss": 1738268672,
+          "heapTotal": 868425728,
+          "heapUsed": 835414856,
+          "external": 2346936,
+          "arrayBuffers": 26179
+        }
+      },
+      {
+        "name": "fingerprint-1",
+        "ms": 2.89292899999964,
+        "memory": {
+          "rss": 1738268672,
+          "heapTotal": 868425728,
+          "heapUsed": 836349136,
+          "external": 2346936,
+          "arrayBuffers": 26179
+        }
+      },
+      {
+        "name": "attribute-lock-2",
+        "ms": 2.6181539999997767,
+        "memory": {
+          "rss": 1734713344,
+          "heapTotal": 868425728,
+          "heapUsed": 839446488,
+          "external": 2347115,
+          "arrayBuffers": 26358
+        }
+      },
+      {
+        "name": "fingerprint-2",
+        "ms": 3.4886749999996027,
+        "memory": {
+          "rss": 1709056000,
+          "heapTotal": 868425728,
+          "heapUsed": 840403776,
+          "external": 2347115,
+          "arrayBuffers": 26358
+        }
+      },
+      {
+        "name": "attribute-lock-3",
+        "ms": 3.3681240000005346,
+        "memory": {
+          "rss": 1685905408,
+          "heapTotal": 868425728,
+          "heapUsed": 843507520,
+          "external": 2347302,
+          "arrayBuffers": 26545
+        }
+      },
+      {
+        "name": "fingerprint-3",
+        "ms": 3.8292789999995875,
+        "memory": {
+          "rss": 1660485632,
+          "heapTotal": 868425728,
+          "heapUsed": 844461496,
+          "external": 2347302,
+          "arrayBuffers": 26545
+        }
+      },
+      {
+        "name": "attribute-lock-4",
+        "ms": 14.243578999999954,
+        "memory": {
+          "rss": 1408307200,
+          "heapTotal": 868425728,
+          "heapUsed": 832468152,
+          "external": 2347481,
+          "arrayBuffers": 26724
+        }
+      },
+      {
+        "name": "fingerprint-4",
+        "ms": 3.2698860000000423,
+        "memory": {
+          "rss": 1387401216,
+          "heapTotal": 868425728,
+          "heapUsed": 833478984,
+          "external": 2347481,
+          "arrayBuffers": 26724
+        }
+      },
+      {
+        "name": "next-season",
+        "ms": 1182.6000009999998,
+        "memory": {
+          "rss": 547749888,
+          "heapTotal": 474722304,
+          "heapUsed": 436434296,
+          "external": 2345848,
+          "arrayBuffers": 25091
+        }
+      },
+      {
+        "name": "first-half",
+        "ms": 14905.562635,
+        "memory": {
+          "rss": 673529856,
+          "heapTotal": 570032128,
+          "heapUsed": 494157512,
+          "external": 2345848,
+          "arrayBuffers": 25091
+        }
+      },
+      {
+        "name": "prepare",
+        "ms": 9372.970279000001,
+        "memory": {
+          "rss": 1472225280,
+          "heapTotal": 469000192,
+          "heapUsed": 405874760,
+          "external": 298189514,
+          "arrayBuffers": 295851285
+        }
+      },
+      {
+        "name": "pack",
+        "ms": 7195.3707049999975,
+        "memory": {
+          "rss": 1249198080,
+          "heapTotal": 464805888,
+          "heapUsed": 405611520,
+          "external": 341704894,
+          "arrayBuffers": 654716412
+        }
+      }
+    ],
+    "packedBytes": 20969296,
+    "hashes": {
+      "player": "5b6a16c7416169d71d82895e5f7a2a5a0a63c5517dce3986a03e72d44b3fe4ab",
+      "season": "6f85da6dc9d2c6097b6a271f138d8c03dfbfd5b0fccb3de6f48af5a70b693a25",
+      "world": "4b843d4c4a53fd67b3c65a121fb219ad086d75b40f26ddf112057ef6092b964d",
+      "national": "bc06cf895e2c8bf91c61b9348fc76885b97948fbc56fdb4e391580e1b9254d97",
+      "cups": "8be4383b2d83f08bc072997b43314c9b52ffa2f08e8049a0f18cfab36669e442"
+    }
+  },
+  "note": "Final version also records field-player clean spells; that requested award input intentionally changes new cleanSheet fields, while this exact-hash proof isolates the nationality lookup optimization. Native JSON serialization experiment was rejected and is not shipped."
+}

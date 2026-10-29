@@ -1,0 +1,1504 @@
+{
+  "source": "test-results/late-2114/age43/career.json",
+  "url": "http://127.0.0.1:4194/Kball.html",
+  "version": "K볼 2.11.4 · A FOOTBALL LIFE",
+  "samples": [
+    {
+      "phase": "clicks",
+      "ms": 98.79999999701977,
+      "wallMs": 224.29999999701977,
+      "putMs": 0.20000000298023224
+    },
+    {
+      "phase": "clicks",
+      "ms": 106.20000000298023,
+      "wallMs": 198.20000000298023,
+      "putMs": 0.20000000298023224
+    },
+    {
+      "phase": "clicks",
+      "ms": 151.79999999701977,
+      "wallMs": 286,
+      "putMs": 0.7999999970197678
+    },
+    {
+      "phase": "clicks",
+      "ms": 165.1000000089407,
+      "wallMs": 310.6000000089407,
+      "putMs": 0.4000000059604645
+    },
+    {
+      "phase": "clicks",
+      "ms": 88.79999999701977,
+      "wallMs": 189.59999999403954,
+      "putMs": 0.29999999701976776
+    },
+    {
+      "phase": "clicks",
+      "ms": 65.09999999403954,
+      "wallMs": 133.79999999701977,
+      "putMs": 0.30000001192092896
+    },
+    {
+      "phase": "clicks",
+      "ms": 80.20000000298023,
+      "wallMs": 179.29999999701977,
+      "putMs": 1.5
+    },
+    {
+      "phase": "clicks",
+      "ms": 104.20000000298023,
+      "wallMs": 260.70000000298023,
+      "putMs": 0.5
+    },
+    {
+      "phase": "clicks",
+      "ms": 141,
+      "wallMs": 267,
+      "putMs": 0.5999999940395355
+    },
+    {
+      "phase": "clicks",
+      "ms": 147.40000000596046,
+      "wallMs": 279.59999999403954,
+      "putMs": 0.5
+    },
+    {
+      "phase": "during-checkpoint",
+      "ms": 197.80000001192093,
+      "wallMs": 335.20000000298023,
+      "putMs": 0.29999999701976776
+    },
+    {
+      "phase": "during-checkpoint",
+      "ms": 189.6000000089407,
+      "wallMs": 340.79999999701977,
+      "putMs": 4.200000002980232
+    },
+    {
+      "phase": "during-checkpoint",
+      "ms": 173.5,
+      "wallMs": 397.20000000298023,
+      "putMs": 0.4000000059604645
+    },
+    {
+      "phase": "during-checkpoint",
+      "ms": 217.1000000089407,
+      "wallMs": 383.40000000596046,
+      "putMs": 2.0999999940395355
+    },
+    {
+      "phase": "during-checkpoint",
+      "ms": 309,
+      "wallMs": 517.2000000029802,
+      "putMs": 0.5
+    },
+    {
+      "phase": "during-checkpoint",
+      "ms": 204,
+      "wallMs": 354,
+      "putMs": 0.3999999910593033
+    },
+    {
+      "phase": "during-checkpoint",
+      "ms": 158.40000000596046,
+      "wallMs": 321.3999999910593,
+      "putMs": 8.600000008940697
+    },
+    {
+      "phase": "during-checkpoint",
+      "ms": 190.19999998807907,
+      "wallMs": 285.3999999910593,
+      "putMs": 0.5
+    },
+    {
+      "phase": "during-checkpoint",
+      "ms": 235,
+      "wallMs": 413.20000000298023,
+      "putMs": 0.5
+    },
+    {
+      "phase": "during-checkpoint",
+      "ms": 177.40000000596046,
+      "wallMs": 300.79999999701977,
+      "putMs": 0.29999999701976776
+    }
+  ],
+  "medianMs": 165.1000000089407,
+  "maxMs": 309,
+  "base": {
+    "id": "career-2804e6ae-99fa-43cc-bdfb-f7019f33c4e0",
+    "format": "kball-blob-v1",
+    "checkpoint": 1080,
+    "revision": 1080,
+    "hash": "8e8d8723c0bbdc1f8db52b22098b0f322ff8067236606e8d75070c4da5ae1df0",
+    "journal": 0,
+    "metadata": {
+      "id": "career-2804e6ae-99fa-43cc-bdfb-f7019f33c4e0",
+      "name": "김현우 · 2055/56",
+      "playerName": "김현우",
+      "clubName": "FA · 무소속",
+      "year": 2055,
+      "age": 43,
+      "ovr": 70,
+      "updatedAt": "2026-10-29T17:04:25.210Z",
+      "revision": 1080,
+      "hash": "8e8d8723c0bbdc1f8db52b22098b0f322ff8067236606e8d75070c4da5ae1df0"
+    }
+  },
+  "afterClicks": {
+    "id": "career-2804e6ae-99fa-43cc-bdfb-f7019f33c4e0",
+    "format": "kball-blob-v1",
+    "checkpoint": 1080,
+    "revision": 1090,
+    "hash": "d36818b7e06e354ba097a243f67dd6490d8b521784f0b8b07c2f520fab769eb9",
+    "journal": 10,
+    "metadata": {
+      "id": "career-2804e6ae-99fa-43cc-bdfb-f7019f33c4e0",
+      "name": "김현우 · 2055/56",
+      "playerName": "김현우",
+      "clubName": "FA · 무소속",
+      "year": 2055,
+      "age": 43,
+      "ovr": 70,
+      "updatedAt": "2026-10-29T17:04:47.331Z",
+      "revision": 1090,
+      "hash": "d36818b7e06e354ba097a243f67dd6490d8b521784f0b8b07c2f520fab769eb9"
+    }
+  },
+  "changedRevision": 1101,
+  "reload": true,
+  "allHistoryAndStatsPreserved": true,
+  "manualAgingPreserved": true,
+  "mobileOverflow": false,
+  "compacted": {
+    "id": "career-2804e6ae-99fa-43cc-bdfb-f7019f33c4e0",
+    "format": "kball-blob-v1",
+    "checkpoint": 1101,
+    "revision": 1101,
+    "hash": "63ba45b10b6c147b18ad6026a8864d15837bc87e60755e7f7df0f6261d1b2553",
+    "journal": 0,
+    "metadata": {
+      "id": "career-2804e6ae-99fa-43cc-bdfb-f7019f33c4e0",
+      "name": "김현우 · 2055/56",
+      "playerName": "김현우",
+      "clubName": "FA · 무소속",
+      "year": 2055,
+      "age": 43,
+      "ovr": 70,
+      "updatedAt": "2026-10-29T17:05:42.809Z",
+      "revision": 1101,
+      "hash": "63ba45b10b6c147b18ad6026a8864d15837bc87e60755e7f7df0f6261d1b2553"
+    }
+  },
+  "compactionWaitMs": 85651.18095400001,
+  "heap": {
+    "usedSize": 538095204,
+    "totalSize": 549179392,
+    "embedderHeapUsedSize": 3299800,
+    "backingStorageSize": 54147364
+  },
+  "trace": {
+    "phase": "during-checkpoint",
+    "events": [
+      {
+        "kind": "send",
+        "time": 5027.4000000059605,
+        "phase": "boot",
+        "operation": "verifyFile",
+        "duration": 0,
+        "largeCareer": false
+      },
+      {
+        "kind": "worker-result",
+        "time": 40948.40000000596,
+        "phase": "boot"
+      },
+      {
+        "kind": "busy",
+        "time": 41140.40000000596,
+        "phase": "boot",
+        "value": true
+      },
+      {
+        "kind": "send",
+        "time": 44134.20000000298,
+        "phase": "boot",
+        "operation": "prepare",
+        "duration": 2755.6000000089407,
+        "largeCareer": true
+      },
+      {
+        "kind": "worker-result",
+        "time": 75856.5,
+        "phase": "boot"
+      },
+      {
+        "kind": "put",
+        "time": 75877.59999999404,
+        "phase": "boot",
+        "store": "slots",
+        "duration": 0.29999999701976776
+      },
+      {
+        "kind": "put",
+        "time": 75877.59999999404,
+        "phase": "boot",
+        "store": "metadata",
+        "duration": 0
+      },
+      {
+        "kind": "busy",
+        "time": 76009.29999999702,
+        "phase": "boot",
+        "value": false
+      },
+      {
+        "kind": "click",
+        "time": 82391.5,
+        "phase": "boot",
+        "target": "player-tab"
+      },
+      {
+        "kind": "click",
+        "time": 82495.79999999702,
+        "phase": "boot",
+        "target": "player-view-training"
+      },
+      {
+        "kind": "visible",
+        "time": 82513.20000000298,
+        "phase": "boot",
+        "pressed": "false"
+      },
+      {
+        "kind": "painted",
+        "time": 82530,
+        "phase": "boot",
+        "pressed": "false"
+      },
+      {
+        "kind": "click",
+        "time": 82635.90000000596,
+        "phase": "clicks",
+        "target": "lock-shooting"
+      },
+      {
+        "kind": "busy",
+        "time": 82645.70000000298,
+        "phase": "clicks",
+        "value": true
+      },
+      {
+        "kind": "visible",
+        "time": 82657.40000000596,
+        "phase": "clicks",
+        "pressed": "true"
+      },
+      {
+        "kind": "painted",
+        "time": 82680,
+        "phase": "clicks",
+        "pressed": "true"
+      },
+      {
+        "kind": "put",
+        "time": 82693.70000000298,
+        "phase": "clicks",
+        "store": "backups",
+        "duration": 0
+      },
+      {
+        "kind": "put",
+        "time": 82693.90000000596,
+        "phase": "clicks",
+        "store": "slots",
+        "duration": 0.20000000298023224
+      },
+      {
+        "kind": "put",
+        "time": 82693.90000000596,
+        "phase": "clicks",
+        "store": "metadata",
+        "duration": 0
+      },
+      {
+        "kind": "busy",
+        "time": 82734.70000000298,
+        "phase": "clicks",
+        "value": false
+      },
+      {
+        "kind": "click",
+        "time": 82848.20000000298,
+        "phase": "clicks",
+        "target": "lock-shooting"
+      },
+      {
+        "kind": "busy",
+        "time": 82850.59999999404,
+        "phase": "clicks",
+        "value": true
+      },
+      {
+        "kind": "visible",
+        "time": 82857.90000000596,
+        "phase": "clicks",
+        "pressed": "false"
+      },
+      {
+        "kind": "painted",
+        "time": 82876.90000000596,
+        "phase": "clicks",
+        "pressed": "false"
+      },
+      {
+        "kind": "put",
+        "time": 82898.79999999702,
+        "phase": "clicks",
+        "store": "backups",
+        "duration": 0.09999999403953552
+      },
+      {
+        "kind": "put",
+        "time": 82898.90000000596,
+        "phase": "clicks",
+        "store": "slots",
+        "duration": 0.10000000894069672
+      },
+      {
+        "kind": "put",
+        "time": 82898.90000000596,
+        "phase": "clicks",
+        "store": "metadata",
+        "duration": 0
+      },
+      {
+        "kind": "busy",
+        "time": 82954.40000000596,
+        "phase": "clicks",
+        "value": false
+      },
+      {
+        "kind": "click",
+        "time": 83075.5,
+        "phase": "clicks",
+        "target": "lock-shooting"
+      },
+      {
+        "kind": "busy",
+        "time": 83079.20000000298,
+        "phase": "clicks",
+        "value": true
+      },
+      {
+        "kind": "visible",
+        "time": 83095.29999999702,
+        "phase": "clicks",
+        "pressed": "true"
+      },
+      {
+        "kind": "painted",
+        "time": 83120.09999999404,
+        "phase": "clicks",
+        "pressed": "true"
+      },
+      {
+        "kind": "put",
+        "time": 83143.90000000596,
+        "phase": "clicks",
+        "store": "backups",
+        "duration": 0.20000000298023224
+      },
+      {
+        "kind": "put",
+        "time": 83144.5,
+        "phase": "clicks",
+        "store": "slots",
+        "duration": 0.5999999940395355
+      },
+      {
+        "kind": "put",
+        "time": 83144.5,
+        "phase": "clicks",
+        "store": "metadata",
+        "duration": 0
+      },
+      {
+        "kind": "busy",
+        "time": 83227.29999999702,
+        "phase": "clicks",
+        "value": false
+      },
+      {
+        "kind": "click",
+        "time": 83387.79999999702,
+        "phase": "clicks",
+        "target": "lock-shooting"
+      },
+      {
+        "kind": "busy",
+        "time": 83389.79999999702,
+        "phase": "clicks",
+        "value": true
+      },
+      {
+        "kind": "visible",
+        "time": 83422.29999999702,
+        "phase": "clicks",
+        "pressed": "false"
+      },
+      {
+        "kind": "painted",
+        "time": 83476.09999999404,
+        "phase": "clicks",
+        "pressed": "false"
+      },
+      {
+        "kind": "put",
+        "time": 83492.20000000298,
+        "phase": "clicks",
+        "store": "backups",
+        "duration": 0.10000000894069672
+      },
+      {
+        "kind": "put",
+        "time": 83492.5,
+        "phase": "clicks",
+        "store": "slots",
+        "duration": 0.29999999701976776
+      },
+      {
+        "kind": "put",
+        "time": 83492.5,
+        "phase": "clicks",
+        "store": "metadata",
+        "duration": 0
+      },
+      {
+        "kind": "busy",
+        "time": 83552.90000000596,
+        "phase": "clicks",
+        "value": false
+      },
+      {
+        "kind": "click",
+        "time": 83683.29999999702,
+        "phase": "clicks",
+        "target": "lock-shooting"
+      },
+      {
+        "kind": "busy",
+        "time": 83685.40000000596,
+        "phase": "clicks",
+        "value": true
+      },
+      {
+        "kind": "visible",
+        "time": 83706.59999999404,
+        "phase": "clicks",
+        "pressed": "true"
+      },
+      {
+        "kind": "painted",
+        "time": 83723.5,
+        "phase": "clicks",
+        "pressed": "true"
+      },
+      {
+        "kind": "put",
+        "time": 83733.70000000298,
+        "phase": "clicks",
+        "store": "backups",
+        "duration": 0.20000000298023224
+      },
+      {
+        "kind": "put",
+        "time": 83733.79999999702,
+        "phase": "clicks",
+        "store": "slots",
+        "duration": 0.09999999403953552
+      },
+      {
+        "kind": "put",
+        "time": 83733.90000000596,
+        "phase": "clicks",
+        "store": "metadata",
+        "duration": 0
+      },
+      {
+        "kind": "busy",
+        "time": 83772.09999999404,
+        "phase": "clicks",
+        "value": false
+      },
+      {
+        "kind": "click",
+        "time": 83864.70000000298,
+        "phase": "clicks",
+        "target": "lock-shooting"
+      },
+      {
+        "kind": "busy",
+        "time": 83866.5,
+        "phase": "clicks",
+        "value": true
+      },
+      {
+        "kind": "visible",
+        "time": 83872.20000000298,
+        "phase": "clicks",
+        "pressed": "false"
+      },
+      {
+        "kind": "put",
+        "time": 83894.20000000298,
+        "phase": "clicks",
+        "store": "backups",
+        "duration": 0.20000000298023224
+      },
+      {
+        "kind": "put",
+        "time": 83894.29999999702,
+        "phase": "clicks",
+        "store": "slots",
+        "duration": 0
+      },
+      {
+        "kind": "put",
+        "time": 83894.40000000596,
+        "phase": "clicks",
+        "store": "metadata",
+        "duration": 0.10000000894069672
+      },
+      {
+        "kind": "painted",
+        "time": 83902.59999999404,
+        "phase": "clicks",
+        "pressed": "false"
+      },
+      {
+        "kind": "busy",
+        "time": 83929.79999999702,
+        "phase": "clicks",
+        "value": false
+      },
+      {
+        "kind": "click",
+        "time": 84019.59999999404,
+        "phase": "clicks",
+        "target": "lock-shooting"
+      },
+      {
+        "kind": "busy",
+        "time": 84021.09999999404,
+        "phase": "clicks",
+        "value": true
+      },
+      {
+        "kind": "visible",
+        "time": 84028.20000000298,
+        "phase": "clicks",
+        "pressed": "true"
+      },
+      {
+        "kind": "painted",
+        "time": 84044.79999999702,
+        "phase": "clicks",
+        "pressed": "true"
+      },
+      {
+        "kind": "put",
+        "time": 84057.09999999404,
+        "phase": "clicks",
+        "store": "backups",
+        "duration": 1.199999988079071
+      },
+      {
+        "kind": "put",
+        "time": 84057.29999999702,
+        "phase": "clicks",
+        "store": "slots",
+        "duration": 0.20000000298023224
+      },
+      {
+        "kind": "put",
+        "time": 84057.40000000596,
+        "phase": "clicks",
+        "store": "metadata",
+        "duration": 0.10000000894069672
+      },
+      {
+        "kind": "busy",
+        "time": 84099.79999999702,
+        "phase": "clicks",
+        "value": false
+      },
+      {
+        "kind": "click",
+        "time": 84225.09999999404,
+        "phase": "clicks",
+        "target": "lock-shooting"
+      },
+      {
+        "kind": "busy",
+        "time": 84226.70000000298,
+        "phase": "clicks",
+        "value": true
+      },
+      {
+        "kind": "visible",
+        "time": 84248.09999999404,
+        "phase": "clicks",
+        "pressed": "false"
+      },
+      {
+        "kind": "painted",
+        "time": 84260.90000000596,
+        "phase": "clicks",
+        "pressed": "false"
+      },
+      {
+        "kind": "put",
+        "time": 84283.20000000298,
+        "phase": "clicks",
+        "store": "backups",
+        "duration": 0.10000000894069672
+      },
+      {
+        "kind": "put",
+        "time": 84283.59999999404,
+        "phase": "clicks",
+        "store": "slots",
+        "duration": 0.3999999910593033
+      },
+      {
+        "kind": "put",
+        "time": 84283.59999999404,
+        "phase": "clicks",
+        "store": "metadata",
+        "duration": 0
+      },
+      {
+        "kind": "busy",
+        "time": 84329.29999999702,
+        "phase": "clicks",
+        "value": false
+      },
+      {
+        "kind": "click",
+        "time": 84513.29999999702,
+        "phase": "clicks",
+        "target": "lock-shooting"
+      },
+      {
+        "kind": "busy",
+        "time": 84531.29999999702,
+        "phase": "clicks",
+        "value": true
+      },
+      {
+        "kind": "visible",
+        "time": 84547.90000000596,
+        "phase": "clicks",
+        "pressed": "true"
+      },
+      {
+        "kind": "painted",
+        "time": 84595.5,
+        "phase": "clicks",
+        "pressed": "true"
+      },
+      {
+        "kind": "put",
+        "time": 84600.29999999702,
+        "phase": "clicks",
+        "store": "backups",
+        "duration": 0.29999999701976776
+      },
+      {
+        "kind": "put",
+        "time": 84600.59999999404,
+        "phase": "clicks",
+        "store": "slots",
+        "duration": 0.29999999701976776
+      },
+      {
+        "kind": "put",
+        "time": 84600.59999999404,
+        "phase": "clicks",
+        "store": "metadata",
+        "duration": 0
+      },
+      {
+        "kind": "busy",
+        "time": 84654.29999999702,
+        "phase": "clicks",
+        "value": false
+      },
+      {
+        "kind": "click",
+        "time": 84782.79999999702,
+        "phase": "clicks",
+        "target": "lock-shooting"
+      },
+      {
+        "kind": "busy",
+        "time": 84784.29999999702,
+        "phase": "clicks",
+        "value": true
+      },
+      {
+        "kind": "visible",
+        "time": 84802.29999999702,
+        "phase": "clicks",
+        "pressed": "false"
+      },
+      {
+        "kind": "painted",
+        "time": 84819.79999999702,
+        "phase": "clicks",
+        "pressed": "false"
+      },
+      {
+        "kind": "put",
+        "time": 84836.79999999702,
+        "phase": "clicks",
+        "store": "backups",
+        "duration": 0.20000000298023224
+      },
+      {
+        "kind": "put",
+        "time": 84837,
+        "phase": "clicks",
+        "store": "slots",
+        "duration": 0.20000000298023224
+      },
+      {
+        "kind": "put",
+        "time": 84837.09999999404,
+        "phase": "clicks",
+        "store": "metadata",
+        "duration": 0.09999999403953552
+      },
+      {
+        "kind": "busy",
+        "time": 84930.20000000298,
+        "phase": "clicks",
+        "value": false
+      },
+      {
+        "kind": "send",
+        "time": 135982.90000000596,
+        "phase": "clicks",
+        "operation": "checkpoint",
+        "duration": 0,
+        "largeCareer": false
+      },
+      {
+        "kind": "click",
+        "time": 136097.09999999404,
+        "phase": "during-checkpoint",
+        "target": "lock-shooting"
+      },
+      {
+        "kind": "busy",
+        "time": 136110.90000000596,
+        "phase": "during-checkpoint",
+        "value": true
+      },
+      {
+        "kind": "visible",
+        "time": 136142.09999999404,
+        "phase": "during-checkpoint",
+        "pressed": "true"
+      },
+      {
+        "kind": "painted",
+        "time": 136199,
+        "phase": "during-checkpoint",
+        "pressed": "true"
+      },
+      {
+        "kind": "put",
+        "time": 136212.70000000298,
+        "phase": "during-checkpoint",
+        "store": "backups",
+        "duration": 0.29999999701976776
+      },
+      {
+        "kind": "put",
+        "time": 136212.70000000298,
+        "phase": "during-checkpoint",
+        "store": "slots",
+        "duration": 0
+      },
+      {
+        "kind": "put",
+        "time": 136212.70000000298,
+        "phase": "during-checkpoint",
+        "store": "metadata",
+        "duration": 0
+      },
+      {
+        "kind": "busy",
+        "time": 136294.90000000596,
+        "phase": "during-checkpoint",
+        "value": false
+      },
+      {
+        "kind": "click",
+        "time": 136442.29999999702,
+        "phase": "during-checkpoint",
+        "target": "lock-shooting"
+      },
+      {
+        "kind": "busy",
+        "time": 136443.90000000596,
+        "phase": "during-checkpoint",
+        "value": true
+      },
+      {
+        "kind": "visible",
+        "time": 136491.79999999702,
+        "phase": "during-checkpoint",
+        "pressed": "false"
+      },
+      {
+        "kind": "painted",
+        "time": 136507.90000000596,
+        "phase": "during-checkpoint",
+        "pressed": "false"
+      },
+      {
+        "kind": "put",
+        "time": 136532,
+        "phase": "during-checkpoint",
+        "store": "backups",
+        "duration": 4
+      },
+      {
+        "kind": "put",
+        "time": 136532.20000000298,
+        "phase": "during-checkpoint",
+        "store": "slots",
+        "duration": 0.20000000298023224
+      },
+      {
+        "kind": "put",
+        "time": 136532.20000000298,
+        "phase": "during-checkpoint",
+        "store": "metadata",
+        "duration": 0
+      },
+      {
+        "kind": "busy",
+        "time": 136631.90000000596,
+        "phase": "during-checkpoint",
+        "value": false
+      },
+      {
+        "kind": "click",
+        "time": 136857.79999999702,
+        "phase": "during-checkpoint",
+        "target": "lock-shooting"
+      },
+      {
+        "kind": "busy",
+        "time": 136859.20000000298,
+        "phase": "during-checkpoint",
+        "value": true
+      },
+      {
+        "kind": "visible",
+        "time": 136897.40000000596,
+        "phase": "during-checkpoint",
+        "pressed": "true"
+      },
+      {
+        "kind": "painted",
+        "time": 136924.79999999702,
+        "phase": "during-checkpoint",
+        "pressed": "true"
+      },
+      {
+        "kind": "put",
+        "time": 136935,
+        "phase": "during-checkpoint",
+        "store": "backups",
+        "duration": 0.20000000298023224
+      },
+      {
+        "kind": "put",
+        "time": 136935.20000000298,
+        "phase": "during-checkpoint",
+        "store": "slots",
+        "duration": 0.20000000298023224
+      },
+      {
+        "kind": "put",
+        "time": 136935.20000000298,
+        "phase": "during-checkpoint",
+        "store": "metadata",
+        "duration": 0
+      },
+      {
+        "kind": "busy",
+        "time": 137031.29999999702,
+        "phase": "during-checkpoint",
+        "value": false
+      },
+      {
+        "kind": "click",
+        "time": 137311.79999999702,
+        "phase": "during-checkpoint",
+        "target": "lock-shooting"
+      },
+      {
+        "kind": "busy",
+        "time": 137315,
+        "phase": "during-checkpoint",
+        "value": true
+      },
+      {
+        "kind": "visible",
+        "time": 137378.40000000596,
+        "phase": "during-checkpoint",
+        "pressed": "false"
+      },
+      {
+        "kind": "painted",
+        "time": 137424.09999999404,
+        "phase": "during-checkpoint",
+        "pressed": "false"
+      },
+      {
+        "kind": "put",
+        "time": 137450.70000000298,
+        "phase": "during-checkpoint",
+        "store": "backups",
+        "duration": 1.7999999970197678
+      },
+      {
+        "kind": "put",
+        "time": 137451,
+        "phase": "during-checkpoint",
+        "store": "slots",
+        "duration": 0.29999999701976776
+      },
+      {
+        "kind": "put",
+        "time": 137451,
+        "phase": "during-checkpoint",
+        "store": "metadata",
+        "duration": 0
+      },
+      {
+        "kind": "busy",
+        "time": 137528.90000000596,
+        "phase": "during-checkpoint",
+        "value": false
+      },
+      {
+        "kind": "click",
+        "time": 137719.20000000298,
+        "phase": "during-checkpoint",
+        "target": "lock-shooting"
+      },
+      {
+        "kind": "busy",
+        "time": 137721.70000000298,
+        "phase": "during-checkpoint",
+        "value": true
+      },
+      {
+        "kind": "visible",
+        "time": 137744.40000000596,
+        "phase": "during-checkpoint",
+        "pressed": "true"
+      },
+      {
+        "kind": "painted",
+        "time": 137816.79999999702,
+        "phase": "during-checkpoint",
+        "pressed": "true"
+      },
+      {
+        "kind": "put",
+        "time": 137887.59999999404,
+        "phase": "during-checkpoint",
+        "store": "backups",
+        "duration": 0.29999999701976776
+      },
+      {
+        "kind": "put",
+        "time": 137887.79999999702,
+        "phase": "during-checkpoint",
+        "store": "slots",
+        "duration": 0.20000000298023224
+      },
+      {
+        "kind": "put",
+        "time": 137887.79999999702,
+        "phase": "during-checkpoint",
+        "store": "metadata",
+        "duration": 0
+      },
+      {
+        "kind": "busy",
+        "time": 138028.20000000298,
+        "phase": "during-checkpoint",
+        "value": false
+      },
+      {
+        "kind": "click",
+        "time": 138284.70000000298,
+        "phase": "during-checkpoint",
+        "target": "lock-shooting"
+      },
+      {
+        "kind": "busy",
+        "time": 138295.59999999404,
+        "phase": "during-checkpoint",
+        "value": true
+      },
+      {
+        "kind": "visible",
+        "time": 138323.20000000298,
+        "phase": "during-checkpoint",
+        "pressed": "false"
+      },
+      {
+        "kind": "painted",
+        "time": 138377.70000000298,
+        "phase": "during-checkpoint",
+        "pressed": "false"
+      },
+      {
+        "kind": "put",
+        "time": 138409.40000000596,
+        "phase": "during-checkpoint",
+        "store": "backups",
+        "duration": 0.20000000298023224
+      },
+      {
+        "kind": "put",
+        "time": 138409.59999999404,
+        "phase": "during-checkpoint",
+        "store": "slots",
+        "duration": 0.19999998807907104
+      },
+      {
+        "kind": "put",
+        "time": 138409.59999999404,
+        "phase": "during-checkpoint",
+        "store": "metadata",
+        "duration": 0
+      },
+      {
+        "kind": "busy",
+        "time": 138488.70000000298,
+        "phase": "during-checkpoint",
+        "value": false
+      },
+      {
+        "kind": "click",
+        "time": 138624.5,
+        "phase": "during-checkpoint",
+        "target": "lock-shooting"
+      },
+      {
+        "kind": "busy",
+        "time": 138625.90000000596,
+        "phase": "during-checkpoint",
+        "value": true
+      },
+      {
+        "kind": "visible",
+        "time": 138640.09999999404,
+        "phase": "during-checkpoint",
+        "pressed": "true"
+      },
+      {
+        "kind": "painted",
+        "time": 138655.90000000596,
+        "phase": "during-checkpoint",
+        "pressed": "true"
+      },
+      {
+        "kind": "put",
+        "time": 138694.09999999404,
+        "phase": "during-checkpoint",
+        "store": "backups",
+        "duration": 8.299999997019768
+      },
+      {
+        "kind": "put",
+        "time": 138694.40000000596,
+        "phase": "during-checkpoint",
+        "store": "slots",
+        "duration": 0.30000001192092896
+      },
+      {
+        "kind": "put",
+        "time": 138694.40000000596,
+        "phase": "during-checkpoint",
+        "store": "metadata",
+        "duration": 0
+      },
+      {
+        "kind": "busy",
+        "time": 138782.90000000596,
+        "phase": "during-checkpoint",
+        "value": false
+      },
+      {
+        "kind": "click",
+        "time": 138945.40000000596,
+        "phase": "during-checkpoint",
+        "target": "lock-shooting"
+      },
+      {
+        "kind": "busy",
+        "time": 138951.59999999404,
+        "phase": "during-checkpoint",
+        "value": true
+      },
+      {
+        "kind": "visible",
+        "time": 138983.20000000298,
+        "phase": "during-checkpoint",
+        "pressed": "false"
+      },
+      {
+        "kind": "painted",
+        "time": 139017.29999999702,
+        "phase": "during-checkpoint",
+        "pressed": "false"
+      },
+      {
+        "kind": "put",
+        "time": 139080.20000000298,
+        "phase": "during-checkpoint",
+        "store": "backups",
+        "duration": 0.20000000298023224
+      },
+      {
+        "kind": "put",
+        "time": 139080.5,
+        "phase": "during-checkpoint",
+        "store": "slots",
+        "duration": 0.29999999701976776
+      },
+      {
+        "kind": "put",
+        "time": 139080.5,
+        "phase": "during-checkpoint",
+        "store": "metadata",
+        "duration": 0
+      },
+      {
+        "kind": "busy",
+        "time": 139135.59999999404,
+        "phase": "during-checkpoint",
+        "value": false
+      },
+      {
+        "kind": "click",
+        "time": 139299.90000000596,
+        "phase": "during-checkpoint",
+        "target": "lock-shooting"
+      },
+      {
+        "kind": "busy",
+        "time": 139301.59999999404,
+        "phase": "during-checkpoint",
+        "value": true
+      },
+      {
+        "kind": "visible",
+        "time": 139321.29999999702,
+        "phase": "during-checkpoint",
+        "pressed": "true"
+      },
+      {
+        "kind": "painted",
+        "time": 139351.70000000298,
+        "phase": "during-checkpoint",
+        "pressed": "true"
+      },
+      {
+        "kind": "put",
+        "time": 139406.59999999404,
+        "phase": "during-checkpoint",
+        "store": "backups",
+        "duration": 0.29999999701976776
+      },
+      {
+        "kind": "put",
+        "time": 139406.79999999702,
+        "phase": "during-checkpoint",
+        "store": "slots",
+        "duration": 0.20000000298023224
+      },
+      {
+        "kind": "put",
+        "time": 139406.79999999702,
+        "phase": "during-checkpoint",
+        "store": "metadata",
+        "duration": 0
+      },
+      {
+        "kind": "busy",
+        "time": 139534.90000000596,
+        "phase": "during-checkpoint",
+        "value": false
+      },
+      {
+        "kind": "click",
+        "time": 139706.79999999702,
+        "phase": "during-checkpoint",
+        "target": "lock-shooting"
+      },
+      {
+        "kind": "busy",
+        "time": 139711.90000000596,
+        "phase": "during-checkpoint",
+        "value": true
+      },
+      {
+        "kind": "visible",
+        "time": 139723.59999999404,
+        "phase": "during-checkpoint",
+        "pressed": "false"
+      },
+      {
+        "kind": "painted",
+        "time": 139775.59999999404,
+        "phase": "during-checkpoint",
+        "pressed": "false"
+      },
+      {
+        "kind": "put",
+        "time": 139787.59999999404,
+        "phase": "during-checkpoint",
+        "store": "backups",
+        "duration": 0.29999999701976776
+      },
+      {
+        "kind": "put",
+        "time": 139787.59999999404,
+        "phase": "during-checkpoint",
+        "store": "slots",
+        "duration": 0
+      },
+      {
+        "kind": "put",
+        "time": 139787.59999999404,
+        "phase": "during-checkpoint",
+        "store": "metadata",
+        "duration": 0
+      },
+      {
+        "kind": "busy",
+        "time": 139884.20000000298,
+        "phase": "during-checkpoint",
+        "value": false
+      },
+      {
+        "kind": "click",
+        "time": 140035.29999999702,
+        "phase": "during-checkpoint",
+        "target": "manual-aging"
+      },
+      {
+        "kind": "click",
+        "time": 140135.5,
+        "phase": "during-checkpoint",
+        "target": "manual-aging"
+      },
+      {
+        "kind": "click",
+        "time": 140223.59999999404,
+        "phase": "during-checkpoint",
+        "target": "training-shooting"
+      },
+      {
+        "kind": "busy",
+        "time": 140225.40000000596,
+        "phase": "during-checkpoint",
+        "value": true
+      },
+      {
+        "kind": "put",
+        "time": 140326.90000000596,
+        "phase": "during-checkpoint",
+        "store": "backups",
+        "duration": 0.30000001192092896
+      },
+      {
+        "kind": "put",
+        "time": 140327.09999999404,
+        "phase": "during-checkpoint",
+        "store": "slots",
+        "duration": 0.19999998807907104
+      },
+      {
+        "kind": "put",
+        "time": 140327.20000000298,
+        "phase": "during-checkpoint",
+        "store": "metadata",
+        "duration": 0.10000000894069672
+      },
+      {
+        "kind": "busy",
+        "time": 140416.5,
+        "phase": "during-checkpoint",
+        "value": false
+      }
+    ],
+    "longTasks": [
+      {
+        "start": 122.20000000298023,
+        "duration": 68,
+        "phase": "boot"
+      },
+      {
+        "start": 551.0999999940395,
+        "duration": 67,
+        "phase": "boot"
+      },
+      {
+        "start": 700.2000000029802,
+        "duration": 2605,
+        "phase": "boot"
+      },
+      {
+        "start": 3320.7000000029802,
+        "duration": 418,
+        "phase": "boot"
+      },
+      {
+        "start": 3740.7000000029802,
+        "duration": 80,
+        "phase": "boot"
+      },
+      {
+        "start": 3825.0999999940395,
+        "duration": 668,
+        "phase": "boot"
+      },
+      {
+        "start": 4693.5,
+        "duration": 89,
+        "phase": "boot"
+      },
+      {
+        "start": 4799,
+        "duration": 94,
+        "phase": "boot"
+      },
+      {
+        "start": 36024.79999999702,
+        "duration": 4925,
+        "phase": "boot"
+      },
+      {
+        "start": 40951.20000000298,
+        "duration": 241,
+        "phase": "boot"
+      },
+      {
+        "start": 41301.5,
+        "duration": 2832,
+        "phase": "boot"
+      },
+      {
+        "start": 76111.79999999702,
+        "duration": 2470,
+        "phase": "boot"
+      },
+      {
+        "start": 78582.29999999702,
+        "duration": 517,
+        "phase": "boot"
+      },
+      {
+        "start": 79100.59999999404,
+        "duration": 3105,
+        "phase": "boot"
+      },
+      {
+        "start": 83387.59999999404,
+        "duration": 57,
+        "phase": "clicks"
+      },
+      {
+        "start": 84511.90000000596,
+        "duration": 70,
+        "phase": "clicks"
+      },
+      {
+        "start": 136092.40000000596,
+        "duration": 84,
+        "phase": "during-checkpoint"
+      },
+      {
+        "start": 136441.5,
+        "duration": 66,
+        "phase": "during-checkpoint"
+      },
+      {
+        "start": 136857.70000000298,
+        "duration": 51,
+        "phase": "during-checkpoint"
+      },
+      {
+        "start": 137311,
+        "duration": 84,
+        "phase": "during-checkpoint"
+      },
+      {
+        "start": 137707.79999999702,
+        "duration": 94,
+        "phase": "during-checkpoint"
+      },
+      {
+        "start": 137834.5,
+        "duration": 52,
+        "phase": "during-checkpoint"
+      },
+      {
+        "start": 138283.20000000298,
+        "duration": 65,
+        "phase": "during-checkpoint"
+      },
+      {
+        "start": 138944,
+        "duration": 64,
+        "phase": "during-checkpoint"
+      },
+      {
+        "start": 140217.5,
+        "duration": 68,
+        "phase": "during-checkpoint"
+      },
+      {
+        "start": 140527.70000000298,
+        "duration": 4084,
+        "phase": "during-checkpoint"
+      },
+      {
+        "start": 144617.70000000298,
+        "duration": 2098,
+        "phase": "during-checkpoint"
+      },
+      {
+        "start": 146717.20000000298,
+        "duration": 5772,
+        "phase": "during-checkpoint"
+      }
+    ]
+  },
+  "errors": []
+}

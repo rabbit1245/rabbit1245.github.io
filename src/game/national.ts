@@ -10,7 +10,7 @@ import {worldPlayerAbility} from './world';
 import { simulateMatch } from './match-engine';
 import { addStats, clamp, emptyStats, seededRandom, sumStats } from './math';
 import { nationalityForPlayer, normalizeNationality,currentNationality } from './national-data';
-import type { MatchParticipant, NationalSeason, NationalState } from './revision-types';
+import type { MatchParticipant, NationalSeason, NationalState,WorldPlayer } from './revision-types';
 import type { Career, Club, Fixture, MatchRecord, PlayerStats, Position, RosterPlayer } from './types';
 
 /** Competition names/cycles are real; the reduced three-team qualification and four-team
@@ -118,9 +118,23 @@ function scoreCandidate(career: Career, id: string, ovr: number, clubId: string,
   const minutesRate = Math.min(1, minutes / Math.max(450, career.season.week * 90));
   return ovr * .86 + minutesRate * 5 + (rating - 6.5) * 3 + leagueLevel(career, clubId) + (user ? (career.player.form - 60) * .045 : 0);
 }
+const windowPlayerIndexes=new WeakMap<Career,{hasPlayers:boolean;countries?:Map<string,WorldPlayer[]>}>();
+function windowPlayers(career:Career,country:string):WorldPlayer[]{
+ const active=windowPlayerIndexes.get(career);
+ if(!active)return Object.values(career.systems?.world.players??{});
+ if(!active.countries){
+  const countries=new Map<string,WorldPlayer[]>();
+  for(const row of Object.values(career.systems?.world.players??{})){
+   if(retainedRosterIds.has(row.id)||row.id===career.player.id)continue;
+   const nation=currentNationality(row),rows=countries.get(nation)??[];rows.push(row);countries.set(nation,rows);
+  }
+  active.countries=countries;
+ }
+ return active.countries.get(country)??[];
+}
 function poolFor(career: Career, country: string, squad: Squad): Candidate[] {
   const world = career.systems?.world;
-  const hasPersistentPlayers = !!world && Object.keys(world.players).length>0;
+  const hasPersistentPlayers = windowPlayerIndexes.get(career)?.hasPlayers??(!!world&&Object.keys(world.players).length>0);
   const pool: Candidate[] = [];
   const offsets=new Map<string,number>();
   for (const row of rosterByCountry.get(country) ?? []) {
@@ -135,7 +149,7 @@ function poolFor(career: Career, country: string, squad: Squad): Candidate[] {
   }
   // Academy arrivals added by the persistent world are eligible too; the static index
   // remains the source for retained players, including those who move abroad.
-  for (const row of Object.values(world?.players ?? {})) {
+  for (const row of windowPlayers(career,country)) {
     if(retainedRosterIds.has(row.id)||row.id===career.player.id||currentNationality(row)!==country)continue;
     if((squad==='U20'&&row.age>20)||(squad==='senior'&&row.age>40))continue;
     const ovr=worldPlayerAbility(career,row,offsets);
@@ -493,6 +507,9 @@ export function processDueNationalWindows(career:Career,throughDate:string):void
   state.timingVersion=1;
   if(timestamp(through)<=timestamp(baseline)){state.processedThrough=baseline;return;}
   windowRosters.set(career,new Map());
+  // Membership only, scoped to this synchronous window update. Ages, injuries,
+  // form, playing ability and actual scores are still evaluated on every query.
+  windowPlayerIndexes.set(career,{hasPlayers:Object.keys(career.systems.world.players).length>0});
   try {
   for(const window of scheduledInternationalWindows(career)){
     if(timestamp(window.date)>timestamp(through))continue;
@@ -506,7 +523,7 @@ export function processDueNationalWindows(career:Career,throughDate:string):void
     }
     processWindowThrough(career,window,through);
   }
-  } finally {windowRosters.delete(career);}
+  } finally {windowRosters.delete(career);windowPlayerIndexes.delete(career);}
   state.processedThrough=through;
 }
 

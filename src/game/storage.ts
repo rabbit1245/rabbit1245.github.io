@@ -5,6 +5,7 @@ import {validatePlaySkills} from './play-skill-validation';
 import {canonicalBytes} from './canonical-bytes';
 import {MAX_SAVE_BYTES,utf8Size} from './save-limits';
 import {jsonBlob} from './json-blob';
+import {CheckpointScheduler} from './checkpoint-scheduler';
 import {recoverCareerKeeperRoles} from './keeper-recovery';
 import {commandChange,controlFingerprint} from './command-patches';
 import {decodeStored,isBlobCareer,prepareStored,metadataFor,journalEntry,storedHead,recordFingerprint,type StoredCareer,type BlobCareer,type PreparedSave,type DecodedSave} from './save-codec';
@@ -34,7 +35,7 @@ interface RecoverySnapshot { current?: StoredCareer; metadata?: Metadata; preser
 let databasePromise: Promise<IDBDatabase> | undefined;
 const knownVersions = new Map<string, { revision: number; hash: string }>();
 const durableCareers=new WeakMap<Career,string>();
-const checkpointTimers=new Map<string,ReturnType<typeof setTimeout>>();
+const checkpointScheduler=new CheckpointScheduler(id=>checkpointCareer(id));
 const checkpointJobs=new Map<string,Promise<void>>();
 const MAX_JOURNAL_BYTES=4*1024*1024;
 const writeQueues = new Map<string, Promise<unknown>>();
@@ -97,15 +98,14 @@ function calendarDate(value: unknown, label: string): string {
 }
 
 function ensureSafeJSON(value: unknown): void {
-  const stack: { value: unknown; depth: number }[] = [{ value, depth: 0 }];
-  let visited = 0;
+  if(!value||typeof value!=='object')return;
+  const stack:object[]=[value],depths=[0];let visited=1;
   while (stack.length) {
-    const current = stack.pop()!;
-    assert(++visited <= 64_000_000 && current.depth <= 64, '저장 구조가 지나치게 크거나 깊습니다.');
-    if (!current.value || typeof current.value !== 'object') continue;
-    for (const [key, item] of Object.entries(current.value)) {
+    const current=stack.pop()! as Record<string,unknown>,depth=depths.pop()!+1;
+    for (const key of Object.keys(current)) {
       assert(!poisonedKeys.has(key), '허용하지 않는 속성이 포함되어 있습니다.');
-      stack.push({ value: item, depth: current.depth + 1 });
+      assert(++visited<=64_000_000&&depth<=64,'저장 구조가 지나치게 크거나 깊습니다.');
+      const item=current[key];if(item&&typeof item==='object'){stack.push(item);depths.push(depth);}
     }
   }
 }
@@ -1015,9 +1015,11 @@ async function replaceSnapshot(career:Career,prepared:PreparedSave,expected:Awai
   };current.onsuccess=write;meta.onsuccess=write;
   tx.oncomplete=()=>resolve();tx.onabort=()=>reject(failure??storageError(tx.error));tx.onerror=()=>reject(failure??storageError(tx.error));
  });
- knownVersions.set(career.id,committedVersion);durableCareers.set(career,controlFingerprint(career));
+ knownVersions.set(career.id,committedVersion);durableCareers.set(career,controlFingerprint(career));checkpointScheduler.fullSaved(career.id);
 }
-function stopCheckpointTimer(id:string){const timer=checkpointTimers.get(id);if(timer)clearTimeout(timer);checkpointTimers.delete(id);}
+function stopCheckpointTimer(id:string){checkpointScheduler.cancelTimer(id);}
+export const pauseBackgroundCheckpoints=()=>checkpointScheduler.pause();
+export function noteCheckpointActivity(id:string){checkpointScheduler.activity(id);}
 /** Whole snapshots still receive the original complete validation and canonical checksum. */
 async function persistCareer(career:Career,recovery?:RecoverySnapshot):Promise<void>{
  stopCheckpointTimer(career.id);
@@ -1049,7 +1051,8 @@ export async function saveCareerChange(previous:Career,next:Career):Promise<void
   if(head.revision!==previous.revision)throw Error('저장 충돌: 변경 기록의 시작 시점이 다릅니다.');
   const entry=await journalEntry(next.id,previous.revision,next.revision,head.hash,patches);
   const journal=[...snapshot.current.journal,entry];
-  if(journal.length>512||new TextEncoder().encode(JSON.stringify(journal)).length>MAX_JOURNAL_BYTES)throw Error('배경 저장이 밀려 있습니다. 잠시 뒤 다시 저장해 주세요.');
+  const journalBytes=new TextEncoder().encode(JSON.stringify(journal)).length;
+  if(journal.length>512||journalBytes>MAX_JOURNAL_BYTES)throw Error('배경 저장이 밀려 있습니다. 잠시 뒤 다시 저장해 주세요.');
   const record:BlobCareer={...snapshot.current,journal,writeId:crypto.randomUUID()};
   const metadata=metadataFor(next,entry.hash,new Date().toISOString()),database=await openDatabase();
   await new Promise<void>((resolve,reject)=>{
@@ -1063,12 +1066,12 @@ export async function saveCareerChange(previous:Career,next:Career):Promise<void
    };current.onsuccess=write;meta.onsuccess=write;tx.oncomplete=()=>resolve();tx.onabort=()=>reject(failure??storageError(tx.error));tx.onerror=()=>reject(failure??storageError(tx.error));
   });
   knownVersions.set(next.id,{revision:next.revision,hash:entry.hash});durableCareers.set(next,controlFingerprint(next));
+  scheduleCheckpoint(next.id,record,journalBytes);
  });
- scheduleCheckpoint(next.id);
 }
-function scheduleCheckpoint(id:string){
+function scheduleCheckpoint(id:string,record:BlobCareer,journalBytes?:number){
  if(typeof Worker==='undefined')return;
- stopCheckpointTimer(id);checkpointTimers.set(id,setTimeout(()=>{checkpointTimers.delete(id);void checkpointCareer(id).catch(()=>{/* The durable journal and previous-good backup remain intact. */});},1500));
+ checkpointScheduler.schedule(id,{bytes:record.rawBytes??record.blob.size,entries:record.journal.length,journalBytes:journalBytes??new TextEncoder().encode(JSON.stringify(record.journal)).length});
 }
 /** Compaction never changes the logical head or the last-good backup. */
 export function checkpointCareer(id:string):Promise<void>{
@@ -1089,7 +1092,11 @@ export function checkpointCareer(id:string):Promise<void>{
     };current.onsuccess=write;meta.onsuccess=write;tx.oncomplete=()=>resolve();tx.onabort=()=>reject(storageError(tx.error));tx.onerror=()=>reject(storageError(tx.error));
    });
   });
- })();checkpointJobs.set(id,job);void job.then(async()=>{const now=await readSlot(id);if(now.current&&isBlobCareer(now.current)&&now.current.journal.length&&!now.metadata?.deleted)scheduleCheckpoint(id);}).catch(()=>undefined);void job.finally(()=>{if(checkpointJobs.get(id)===job)checkpointJobs.delete(id);}).catch(()=>undefined);return job;
+ })();checkpointJobs.set(id,job);
+ // Reconcile scheduling in the same slot queue as journal commits. Otherwise a
+ // command arriving between this read and fullSaved could lose its pending timer.
+ void job.then(()=>enqueue(id,async()=>{const now=await readSlot(id);if(!now.current||now.metadata?.deleted){checkpointScheduler.forget(id);return;}checkpointScheduler.fullSaved(id);if(isBlobCareer(now.current)&&now.current.journal.length)scheduleCheckpoint(id,now.current);})).catch(()=>undefined);
+ void job.finally(()=>{if(checkpointJobs.get(id)===job)checkpointJobs.delete(id);}).catch(()=>undefined);return job;
 }
 
 export async function listSlots(): Promise<SaveSlot[]> {
@@ -1118,13 +1125,14 @@ export async function loadCareer(id:string):Promise<Career>{
   });});
  }
  knownVersions.set(id,{revision:decoded.career.revision,hash:decoded.versionHash});durableCareers.set(decoded.career,controlFingerprint(decoded.career));
- if(isBlobCareer(snapshot.current)&&snapshot.current.journal.length)scheduleCheckpoint(id);
+ if(isBlobCareer(snapshot.current)&&snapshot.current.journal.length)scheduleCheckpoint(id,snapshot.current);
  return decoded.career;
 }
 
 export async function deleteSlot(id: string): Promise<void> {
   text(id, '슬롯 ID');
   stopCheckpointTimer(id);
+  checkpointScheduler.forget(id);
   return enqueue(id, async () => {
     const database = await openDatabase();
     await new Promise<void>((resolve, reject) => {

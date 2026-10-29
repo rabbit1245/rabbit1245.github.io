@@ -3,6 +3,7 @@ import type {CompetitorSeason} from './revision-types';
 import {getClub,getLeague} from './data';
 import {emptyStats,addStats,sumStats,clamp} from './math';
 import {tournamentPerformance} from './tournament-awards';
+import {performanceBaselines,type PerformanceBaselines} from './performance-profile';
 import {cupLedger} from './club-competitions';
 import {personalityEdge} from './personality';
 const avg=(s:PlayerStats)=>s.ratingCount?s.ratingSum/s.ratingCount:0;
@@ -16,7 +17,7 @@ export function trackMonthlyLeague(c:Career,matches:MatchRecord[]):void{
  const state=ledger?.year===c.season.year&&ledger.leagueId===c.season.leagueId?ledger:(c.systems.monthlyLeague={year:c.season.year,leagueId:c.season.leagueId,months:{}});
  for(const m of matches){if(!m.date)continue;const month=m.date.slice(0,7),rows=state.months[month]??(state.months[month]={});for(const p of m.performers??[]){const row=rows[p.id]??(rows[p.id]={id:p.id,name:p.name,position:p.position,age:p.id===c.player.id?c.player.age:c.systems.world.players[p.id]?.age??99,clubId:p.clubId,stats:emptyStats()});addStats(row.stats,p.stats);}}
 }
-function legacyPerformance(r:CompetitorSeason){return tournamentPerformance({id:r.playerId,...r})*clamp(r.stats.minutes/1800,.3,1.2);}
+function legacyPerformance(r:CompetitorSeason,baselines:PerformanceBaselines={}){return tournamentPerformance({id:r.playerId,...r},baselines)*clamp(r.stats.minutes/1800,.3,1.2);}
 function allClubRows(c:Career):CompetitorSeason[]{
  const rows=new Map(Object.values(c.systems!.world.playerStats).map(r=>[r.playerId,{...r,stats:{...r.stats}}]));
  for(const t of cupLedger(c,c.season.year))for(const r of Object.values(t.playerStats??{})){const row=rows.get(r.playerId);if(row)addStats(row.stats,r.stats);else rows.set(r.playerId,{...r,stats:{...r.stats}});}
@@ -58,14 +59,19 @@ export function evaluateExtraHonours(c:Career,scoreSeason:(r:CompetitorSeason)=>
  add('league-rookie',`${getLeague(c.season.leagueId).name} 올해의 신인`,'league',league.filter(r=>r.playerId===p.id?ownFirst:w.players[r.playerId]?.leagueDebutYear===year),performance,'이 게임에서 참가 이력이 확인되는 리그 첫 시즌 · NPC 과거 이력이 불명확하면 후보에서 제외');
  add('league-signing',`${getLeague(c.season.leagueId).name} 올해의 영입`,'league',league.filter(firstSigning),valueReturn,'확인된 이적 첫 시즌 · 출전 기여와 이적료 대비 활약');
  for(const [month,map] of Object.entries(c.systems.monthlyLeague?.year===year?c.systems.monthlyLeague.months:{}))for(const young of [false,true]){
-  const candidates=Object.values(map).filter(r=>r.stats.apps>=2&&r.stats.minutes>=120&&avg(r.stats)>=6.8&&(!young||r.age<=23)).sort((a,b)=>tournamentPerformance(b)-tournamentPerformance(a)||a.id.localeCompare(b.id));
+  const eligible=Object.values(map).filter(r=>r.stats.apps>=2&&r.stats.minutes>=120&&avg(r.stats)>=6.8&&(!young||r.age<=23)),baselines=performanceBaselines(eligible,120),scores=new Map(eligible.map(r=>[r.id,tournamentPerformance(r,baselines)])),candidates=eligible.sort((a,b)=>scores.get(b.id)!-scores.get(a.id)!||a.id.localeCompare(b.id));
   if(candidates[0]?.id===p.id){const r=candidates[0];awards.push({id:`${year}:extra:month:${month}:${young?'young':'player'}:${p.id}`,year,clubId:r.clubId,name:`언론 선정 · ${getLeague(c.season.leagueId).name} ${month} 이달의 ${young?'유망주':'선수'}`,category:'league-monthly',official:false,organiser:'언론 평가 모형',verification:'game-model',description:`${month} 리그만 ${r.stats.apps}경기 · ${r.stats.goals}골 ${r.stats.assists}도움 · 평점 ${avg(r.stats).toFixed(2)}. 최소 2경기·120분·평점 6.8${young?'·23세 이하':''}; ${candidates.length}명 비교. 공식 월간 시상과 구별하는 언론 선정.`});}
  }
  // Domestic cups use their own ledger. Existing continental MVP is reused, never awarded twice.
- for(const t of cupLedger(c,year).filter(t=>t.phase==='completed'&&(t.kind==='cup'||t.kind==='leagueCup'))){const candidates=Object.values(t.playerStats??{}).filter(r=>r.stats.apps>=Math.max(2,Math.ceil(Math.max(...Object.values(t.playerStats??{}).map(r=>r.stats.apps),0)*.5))).sort((a,b)=>legacyPerformance(b)-legacyPerformance(a)||a.playerId.localeCompare(b.playerId));if(candidates[0]?.playerId===p.id)awards.push({id:`${t.id}:extra:mvp:${p.id}`,year,clubId,name:`언론 선정 · ${t.name} 최우수 선수`,category:'cup-individual',official:false,organiser:'언론 평가 모형',verification:'game-model',description:`해당 컵 실제 출전 ${candidates[0].stats.apps}경기 · 포지션별 활약으로 ${candidates.length}명 비교. 다른 대회 기록 제외.`});}
+ for(const t of cupLedger(c,year).filter(t=>t.phase==='completed'&&(t.kind==='cup'||t.kind==='leagueCup'))){
+  const rows=Object.values(t.playerStats??{}),minApps=Math.max(2,Math.ceil(Math.max(...rows.map(r=>r.stats.apps),0)*.5));
+  const eligible=rows.filter(r=>r.stats.apps>=minApps),baselines=performanceBaselines(eligible,90),scores=new Map(eligible.map(r=>[r.playerId,legacyPerformance(r,baselines)]));
+  const candidates=eligible.sort((a,b)=>scores.get(b.playerId)!-scores.get(a.playerId)!||a.playerId.localeCompare(b.playerId));
+  if(candidates[0]?.playerId===p.id)awards.push({id:`${t.id}:extra:mvp:${p.id}`,year,clubId,name:`언론 선정 · ${t.name} 최우수 선수`,category:'cup-individual',official:false,organiser:'언론 평가 모형',verification:'game-model',description:`해당 컵 실제 출전 ${candidates[0].stats.apps}경기 · 포지션별 활약으로 ${candidates.length}명 비교. 다른 대회 기록 제외.`});
+ }
  const natGames=[...new Map([...(c.systems.national.history.flatMap(h=>h.matches)??[]),...c.systems.national.matches].filter(m=>m.seasonYear===year&&m.playerClubId.endsWith(':senior')).map(m=>[m.fixtureId,m])).values()];
  const natRows=new Map<string,MonthlyPlayer>();for(const m of natGames)for(const r of m.performers??[]){if((r.teamId??r.clubId)!==m.playerClubId)continue;const row=natRows.get(r.id)??{id:r.id,name:r.name,position:r.position,age:99,clubId,stats:emptyStats()};addStats(row.stats,r.stats);natRows.set(r.id,row);}
- const nationals=[...natRows.values()].filter(r=>r.stats.apps>=4&&r.stats.minutes>=240&&avg(r.stats)>=6.7).sort((a,b)=>tournamentPerformance(b)-tournamentPerformance(a)||a.id.localeCompare(b.id));
+ const nationalPool=[...natRows.values()].filter(r=>r.stats.apps>=4&&r.stats.minutes>=240&&avg(r.stats)>=6.7),nationalBaselines=performanceBaselines(nationalPool,240),nationalScores=new Map(nationalPool.map(r=>[r.id,tournamentPerformance(r,nationalBaselines)])),nationals=nationalPool.sort((a,b)=>nationalScores.get(b.id)!-nationalScores.get(a.id)!||a.id.localeCompare(b.id));
  if(nationals[0]?.id===p.id)awards.push({id:`${year}:extra:national-player:${p.id}`,year,clubId,name:`언론 선정 · ${c.systems.national.country} 국가대표 올해의 선수`,category:'national-individual',official:false,organiser:'언론 평가 모형',verification:'game-model',description:`해당 게임 연도 실제 성인 대표팀 ${nationals[0].stats.apps}경기 · 같은 대표팀 실제 출전 ${nationals.length}명 비교. U20·클럽 기록 제외.`});
  // Historical estimated popularity awards remain intact. New sales medals use
  // the conserved world merchandise market, not a second popularity-only award.

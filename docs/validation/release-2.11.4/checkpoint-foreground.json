@@ -1,0 +1,78 @@
+{
+  "url": "http://127.0.0.1:4194/Kball.html",
+  "source": "test-results/coherence/large/career.json",
+  "version": "K볼 2.11.4 · A FOOTBALL LIFE",
+  "checkpointInterrupted": true,
+  "renewalSaved": true,
+  "historyAndStatsPreserved": true,
+  "controlChangePreserved": true,
+  "reload": true,
+  "trace": [
+    {
+      "kind": "send",
+      "id": 1,
+      "op": "verifyFile"
+    },
+    {
+      "kind": "done",
+      "id": 1,
+      "op": "verifyFile"
+    },
+    {
+      "kind": "stop",
+      "id": 1
+    },
+    {
+      "kind": "send",
+      "id": 2,
+      "op": "prepare"
+    },
+    {
+      "kind": "done",
+      "id": 2,
+      "op": "prepare"
+    },
+    {
+      "kind": "stop",
+      "id": 2
+    },
+    {
+      "kind": "send",
+      "id": 3,
+      "op": "checkpoint"
+    },
+    {
+      "kind": "stop",
+      "id": 3
+    },
+    {
+      "kind": "send",
+      "id": 4,
+      "op": "transfer"
+    },
+    {
+      "kind": "done",
+      "id": 4,
+      "op": "transfer"
+    },
+    {
+      "kind": "stop",
+      "id": 4
+    },
+    {
+      "kind": "send",
+      "id": 5,
+      "op": "prepare"
+    },
+    {
+      "kind": "done",
+      "id": 5,
+      "op": "prepare"
+    },
+    {
+      "kind": "stop",
+      "id": 5
+    }
+  ],
+  "errors": []
+}

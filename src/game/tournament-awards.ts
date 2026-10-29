@@ -1,21 +1,20 @@
 import { FIFA_TOURNAMENT_AWARD_RULES, AWARD_MODEL_VERSION } from './award-rules';
 import { addStats, emptyStats } from './math';
 import type { Award, Career, MatchRecord, PlayerStats, Position } from './types';
+import {evaluateFieldPerformance,type PerformanceBaselines,performanceBaselines} from './performance-profile';
 
 interface TournamentPlayer { id:string; name:string; position:Position; stats:PlayerStats }
 const average=(s:PlayerStats)=>s.ratingCount?s.ratingSum/s.ratingCount:0;
 const group=(position:Position)=>position==='GK'?'GK':['CB','LB','RB','LWB','RWB'].includes(position)?'DEF':['CDM','CM','CAM','LM','RM'].includes(position)?'MID':'FWD';
 
 /** This is a published game voting model; it never pretends to reproduce FIFA's actual votes. */
-export function tournamentPerformance(player:TournamentPlayer):number {
+export function tournamentPerformance(player:TournamentPlayer,baselines:PerformanceBaselines={}):number {
   const s=player.stats;if(!s.apps||!s.minutes)return 0;
   const matches=Math.max(1,s.minutes/90),role=group(player.position);
   const fairPlay=s.yellowCards*.35+s.redCards*3;
+  if(role!=='GK')return evaluateFieldPerformance(player,baselines).value+(s.mom??0)*.8-fairPlay;
   const common=Math.max(0,average(s)-5)*18+(s.mom??0)*1.5-fairPlay;
-  if(role==='GK')return common+s.saves/matches*2+s.saves/Math.max(1,s.shotsFaced??s.saves+s.goalsConceded)*16+s.cleanSheets/Math.max(1,s.apps)*16-s.goalsConceded/matches*1.5+(s.penaltiesSaved??0)*3;
-  if(role==='DEF')return common+(s.tackles+s.interceptions)/matches*2.5+(s.aerialWon??0)/matches+s.cleanSheets/Math.max(1,s.apps)*12+(s.goals+s.assists)/matches*6;
-  if(role==='MID')return common+(s.goals+s.assists)/matches*9+(s.keyPasses??0)/matches*2+(s.tackles+s.interceptions)/matches+s.passesCompleted/Math.max(1,s.passes)*5;
-  return common+s.goals/matches*13+s.assists/matches*7+(s.dribblesCompleted??0)/matches+(s.tackles+s.interceptions)/matches*2+(s.keyPasses??0)/matches*1.5+(s.aerialWon??0)/matches*.6;
+  return common+s.saves/matches*2+s.saves/Math.max(1,s.shotsFaced??s.saves+s.goalsConceded)*16+s.cleanSheets/Math.max(1,s.apps)*16-s.goalsConceded/matches*1.5+(s.penaltiesSaved??0)*3;
 }
 
 /** Pure, competition-scoped personal awards, based only on completed FIFA finals ledgers. */
@@ -49,9 +48,10 @@ export function evaluateTournamentAwards(career:Career):Award[] {
     // A fully tied sporting record does not invent a sole winner by player-id ordering.
     if(boot[0]&&own.stats.goals===boot[0].stats.goals&&own.stats.assists===boot[0].stats.assists&&own.stats.minutes===boot[0].stats.minutes)add(rules.goldenBoot,`본선 ${own.stats.goals}골 · ${own.stats.assists}도움 · ${own.stats.minutes}분. 실제 본선 출전 선수 ${rows.length}명 비교${boot.filter(p=>p.stats.goals===own.stats.goals&&p.stats.assists===own.stats.assists&&p.stats.minutes===own.stats.minutes).length>1?' · 완전 동률 공동 선정':''}.`);
     const minApps=Math.max(1,Math.ceil(Math.max(...rows.map(r=>r.stats.apps))*.5));
-    const ranked=rows.filter(p=>p.stats.apps>=minApps).sort((a,b)=>tournamentPerformance(b)-tournamentPerformance(a)||a.id.localeCompare(b.id));
+    const eligible=rows.filter(p=>p.stats.apps>=minApps),baselines=performanceBaselines(eligible,90),scores=new Map(eligible.map(r=>[r.id,tournamentPerformance(r,baselines)]));
+    const ranked=eligible.sort((a,b)=>scores.get(b.id)!-scores.get(a.id)!||a.id.localeCompare(b.id));
     if(ranked[0]?.id===own.id)add(rules.goldenBall,`본선 ${own.stats.apps}경기 · 평점 ${average(own.stats).toFixed(2)}. 본선에서 실제로 뛴 선수들의 역할별 기록을 비교한 게임 내 투표.`);
-    const keepers=rows.filter(p=>p.position==='GK'&&p.stats.apps>=minApps).sort((a,b)=>tournamentPerformance(b)-tournamentPerformance(a)||a.id.localeCompare(b.id));
+    const keepers=rows.filter(p=>p.position==='GK'&&p.stats.apps>=minApps).sort((a,b)=>scores.get(b.id)!-scores.get(a.id)!||a.id.localeCompare(b.id));
     if(kind!=='UEFA'&&keepers[0]?.id===own.id)add(rules.goldenGlove,`본선 ${own.stats.saves}선방 · ${own.stats.cleanSheets}무실점 · 평점 ${average(own.stats).toFixed(2)}. 실제 본선 골키퍼 ${keepers.length}명을 비교한 게임 내 투표.`);
   }
   return awards;

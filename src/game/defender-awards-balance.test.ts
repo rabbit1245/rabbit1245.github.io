@@ -16,9 +16,9 @@ function fresh(position:Position='CB'){
  for(const key of FIELD_ATTRIBUTES)c.player.attributes[key]=92;c.player.ovr=overall(c.player);return c;
 }
 
-test('defender clean spells use actual on-pitch goals and 60-minute eligibility, including early substitutions',()=>{
+test('field-player clean spells use actual on-pitch goals and 60-minute eligibility, including early substitutions',()=>{
  let clean=0,conceding=0,lateOnly=0;
- for(const position of ['CB','RWB'] as const){
+ for(const position of ['CB','RWB','RW','CM'] as const){
   const c=fresh(position),f=c.season.fixtures.find(f=>f.homeId===c.player.clubId)!;
   const options={home:{...getClub(f.homeId),power:80},away:{...getClub(f.awayId),power:80},homePlayers:getWorldClubPlayers(c,f.homeId),awayPlayers:getWorldClubPlayers(c,f.awayId),detailed:false};
   for(const end of [59,65,90])for(let seed=0;seed<100;seed++){

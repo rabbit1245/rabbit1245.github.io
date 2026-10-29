@@ -3,6 +3,7 @@ import { selectEleven } from './award-selection';
 import { tournamentPerformance } from './tournament-awards';
 import type { BallonDorYear, ClubTournament, CompetitorSeason } from './revision-types';
 import type { Award, Career } from './types';
+import {performanceBaselines} from './performance-profile';
 
 const uefaPaths:Record<string,string>={UCL:'uefachampionsleague',UEL:'uefaeuropaleague',UECL:'uefaconferenceleague'};
 type Diagnostic=NonNullable<BallonDorYear['diagnostics']>[number];
@@ -26,7 +27,8 @@ export function evaluateClubAwards(c:Career,t:ClubTournament):{awards:Award[];di
   const rows=Object.values(t.playerStats??{}).filter(r=>r.stats.apps>0&&r.stats.minutes>0);
   const own=rows.find(r=>r.playerId===c.player.id),completed=t.phase==='completed'&&t.year===c.season.year;
   const minApps=Math.max(2,Math.ceil(Math.max(1,...rows.map(r=>r.stats.apps))*.5));
-  const score=(r:CompetitorSeason)=>tournamentPerformance({id:r.playerId,...r});
+  const baselines=performanceBaselines(rows.filter(r=>r.stats.apps>=minApps),90),scores=new Map(rows.map(r=>[r.playerId,tournamentPerformance({id:r.playerId,...r},baselines)]));
+  const score=(r:CompetitorSeason)=>scores.get(r.playerId)??0;
   const ranking=rows.filter(r=>r.stats.apps>=minApps&&r.stats.minutes>=90).sort((a,b)=>score(b)-score(a)||a.playerId.localeCompare(b.playerId));
   const eleven=selectEleven(ranking,4,3,3),topGoals=Math.max(0,...rows.map(r=>r.stats.goals));
   const dates=t.fixtures.filter(f=>f.played&&f.date).map(f=>f.date!.slice(0,10)).sort();

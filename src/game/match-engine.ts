@@ -379,9 +379,9 @@ export function simulateMatch(career:Career,fixture:Fixture,options:MatchOptions
   for(let side=0;side<2;side++)for(const actor of teams[side].actors){
     const s=actor.stats;
     if(actor.position==='GK'&&actor.minutes>=60&&s.goalsConceded===0)s.cleanSheets=1;
-    // Existing defender award rules read this field, but only keepers used to
-    // receive it. Credit an actual >=60-minute clean spell, including substitutions.
-    if(DEFENCE.has(actor.position)&&actor.minutes>=60&&!goalMinutes[1-side].some(minute=>minute>actor.from&&minute<=actor.to))s.cleanSheets=1;
+    // Every field role can contribute to prevention. Credit an actual >=60-minute
+    // clean spell, including substitutions; this does not add a rating bonus.
+    if(actor.position!=='GK'&&actor.minutes>=60&&!goalMinutes[1-side].some(minute=>minute>actor.from&&minute<=actor.to))s.cleanSheets=1;
     const isGK=actor.position==='GK';
     const contribution=isGK?s.saves*.20+(s.oneOnOneSaves??0)*.12+(s.penaltiesSaved??0)*.65+s.cleanSheets*.45-s.goalsConceded*.38+(s.crossesCaught??0)*.035+(s.sweepingSuccesses??0)*.04:
       s.goals*.95+s.assists*.65+(s.keyPasses??0)*.07+s.tackles*(FORWARD.has(actor.position)?.12:.075)+s.interceptions*(FORWARD.has(actor.position)?.11:.065)+(s.dribblesCompleted??0)*.055+(s.aerialWon??0)*.025+s.shotsOnTarget*.055-(s.passes-s.passesCompleted)*.018-((s.dribbleAttempts??0)-(s.dribblesCompleted??0))*.035;

@@ -6,8 +6,10 @@ import type { Career, CreateOptions, GameCommand, GameProgress, MatchRecord, Sav
 import type { PresentationEvent } from './game/revision-types';
 import { CLUBS, DATA_PROVENANCE } from './game/data';
 import { createCareer, ENGINE_VERSION } from './game/engine';
+import {LIGHT_COMMANDS} from './game/command-patches';
+import {cancelCheckpointPreparation} from './game/save-preparation';
 import { runGameCommand,releaseIdleGameWorker } from './game/client';
-import { deleteSlot, exportCareerBlob, importCareer, listSlots, loadCareer, restoreBackup, saveCareer, saveCareerChange } from './game/storage';
+import { deleteSlot, exportCareerBlob, importCareer, listSlots, loadCareer, restoreBackup, saveCareer, saveCareerChange,pauseBackgroundCheckpoints,noteCheckpointActivity } from './game/storage';
 import { sumStats } from './game/math';
 import { careerTextChunks,careerTextFilename } from './game/career-text';
 import Creation from './components/Creation';
@@ -38,6 +40,7 @@ function Presentation({matches,events,onClose,reduced}:{matches:MatchRecord[];ev
   useEffect(()=>{if(reduced||!items.length){onClose();return;}const timer=window.setTimeout(()=>{if(index>=items.length-1)onClose();else setIndex(i=>i+1);},items[index]?.important?850:200);return()=>clearTimeout(timer);},[index,reduced]);
   return <div className="presentation" role="status" aria-live="polite"><span className="eyebrow">시즌의 장면 · 결과 계산 완료</span><div className="presentation-rail">{items.map((r,i)=><i key={r.id} className={i<=index?'done':''}/>)}</div><strong>{items[index]?.title}</strong><p>{currencyText(items[index]?.body??'')}</p><button className="button secondary small" onClick={onClose}><SkipForward size={15}/>연출 건너뛰기</button></div>;
 }
+function beginFullTask(){const resume=pauseBackgroundCheckpoints();cancelCheckpointPreparation();return resume;}
 export default function App() {
   const [career, setCareer] = useState<Career | null>(null);
   const [page, setPage] = useState<Page>('locker');
@@ -77,6 +80,7 @@ export default function App() {
     document.addEventListener('keydown', close);
     return () => { document.body.style.overflow = previousOverflow; document.removeEventListener('keydown', close); };
   }, [mobileOpen]);
+  useEffect(()=>{const activity=()=>{if(careerRef.current)noteCheckpointActivity(careerRef.current.id);};document.addEventListener('pointerdown',activity,true);document.addEventListener('keydown',activity,true);return()=>{document.removeEventListener('pointerdown',activity,true);document.removeEventListener('keydown',activity,true);};},[]);
   function confirmReplace(action: string) {
     return !careerRef.current || saveStatus !== 'error' || window.confirm(`저장되지 않은 진행이 있습니다. 파일로 내보내지 않고 ${action}?`);
   }
@@ -107,63 +111,63 @@ export default function App() {
   }
   async function command(value: GameCommand) {
     if (locked.current || !careerRef.current) return;
-    locked.current = true; setBusy(true); setError('');
+    locked.current = true; setBusy(true); setError('');const resume=LIGHT_COMMANDS.has(value.type)?undefined:beginFullTask();
     try { const previous = careerRef.current; const next = await runGameCommand(previous, value,setProgress); const saved=await commit(next,previous);if(value.type==='training'&&saved)navigate('locker');
       if (['advanceHalf','continueHalf','transfer','nextSeason','retire'].includes(value.type) && !reduced) { const matchIds = new Set([...careerMatchLedger(previous).club,...careerMatchLedger(previous).national].map(m => m.id)), eventIds = new Set(previous.systems?.events.map(e => e.id) || []); const matches = [...careerMatchLedger(next).club,...careerMatchLedger(next).national].filter(m => !matchIds.has(m.id)), events = next.systems?.events.filter(e => !eventIds.has(e.id)) || []; if (matches.length || events.some(e => e.importance === 'milestone')) setPresentation({ matches, events }); } if (value.type === 'nextSeason' || value.type === 'retire') navigate(value.type === 'retire' ? 'career' : 'locker'); if (value.type === 'training') setToast('새로운 훈련 계획을 적용했습니다.'); }
     catch (e) { setError(errorMessage(e)); }
-    finally { locked.current = false; setBusy(false); setProgress(null); }
+    finally { resume?.();locked.current = false; setBusy(false); setProgress(null); }
   }
   async function newCareer(options: CreateOptions) {
     if (locked.current) return;
-    locked.current = true; setBusy(true); setError('');releaseIdleGameWorker();
+    locked.current = true; setBusy(true); setError('');const resume=beginFullTask();releaseIdleGameWorker();
     try { const next = createCareer(options); await commit(next); setCreation(false); navigate('locker'); setToast('당신의 커리어가 시작되었습니다.'); }
     catch (e) { setError(errorMessage(e)); throw e; }
-    finally { locked.current = false; setBusy(false); setProgress(null); }
+    finally { resume?.();locked.current = false; setBusy(false); setProgress(null); }
   }
   async function load(id: string) {
     if (locked.current) return;
     if (!confirmReplace('다른 저장을 불러올까요')) return;
-    locked.current = true; setBusy(true); setError('');releaseIdleGameWorker();
+    locked.current = true; setBusy(true); setError('');const resume=beginFullTask();releaseIdleGameWorker();
     try { const next = await loadCareer(id); display(next); setSelectedMatch(null); setSaveStatus('saved'); setCommon(false); navigate('locker'); setToast('커리어를 불러왔습니다.'); }
     catch (e) { setError(errorMessage(e)); }
-    finally { locked.current = false; setBusy(false); setProgress(null); }
+    finally { resume?.();locked.current = false; setBusy(false); setProgress(null); }
   }
   async function saveNow() {
     if (locked.current || !careerRef.current) return;
-    locked.current = true; setBusy(true); setError('');
+    locked.current = true; setBusy(true); setError('');const resume=beginFullTask();
     try { await commit(careerRef.current); }
-    finally { locked.current = false; setBusy(false); setProgress(null); }
+    finally { resume?.();locked.current = false; setBusy(false); setProgress(null); }
   }
   async function exportFile() {
     if(locked.current)return;
     const exporting = careerRef.current;
     if (!exporting) return;
-    locked.current=true;setBusy(true);releaseIdleGameWorker();
+    locked.current=true;setBusy(true);releaseIdleGameWorker();const resume=beginFullTask();
     try { const blob = await exportCareerBlob(exporting); const url = URL.createObjectURL(blob); const link = document.createElement('a'); link.href = url; link.download = `K볼_${exporting.player.name}_${exporting.season.year}.json`; link.click(); window.setTimeout(() => URL.revokeObjectURL(url), 1000); setToast('커리어를 JSON 파일로 내보냈습니다.'); }
     catch (e) { setError(errorMessage(e)); }
-    finally {locked.current=false;setBusy(false);}
+    finally {resume();locked.current=false;setBusy(false);}
   }
   async function importFile(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0]; event.target.value = '';
     if (!file || locked.current || !confirmReplace('가져온 커리어를 열까요')) return;
-    locked.current = true; setBusy(true); setError('');
+    locked.current = true; setBusy(true); setError('');const resume=beginFullTask();
     try { const next = await importCareer(file); const saved = await commit(next); setSelectedMatch(null); setCommon(false); navigate('locker'); if (saved) setToast('별도 슬롯으로 커리어를 가져왔습니다.'); }
     catch (e) { setError(errorMessage(e)); }
-    finally { locked.current = false; setBusy(false); setProgress(null); }
+    finally { resume?.();locked.current = false; setBusy(false); setProgress(null); }
   }
   async function remove(id: string) {
     if (locked.current || !window.confirm('이 커리어의 저장 파일과 백업을 삭제할까요? 삭제 후에는 되돌릴 수 없습니다.')) return;
-    locked.current = true; setBusy(true); setError('');
+    locked.current = true; setBusy(true); setError('');const resume=beginFullTask();
     try { await deleteSlot(id); if (careerRef.current?.id === id) { careerRef.current = null; setCareer(null); } await refresh(); setToast('커리어를 삭제했습니다.'); }
     catch (e) { setError(errorMessage(e)); }
-    finally { locked.current = false; setBusy(false); setProgress(null); }
+    finally { resume?.();locked.current = false; setBusy(false); setProgress(null); }
   }
   async function restore(id: string) {
     if (locked.current || !window.confirm('직전 정상 저장본으로 복원할까요? 현재 저장본은 복원용 백업으로 남습니다.')) return;
-    locked.current = true; setBusy(true); setError('');
+    locked.current = true; setBusy(true); setError('');const resume=beginFullTask();
     try { const next = await restoreBackup(id); display(next); setSaveStatus('saved'); await refresh(); setCommon(false); navigate('locker'); setToast('이전 저장본을 복원했습니다.'); }
     catch (e) { setError(errorMessage(e)); }
-    finally { locked.current = false; setBusy(false); setProgress(null); }
+    finally { resume?.();locked.current = false; setBusy(false); setProgress(null); }
   }
   function copyCareer() {
     const career=careerRef.current;if(!career)return;

@@ -1,0 +1,71 @@
+TAP version 13
+# Subtest: same seed and commands replay exactly without mutating prior snapshots
+ok 1 - same seed and commands replay exactly without mutating prior snapshots # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.726222
+  ...
+# Subtest: creation rejects invalid input and defines every field/GK attribute
+ok 2 - creation rejects invalid input and defines every field/GK attribute # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.093701
+  ...
+# Subtest: double round robin is balanced, including odd team counts and byes
+ok 3 - double round robin is balanced, including odd team counts and byes # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.0669
+  ...
+# Subtest: selected training dominates bounded experience and development; rest recovers condition
+ok 4 - selected training dominates bounded experience and development; rest recovers condition # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.100672
+  ...
+# Subtest: match goal events, personal statistics and full league standings reconcile
+ok 5 - match goal events, personal statistics and full league standings reconcile # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.128664
+  ...
+# Subtest: six distinct external offers, signing, contract renewal and new league work
+ok 6 - six distinct external offers, signing, contract renewal and new league work # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.063485
+  ...
+# Subtest: GK records saves without striker output; position performance differs over many matches
+ok 7 - GK records saves without striker output; position performance differs over many matches # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.055033
+  ...
+# Long TXT verified: 96591 bytes, 102 club and 314 national matches
+# Subtest: 30 seasons preserve history, finite stats, youth promotion, age progression and retirement totals
+ok 8 - 30 seasons preserve history, finite stats, youth promotion, age progression and retirement totals
+  ---
+  duration_ms: 103633.589747
+  ...
+# Subtest: retirement during a season archives the partial ledger exactly once
+ok 9 - retirement during a season archives the partial ledger exactly once # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.567055
+  ...
+# Subtest: a future effective transfer cannot leave an earlier retirement in the career ledger
+ok 10 - a future effective transfer cannot leave an earlier retirement in the career ledger # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.08608
+  ...
+# Subtest: personal actions and clean sheets use the actual on-pitch interval
+ok 11 - personal actions and clean sheets use the actual on-pitch interval # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.055904
+  ...
+# Subtest: absolute OVR and seeds stay independent of team selection
+ok 12 - absolute OVR and seeds stay independent of team selection # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.058979
+  ...
+1..12
+# tests 12
+# suites 0
+# pass 1
+# fail 0
+# cancelled 0
+# skipped 11
+# todo 0
+# duration_ms 105224.223008

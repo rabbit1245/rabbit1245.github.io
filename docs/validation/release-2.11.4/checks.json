@@ -1,0 +1,50 @@
+{
+  "totalCoreItems": 373,
+  "initialFullRun": {
+    "pass": 371,
+    "fail": 1,
+    "skip": 1
+  },
+  "resolvedExpectation": "The former assertion prohibited all new action counters from affecting awards. The current user request explicitly asks pressure and progression contributions to count. Updated it to preserve header subset and unrelated keeper-count non-duplication. The new role-profile tests independently verify actual pressure and progression recognition. Production logic was not weakened to satisfy the old assertion.",
+  "failedModuleAndNewProfileRerun": {
+    "tests": 16,
+    "pass": 16,
+    "fail": 0
+  },
+  "finalDistinctCoreStatus": {
+    "pass": 372,
+    "fail": 0,
+    "skip": 1
+  },
+  "storageAfterSlotQueueSchedulingReview": {
+    "tests": 34,
+    "pass": 34,
+    "fail": 0
+  },
+  "thirtySeasonCheckpoint": {
+    "matched": 1,
+    "pass": 1,
+    "fail": 0,
+    "filtered": 11,
+    "note": "Reused actual existing 30-season checkpoint for preservation, retirement and TXT checks; not thirty seasons resimulated in this release."
+  },
+  "portableDesktopMobileFlows": 11,
+  "largeAge31": {
+    "years": 31,
+    "seasons": 14,
+    "bytes": 272717105,
+    "durableClicks": 20,
+    "reloadAndCompaction": true
+  },
+  "largeAge43": {
+    "years": 43,
+    "seasons": 30,
+    "bytes": 429191805,
+    "durableClicks": 20,
+    "reloadAndCompaction": true,
+    "timingCondition": "Ran alongside functional core tests; no timing comparison to quiet age31 sample."
+  },
+  "foregroundCancellation": true,
+  "hongMinjunSourceRead": false,
+  "hongMinjunReason": "Sediment executor transfer limit 32 MiB; requested compressed source."
+}

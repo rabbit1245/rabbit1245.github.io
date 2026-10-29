@@ -1,0 +1,90 @@
+TAP version 13
+# Subtest: all 16 positions produce source-backed, non-duplicated counters and preserve input abilities
+ok 1 - all 16 positions produce source-backed, non-duplicated counters and preserve input abilities
+  ---
+  duration_ms: 358.80367
+  ...
+# Subtest: equal-OVR aerial and technical strikers have different actual header shot and goal shares
+ok 2 - equal-OVR aerial and technical strikers have different actual header shot and goal shares
+  ---
+  duration_ms: 710.933337
+  ...
+# Subtest: aerial centre backs head real set-piece deliveries without losing ordinary aerial contests
+ok 3 - aerial centre backs head real set-piece deliveries without losing ordinary aerial contests
+  ---
+  duration_ms: 238.761707
+  ...
+# Subtest: pressing strength and work rate distinguish equal-OVR forwards, wingers and midfielders
+ok 4 - pressing strength and work rate distinguish equal-OVR forwards, wingers and midfielders
+  ---
+  duration_ms: 1159.916724
+  ...
+# Subtest: pressure attempts require a separate possession recovery and cannot duplicate tackles or interceptions
+ok 5 - pressure attempts require a separate possession recovery and cannot duplicate tackles or interceptions
+  ---
+  duration_ms: 11.049412
+  ...
+# Subtest: equal-OVR build-up defenders and playmakers advance zones with completed passes, not sideways labels
+ok 6 - equal-OVR build-up defenders and playmakers advance zones with completed passes, not sideways labels
+  ---
+  duration_ms: 920.601785
+  ...
+# Subtest: keepers choose between holding a cross and punching it safe; the same ball is never counted twice
+ok 7 - keepers choose between holding a cross and punching it safe; the same ball is never counted twice
+  ---
+  duration_ms: 459.579499
+  ...
+# Subtest: 100-plus mastered attributes still affect actual header and progression decisions
+ok 8 - 100-plus mastered attributes still affect actual header and progression decisions
+  ---
+  duration_ms: 593.062316
+  ...
+# Subtest: legacy unknown, measured zero and mixed coverage remain distinct in sums and Korean retirement text
+ok 9 - legacy unknown, measured zero and mixed coverage remain distinct in sums and Korean retirement text
+  ---
+  duration_ms: 389.02089
+  ...
+# Subtest: header goal subsets and goalkeeper punch counts do not duplicate field-player award credit
+ok 10 - header goal subsets and goalkeeper punch counts do not duplicate field-player award credit
+  ---
+  duration_ms: 5.06893
+  ...
+# Subtest: discarded NPC details use the same decisions and counters while career and national sources cannot be disabled
+ok 11 - discarded NPC details use the same decisions and counters while career and national sources cannot be disabled
+  ---
+  duration_ms: 171.654192
+  ...
+# Subtest: real league progression saves and reloads all new event counters without changing progression systems
+ok 12 - real league progression saves and reloads all new event counters without changing progression systems
+  ---
+  duration_ms: 4395.457225
+  ...
+# Subtest: a defensive winger and a scoring centre-back are evaluated by their observed work rather than fixed role weights
+ok 13 - a defensive winger and a scoring centre-back are evaluated by their observed work rather than fixed role weights
+  ---
+  duration_ms: 1.217213
+  ...
+# Subtest: role comparison uses one primary contribution and bounded complementary work without adding header goals twice
+ok 14 - role comparison uses one primary contribution and bounded complementary work without adding header goals twice
+  ---
+  duration_ms: 0.724371
+  ...
+# Subtest: legacy missing action coverage remains missing and does not fabricate pressure or progressive passes
+ok 15 - legacy missing action coverage remains missing and does not fabricate pressure or progressive passes
+  ---
+  duration_ms: 0.307533
+  ...
+# Subtest: exceptional unconventional output can win a world vote and the old hard personal-score plateau no longer suppresses further output
+ok 16 - exceptional unconventional output can win a world vote and the old hard personal-score plateau no longer suppresses further output
+  ---
+  duration_ms: 538.219551
+  ...
+1..16
+# tests 16
+# suites 0
+# pass 16
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 10565.872514
