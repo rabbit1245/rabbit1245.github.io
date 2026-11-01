@@ -75,3 +75,12 @@ ZIP의 CRC와 내부 `Kball.html`이 검사한 HTML과 바이트 단위로 같�
 - HTML: **28,614,404바이트** · SHA-256 `d1999d121641dc9f7b25def668e0f9d94157911362d4599a09867f0267907992`
 
 - ZIP: **21,564,187바이트** · SHA-256 `60e3b2705dfb405cec318557b43f04a211b335546a14567f54df2fcd62929f02`
+
+
+[검수한 2.11.6 ZIP 다운로드](https://github.com/rabbit1245/rabbit1245.github.io/raw/cb8574a1a8f5eb0d3a6a00176b9a608aab609081/Kball.zip?download=1)
+
+- 소스: `02b5b0c091f30833dbe3949c584d63cda9ea015a`
+- 다운로드 배포: `cb8574a1a8f5eb0d3a6a00176b9a608aab609081`
+- 공개 링크 HTTP **200** · **21,564,187바이트**, ZIP SHA-256·CRC와 내부 HTML이 검사한 파일과 일치한다. [확인 결과](validation/release-2.11.6/public-download.json).
+
+압축을 풀고 `Kball.html`에서 기존 JSON을 가져온다. 하단의 K볼 **2.11.6**을 확인한다. 새 미확정 계약 제안과 이후 시즌 판매 결산에 적용한다. 다운로드 브랜치를 갱신했으며 별도 메인 GitHub Pages 배포는 변경하지 않았다.
