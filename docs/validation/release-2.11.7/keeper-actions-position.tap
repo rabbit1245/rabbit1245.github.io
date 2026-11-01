@@ -1,0 +1,357 @@
+TAP version 13
+# Subtest: all 16 positions produce source-backed, non-duplicated counters and preserve input abilities
+ok 1 - all 16 positions produce source-backed, non-duplicated counters and preserve input abilities
+  ---
+  duration_ms: 774.587007
+  ...
+# Subtest: equal-OVR aerial and technical strikers have different actual header shot and goal shares
+ok 2 - equal-OVR aerial and technical strikers have different actual header shot and goal shares
+  ---
+  duration_ms: 1534.248814
+  ...
+# Subtest: aerial centre backs head real set-piece deliveries without losing ordinary aerial contests
+ok 3 - aerial centre backs head real set-piece deliveries without losing ordinary aerial contests
+  ---
+  duration_ms: 409.785193
+  ...
+# Subtest: pressing strength and work rate distinguish equal-OVR forwards, wingers and midfielders
+ok 4 - pressing strength and work rate distinguish equal-OVR forwards, wingers and midfielders
+  ---
+  duration_ms: 2831.383091
+  ...
+# Subtest: pressure attempts require a separate possession recovery and cannot duplicate tackles or interceptions
+ok 5 - pressure attempts require a separate possession recovery and cannot duplicate tackles or interceptions
+  ---
+  duration_ms: 22.714724
+  ...
+# Subtest: equal-OVR build-up defenders and playmakers advance zones with completed passes, not sideways labels
+ok 6 - equal-OVR build-up defenders and playmakers advance zones with completed passes, not sideways labels
+  ---
+  duration_ms: 2298.547425
+  ...
+# Subtest: keepers choose between holding a cross and punching it safe; the same ball is never counted twice
+ok 7 - keepers choose between holding a cross and punching it safe; the same ball is never counted twice
+  ---
+  duration_ms: 972.498265
+  ...
+# Subtest: 100-plus mastered attributes still affect actual header and progression decisions
+ok 8 - 100-plus mastered attributes still affect actual header and progression decisions
+  ---
+  duration_ms: 1363.081011
+  ...
+# Subtest: legacy unknown, measured zero and mixed coverage remain distinct in sums and Korean retirement text
+ok 9 - legacy unknown, measured zero and mixed coverage remain distinct in sums and Korean retirement text
+  ---
+  duration_ms: 798.963477
+  ...
+# Subtest: header goal subsets and goalkeeper punch counts do not duplicate field-player award credit
+ok 10 - header goal subsets and goalkeeper punch counts do not duplicate field-player award credit
+  ---
+  duration_ms: 6.163375
+  ...
+# Subtest: discarded NPC details use the same decisions and counters while career and national sources cannot be disabled
+ok 11 - discarded NPC details use the same decisions and counters while career and national sources cannot be disabled
+  ---
+  duration_ms: 348.98326
+  ...
+# Subtest: real league progression saves and reloads all new event counters without changing progression systems
+ok 12 - real league progression saves and reloads all new event counters without changing progression systems
+  ---
+  duration_ms: 6004.293387
+  ...
+# Subtest: missing healthy GK depth fields explicitly fictional keepers instead of an unlabelled outfielder
+ok 13 - missing healthy GK depth fields explicitly fictional keepers instead of an unlabelled outfielder
+  ---
+  duration_ms: 899.144473
+  ...
+# Subtest: outfield insertion cannot evict a goalkeeper when its positional group is absent
+ok 14 - outfield insertion cannot evict a goalkeeper when its positional group is absent
+  ---
+  duration_ms: 790.940601
+  ...
+# Subtest: a sent-off goalkeeper is replaced by withdrawing an outfielder, retaining exactly ten active players
+ok 15 - a sent-off goalkeeper is replaced by withdrawing an outfielder, retaining exactly ten active players
+  ---
+  duration_ms: 919.114192
+  ...
+# Subtest: a goalkeeper who enters from the bench and leaves early has three continuous, non-overlapping keeper spells
+ok 16 - a goalkeeper who enters from the bench and leaves early has three continuous, non-overlapping keeper spells
+  ---
+  duration_ms: 599.662496
+  ...
+# Subtest: an injured or sent-off substitute keeper retains complete keeper coverage and the correct active headcount
+ok 17 - an injured or sent-off substitute keeper retains complete keeper coverage and the correct active headcount
+  ---
+  duration_ms: 2921.588038
+  ...
+# Subtest: old emergency roles are inferred from their own source; new invalid lineups are never repaired
+ok 18 - old emergency roles are inferred from their own source; new invalid lineups are never repaired
+  ---
+  duration_ms: 547.048897
+  ...
+# Subtest: a hash-verified affected file and durable Blob recover without bypassing integrity or changing statistics
+ok 19 - a hash-verified affected file and durable Blob recover without bypassing integrity or changing statistics
+  ---
+  duration_ms: 11062.912008
+  ...
+# Subtest: owned Worker snapshots avoid another deep copy while receiving the same validation and checksum
+ok 20 - owned Worker snapshots avoid another deep copy while receiving the same validation and checksum
+  ---
+  duration_ms: 1083.820762
+  ...
+# Subtest: paired complete league schedules turn individual actions into different points and rank distributions
+ok 21 - paired complete league schedules turn individual actions into different points and rank distributions
+  ---
+  duration_ms: 9458.341579
+  ...
+# {"paired40Seasons":[{"ability":25,"meanPoints":11.2,"meanRank":6.975,"titles":0,"goals":16},{"ability":95,"meanPoints":30.9,"meanRank":1.975,"titles":1,"goals":745}]}
+# Subtest: a weak club’s world-class striker raises earned points without unbounded lower-league scoring
+ok 22 - a weak club’s world-class striker raises earned points without unbounded lower-league scoring
+  ---
+  duration_ms: 9579.920747
+  ...
+# {"weakClubEight38GameSeasons":[{"ability":25,"meanPoints":18.5,"meanRank":18.75,"goals":[1,2,1,0,2,2,0,1]},{"ability":90,"meanPoints":74.25,"meanRank":5.125,"goals":[47,55,40,50,65,47,45,52]},{"ability":95,"meanPoints":78.5,"meanRank":4.375,"goals":[62,65,55,62,70,55,55,59]}]}
+# Subtest: seed replay is pure, and output verbosity does not change any performance
+ok 23 - seed replay is pure, and output verbosity does not change any performance
+  ---
+  duration_ms: 8.379797
+  ...
+# Subtest: scores, shot references, saves, assists and both-team MOM reconcile over 240 games
+ok 24 - scores, shot references, saves, assists and both-team MOM reconcile over 240 games
+  ---
+  duration_ms: 264.161469
+  ...
+# Subtest: CM: strength changes tackles in its intended direction across 240 paired games with OVR held fixed
+ok 25 - CM: strength changes tackles in its intended direction across 240 paired games with OVR held fixed
+  ---
+  duration_ms: 338.479289
+  ...
+# Subtest: CM: stamina changes lateSuccesses in its intended direction across 240 paired games with OVR held fixed
+ok 26 - CM: stamina changes lateSuccesses in its intended direction across 240 paired games with OVR held fixed
+  ---
+  duration_ms: 302.783336
+  ...
+# Subtest: CM: speed changes dribbleAttempts in its intended direction across 240 paired games with OVR held fixed
+ok 27 - CM: speed changes dribbleAttempts in its intended direction across 240 paired games with OVR held fixed
+  ---
+  duration_ms: 306.243655
+  ...
+# Subtest: CM: agility changes dribblesCompleted in its intended direction across 240 paired games with OVR held fixed
+ok 28 - CM: agility changes dribblesCompleted in its intended direction across 240 paired games with OVR held fixed
+  ---
+  duration_ms: 317.121461
+  ...
+# Subtest: CM: jumping changes aerialWon in its intended direction across 240 paired games with OVR held fixed
+ok 29 - CM: jumping changes aerialWon in its intended direction across 240 paired games with OVR held fixed
+  ---
+  duration_ms: 317.47606
+  ...
+# Subtest: CM: ballControl changes passesCompleted in its intended direction across 240 paired games with OVR held fixed
+ok 30 - CM: ballControl changes passesCompleted in its intended direction across 240 paired games with OVR held fixed
+  ---
+  duration_ms: 286.483811
+  ...
+# Subtest: CM: dribbling changes dribblesCompleted in its intended direction across 240 paired games with OVR held fixed
+ok 31 - CM: dribbling changes dribblesCompleted in its intended direction across 240 paired games with OVR held fixed
+  ---
+  duration_ms: 307.677014
+  ...
+# Subtest: CM: passing changes passesCompleted in its intended direction across 240 paired games with OVR held fixed
+ok 32 - CM: passing changes passesCompleted in its intended direction across 240 paired games with OVR held fixed
+  ---
+  duration_ms: 298.609222
+  ...
+# Subtest: CM: crossing changes keyPasses in its intended direction across 240 paired games with OVR held fixed
+ok 33 - CM: crossing changes keyPasses in its intended direction across 240 paired games with OVR held fixed
+  ---
+  duration_ms: 301.019754
+  ...
+# Subtest: CM: shooting changes shotsOnTarget in its intended direction across 240 paired games with OVR held fixed
+ok 34 - CM: shooting changes shotsOnTarget in its intended direction across 240 paired games with OVR held fixed
+  ---
+  duration_ms: 313.657591
+  ...
+# Subtest: CM: heading changes aerialWon in its intended direction across 240 paired games with OVR held fixed
+ok 35 - CM: heading changes aerialWon in its intended direction across 240 paired games with OVR held fixed
+  ---
+  duration_ms: 292.089428
+  ...
+# Subtest: CM: defending changes tackles in its intended direction across 240 paired games with OVR held fixed
+ok 36 - CM: defending changes tackles in its intended direction across 240 paired games with OVR held fixed
+  ---
+  duration_ms: 338.674556
+  ...
+# Subtest: CM: setPieces changes shotsOnTarget in its intended direction across 240 paired games with OVR held fixed
+ok 37 - CM: setPieces changes shotsOnTarget in its intended direction across 240 paired games with OVR held fixed
+  ---
+  duration_ms: 348.763734
+  ...
+# Subtest: CM: decisions changes passesCompleted in its intended direction across 240 paired games with OVR held fixed
+ok 38 - CM: decisions changes passesCompleted in its intended direction across 240 paired games with OVR held fixed
+  ---
+  duration_ms: 318.5347
+  ...
+# Subtest: CM: vision changes keyPasses in its intended direction across 240 paired games with OVR held fixed
+ok 39 - CM: vision changes keyPasses in its intended direction across 240 paired games with OVR held fixed
+  ---
+  duration_ms: 349.091128
+  ...
+# Subtest: CM: anticipation changes interceptions in its intended direction across 240 paired games with OVR held fixed
+ok 40 - CM: anticipation changes interceptions in its intended direction across 240 paired games with OVR held fixed
+  ---
+  duration_ms: 319.624953
+  ...
+# Subtest: CM: positioning changes shots in its intended direction across 240 paired games with OVR held fixed
+ok 41 - CM: positioning changes shots in its intended direction across 240 paired games with OVR held fixed
+  ---
+  duration_ms: 366.312335
+  ...
+# Subtest: CM: composure changes shotsOnTarget in its intended direction across 240 paired games with OVR held fixed
+ok 42 - CM: composure changes shotsOnTarget in its intended direction across 240 paired games with OVR held fixed
+  ---
+  duration_ms: 365.276225
+  ...
+# Subtest: CM: concentration changes passesCompleted in its intended direction across 240 paired games with OVR held fixed
+ok 43 - CM: concentration changes passesCompleted in its intended direction across 240 paired games with OVR held fixed
+  ---
+  duration_ms: 311.589761
+  ...
+# Subtest: CM: teamwork changes passes in its intended direction across 240 paired games with OVR held fixed
+ok 44 - CM: teamwork changes passes in its intended direction across 240 paired games with OVR held fixed
+  ---
+  duration_ms: 332.055278
+  ...
+# Subtest: GK: gkShotStopping changes saves in its intended direction across 240 paired games with OVR held fixed
+ok 45 - GK: gkShotStopping changes saves in its intended direction across 240 paired games with OVR held fixed
+  ---
+  duration_ms: 317.634624
+  ...
+# Subtest: GK: gkReflexes changes saves in its intended direction across 240 paired games with OVR held fixed
+ok 46 - GK: gkReflexes changes saves in its intended direction across 240 paired games with OVR held fixed
+  ---
+  duration_ms: 324.960607
+  ...
+# Subtest: GK: gkHandling changes handlingSuccesses in its intended direction across 240 paired games with OVR held fixed
+ok 47 - GK: gkHandling changes handlingSuccesses in its intended direction across 240 paired games with OVR held fixed
+  ---
+  duration_ms: 327.504726
+  ...
+# Subtest: GK: gkAerialCommand changes crossesCaught in its intended direction across 240 paired games with OVR held fixed
+ok 48 - GK: gkAerialCommand changes crossesCaught in its intended direction across 240 paired games with OVR held fixed
+  ---
+  duration_ms: 319.507026
+  ...
+# Subtest: GK: gkOneOnOnes changes oneOnOneSaves in its intended direction across 240 paired games with OVR held fixed
+ok 49 - GK: gkOneOnOnes changes oneOnOneSaves in its intended direction across 240 paired games with OVR held fixed
+  ---
+  duration_ms: 345.795461
+  ...
+# Subtest: GK: gkPositioning changes sweepingSuccesses in its intended direction across 240 paired games with OVR held fixed
+ok 50 - GK: gkPositioning changes sweepingSuccesses in its intended direction across 240 paired games with OVR held fixed
+  ---
+  duration_ms: 330.710586
+  ...
+# Subtest: GK: gkDistribution changes buildUpCompleted in its intended direction across 240 paired games with OVR held fixed
+ok 51 - GK: gkDistribution changes buildUpCompleted in its intended direction across 240 paired games with OVR held fixed
+  ---
+  duration_ms: 408.293173
+  ...
+# Subtest: GK: decisions changes sweepingSuccesses in its intended direction across 240 paired games with OVR held fixed
+ok 52 - GK: decisions changes sweepingSuccesses in its intended direction across 240 paired games with OVR held fixed
+  ---
+  duration_ms: 650.593429
+  ...
+# Subtest: GK: concentration changes handlingSuccesses in its intended direction across 240 paired games with OVR held fixed
+ok 53 - GK: concentration changes handlingSuccesses in its intended direction across 240 paired games with OVR held fixed
+  ---
+  duration_ms: 351.01307
+  ...
+# Subtest: GK: gkDefensiveOrganization changes shotsFaced in its intended direction across 240 paired games with OVR held fixed
+ok 54 - GK: gkDefensiveOrganization changes shotsFaced in its intended direction across 240 paired games with OVR held fixed
+  ---
+  duration_ms: 342.970989
+  ...
+# Subtest: bench, injuries and red cards respect playing intervals; forced selection controls experiments
+ok 55 - bench, injuries and red cards respect playing intervals; forced selection controls experiments
+  ---
+  duration_ms: 425.177347
+  ...
+# Subtest: national synthetic teams preserve domestic membership and non-user fixtures contain no user performance
+ok 56 - national synthetic teams preserve domestic membership and non-user fixtures contain no user performance
+  ---
+  duration_ms: 2.089559
+  ...
+# Subtest: field and goalkeeper metric displays sum denominators and support per90 rather than averaging match percentages
+ok 57 - field and goalkeeper metric displays sum denominators and support per90 rather than averaging match percentages
+  ---
+  duration_ms: 0.71007
+  ...
+# Subtest: successful passing builds actual team chances and successful defending prevents actual opposing chances
+ok 58 - successful passing builds actual team chances and successful defending prevents actual opposing chances
+  ---
+  duration_ms: 1578.158788
+  ...
+# Subtest: OVR arrows are monotonically tied to the actual positional/type weights across all positions and styles
+ok 59 - OVR arrows are monotonically tied to the actual positional/type weights across all positions and styles
+  ---
+  duration_ms: 12.505194
+  ...
+# Subtest: changing position recalculates OVR without changing attributes, skill selections, contracts or archived results
+ok 60 - changing position recalculates OVR without changing attributes, skill selections, contracts or archived results
+  ---
+  duration_ms: 3409.54351
+  ...
+# Subtest: position commands retain the bounded journal path and repeated command IDs cannot duplicate history
+ok 61 - position commands retain the bounded journal path and repeated command IDs cannot duplicate history
+  ---
+  duration_ms: 953.297728
+  ...
+# Subtest: invalid/retired position changes are rejected and an old save acquires no invented position history
+ok 62 - invalid/retired position changes are rejected and an old save acquires no invented position history
+  ---
+  duration_ms: 1161.778465
+  ...
+# Subtest: a valid older custom style is preserved as historical text when changing to a current position/type
+ok 63 - a valid older custom style is preserved as historical text when changing to a current position/type
+  ---
+  duration_ms: 1331.691857
+  ...
+# Subtest: the next actual game uses the new position, while the original career and earlier game stay unchanged
+ok 64 - the next actual game uses the new position, while the original career and earlier game stay unchanged
+  ---
+  duration_ms: 5749.24347
+  ...
+# Subtest: club historical stature makes a Madrid retired number harder than an obscure club, without using current inflated power
+ok 65 - club historical stature makes a Madrid retired number harder than an obscure club, without using current inflated power
+  ---
+  duration_ms: 633.343441
+  ...
+# Subtest: a historic club award is one per club across transfers/years; another club may also honour the player
+ok 66 - a historic club award is one per club across transfers/years; another club may also honour the player
+  ---
+  duration_ms: 479.562435
+  ...
+# Subtest: a short glorious spell cannot bypass a major club legacy threshold and low performance alone is insufficient
+ok 67 - a short glorious spell cannot bypass a major club legacy threshold and low performance alone is insufficient
+  ---
+  duration_ms: 464.116662
+  ...
+# Subtest: Super Ballon is judged every fifth calendar year from all five finalized annual ledgers; no missing-year fabrication
+ok 68 - Super Ballon is judged every fifth calendar year from all five finalized annual ledgers; no missing-year fabrication
+  ---
+  duration_ms: 472.938497
+  ...
+# Subtest: five-year evaluation rewards sustained results over one annual spike and respects historical position-aware scores
+ok 69 - five-year evaluation rewards sustained results over one annual spike and respects historical position-aware scores
+  ---
+  duration_ms: 709.554957
+  ...
+1..69
+# tests 69
+# suites 0
+# pass 69
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 32065.819142

@@ -1,3 +1,4 @@
+import {evaluateRetiredNumbers,evaluateSuperBallon} from './legacy-honours';
 import {syncUser} from './world';
 import {selectEleven,awardPositionGroup} from './award-selection';
 export {awardPositionGroup} from './award-selection';
@@ -494,6 +495,9 @@ export function evaluateAwards(career: Career): Award[] {
   for(const t of cupLedger(career,career.season.year).filter(t=>t.entrants.includes(career.player.clubId)||!!t.playerStats?.[career.player.id]))diagnostics.push(...evaluateClubAwards(career,t).diagnostics);
   const result: BallonDorYear = {diagnostics, year: career.season.year, candidates, playerRank, winnerId: candidates[0]?.playerId ?? '', world11, awards: won };
   career.systems.rankings.push(result);
+  won.push(...evaluateSuperBallon(career));
+  for(const a of won)if(!career.awards.some(old=>old.id===a.id))career.awards.push(a);
+  won.push(...evaluateRetiredNumbers(career));
   voting.finish();
   for (const a of won) if (!career.awards.some(previous => previous.id === a.id)) career.awards.push(a);
   return won;

@@ -1,3 +1,5 @@
+import {positionChangeLines} from './position-changes';
+import {retirementAwardName} from './legacy-honours';
 import {actionCoverage,ACTION_LABELS} from './action-metrics';
 import {nationalParticipationLines} from './national-participation';
 import {employmentLines,recordedEmployment} from './employment';
@@ -175,7 +177,7 @@ export function careerSeasonRecords(c:Career){
   const cups=cupLedger(c,year).flatMap(t=>[...own].filter(id=>t.entrants.includes(id)).map(id=>`${t.name} · ${name(id)} · ${tournamentResult(t,id)==='결승 탈락'?'준우승 (결승 탈락)':tournamentResult(t,id)}`));
   const judging=c.systems?.rankings.find(r=>r.year===year),globalNames=/발롱도르|FIFPRO|The Best FIFA|야신 트로피|코파 트로피|유러피언 골든슈/;
   const awardResults=(judging?.diagnostics??[]).filter(d=>d.eligible&&globalNames.test(d.name)).map(d=>`${d.name}: ${d.name==='발롱도르'&&d.result==='미선정'?(d.detail.match(/전체 (\d+)위/)?.[1]?d.detail.match(/전체 (\d+)위/)![1]+'위':'후보권 밖')+' · 30인 후보 제외':d.result}`);
-  return {year,shirtSales,employment:employmentLines(c,year),awardResults,playSkills:retirementPlaySkillNames(h?.position??c.player.position,playSkillsForYear(c,year)),age:h?.age??c.player.age,clubId,clubName:recordedEmployment(c,year).length?[...new Set(recordedEmployment(c,year).map(r=>name(r.clubId)))].join(' → '):h?.clubName??name(clubId),
+  return {year,shirtSales,positionChanges:positionChangeLines(c,year),employment:employmentLines(c,year),awardResults,playSkills:retirementPlaySkillNames(h?.position??c.player.position,playSkillsForYear(c,year)),age:h?.age??c.player.age,clubId,clubName:recordedEmployment(c,year).length?[...new Set(recordedEmployment(c,year).map(r=>name(r.clubId)))].join(' → '):h?.clubName??name(clubId),
    status:retired?`은퇴${completed?' (시즌 종료 후)':' (시즌 도중)'}`:completed?'시즌 종료':'진행 중',
    nationalParticipation:nationalParticipationLines(c,year),ovrStart:h?.ovrStart??c.season.ovrStart,ovrEnd:h?.ovrEnd??c.player.ovr,
    ...financials(c,year,h,clubId),leadership:seasonLeadership(c,year,h,clubId),injury:seasonInjuries(c,year,[...clubMatches,...nationalMatches]),
@@ -214,13 +216,14 @@ export function* careerTextChunks(c:Career):Generator<string>{
   for(const period of h.employment)yield line(`소속 기간: ${period}`);
   yield line(`몸값: ${h.value}`);yield line(`주급: ${h.wage}`);
   yield line(`능력점수: ${h.ovrStart} → ${h.ovrEnd}`);
+  for(const change of h.positionChanges)yield line(`포지션 변경: ${change}`);
   yield line(`유니폼 판매: ${h.shirtSales}`);
   if(h.playSkills.length)yield line(`플레이스타일: ${h.playSkills.join(' / ')}`);
   yield line(`주장/부주장 여부: ${h.leadership}`);yield line(`부상 유무: ${h.injury}`);
   for(const activity of h.nationalParticipation)yield line(`국가대표 활동: ${activity}`);
   yield line(`팀 수상: ${h.teamAwards.join(' / ')||'없음'}`);
   yield line('대회별 팀 성적:');for(const result of h.results)yield line(`- ${result}`);
-  yield line(`개인 수상: ${h.personal.map(a=>a.name).join(' / ')||'없음'}`);
+  yield line(`개인 수상: ${h.personal.map(retirementAwardName).join(' / ')||'없음'}`);
   if(h.awardResults.length)yield line(`개인상 평가 결과: ${h.awardResults.join(' / ')}`);
   yield line(`클럽 기록: ${summary(h.clubStats)}`);yield line(`국가대표 기록: ${summary(h.nationalStats)}`);
   yield line('시즌 통합 세부 스탯 · 성공률:');for(const row of careerStatsLines(h.stats,h.matches))yield line(row);

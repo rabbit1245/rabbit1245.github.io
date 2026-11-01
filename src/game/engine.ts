@@ -1,3 +1,5 @@
+import {evaluateRetiredNumbers} from './legacy-honours';
+import {validatePositionChoice} from './position-changes';
 import {isFreeAgent,beginEmployment,changeEmployment} from './employment';
 import {personality,PERSONALITY_KEYS,type PersonalityKey,type Personality} from './personality';
 import {beginAchievementSeason} from './achievement-evidence';
@@ -24,10 +26,10 @@ import { fixtureDate, nextCalendarYear, seasonDate, seasonHalfEndDate } from './
 import { captureSeasonDetails } from './season-details';
 import { applyMatchExperience, beginGrowthSeason, ensureGrowthTracking, trainRound,increaseAttribute,applyManualAging } from './growth';
 import { TALENT_PROFILES } from './talent';
-import type { Award, AttributeKey, Attributes, Career, CreateOptions, Fixture, GameProgress, Intensity, MatchRecord, Player, PlayerStats, SeasonState, SeasonSummary, Standing, Talent, TransferOffer } from './types';
+import type { Award, AttributeKey, Attributes, Career, CreateOptions, Fixture, GameProgress, Intensity, MatchRecord, Player, PlayerStats, Position, SeasonState, SeasonSummary, Standing, Talent, TransferOffer } from './types';
 import type { PresentationEvent } from './revision-types';
 
-export const ENGINE_VERSION = '2.11.6';
+export const ENGINE_VERSION = '2.11.7';
 export const overall = calculateOverall;
 export { addStats, emptyStats, hashSeed, seededRandom } from './math';
 const TALENT_ORDER: Talent[] = ['D','C','B','A','S','SS','SSS'];
@@ -305,6 +307,18 @@ function validateTraining(position:Player['position'],keys:AttributeKey[],intens
   const allowed=position==='GK'?GK_ATTRIBUTES:FIELD_ATTRIBUTES;
   if(!Array.isArray(keys)||keys.length>3||new Set(keys).size!==keys.length||keys.some(key=>!allowed.includes(key)))throw new Error('서로 다른 유효 능력치를 최대 3개까지 선택해 주세요. 선택 없이 진행할 수도 있습니다.');
 }
+export function changePosition(career:Career,position:Position,style:string):Career {
+ validatePositionChoice(career,position,style);
+ const next=editable(career,true),p=next.player;
+ if(p.position===position&&p.style===style){touch(next);return next;}
+ const from=p.position,fromStyle=p.style,ovrBefore=p.ovr;
+ p.position=position;p.style=style;
+ p.secondaryPositions=[...new Set([from,...p.secondaryPositions])].filter(k=>k!==position).slice(0,2);
+ p.ovr=overall(p);
+ next.systems!.positionChanges=[...(next.systems!.positionChanges??[]),{year:next.season.year,round:next.season.week,date:currentDate(next),from,to:position,fromStyle,toStyle:style,ovrBefore,ovrAfter:p.ovr,afterSeason:next.stage==='offseason'}];
+ present(next,'growth','포지션 변경',`${from} → ${position} · ${style} · OVR ${ovrBefore} → ${p.ovr}. 현재 능력치를 새 포지션·유형의 가중치로 평가했습니다.`);
+ touch(next);return next;
+}
 export function setTraining(career:Career,keys:AttributeKey[],intensity:Intensity):Career {
   if(career.stage==='retired')throw new Error('은퇴한 선수는 훈련할 수 없습니다.');
   if(career.stage!=='offseason')throw new Error('시즌 중에는 훈련 계획을 바꿀 수 없습니다. 다음 오프시즌에 설정해 주세요.');
@@ -435,6 +449,7 @@ export function retireCareer(career:Career):Career {
   if(career.stage==='retired')return career;
   if(career.stage==='offseason'&&!isFreeAgent(career)&&career.transfers.some(t=>t.year>career.season.year))throw new Error('새 구단과의 계약이 확정됐습니다. 다음 시즌을 시작한 뒤 은퇴해 주세요.');
   const next=editable(career);
+  next.awards.push(...evaluateRetiredNumbers(next));
   if((next.season.week>0||isFreeAgent(next))&&!next.history.some(s=>s.year===next.season.year))archive(next,false);
   archiveNationalSeason(next);
   next.stage='retired';next.retiredYear=next.season.year;next.offers=[];

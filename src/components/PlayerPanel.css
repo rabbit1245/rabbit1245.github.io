@@ -43,3 +43,9 @@
 @media(min-width:1100px){.training-panel>.panel-head{padding-top:6px;padding-bottom:6px;}.training-panel>.panel-body{padding-top:8px;padding-bottom:8px;}}
 
 .skill-cap{font-size:11px;color:#365d2e;margin-left:5px;white-space:nowrap}.offer-league{display:block;font-size:13px;font-weight:500;color:#4e5964;margin-top:5px}.locker-injury{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.injury-options{flex-basis:100%;padding:10px;border:1px solid #d7ded5;border-radius:8px;background:#fff}.release-contract{margin-top:16px;padding-top:14px;border-top:1px solid #d7ded5}.training-name{display:flex;align-items:center;flex-wrap:wrap}
+
+.ovr-importance{display:inline-block;color:#365d2e;font-size:13px;font-weight:800;letter-spacing:-2px;white-space:nowrap;margin-left:3px;line-height:1;vertical-align:middle}.position-change-button{min-height:34px;padding:5px 10px}.position-change-fields{display:grid;gap:12px}.position-change-fields p{color:var(--text);line-height:1.6}.position-history{margin:8px 0;padding:8px 10px;border:1px solid var(--border);border-radius:6px}.position-history summary{font-weight:700;color:#365d2e;cursor:pointer}.position-history p{padding:5px 0;line-height:1.6;overflow-wrap:anywhere}
+.position-change-button{font-size:14px;line-height:20px;min-height:32px;padding:4px 10px}
+@media(min-width:1200px) and (max-height:850px){.training-panel .training-name{line-height:19px}.training-panel .training-name .ovr-importance{flex-basis:100%;font-size:12px;line-height:12px;margin-left:0}.training-panel .training-cell .training-row{padding:3px 6px}}
+
+@media(min-width:1200px) and (max-height:850px){.player-workspace .training-panel .training-bottom{margin-top:3px}.player-workspace .training-panel .training-summary{margin-top:2px;padding-top:3px;padding-bottom:3px}}

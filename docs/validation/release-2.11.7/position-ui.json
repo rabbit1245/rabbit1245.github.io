@@ -1,0 +1,42 @@
+{
+  "url": "http://127.0.0.1:4194/Kball.html",
+  "source": "test-results/economy-2116/flow/career-baseline.json",
+  "checks": [
+    {
+      "width": 1366,
+      "existingSaveImport": true,
+      "previewMatchesRecalculatedOVR": true,
+      "attributesUnchanged": true,
+      "contractsUnchanged": true,
+      "pastMatchesAndStatsUnchanged": true,
+      "boundedJournal": true,
+      "twoReloads": true,
+      "twoChanges": true,
+      "arrows": true,
+      "careerAndKoreanTXT": true,
+      "noOverflow": true
+    },
+    {
+      "width": 390,
+      "existingSaveImport": true,
+      "previewMatchesRecalculatedOVR": true,
+      "attributesUnchanged": true,
+      "contractsUnchanged": true,
+      "pastMatchesAndStatsUnchanged": true,
+      "boundedJournal": true,
+      "twoReloads": true,
+      "twoChanges": true,
+      "arrows": true,
+      "careerAndKoreanTXT": true,
+      "noOverflow": true
+    },
+    {
+      "awardDisplayFixtureOnly": true,
+      "bothAwardsShown": true,
+      "criteriaInitiallyCollapsed": true,
+      "criteriaToggle": true,
+      "retirementTXTExplainsFiveYearAward": true
+    }
+  ],
+  "errors": []
+}

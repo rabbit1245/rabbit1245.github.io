@@ -99,6 +99,14 @@ function makeTeam(career:Career,club:Club,provided:MatchParticipant[]|undefined,
   }
   const userActor=actors.find(p=>p.user);
   if(userActor){userActor.from=selection.from;userActor.to=selection.to;userActor.minutes=selection.to-selection.from;userActor.started=selection.started;}
+  // A substitute may also leave early through injury or dismissal. The first
+  // replacement only covers entry, so fill the later vacancy as a second spell.
+  // The dismissal branch below removes an outfield replacement or withdraws
+  // another outfielder for a sent-off GK, preserving ten active players.
+  if(includesUser&&!selection.started&&selection.to<90){
+    const replacement=candidates.filter(p=>!used.has(p.id)&&!actors.some(a=>a.id===p.id)&&(user.position==='GK'?p.position==='GK':p.position!=='GK')).sort((a,b)=>(b.position===user.position?100:0)+b.ovr-((a.position===user.position?100:0)+a.ovr))[0];
+    if(replacement)actors.push({...replacement,teamId:club.id,stats:emptyStats(),rating:0,minutes:90-selection.to,started:false,from:selection.to,to:90,user:false,style:'',creation:0});
+  }
   const worldPower=career.systems?.world.clubs[club.id]?.power;
   // Supplied teams already carry their current power (including national teams).
   const power=provided?.length?club.power:worldPower??club.power;

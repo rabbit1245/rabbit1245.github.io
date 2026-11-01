@@ -21,6 +21,22 @@ test('a sent-off goalkeeper is replaced by withdrawing an outfielder, retaining 
  const c=fresh('GK'),{f,options}=setup(c);c.systems!.personality={leadership:5,stardom:5,fairPlay:1,clutch:5,winning:5};let found=false;
  for(let i=0;i<500;i++){c.seed=`keeper-red-${i}`;const m=simulateMatch(c,f,{...options,forceSelection:undefined});if(!m.playerStats.redCards)continue;found=true;validateActionLedger(m,c.player.id);const minute=m.playerMinutes+1,team=m.performers!.filter(p=>p.teamId===f.homeId&&((p.started?0:m.events.find(e=>e.type==='substitution'&&e.playerId===p.id)!.minute)+p.minutes)>=minute);assert.equal(team.length,10);assert.equal(team.filter(p=>p.position==='GK').length,1);break;}assert.ok(found);
 });
+test('a goalkeeper who enters from the bench and leaves early has three continuous, non-overlapping keeper spells',()=>{
+ const c=fresh('GK'),{f,options}=setup(c),m=simulateMatch(c,f,{...options,forceSelection:{from:60,to:75,started:false}});
+ validateActionLedger(m,c.player.id);const keepers=m.performers!.filter(p=>p.teamId===f.homeId&&p.position==='GK');
+ assert.deepEqual(keepers.map(p=>p.minutes),[60,15,15]);assert.equal(new Set(keepers.map(p=>p.id)).size,3);
+ assert.equal(m.playerMinutes,15);assert.equal(m.playerStarted,false);
+});
+test('an injured or sent-off substitute keeper retains complete keeper coverage and the correct active headcount',()=>{
+ const c=fresh('GK'),{f,options}=setup(c);c.managerTrust=0;c.player.fitness=30;c.systems!.personality={leadership:5,stardom:5,fairPlay:1,clutch:5,winning:5};let injury=false,red=false;
+ for(let i=0;i<1200&&(!injury||!red);i++){
+  const m=simulateMatch({...c,seed:`keeper-bench-exit-${i}`},f,{...options,forceSelection:undefined,detailed:false});if(m.playerStarted||!m.playerPlayed||!m.playerStats.redCards&&!m.events.some(e=>e.type==='injury'&&e.playerId===c.player.id))continue;
+  validateActionLedger(m,c.player.id);const exit=m.events.find(e=>(e.type==='injury'||e.type==='red')&&e.playerId===c.player.id)!.minute;
+  if(exit===90)continue;const active=m.performers!.filter(p=>p.teamId===f.homeId&&(p.started?0:m.events.find(e=>e.type==='substitution'&&e.playerId===p.id)!.minute)<=exit&&((p.started?0:m.events.find(e=>e.type==='substitution'&&e.playerId===p.id)!.minute)+p.minutes)>exit);
+  assert.equal(active.filter(p=>p.position==='GK').length,1);assert.equal(active.length,m.playerStats.redCards?10:11);if(m.playerStats.redCards)red=true;else injury=true;
+ }
+ assert.ok(injury,'real substitute injury path');assert.ok(red,'real substitute dismissal path');
+});
 test('old emergency roles are inferred from their own source; new invalid lineups are never repaired',()=>{
  const c=fresh(),{f,options}=setup(c),m=simulateMatch(c,f,options);delete m.lineupVersion;const keeper=m.performers!.find(p=>p.position==='GK'&&p.teamId===f.awayId)!;keeper.position='RB';const events=structuredClone(m.events),stats=structuredClone(m.playerStats);
  assert.throws(()=>validateActionLedger(m,c.player.id),/크로스 상대 골키퍼/);assert.equal(recoverLegacyKeeperRoles(m),1);validateActionLedger(m,c.player.id);assert.deepEqual(m.events,events);assert.deepEqual(m.playerStats,stats);assert.equal(keeper.position,'RB');

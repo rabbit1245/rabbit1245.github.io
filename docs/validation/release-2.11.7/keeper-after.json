@@ -1,0 +1,27 @@
+{
+  "forceSelection": {
+    "from": 60,
+    "to": 75,
+    "started": false
+  },
+  "valid": true,
+  "keepers": [
+    {
+      "id": "sim_KR2_03_01",
+      "minutes": 60,
+      "started": true
+    },
+    {
+      "id": "player_1f2pw5j",
+      "minutes": 15,
+      "started": false,
+      "entry": 60
+    },
+    {
+      "id": "sim_KR2_03_02",
+      "minutes": 15,
+      "started": false,
+      "entry": 75
+    }
+  ]
+}

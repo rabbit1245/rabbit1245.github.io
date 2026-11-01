@@ -1,0 +1,170 @@
+TAP version 13
+# Subtest: OVR arrows are monotonically tied to the actual positional/type weights across all positions and styles
+ok 1 - OVR arrows are monotonically tied to the actual positional/type weights across all positions and styles
+  ---
+  duration_ms: 6.401392
+  ...
+# Subtest: changing position recalculates OVR without changing attributes, skill selections, contracts or archived results
+ok 2 - changing position recalculates OVR without changing attributes, skill selections, contracts or archived results
+  ---
+  duration_ms: 1561.437286
+  ...
+# Subtest: position commands retain the bounded journal path and repeated command IDs cannot duplicate history
+ok 3 - position commands retain the bounded journal path and repeated command IDs cannot duplicate history
+  ---
+  duration_ms: 443.828823
+  ...
+# Subtest: invalid/retired position changes are rejected and an old save acquires no invented position history
+ok 4 - invalid/retired position changes are rejected and an old save acquires no invented position history
+  ---
+  duration_ms: 688.556595
+  ...
+# Subtest: a valid older custom style is preserved as historical text when changing to a current position/type
+ok 5 - a valid older custom style is preserved as historical text when changing to a current position/type
+  ---
+  duration_ms: 727.706143
+  ...
+# Subtest: the next actual game uses the new position, while the original career and earlier game stay unchanged
+ok 6 - the next actual game uses the new position, while the original career and earlier game stay unchanged
+  ---
+  duration_ms: 2911.827224
+  ...
+# Subtest: club historical stature makes a Madrid retired number harder than an obscure club, without using current inflated power
+ok 7 - club historical stature makes a Madrid retired number harder than an obscure club, without using current inflated power
+  ---
+  duration_ms: 399.210365
+  ...
+# Subtest: a historic club award is one per club across transfers/years; another club may also honour the player
+ok 8 - a historic club award is one per club across transfers/years; another club may also honour the player
+  ---
+  duration_ms: 330.114607
+  ...
+# Subtest: a short glorious spell cannot bypass a major club legacy threshold and low performance alone is insufficient
+ok 9 - a short glorious spell cannot bypass a major club legacy threshold and low performance alone is insufficient
+  ---
+  duration_ms: 305.556658
+  ...
+# Subtest: Super Ballon is judged every fifth calendar year from all five finalized annual ledgers; no missing-year fabrication
+ok 10 - Super Ballon is judged every fifth calendar year from all five finalized annual ledgers; no missing-year fabrication
+  ---
+  duration_ms: 303.775651
+  ...
+# Subtest: five-year evaluation rewards sustained results over one annual spike and respects historical position-aware scores
+ok 11 - five-year evaluation rewards sustained results over one annual spike and respects historical position-aware scores
+  ---
+  duration_ms: 358.609706
+  ...
+# Subtest: career-long national team results exceed one-season limits while every score still validates
+ok 12 - career-long national team results exceed one-season limits while every score still validates
+  ---
+  duration_ms: 2738.04994
+  ...
+# Subtest: original v1 envelopes retain their checksum and all legacy fields through load, export and import
+ok 13 - original v1 envelopes retain their checksum and all legacy fields through load, export and import
+  ---
+  duration_ms: 74.94635
+  ...
+# Subtest: published v2 envelopes preserve their checksum and do not invent new improvement ledgers while loading
+ok 14 - published v2 envelopes preserve their checksum and do not invent new improvement ledgers while loading
+  ---
+  duration_ms: 1613.071669
+  ...
+# Subtest: contract snapshots reconcile renewals, transfers and known season-opening values without inventing previous terms
+ok 15 - contract snapshots reconcile renewals, transfers and known season-opening values without inventing previous terms
+  ---
+  duration_ms: 3505.010813
+  ...
+# Subtest: dated national windows reject malformed cursors, future periods and duplicate callups while keeping old processed keys
+ok 16 - dated national windows reject malformed cursors, future periods and duplicate callups while keeping old processed keys
+  ---
+  duration_ms: 1046.58748
+  ...
+# Subtest: legacy detail fields remain optional while malformed and future detailed records are rejected
+ok 17 - legacy detail fields remain optional while malformed and future detailed records are rejected
+  ---
+  duration_ms: 10.592308
+  ...
+# Subtest: v2 saves validate world membership, international scope, references and separate income ledgers
+ok 18 - v2 saves validate world membership, international scope, references and separate income ledgers
+  ---
+  duration_ms: 3744.978302
+  ...
+# Subtest: IndexedDB round trip preserves Korean names, match ledgers and selected training
+ok 19 - IndexedDB round trip preserves Korean names, match ledgers and selected training
+  ---
+  duration_ms: 8.630142
+  ...
+# Subtest: autosaves atomically retain a previous-good backup and identical saves do not replace it
+ok 20 - autosaves atomically retain a previous-good backup and identical saves do not replace it
+  ---
+  duration_ms: 31.409481
+  ...
+# Subtest: a damaged current slot can be recovered without displacing its previous-good backup
+ok 21 - a damaged current slot can be recovered without displacing its previous-good backup
+  ---
+  duration_ms: 21.822818
+  ...
+# Subtest: stale autosaves and equal-revision conflicting branches cannot overwrite a slot
+ok 22 - stale autosaves and equal-revision conflicting branches cannot overwrite a slot
+  ---
+  duration_ms: 13.689084
+  ...
+# Subtest: another tab changing a slot is detected even when a local branch has a higher revision
+ok 23 - another tab changing a slot is detected even when a local branch has a higher revision
+  ---
+  duration_ms: 14.036947
+  ...
+# Subtest: JSON import validates its checksum and creates a separate slot without changing its simulation seed
+ok 24 - JSON import validates its checksum and creates a separate slot without changing its simulation seed
+  ---
+  duration_ms: 22.848078
+  ...
+# Subtest: edited, truncated, future-version and prototype-poisoned save files are rejected
+ok 25 - edited, truncated, future-version and prototype-poisoned save files are rejected
+  ---
+  duration_ms: 6.885643
+  ...
+# Subtest: damaged statistics, league tables and shot-to-goal references are rejected before writing
+ok 26 - damaged statistics, league tables and shot-to-goal references are rejected before writing
+  ---
+  duration_ms: 16.219798
+  ...
+# Subtest: the first editable command upgrades legacy systems without rewriting old match metrics or income
+ok 27 - the first editable command upgrades legacy systems without rewriting old match metrics or income
+  ---
+  duration_ms: 2086.191339
+  ...
+# Subtest: a continued v1 career retains old match coverage and saves new detailed matches beside it
+ok 28 - a continued v1 career retains old match coverage and saves new detailed matches beside it
+  ---
+  duration_ms: 12092.014179
+  ...
+# Subtest: only explicitly named club reserve snapshots may lack a persistent world roster entry
+ok 29 - only explicitly named club reserve snapshots may lack a persistent world roster entry
+  ---
+  duration_ms: 1291.919414
+  ...
+# Subtest: historical award snapshots survive retirement of the ranked NPC without relaxing live references
+ok 30 - historical award snapshots survive retirement of the ranked NPC without relaxing live references
+  ---
+  duration_ms: 2242.607421
+  ...
+# Subtest: actual international goalkeeper matches and their attempt denominators survive export/import
+ok 31 - actual international goalkeeper matches and their attempt denominators survive export/import
+  ---
+  duration_ms: 5332.464474
+  ...
+# Subtest: deleting a slot also deletes its backup and blocks a delayed autosave from reviving it
+ok 32 - deleting a slot also deletes its backup and blocks a delayed autosave from reviving it
+  ---
+  duration_ms: 23.985683
+  ...
+1..32
+# tests 32
+# suites 0
+# pass 32
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 36663.030823

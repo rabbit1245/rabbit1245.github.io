@@ -1,5 +1,5 @@
 import { getClub,getLeague } from './data';
-import {POSITION_LABELS} from './attributes';
+import {POSITION_LABELS,PLAY_STYLES} from './attributes';
 import type { Career,SeasonSummary } from './types';
 import type { ClubSeasonDevelopment } from './revision-types';
 import {PERSONALITY_KEYS} from './personality';
@@ -18,6 +18,14 @@ function details(h:SeasonSummary){const d=h.details;if(!d)return;check(d.version
 /** Optional extension fields do not initialize or rewrite legacy saves while loading. */
 export function validateCareerExtensions(c:Career){
  validateCommercial(c);
+ if(c.systems?.positionChanges!==undefined){
+  const rows=c.systems.positionChanges;check(Array.isArray(rows)&&rows.length<=10000,'포지션 변경 이력');let prior=1900;
+  for(const r of rows){num(r.year,'포지션 변경 연도',prior,c.season.year,true);prior=r.year;num(r.round,'포지션 변경 시점',0,150,true);
+   check(Object.hasOwn(POSITION_LABELS,r.from)&&Object.hasOwn(POSITION_LABELS,r.to),'변경 포지션');check(typeof r.fromStyle==='string'&&r.fromStyle.length>0&&r.fromStyle.length<=500&&PLAY_STYLES[r.to].includes(r.toStyle),'변경 선수 유형');
+   num(r.ovrBefore,'변경 전 종합 능력',1,120);num(r.ovrAfter,'변경 후 종합 능력',1,120);check(typeof r.afterSeason==='boolean'&&typeof r.date==='string'&&Number.isFinite(Date.parse(r.date)),'포지션 변경 날짜');
+  }
+ }
+ const retiredNumbers=c.awards.filter(a=>a.category==='club-legacy');check(new Set(retiredNumbers.map(a=>a.clubId)).size===retiredNumbers.length,'동일 구단 영구결번 중복');
  if(c.systems?.world.financeVersion!==undefined)check(c.systems.world.financeVersion===1,'재정 기준 버전');
  if(c.systems?.economics.valuationVersion!==undefined)check([1,2].includes(c.systems.economics.valuationVersion),'몸값 평가 버전');
  if(c.systems?.personality!==undefined){const p=c.systems.personality;check(p!==null&&typeof p==='object'&&!Array.isArray(p)&&Object.keys(p).length===5,'성향 형식');for(const key of PERSONALITY_KEYS)num(p[key],`성향 ${key}`,1,10,true);}

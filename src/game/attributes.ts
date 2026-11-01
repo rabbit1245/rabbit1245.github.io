@@ -110,6 +110,12 @@ export function attributeWeights(position: Position, style: string): Partial<Rec
   return weights;
 }
 
+/** Display the existing positional/type weights; never alter growth or OVR. */
+export function attributeImportance(position:Position,style:string):Partial<Record<AttributeKey,0|1|2|3>>{
+ const weights=attributeWeights(position,style),values=Object.values(weights) as number[],max=Math.max(...values),min=Math.min(...values);
+ return Object.fromEntries(Object.entries(weights).map(([key,w])=>[key,w!>=max*.75?3:w!>=max*.45?2:w!>min+1e-9?1:0]));
+}
+
 /** Current mental excellence and established leadership use the same scale on and off the pitch. */
 export function leadershipAbility(attributes:Player['attributes'],trait:number):number{
   const mental=((attributes.decisions??50)+(attributes.concentration??50)+(attributes.composure??50)+(attributes.teamwork??50))/4;
