@@ -6,6 +6,26 @@ import {observedSeasons,careerStanding} from './career-standing';
 import type {Career} from './types';
 import type {MarketAssessment} from './revision-types';
 
+/** Retain the observed pre-decline class across assessments. A single quiet
+ * season at unchanged ability has no decline pressure; repeated low ability does. */
+export function marketDeclineEvidence(c:Career){
+ const ability=playingAbility(c.player),a=c.systems?.economics.assessment;
+ let reference=Math.max(ability,c.season.ovrStart??ability,a?.ability??ability);
+ for(const h of c.history)for(const value of [h.ovrStart,h.ovrEnd])if(Number.isFinite(value))reference=Math.max(reference,value);
+ for(const r of c.systems?.manualAging??[])if((!r.playerId||r.playerId===c.player.id)&&Number.isFinite(r.ovrBefore))reference=Math.max(reference,r.ovrBefore);
+ const severity=clamp((reference-ability-8)/32,0,1),threshold=reference-8;
+ let years=0,expected=c.season.year-1;
+ for(const h of [...c.history].filter(h=>h.completed&&h.year<c.season.year&&h.squad!=='youth').sort((x,y)=>y.year-x.year)){
+  if(h.year!==expected||h.ovrEnd>=threshold)break;years++;expected--;
+ }
+ let fraction=clamp(c.season.week/Math.max(1,c.season.totalWeeks),0,1);
+ const closed=c.history.find(h=>h.year===c.season.year&&h.completed);
+ if(closed&&closed.ovrEnd>=threshold)fraction=0;
+ else if(a?.year===c.season.year&&a.ability>=threshold)fraction=Math.max(0,fraction-a.round/a.totalRounds);
+ const seasons=severity?years+fraction:0;
+ return {reference,ability,severity,seasons,pressure:severity*clamp((seasons-.5)/1.5,0,1)};
+}
+
 /** A fundamental estimate; the quoted market price moves only after new evidence. */
 export function marketEstimate(c:Career):number {
  const p=c.player,ability=playingAbility(p),rows=observedSeasons(c),leagueId=c.systems?.world.clubs[p.clubId]?.leagueId??c.season.leagueId,league=getLeague(leagueId),tier=league.tier;
@@ -44,11 +64,13 @@ export function marketQuote(c:Career):number {
  if(progress===0&&freshInjury<4&&starChange<=0)return e.marketValue;
  const target=marketEstimate(c),up=target>=e.marketValue;
  const firstBreakout=c.history.filter(h=>h.completed&&h.stats.minutes>=1800).length<2;
- const rate=up?(firstBreakout?.95:.55)*progress:.3*progress;
+ const decline=marketDeclineEvidence(c),confirmed=decline.severity*clamp(decline.seasons,0,1);
+ const rate=up?(firstBreakout?.95:.55)*progress:(.3+.65*confirmed)*progress;
  const eventRate=freshInjury>=4?Math.min(.18,freshInjury*.01):starChange>0?.06:0;
  let value=e.marketValue+(target-e.marketValue)*Math.max(rate,eventRate);
  const retained=now.ability>=a.ability-2,young=c.player.age<=29;
- const maxDrop=(retained&&young?.12:.35)*clamp(elapsed,0,1)+Math.min(.15,freshInjury*.01);
+ const ordinaryDrop=(retained&&young?.12:.35)*clamp(elapsed,0,1);
+ const maxDrop=clamp(Math.max(ordinaryDrop,1-Math.exp(-2.6*confirmed*elapsed))+Math.min(.15,freshInjury*.01),0,1);
  const floor=Math.ceil(e.marketValue*(1-maxDrop)/1000)*1000;
  value=Math.max(floor,value);
  return Math.max(1000,Math.min(350000000,Math.round(value/1000)*1000));

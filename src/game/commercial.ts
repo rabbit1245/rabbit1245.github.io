@@ -8,9 +8,10 @@ import type {Award,Career,PlayerStats,Position} from './types';
 
 export interface ShirtClubState {popularity:number;power:number;}
 export interface ShirtSeller {playerId:string;name:string;clubId:string;units:number;rank:number;}
-export interface ShirtClubSales {clubId:string;total:number;named:number;other:number;popularity:number;}
-export interface ShirtPlayerClub {clubId:string;units:number;rank:number;clubTotal:number;clubPopularity:number;}
+export interface ShirtClubSales {clubId:string;total:number;named:number;other:number;popularity:number;personal?:number;}
+export interface ShirtPlayerClub {clubId:string;units:number;rank:number;clubTotal:number;clubPopularity:number;personalUnits?:number;}
 export interface ShirtSeason {
+ modelVersion?:2;personalMarket?:number;playerPersonalUnits?:number;
  year:number;completed:boolean;throughRound:number;totalRounds:number;marketTotal:number;namedTotal:number;otherTotal:number;
  playerUnits:number;playerRank:number|null;candidateCount:number;playerClubs:ShirtPlayerClub[];
  leaders:ShirtSeller[];clubLeaders:ShirtSeller[];clubs:ShirtClubSales[];
@@ -34,13 +35,17 @@ export function allocateUnits(total:number,weights:number[]):number[]{
 export function ensureCommercial(c:Career):CommercialState|undefined{
  if(!c.systems)return;
  if(c.systems.commercial)return c.systems.commercial;
+ const reputation=earnedReputation(c);
+ return c.systems.commercial={version:1,firstYear:c.season.year+(c.stage==='offseason'||c.stage==='retired'?1:0),clubs:Object.fromEntries(CLUBS.map(club=>{const w=c.systems!.world.clubs[club.id],d=w?.development;return[club.id,{popularity:clamp(1+Math.max(0,d?.investmentPower??0)*.04+Math.max(0,(d?.prestige??club.power)-(d?.basePower??club.power))*.015,1,2.5),power:w?.power??club.power}];})),reputation,seasons:[]};
+}
+function earnedReputation(c:Career):Record<string,number>{
  const reputation:Record<string,number>={};
  // A mature imported career is not an unknown rookie. Seed only from its real
  // prior honours/results; never invent historical sales or rewrite old seasons.
- for(const year of c.systems.rankings.slice(-3))for(const p of year.candidates){const recent=Math.pow(.94,Math.max(0,c.season.year-year.year));reputation[p.playerId]=Math.max(reputation[p.playerId]??0,(.3+.65*clamp((31-p.rank)/30,0,1))*recent);}
+ for(const year of c.systems!.rankings.slice(-3))for(const p of year.candidates){const recent=Math.pow(.94,Math.max(0,c.season.year-year.year));reputation[p.playerId]=Math.max(reputation[p.playerId]??0,(.3+.65*clamp((31-p.rank)/30,0,1))*recent);}
  for(const a of c.awards.filter(a=>a.year>=c.season.year-4&&['world','continental-individual','league'].includes(a.category??''))){const value=a.category==='world'?.88:a.category==='continental-individual'?.7:.5;reputation[c.player.id]=Math.max(reputation[c.player.id]??0,value*Math.pow(.94,Math.max(0,c.season.year-a.year)));}
  for(const h of c.history.slice(-3).filter(h=>h.squad==='senior'&&h.stats.minutes>=1500)){const rating=h.stats.ratingCount?h.stats.ratingSum/h.stats.ratingCount:0,quality=clamp((h.ovrEnd-65)/40,0,1);reputation[c.player.id]=Math.max(reputation[c.player.id]??0,(.2+quality*.25+clamp(rating-7,0,1)*.2)/Math.sqrt(getLeague(h.leagueId).tier));}
- return c.systems.commercial={version:1,firstYear:c.season.year+(c.stage==='offseason'||c.stage==='retired'?1:0),clubs:Object.fromEntries(CLUBS.map(club=>{const w=c.systems!.world.clubs[club.id],d=w?.development;return[club.id,{popularity:clamp(1+Math.max(0,d?.investmentPower??0)*.04+Math.max(0,(d?.prestige??club.power)-(d?.basePower??club.power))*.015,1,2.5),power:w?.power??club.power}];})),reputation,seasons:[]};
+ return reputation;
 }
 function entries(c:Career):Entry[]{
  const w=c.systems!.world,rows=new Map<string,Entry>();
@@ -76,15 +81,27 @@ export function settleShirtMarket(c:Career,completed=true):ShirtSeason|undefined
  for(const e of rows){let pool=byClub.get(e.clubId);if(!pool){pool=[];byClub.set(e.clubId,pool);}pool.push(e);}
  const standings=new Map(Object.values(w.competitions).flatMap(t=>t.table.map((r,i)=>[r.clubId,{rank:i+1,teams:t.table.length}] as const)));
  const titles=new Map<string,number>();for(const t of c.systems!.clubCompetitions?.current??[])if(t.winnerId)titles.set(t.winnerId,(titles.get(t.winnerId)??0)+(t.kind==='continental'?.04:.015));
- const oldFame=state.reputation,newFame:Record<string,number>={},fame=new Map<string,number>(),weight=new Map<string,number>();
+ const oldFame=state.reputation,recognition=earnedReputation(c),newFame:Record<string,number>={},fame=new Map<string,number>(),weight=new Map<string,number>(),stars=new Map<string,number>();
  for(const e of rows){
-  const ability=clamp((e.ability-55)/45,0,1),initial=Math.max(e.playerId.startsWith('fc25_')?legend(e.name):0,ability*.32+(hashSeed(e.playerId)%1000)/1000*.10),prior=oldFame[e.playerId]??initial;
+  const ability=clamp((e.ability-55)/45,0,1),initial=Math.max(e.playerId.startsWith('fc25_')?legend(e.name):0,ability*.32+(hashSeed(e.playerId)%1000)/1000*.10),prior=Math.max(oldFame[e.playerId]??initial,recognition[e.playerId]??0);
   const tier=getLeague(w.clubs[e.clubId].leagueId).tier,exposure=clamp((w.clubs[e.clubId].power-35)/55,.15,1)/Math.sqrt(tier);
   const record=clamp(contribution(e)/2.5,0,1),quality=clamp((e.ability-65)/40,0,1),s=standings.get(e.clubId),team=s?(s.teams-s.rank)/Math.max(1,s.teams-1):.5;
-  const earned=record*exposure*.48+quality*.22+team*.08+(titles.get(e.clubId)??0);
-  const current=clamp(prior*.82+earned*.18,0,1);fame.set(`${e.playerId}|${e.clubId}`,current);newFame[e.playerId]=Math.max(newFame[e.playerId]??0,current);
   const star=e.playerId===c.player.id?personality(c).stardom:clamp(3+ability*4+(hashSeed(e.playerId+'star')%300)/100,1,10);
+  const starRatio=(star-1)/9,earned=clamp(record*(.30+.15*exposure)+quality*.25+starRatio*.12+team*.06+(titles.get(e.clubId)??0),0,1);
+  const rate=earned>=prior?.16+.10*starRatio:.14-.08*starRatio;
+  const current=clamp(prior+(earned-prior)*rate,0,1);fame.set(`${e.playerId}|${e.clubId}`,current);newFame[e.playerId]=Math.max(newFame[e.playerId]??0,current);stars.set(e.playerId,star);
   weight.set(`${e.playerId}|${e.clubId}`,shirtDemandWeight(e,current,star));
+ }
+ // Personal fans buy the player's new club shirt across borders. This is a
+ // separate share of the same finite world market, not an extra sales award.
+ // Split one person's demand between actual club spells, never once per club.
+ const byPlayer=new Map<string,Entry[]>(),personalDemand=new Map<string,number>();
+ for(const e of rows){const list=byPlayer.get(e.playerId)??[];list.push(e);byPlayer.set(e.playerId,list);}
+ for(const [id,list]of byPlayer){
+  const recognition=Math.max(...list.map(e=>fame.get(`${id}|${e.clubId}`)??0)),quality=clamp((Math.max(...list.map(e=>e.ability))-45)/55,0,1),minutes=list.reduce((n,e)=>n+e.production.minutes,0);
+  const demand=4000000*Math.pow(clamp((recognition-.35)/.65,0,1),3)*(.25+1.25*((stars.get(id)??5)-1)/9)*(.55+.45*quality)*(.7+.3*Math.sqrt(clamp(minutes/2400,0,1)));
+  const shares=list.map(e=>minutes>0?e.production.minutes/minutes:1/list.length);
+  list.forEach((e,i)=>{const access=.8+.2*Math.pow(clamp(baseShirtMarket(e.clubId)*(state.clubs[e.clubId]?.popularity??1)/1000000,0,1),.25);personalDemand.set(`${id}|${e.clubId}`,demand*shares[i]*access);});
  }
  const clubs=CLUBS.filter(club=>byClub.has(club.id));
  const demands=clubs.map(club=>{
@@ -92,27 +109,30 @@ export function settleShirtMarket(c:Career,completed=true):ShirtSeason|undefined
   const progress=clamp((actual.power-before.power)*.007,-.025,.045),success=(finish-.55)*.035+(s?.rank===1?.02:0)+(titles.get(club.id)??0);
   const popularity=clamp(before.popularity*(1+(completed?clamp(success+progress,-.025,.09):0)),.35,5);
   state.clubs[club.id]={popularity,power:actual.power};
-  const pool=byClub.get(club.id)!,attention=pool.reduce((n,e)=>n+Math.pow(fame.get(`${e.playerId}|${e.clubId}`)??0,4)*clamp((e.ability-65)/30,0,1),0);
-  return baseShirtMarket(club.id)*popularity*(.9+finish*.12+(titles.get(club.id)??0))+Math.min(400000,attention*75000)*popularity;
+  return baseShirtMarket(club.id)*popularity*(.9+finish*.12+(titles.get(club.id)??0));
  });
  const fraction=completed?1:clamp(c.season.week/c.season.totalWeeks,0,1);
  const marketTotal=Math.round(clubs.reduce((n,club)=>n+baseShirtMarket(club.id),0)*Math.min(1.8,Math.pow(1.012,Math.max(0,c.season.year-state.firstYear)))*fraction);
- const clubUnits=allocateUnits(marketTotal,demands),sales:ShirtSeller[]=[],clubSales:ShirtClubSales[]=[],ownClubs:ShirtPlayerClub[]=[],peers:ShirtSeller[]=[];
- let namedTotal=0,otherTotal=0;
+ const personalWeights=rows.map(e=>personalDemand.get(`${e.playerId}|${e.clubId}`)??0),personalSum=personalWeights.reduce((n,v)=>n+v,0);
+ const personalMarket=Math.round(marketTotal*Math.min(.35,personalSum/(demands.reduce((n,v)=>n+v,0)+personalSum)));
+ const personalAllocation=allocateUnits(personalMarket,personalWeights),personalUnits=new Map(rows.map((e,i)=>[`${e.playerId}|${e.clubId}`,personalAllocation[i]]));
+ const clubUnits=allocateUnits(marketTotal-personalMarket,demands),sales:ShirtSeller[]=[],clubSales:ShirtClubSales[]=[],ownClubs:ShirtPlayerClub[]=[],peers:ShirtSeller[]=[];
+ let namedTotal=0,otherTotal=0,playerPersonalUnits=0;
  for(let i=0;i<clubs.length;i++){
-  const club=clubs[i],pool=byClub.get(club.id)!,total=clubUnits[i],named=Math.round(total*.80),other=total-named,units=allocateUnits(named,pool.map(e=>weight.get(`${e.playerId}|${club.id}`)??0));
+  const club=clubs[i],pool=byClub.get(club.id)!,personal=pool.reduce((n,e)=>n+(personalUnits.get(`${e.playerId}|${club.id}`)??0),0),total=clubUnits[i]+personal,baseNamed=Math.round(clubUnits[i]*.80),named=baseNamed+personal,other=clubUnits[i]-baseNamed;
+  const units=allocateUnits(baseNamed,pool.map(e=>weight.get(`${e.playerId}|${club.id}`)??0)).map((v,j)=>v+(personalUnits.get(`${pool[j].playerId}|${club.id}`)??0));
   const sold=pool.map((e,j)=>({playerId:e.playerId,name:e.name,clubId:club.id,units:units[j],rank:0})).sort((a,b)=>b.units-a.units||a.playerId.localeCompare(b.playerId));sold.forEach((e,j)=>e.rank=j+1);sales.push(...sold);
-  const own=sold.find(e=>e.playerId===c.player.id);if(own){ownClubs.push({clubId:club.id,units:own.units,rank:own.rank,clubTotal:total,clubPopularity:state.clubs[club.id].popularity});peers.push(...sold);}
-  clubSales.push({clubId:club.id,total,named,other,popularity:state.clubs[club.id].popularity});namedTotal+=named;otherTotal+=other;
+  const own=sold.find(e=>e.playerId===c.player.id);if(own){const personal=personalUnits.get(`${c.player.id}|${club.id}`)??0;playerPersonalUnits+=personal;ownClubs.push({clubId:club.id,units:own.units,rank:own.rank,clubTotal:total,clubPopularity:state.clubs[club.id].popularity,personalUnits:personal});peers.push(...sold);}
+  clubSales.push({clubId:club.id,total,named,other,popularity:state.clubs[club.id].popularity,personal});namedTotal+=named;otherTotal+=other;
  }
  const all=new Map<string,ShirtSeller>(),primary=new Map<string,number>();for(const s of sales){const existing=all.get(s.playerId);if(existing){existing.units+=s.units;if(s.units>(primary.get(s.playerId)??0)){existing.clubId=s.clubId;primary.set(s.playerId,s.units);}}else{all.set(s.playerId,{...s});primary.set(s.playerId,s.units);}}
  const ranked=[...all.values()].sort((a,b)=>b.units-a.units||a.playerId.localeCompare(b.playerId));ranked.forEach((s,i)=>s.rank=i+1);
  const own=ranked.find(e=>e.playerId===c.player.id),p=c.player,s=c.season.playerStats;
- const result:ShirtSeason={year:c.season.year,completed,throughRound:c.season.week,totalRounds:c.season.totalWeeks,marketTotal,namedTotal,otherTotal,playerUnits:own?.units??0,playerRank:own?.units?own.rank:null,candidateCount:ranked.length,playerClubs:ownClubs,leaders:ranked.filter(s=>s.units>0).slice(0,20),clubLeaders:peers,clubs:clubSales,evidence:{ability:playingAbility(p),stardom:personality(c).stardom,goals:s.goals,assists:s.assists,minutes:s.minutes,rating:s.ratingCount?s.ratingSum/s.ratingCount:0}};
+ const result:ShirtSeason={modelVersion:2,personalMarket,playerPersonalUnits,year:c.season.year,completed,throughRound:c.season.week,totalRounds:c.season.totalWeeks,marketTotal,namedTotal,otherTotal,playerUnits:own?.units??0,playerRank:own?.units?own.rank:null,candidateCount:ranked.length,playerClubs:ownClubs,leaders:ranked.filter(s=>s.units>0).slice(0,20),clubLeaders:peers,clubs:clubSales,evidence:{ability:playingAbility(p),stardom:personality(c).stardom,goals:s.goals,assists:s.assists,minutes:s.minutes,rating:s.ratingCount?s.ratingSum/s.ratingCount:0}};
  state.reputation=newFame;state.seasons.push(result);return result;
 }
 export function shirtSalesSeason(c:Career,year:number):ShirtSeason|undefined{return c.systems?.commercial?.seasons.find(s=>s.year===year);}
 export function shirtSalesAwards(c:Career):Award[]{
  const s=shirtSalesSeason(c,c.season.year);if(!s?.completed||!s.playerRank||s.playerRank>3||s.playerUnits<=0)return[];
- return [{id:`${s.year}:shirt-market:${c.player.id}`,name:`K볼 유니폼 판매 ${s.playerRank}위`,year:s.year,clubId:[...s.playerClubs].sort((a,b)=>b.units-a.units)[0]?.clubId??c.player.clubId,rank:s.playerRank,category:'commercial-individual',official:false,organiser:'K볼 유니폼 시장',verification:'game-model',ruleVersion:'shirt-market-1',evaluationPeriod:`${s.year}시즌`,criterion:'세계 전체 선수의 실제 게임 내 유니폼 판매량 합계 1~3위. 복수 소속팀 판매량 합산.',description:`유니폼 ${s.playerUnits.toLocaleString('ko-KR')}장 · ${s.candidateCount.toLocaleString('ko-KR')}명 중 세계 ${s.playerRank}위. 구단별 유한한 시장과 개인 실적·팀 성적·실력·스타성·명성·클럽 인기도를 반영한 게임 내 판매량입니다.`}];
+ return [{id:`${s.year}:shirt-market:${c.player.id}`,name:`K볼 유니폼 판매 ${s.playerRank}위`,year:s.year,clubId:[...s.playerClubs].sort((a,b)=>b.units-a.units)[0]?.clubId??c.player.clubId,rank:s.playerRank,category:'commercial-individual',official:false,organiser:'K볼 유니폼 시장',verification:'game-model',ruleVersion:s.modelVersion===2?'shirt-market-2':'shirt-market-1',evaluationPeriod:`${s.year}시즌`,criterion:'세계 전체 선수의 실제 게임 내 유니폼 판매량 합계 1~3위. 복수 소속팀 판매량 합산.',description:`유니폼 ${s.playerUnits.toLocaleString('ko-KR')}장 · ${s.candidateCount.toLocaleString('ko-KR')}명 중 세계 ${s.playerRank}위. 구단 팬 시장과 선수를 따라가는 개인 팬 수요, 개인 실적·팀 성적·실력·스타성·명성·클럽 인기도를 반영한 유한한 게임 내 판매량입니다.`}];
 }

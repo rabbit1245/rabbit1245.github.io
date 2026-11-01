@@ -186,6 +186,15 @@ try {
   await page.getByTestId('records-scope-national').click();assert.equal(await page.getByTestId('role-metrics').locator('.stat-detail').count(),12);await navigate(page,'locker');
   await page.getByTestId('advance-half').click();career=await waitState(page,c=>c.id===replicaId&&c.stage==='offseason','second half and season archive');await ready(page);
   assert.equal(career.history.length,1);assert.ok(career.season.fixtures.every(f=>f.played));assert.equal(career.history[0].stats.goals,career.history[0].matches.reduce((s,m)=>s+m.playerStats.goals,0));assert.equal(career.systems.growthReports.filter(r=>r.year===initialYear).length,2);
+  const market=career.systems.commercial.seasons.find(s=>s.year===initialYear);assert.equal(market.modelVersion,2);
+  assert.equal(market.clubs.reduce((n,r)=>n+r.total,0),market.marketTotal);assert.equal(market.clubs.reduce((n,r)=>n+r.personal,0),market.personalMarket);
+  assert.equal(market.playerClubs.reduce((n,r)=>n+r.personalUnits,0),market.playerPersonalUnits);
+  await navigate(page,'career');await page.getByTestId('career-view-awards').click();const shirts=page.getByTestId('shirt-sales');
+  assert.equal(await shirts.getByTestId('shirt-units').innerText(),`${market.playerUnits.toLocaleString('ko-KR')}장`);
+  await shirts.locator('.shirt-market-details > summary').click();assert.match(await shirts.innerText(),new RegExp(`개인 팬 수요 ${market.playerPersonalUnits.toLocaleString('ko-KR')}장`));
+  for(const width of [1366,390]){await page.setViewportSize({width,height:900});await noOverflow(page,'personal fan sales');await shirts.screenshot({path:path.join(results,`kball-personal-fans-${width}.png`)});}
+  await page.setViewportSize({width:1440,height:1000});await navigate(page,'locker');
+  completed.push('actual season conserves club/personal fan sales and displays the saved personal share on desktop/mobile');
   completed.push('annual-only contracts, one training route, current competitions, locker combined details and reconciled records');
   // An annual training choice creates a new normal snapshot, then backup restore returns to the old plan.
   assert.equal(await page.getByTestId('advance-half').isDisabled(),false,'current contract or FA permits progressing without forced renewal');

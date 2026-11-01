@@ -1,0 +1,362 @@
+{
+  "root": "/workspace/rabbit1245.github.io",
+  "note": "Controlled economic histories and equal-record/full-world merchandise allocation; not a replay of an uploaded career and not real-world shirt sales data.",
+  "economy": [
+    {
+      "retained": false,
+      "noMatchValue": 350000000,
+      "years": [
+        {
+          "year": 2026,
+          "ability": 50,
+          "value": 49797000,
+          "renewWage": 365790,
+          "signedWage": 500000,
+          "fees": [
+            42693049,
+            41466002,
+            43356025,
+            44371127,
+            41252466,
+            41758333
+          ],
+          "transferWages": [
+            396508,
+            393493,
+            399780,
+            378845,
+            403075,
+            424160
+          ],
+          "clubs": [
+            "유벤투스",
+            "SL 벤피카",
+            "FC 바르셀로나",
+            "맨체스터 유나이티드",
+            "VfB 슈투트가르트",
+            "파리 생제르맹"
+          ]
+        },
+        {
+          "year": 2027,
+          "ability": 50,
+          "value": 3847000,
+          "renewWage": 5558,
+          "signedWage": 500000,
+          "fees": [
+            800595,
+            877380,
+            724243,
+            747732,
+            2025150,
+            3604699
+          ],
+          "transferWages": [
+            6424,
+            6646,
+            5867,
+            5819,
+            6367,
+            6067
+          ],
+          "clubs": [
+            "용 알메러 시티",
+            "올리베이라 두 오스피탈",
+            "호흐스트라턴",
+            "엘라즈스포르",
+            "로스앤젤레스 FC 2",
+            "맨체스터 시티"
+          ]
+        },
+        {
+          "year": 2028,
+          "ability": 50,
+          "value": 2931000,
+          "renewWage": 4865,
+          "signedWage": 500000,
+          "fees": [
+            690349,
+            1303209,
+            569872,
+            743271,
+            1812772,
+            2650902
+          ],
+          "transferWages": [
+            5303,
+            5178,
+            4835,
+            5283,
+            5289,
+            5047
+          ],
+          "clubs": [
+            "몽스",
+            "타코마 디파이언스",
+            "광둥 GZ-파워",
+            "더 트레퍼르스",
+            "파티흐 카라귐뤼크",
+            "바이에른 뮌헨"
+          ]
+        }
+      ]
+    },
+    {
+      "retained": true,
+      "noMatchValue": 350000000,
+      "years": [
+        {
+          "year": 2026,
+          "ability": 100,
+          "value": 309260000,
+          "renewWage": 527099,
+          "signedWage": 500000,
+          "fees": [
+            68190023,
+            139820163,
+            158128687,
+            141529617,
+            145055724,
+            73181925
+          ],
+          "transferWages": [
+            578582,
+            606413,
+            581879,
+            636065,
+            573282,
+            599935
+          ],
+          "clubs": [
+            "AC 밀란",
+            "파리 생제르맹",
+            "FC 바르셀로나",
+            "맨체스터 시티",
+            "바이에른 뮌헨",
+            "애스턴 빌라"
+          ]
+        },
+        {
+          "year": 2027,
+          "ability": 100,
+          "value": 273263000,
+          "renewWage": 520000,
+          "signedWage": 500000,
+          "fees": [
+            76770597,
+            139820163,
+            136923664,
+            145055724,
+            90723211,
+            73181925
+          ],
+          "transferWages": [
+            629862,
+            607232,
+            608370,
+            596680,
+            618043,
+            540309
+          ],
+          "clubs": [
+            "아틀레티코 마드리드",
+            "파리 생제르맹",
+            "아스널",
+            "바이에른 뮌헨",
+            "인테르",
+            "애스턴 빌라"
+          ]
+        },
+        {
+          "year": 2028,
+          "ability": 100,
+          "value": 241456000,
+          "renewWage": 520000,
+          "signedWage": 500000,
+          "fees": [
+            90723211,
+            139820163,
+            76770597,
+            141529617,
+            145055724,
+            73181925
+          ],
+          "transferWages": [
+            589833,
+            562261,
+            601765,
+            587719,
+            575514,
+            585854
+          ],
+          "clubs": [
+            "인테르",
+            "파리 생제르맹",
+            "아틀레티코 마드리드",
+            "맨체스터 시티",
+            "바이에른 뮌헨",
+            "애스턴 빌라"
+          ]
+        }
+      ]
+    }
+  ],
+  "shirts": [
+    {
+      "club": "레알 마드리드",
+      "clubId": "ES1_01",
+      "star": 1,
+      "fame": 0.939590909090909,
+      "units": 1263455,
+      "personal": 637138,
+      "worldRank": 2,
+      "marketTotal": 60174850,
+      "personalMarket": 7533263,
+      "clubTotal": 4322820,
+      "ms": 327.40147999999976
+    },
+    {
+      "club": "레알 마드리드",
+      "clubId": "ES1_01",
+      "star": 5,
+      "fame": 0.9554239057239057,
+      "units": 3154131,
+      "personal": 2165803,
+      "worldRank": 1,
+      "marketTotal": 60174850,
+      "personalMarket": 8884867,
+      "clubTotal": 5756853,
+      "ms": 237.57962799999996
+    },
+    {
+      "club": "레알 마드리드",
+      "clubId": "ES1_01",
+      "star": 10,
+      "fame": 0.9698818181818182,
+      "units": 5462646,
+      "personal": 4178557,
+      "worldRank": 1,
+      "marketTotal": 60174850,
+      "personalMarket": 10664487,
+      "clubTotal": 7645008,
+      "ms": 263.2240380000003
+    },
+    {
+      "club": "인터 마이애미 CF",
+      "clubId": "US1_12",
+      "star": 1,
+      "fame": 0.9324078181818182,
+      "units": 757042,
+      "personal": 601949,
+      "worldRank": 6,
+      "marketTotal": 60174850,
+      "personalMarket": 7502150,
+      "clubTotal": 3281042,
+      "ms": 277.3655040000003
+    },
+    {
+      "club": "인터 마이애미 CF",
+      "clubId": "US1_12",
+      "star": 5,
+      "fame": 0.9500650918710919,
+      "units": 2301282,
+      "personal": 2069179,
+      "worldRank": 1,
+      "marketTotal": 60174850,
+      "personalMarket": 8799434,
+      "clubTotal": 4682287,
+      "ms": 202.26303000000007
+    },
+    {
+      "club": "인터 마이애미 CF",
+      "clubId": "US1_12",
+      "star": 10,
+      "fame": 0.9668033506493506,
+      "units": 4330350,
+      "personal": 4042358,
+      "worldRank": 1,
+      "marketTotal": 60174850,
+      "personalMarket": 10544064,
+      "clubTotal": 6566729,
+      "ms": 257.058677
+    },
+    {
+      "club": "FC 서울",
+      "clubId": "KR1_04",
+      "star": 1,
+      "fame": 0.9310649090909091,
+      "units": 554994,
+      "personal": 540857,
+      "worldRank": 8,
+      "marketTotal": 60174850,
+      "personalMarket": 7448134,
+      "clubTotal": 570261,
+      "ms": 278.252434
+    },
+    {
+      "club": "FC 서울",
+      "clubId": "KR1_04",
+      "star": 5,
+      "fame": 0.949063239057239,
+      "units": 1884830,
+      "personal": 1867294,
+      "worldRank": 2,
+      "marketTotal": 60174850,
+      "personalMarket": 8620933,
+      "clubTotal": 1896044,
+      "ms": 255.7336809999997
+    },
+    {
+      "club": "FC 서울",
+      "clubId": "KR1_04",
+      "star": 10,
+      "fame": 0.9662278181818181,
+      "units": 3686817,
+      "personal": 3667694,
+      "worldRank": 1,
+      "marketTotal": 60174850,
+      "personalMarket": 10212796,
+      "clubTotal": 3695557,
+      "ms": 220.77243200000066
+    },
+    {
+      "club": "서울 이랜드 FC",
+      "clubId": "KR2_03",
+      "star": 1,
+      "fame": 0.9251587373185723,
+      "units": 506814,
+      "personal": 504406,
+      "worldRank": 8,
+      "marketTotal": 60174850,
+      "personalMarket": 7415906,
+      "clubTotal": 508180,
+      "ms": 206.1810029999997
+    },
+    {
+      "club": "서울 이랜드 FC",
+      "clubId": "KR2_03",
+      "star": 5,
+      "fame": 0.9446570474175592,
+      "units": 1761163,
+      "personal": 1758521,
+      "worldRank": 2,
+      "marketTotal": 60174850,
+      "personalMarket": 8524759,
+      "clubTotal": 1762216,
+      "ms": 239.83001999999942
+    },
+    {
+      "club": "서울 이랜드 FC",
+      "clubId": "KR2_03",
+      "star": 10,
+      "fame": 0.9636966017079596,
+      "units": 3495060,
+      "personal": 3492362,
+      "worldRank": 1,
+      "marketTotal": 60174850,
+      "personalMarket": 10057773,
+      "clubTotal": 3495947,
+      "ms": 229.34516900000017
+    }
+  ]
+}

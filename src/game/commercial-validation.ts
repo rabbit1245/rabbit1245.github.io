@@ -16,6 +16,14 @@ function season(s:ShirtSeason,c:Career){
  check(Array.isArray(s.playerClubs)&&s.playerClubs.length<=150,'시즌 소속 판매량');let own=0;const ownIds=new Set<string>();
  for(const r of s.playerClubs){getClub(r.clubId);check(!ownIds.has(r.clubId),'소속 중복');ownIds.add(r.clubId);integer(r.units,'소속별 개인 판매량');integer(r.rank,'구단 내 순위',1000000);check(r.rank>0,'구단 내 순위');const club=s.clubs.find(t=>t.clubId===r.clubId);check(club&&r.clubTotal===club.total&&r.units<=club.named&&r.clubPopularity===club.popularity,'소속 판매량 근거');popularity(r.clubPopularity);own+=r.units;}
  check(own===s.playerUnits,'소속별→개인 판매량 합계');
+ if(s.modelVersion!==undefined){
+  check(s.modelVersion===2,'집계 모형 버전');integer(s.personalMarket!,'개인 팬 세계 판매량');integer(s.playerPersonalUnits!,'개인 팬 본인 판매량');
+  check(s.personalMarket!<=s.namedTotal&&s.playerPersonalUnits!<=s.playerUnits&&s.playerPersonalUnits!<=s.personalMarket!,'개인 팬 판매량 한도');
+  let personal=0,ownPersonal=0;
+  for(const r of s.clubs){integer(r.personal!,'구단 개인 팬 판매량');check(r.personal!<=r.named,'구단 개인 팬 한도');personal+=r.personal!;}
+  for(const r of s.playerClubs){integer(r.personalUnits!,'소속별 개인 팬 판매량');check(r.personalUnits!<=r.units&&r.personalUnits!<=s.clubs.find(t=>t.clubId===r.clubId)!.personal!,'소속별 개인 팬 한도');ownPersonal+=r.personalUnits!;}
+  check(personal===s.personalMarket&&ownPersonal===s.playerPersonalUnits,'개인 팬 판매량 합계');
+ }
  check(Array.isArray(s.leaders)&&s.leaders.length<=20&&Array.isArray(s.clubLeaders)&&s.clubLeaders.length<=500,'판매 순위표');
  const players=new Set<string>();for(let i=0;i<s.leaders.length;i++){const r=s.leaders[i];seller(r);check(r.rank===i+1&&!players.has(r.playerId)&&(!i||s.leaders[i-1].units>=r.units),'세계 순위표');players.add(r.playerId);if(r.playerId===c.player.id)check(r.units===s.playerUnits&&r.rank===s.playerRank,'본인 순위 일치');}
  for(const r of s.clubLeaders){seller(r);check(ownIds.has(r.clubId),'소속 구단 비교 선수');}
