@@ -79,3 +79,12 @@ KBALL_TEST_URL=http://127.0.0.1:4194/Kball.html node tests/kball-browser.test.mj
 
 - HTML: **28,629,196바이트** · SHA-256 `ddb8ce29ba62470fdd01aee1b9067704d97659727855dab602ac86c215a849c1`
 - ZIP: **21,575,260바이트** · SHA-256 `cdee94c71230a76adee61a5e3d375cfd973e77341e71c9c172e048fe250197f8`
+
+
+[검수한 K볼 2.11.7 ZIP 다운로드](https://github.com/rabbit1245/rabbit1245.github.io/raw/e3845ecc68df244cb52e6b717abc68126ecfca8a/Kball.zip?download=1)
+
+- 소스: `9e0385aa91619f58b786b55d5f4d489ef4fae1e9`
+- 다운로드 배포: `e3845ecc68df244cb52e6b717abc68126ecfca8a`
+- 공개 링크 HTTP **200** · **21,575,260바이트**, ZIP SHA-256·CRC와 내부 HTML이 검수 파일과 일치한다. [확인 결과](validation/release-2.11.7/public-download.json).
+
+압축을 풀고 `Kball.html`을 연 뒤 기존 JSON을 가져온다. 하단의 **K볼 2.11.7**을 확인한다. 다운로드 브랜치를 갱신했으며 메인 GitHub Pages는 변경하지 않았다.
