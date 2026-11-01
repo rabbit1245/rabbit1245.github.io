@@ -104,4 +104,13 @@ PC/모바일 일반 실제 플레이 **11흐름**을 통과했다. 새 실제 10
 
 ## 다운로드 배포
 
-검수 ZIP을 다운로드 브랜치에 반영하고 공개 다운로드의 해시·CRC를 대조한 뒤 링크를 기록한다.
+[K볼 2.11.5 ZIP 다운로드](https://github.com/rabbit1245/rabbit1245.github.io/raw/1e19b6dbbc7640c44b02bf7fc81cccd0e278ecfb/Kball.zip?download=1)
+
+압축을 풀고 `Kball.html`에서 기존 JSON을 가져온다. 새 경기와 이후 미확정 심사에 적용하며 과거 경기·확정 수상은 유지한다. 사용자 이사기 원본을 직접 읽은 결과는 아니며 ZIP 재첨부 후 해당 파일의 추가 대조가 필요하다. 다운로드 브랜치를 갱신했고 별도 메인 GitHub Pages 배포는 변경하지 않았다.
+
+- 소스: `5c3f427af3f6eef290b0bf7b1a7f45cf2ca30d22`
+- 배포: `1e19b6dbbc7640c44b02bf7fc81cccd0e278ecfb`
+- ZIP: **21,562,166바이트**, SHA-256 `f030bd7dab03d01500b04d79f32c78076755e2bec89cb3401654f53167ac8a09`
+- HTML: **28,611,412바이트**, SHA-256 `8b01e7cbc73e260f86097b059e3cf14b0c905a0722ff934cda2e107cc39b42f0`
+
+공개 URL의 실제 파일을 다시 내려받아 HTTP 200·크기·SHA-256·ZIP CRC·동봉 HTML의 검수 파일 일치를 확인했다. [공개 다운로드 검증](validation/release-2.11.5/public-download.json)
