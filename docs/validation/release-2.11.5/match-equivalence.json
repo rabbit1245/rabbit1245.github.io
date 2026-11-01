@@ -1,0 +1,6 @@
+{
+  "ordinaryFourConditionsExactlyIdentical": true,
+  "ageOnlySixPairsExactlyIdenticalBefore": true,
+  "ageOnlySixPairsExactlyIdenticalAfter": true,
+  "note": "240 deterministic match samples per condition, condition reset each match; no long career aging or user save reproduction is claimed."
+}

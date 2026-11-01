@@ -35,3 +35,14 @@ export function shareShotSupply(rows:{opportunities:number;quality:number;contes
  }
  return original===0?result:rows.map(r=>r.opportunities);
 }
+import type {AttributeKey} from './types';
+const pressureSkills=new Set<AttributeKey>(['decisions','concentration','composure','anticipation','positioning','vision','teamwork']);
+/** Match-only pressure execution; never writes player attributes or growth. */
+export function pressureAbility(value:number,key:AttributeKey,pressure=0):number{
+ return pressure&&pressureSkills.has(key)?value+Math.max(-4,Math.min(5,pressure))*1.4:value;
+}
+/** Exceptional reading beyond both teams' normal level, rather than another
+ * team-power advantage applied to every ordinary teammate. */
+export function cognitiveOpportunity(reading:number,opposition:number,reference:number):number{
+ return Math.max(0,Math.min(1,(reading-Math.max(95,opposition,reference))/15));
+}

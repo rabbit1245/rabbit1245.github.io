@@ -1,4 +1,5 @@
 import {actionCoverage,ACTION_LABELS} from './action-metrics';
+import {nationalParticipationLines} from './national-participation';
 import {employmentLines,recordedEmployment} from './employment';
 import {playSkillsForYear,retirementPlaySkillNames} from './play-skills';
 import {moneyText,currencyText} from './currency';
@@ -176,7 +177,7 @@ export function careerSeasonRecords(c:Career){
   const awardResults=(judging?.diagnostics??[]).filter(d=>d.eligible&&globalNames.test(d.name)).map(d=>`${d.name}: ${d.name==='발롱도르'&&d.result==='미선정'?(d.detail.match(/전체 (\d+)위/)?.[1]?d.detail.match(/전체 (\d+)위/)![1]+'위':'후보권 밖')+' · 30인 후보 제외':d.result}`);
   return {year,shirtSales,employment:employmentLines(c,year),awardResults,playSkills:retirementPlaySkillNames(h?.position??c.player.position,playSkillsForYear(c,year)),age:h?.age??c.player.age,clubId,clubName:recordedEmployment(c,year).length?[...new Set(recordedEmployment(c,year).map(r=>name(r.clubId)))].join(' → '):h?.clubName??name(clubId),
    status:retired?`은퇴${completed?' (시즌 종료 후)':' (시즌 도중)'}`:completed?'시즌 종료':'진행 중',
-   ovrStart:h?.ovrStart??c.season.ovrStart,ovrEnd:h?.ovrEnd??c.player.ovr,
+   nationalParticipation:nationalParticipationLines(c,year),ovrStart:h?.ovrStart??c.season.ovrStart,ovrEnd:h?.ovrEnd??c.player.ovr,
    ...financials(c,year,h,clubId),leadership:seasonLeadership(c,year,h,clubId),injury:seasonInjuries(c,year,[...clubMatches,...nationalMatches]),
    stats:sumStats([clubStats,nationalStats]),clubStats,nationalStats,matches:[...clubMatches,...nationalMatches],
    results:[...(employmentResults?.length?employmentResults:clubId==='FA'&&!leagueMatches.length?['FA · 클럽 리그 미참가']:[leagueResult]),...cups,...nationalResults(c,year,nationalMatches)],
@@ -216,6 +217,7 @@ export function* careerTextChunks(c:Career):Generator<string>{
   yield line(`유니폼 판매: ${h.shirtSales}`);
   if(h.playSkills.length)yield line(`플레이스타일: ${h.playSkills.join(' / ')}`);
   yield line(`주장/부주장 여부: ${h.leadership}`);yield line(`부상 유무: ${h.injury}`);
+  for(const activity of h.nationalParticipation)yield line(`국가대표 활동: ${activity}`);
   yield line(`팀 수상: ${h.teamAwards.join(' / ')||'없음'}`);
   yield line('대회별 팀 성적:');for(const result of h.results)yield line(`- ${result}`);
   yield line(`개인 수상: ${h.personal.map(a=>a.name).join(' / ')||'없음'}`);

@@ -9,16 +9,18 @@ interface Baseline {rating:number;goalImpact:number;channels:Channels;}
 export type PerformanceBaselines=Partial<Record<PerformanceRole,Baseline>>;
 const roles:PerformanceRole[]=['DEF','MID','FWD'];
 const defaults:Record<PerformanceRole,Baseline>={
- DEF:{rating:6.6,goalImpact:.15,channels:{DEF:45,MID:18,FWD:6}},
- MID:{rating:6.9,goalImpact:.35,channels:{DEF:28,MID:34,FWD:13}},
- FWD:{rating:7.1,goalImpact:.65,channels:{DEF:18,MID:25,FWD:30}},
+ DEF:{rating:6.6,goalImpact:Math.tanh(.15),channels:{DEF:45,MID:18,FWD:6}},
+ MID:{rating:6.9,goalImpact:Math.tanh(.35),channels:{DEF:28,MID:34,FWD:13}},
+ FWD:{rating:7.1,goalImpact:Math.tanh(.65),channels:{DEF:18,MID:25,FWD:30}},
 };
 const average=(s:PlayerStats)=>s.ratingCount?s.ratingSum/s.ratingCount:0;
-// Remove the direct goal/assist component only while comparing background
-// match ratings. Goals and assists retain their own explicit output channels.
-const goalImpact=(s:PlayerStats)=>(s.goals*.95+s.assists*.65)/Math.max(1,s.ratingCount);
+// Match ratings are bounded at ten. Subtracting an unlimited linear production
+// component penalised prolific seasons after the observed rating had saturated.
+// Compress only this background comparison; actual production stays explicit.
+const goalImpact=(s:PlayerStats)=>Math.tanh((s.goals*.95+s.assists*.65)/Math.max(1,s.ratingCount));
+const diminishing=(n:number,threshold:number)=>n<=threshold?n:threshold+Math.log1p(n-threshold);
 export function performanceChannels(s:PlayerStats):Channels{
- const games=Math.max(1,s.minutes/90),rate=(n:number,target:number)=>clamp(n/games/target,0,2.5),coverage=clamp((s.actionMinutes??0)/Math.max(1,s.minutes),0,1);
+ const games=Math.max(1,s.minutes/90),rate=(n:number,target:number)=>diminishing(Math.max(0,n/games/target),2.5),coverage=clamp((s.actionMinutes??0)/Math.max(1,s.minutes),0,1);
  const progressive=s.progressivePasses??0,ordinary=Math.max(0,s.passesCompleted-progressive),passing=s.passesCompleted/Math.max(1,s.passes);
  const buildup=passing*(8*(1-coverage)+rate(ordinary,35)*4*coverage)+rate(progressive,5)*8;
  return {
@@ -43,7 +45,9 @@ export function performanceBaselines(rows:Row[],minimum=900):PerformanceBaseline
 export function evaluateFieldPerformance(row:Row,baselines:PerformanceBaselines={}):{value:number;role:PerformanceRole}{
  const nominal=awardPositionGroup(row.position);if(nominal==='GK'||row.stats.apps<1||row.stats.minutes<1)return {value:0,role:'DEF'};
  const s=row.stats,channels=performanceChannels(s),peers=baselines[nominal]??defaults[nominal],rating=average(s)-goalImpact(s);
- const relative=(role:PerformanceRole)=>{const actual=baselines[role]??defaults[role];return (clamp(channels[role]/Math.max(8,actual.channels[role]),0,2.2)+clamp(channels[role]/Math.max(8,peers.channels[role]),0,2.2))*.5;};
+ // Absolute functional excellence keeps growing; unusualness versus the nominal
+ // position retains its old bound and cannot by itself dominate world voting.
+ const relative=(role:PerformanceRole)=>{const actual=baselines[role]??defaults[role];return (diminishing(Math.max(0,channels[role]/Math.max(8,actual.channels[role])),2.2)+clamp(channels[role]/Math.max(8,peers.channels[role]),0,2.2))*.5;};
  let best={value:-Infinity,role:nominal as PerformanceRole};
  for(const role of roles){
   const level=baselines[role]??defaults[role],common=Math.max(0,rating-(level.rating-level.goalImpact-1.8))*17+(s.mom??0)*.7;

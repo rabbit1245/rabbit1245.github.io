@@ -1,5 +1,6 @@
 import {cupLedger,tournamentResult} from './club-competitions';
 import {nationalSquadFor} from './national';
+import {nationalAvailable,nationalParticipationReason,nationalParticipation,nationalParticipationNotice} from './national-participation';
 import { getClub } from './data';
 import { seasonDate,seasonHalfEndDate } from './calendar';
 import { normalizeNationality } from './national-data';
@@ -42,7 +43,7 @@ function currentNationalMatches(career:Career):MatchRecord[] {
 
 /** A retained `called` flag from last season is not proof of a new call-up. */
 function currentCallup(career:Career,national:NationalState,matches:MatchRecord[]):boolean {
-  if(national.status!=='called'||national.squad!==nationalSquadFor(career))return false;
+  if(!nationalAvailable(career)||national.status!=='called'||national.squad!==nationalSquadFor(career))return false;
   if(matches.some(match=>squadOf(match)===national.squad))return true;
   const start=seasonDate(career.season,0).slice(0,10),end=seasonHalfEndDate(career.season,'second').slice(0,10);
   const through=national.processedThrough?.slice(0,10);
@@ -71,6 +72,8 @@ function nationalEmpty(career:Career):CompetitionParticipation {
   let statusLabel=status==='injured'?'부상 제외':status==='watchlist'?'관찰 중':'미선발';
   let reason=national?.reason??'현재 시즌에 확인된 국가대표 소집·출전 기록이 없습니다.';
   if(career.stage==='retired'){status='retired';statusLabel='국대 경력 종료';}
+  else if(!nationalAvailable(career)){status=nationalParticipation(career).retired?'retired':'unselected';statusLabel=nationalParticipation(career).retired?'국대 은퇴':'소집 거절';reason=nationalParticipationReason(career)!;}
+  else if(nationalParticipationNotice(career)){status='unselected';statusLabel='다음 소집 대기';reason=nationalParticipationNotice(career)!;}
   else if(national&&national.squad!==ageSquad){status='unselected';statusLabel='새 연령대 소집 대기';reason='현재 연령에 맞는 대표팀의 새 소집에서 실력·소속·출전 성과를 다시 평가합니다.';}
   else if(national?.status==='called'){status='unselected';statusLabel='다음 소집 대기';reason='이전 소집 상태만 남아 있습니다. 현재 시즌의 새 소집이나 출전은 아직 확인되지 않았습니다.';}
   return {id:`national:none:${career.season.year}`,scope:'national',name:'참여 대회 없음',teamId,teamName:nationalTeamName(teamId),squad:ageSquad,status,statusLabel,apps:0,minutes:0,reason};

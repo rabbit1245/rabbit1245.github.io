@@ -520,6 +520,21 @@ function validateSystems(career: Record<string, unknown>, player: Record<string,
     assert(leagueId(row.fromLeagueId, 'world.movement.fromLeagueId') !== leagueId(row.toLeagueId, 'world.movement.toLeagueId'), '승강 이동 전후 리그가 같습니다.');
     choice(row.kind, ['promotion', 'relegation'], 'world.movement.kind'); text(row.reason, 'world.movement.reason', 4_000);
   }
+  if(systems.nationalParticipation!==undefined){
+    const value=object(systems.nationalParticipation,'nationalParticipation'),expected={declineCallups:false,retired:false};
+    bool(value.declineCallups,'nationalParticipation.declineCallups');bool(value.retired,'nationalParticipation.retired');
+    let previousDate='';
+    for(const raw of list(value.history,'nationalParticipation.history',20_000)){
+      const row=object(raw,'nationalParticipation.change');
+      number(row.year,'nationalParticipation.year',1900,2500,true);number(row.round,'nationalParticipation.round',0,120,true);
+      const key=choice(row.key,['declineCallups','retired'],'nationalParticipation.key') as keyof typeof expected;
+      expected[key]=bool(row.checked,'nationalParticipation.checked');const date=calendarDate(row.date,'nationalParticipation.date');
+      // A same-season FA move can remap the league round. The simulation date
+      // remains the chronology shared by every league and international window.
+      assert(date>=previousDate,'국가대표 활동 설정 이력 날짜 순서가 올바르지 않습니다.');previousDate=date;
+    }
+    assert(expected.declineCallups===value.declineCallups&&expected.retired===value.retired,'국가대표 활동 설정과 이력이 일치하지 않습니다.');
+  }
   const national = object(systems.national, 'systems.national');
   text(national.country, 'national.country'); choice(national.squad, ['U20', 'senior'], 'national.squad');
   choice(national.status, ['unselected', 'watchlist', 'called', 'injured', 'retired'], 'national.status'); text(national.reason, 'national.reason', 4_000);

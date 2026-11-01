@@ -115,11 +115,13 @@ export function leadershipAbility(attributes:Player['attributes'],trait:number):
   const mental=((attributes.decisions??50)+(attributes.concentration??50)+(attributes.composure??50)+(attributes.teamwork??50))/4;
   return Math.round(Math.max(0,Math.min(100,Math.max(mental*.75+trait*.25,trait*.7+mental*.3)))*10)/10;
 }
-/** Team comparisons use actual weighted ability, without the display mastery conversion. */
+/** Selection and career comparisons keep earned mastery on the displayed OVR
+ * scale. Individual actions still read their specific physical/technical skills. */
 export function playingAbility(player: Pick<Player, 'attributes'|'position'|'style'>&{ovr?:number}): number {
   // Preserve the established 0–100 comparison scale, including old saves and external roster records.
   if(player.ovr!==undefined&&!Object.values(player.attributes).some(v=>(v??0)>100))return player.ovr;
-  return Object.entries(attributeWeights(player.position,player.style)).reduce((n,[key,w])=>n+Math.max(1,Math.min(110,player.attributes[key as AttributeKey]??1))*(w??0),0);
+  const weighted=Object.entries(attributeWeights(player.position,player.style)).reduce((n,[key,w])=>n+Math.max(1,Math.min(110,player.attributes[key as AttributeKey]??1))*(w??0),0);
+  return player.ovr===undefined?weighted:Math.max(weighted,player.ovr);
 }
 export function overall(player: Pick<Player, 'attributes'|'position'|'style'|'playSkills'>): number {
   const weights = attributeWeights(player.position, player.style);

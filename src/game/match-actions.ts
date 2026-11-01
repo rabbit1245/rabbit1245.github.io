@@ -1,9 +1,10 @@
 import {playingAbility} from './attributes';
+import {pressureAbility} from './ability-contests';
 import {clamp,integer,seededRandom} from './math';
 import type {MatchPerformance} from './revision-types';
 import type {AttributeKey,MatchAction,MatchEvent,Position} from './types';
 
-export interface ActionActor extends MatchPerformance {from:number;to:number;teamId:string;user:boolean;style:string;creation:number}
+export interface ActionActor extends MatchPerformance {from:number;to:number;teamId:string;user:boolean;style:string;creation:number;pressure?:number}
 export interface ActionTeam {club:{id:string;name:string};actors:ActionActor[];power:number}
 export type ActionEmitter=(type:MatchEvent['type'],actor:ActionActor,minute:number,detail:string,relatedId?:string,action?:MatchAction)=>string;
 const forward=new Set<Position>(['ST','CF','SS','LW','RW']);
@@ -26,8 +27,8 @@ const active=(team:ActionTeam,minute:number)=>{
 const zonePools=(players:ActionActor[])=>{let pools=byZone.get(players);if(!pools){pools=[0,1,2].map(z=>players.filter(p=>zone(p.position)===z));byZone.set(players,pools);}return pools;};
 export const actionAbility=(p:ActionActor,key:AttributeKey)=>{
   if(!p.attributes)return p.ovr;
-  const raw=p.attributes[key];if(raw!==undefined)return clamp(raw,1,110);
-  return clamp(p.ovr>100?playingAbility({...p,attributes:p.attributes,style:p.style,ovr:undefined}):p.ovr,1,110);
+  const raw=p.attributes[key],value=raw!==undefined?clamp(raw,1,110):clamp(p.ovr>100?playingAbility({...p,attributes:p.attributes,style:p.style,ovr:undefined}):p.ovr,1,110);
+  return p.pressure?pressureAbility(value,key,p.pressure):value;
 };
 
 /** Only a bounded number of attacking phase transitions are expanded; ordinary passes keep the existing fast aggregate. */

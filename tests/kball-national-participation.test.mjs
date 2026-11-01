@@ -1,0 +1,34 @@
+import {chromium} from './stored-careers.mjs';
+import assert from 'node:assert/strict';
+import {mkdir,writeFile} from 'node:fs/promises';
+const url=process.env.KBALL_TEST_URL||'http://127.0.0.1:4194/Kball.html',source=process.env.KBALL_NATIONAL_SAVE||'test-results/national-2115/source.json',out=process.env.KBALL_TEST_RESULTS_DIR||'test-results/national-2115/ui';
+const controlsOnly=process.env.KBALL_NATIONAL_CONTROLS_ONLY==='1';
+await mkdir(out,{recursive:true});
+const b=await chromium.launch({headless:true,executablePath:process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE||'/usr/bin/chromium'}),context=await b.newContext({viewport:{width:1366,height:900},reducedMotion:'reduce'});
+await context.addInitScript(()=>{window.__nationalSaveOps=[];const W=window.Worker;window.Worker=new Proxy(W,{construct(T,args){const w=new T(...args),post=w.postMessage.bind(w);w.postMessage=function(data,...rest){window.__nationalSaveOps.push(data.operation??data.command?.type);return post(data,...rest);};return w;}});});
+const p=await context.newPage(),errors=[];p.on('pageerror',e=>errors.push(String(e)));p.setDefaultTimeout(240000);
+async function ready(){await p.locator('.processing').waitFor({state:'hidden'});await p.getByTestId('save-status').filter({hasText:'자동 저장됨'}).waitFor();assert.deepEqual(await p.getByRole('alert').allTextContents(),[]);}
+async function summary(){return p.evaluate(()=>new Promise((resolve,reject)=>{const r=indexedDB.open('kball-careers');r.onerror=()=>reject(r.error);r.onsuccess=()=>{const db=r.result,tx=db.transaction('slots'),get=tx.objectStore('slots').getAll();tx.oncomplete=async()=>{db.close();try{const c=await window.__readKballStored(get.result[0]);resolve({revision:c.revision,flags:c.systems.nationalParticipation,matches:c.systems.national.matches.map(m=>({id:m.fixtureId,played:m.playerPlayed,apps:m.playerStats.apps,goals:m.playerStats.goals,assists:m.playerStats.assists})),history:c.history.map(h=>({year:h.year,stats:h.stats,fixtures:h.matches.map(m=>m.fixtureId)})),nationalHistory:c.systems.national.history.map(h=>({year:h.year,competitionId:h.competitionId,stats:h.stats,fixtures:h.matches.map(m=>m.fixtureId)})),clubApps:c.season.playerStats.apps,stage:c.stage,year:c.season.year,attributes:c.player.attributes});}catch(e){reject(e);}};};}));}
+async function toggle(label,checked){const box=p.getByRole('checkbox',{name:label,exact:true});await box.setChecked(checked);await ready();assert.equal(await box.isChecked(),checked);}
+try{
+ await p.goto(url,{waitUntil:'load'});await p.getByLabel('K볼 저장 파일 가져오기').setInputFiles(source);await ready();const initial=await summary();
+ await p.evaluate(()=>window.__nationalSaveOps=[]);await toggle('국대 소집 거절',true);await toggle('국대 은퇴',true);
+ assert.ok(!(await p.evaluate(()=>window.__nationalSaveOps)).includes('prepare'),'checkbox edits use the bounded journal, not a whole-career preparation');
+ await p.setViewportSize({width:390,height:844});assert.ok(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));await p.getByTestId('national-participation-controls').screenshot({path:out+'/controls-mobile.png'});await p.setViewportSize({width:1366,height:900});
+ if(controlsOnly){
+  await p.reload({waitUntil:'load'});await p.getByRole('button',{name:'이어서 플레이',exact:true}).click();await ready();assert.equal(await p.getByRole('checkbox',{name:'국대 소집 거절',exact:true}).isChecked(),true);assert.equal(await p.getByRole('checkbox',{name:'국대 은퇴',exact:true}).isChecked(),true);
+  await toggle('국대 소집 거절',false);await toggle('국대 은퇴',false);const after=await summary();assert.equal(after.flags.history.length,4);assert.deepEqual(after.attributes,initial.attributes);assert.deepEqual(after.history,initial.history);assert.deepEqual(after.nationalHistory,initial.nationalHistory);assert.deepEqual(after.matches,initial.matches);
+  await p.reload({waitUntil:'load'});await p.getByRole('button',{name:'이어서 플레이',exact:true}).click();await ready();assert.deepEqual(await summary(),after);assert.deepEqual(errors,[]);
+  await writeFile(out+'/results.json',JSON.stringify({url,source,version:await p.getByTestId('game-version').textContent(),controlsOnly:true,boundedCheckboxSaving:true,mobileOverflow:false,independentSwitches:true,oldClubAndNationalHistoryPreserved:true,oldMatchesPreserved:true,attributesUnchanged:true,twoReloads:true,history:after.flags.history,errors},null,2));console.log('Large existing career: national switches, durable journal, two reloads and all archived season summaries preserved.');
+ }else{
+ await p.getByTestId('advance-half').click();await ready();const blocked=await summary();assert.ok(blocked.clubApps>0);assert.ok(blocked.matches.length>0,'country fixtures continue');assert.ok(blocked.matches.every(m=>!m.played&&m.apps===0));
+ await p.reload({waitUntil:'load'});await p.getByRole('button',{name:'이어서 플레이',exact:true}).click();await ready();assert.equal(await p.getByRole('checkbox',{name:'국대 소집 거절',exact:true}).isChecked(),true);assert.equal(await p.getByRole('checkbox',{name:'국대 은퇴',exact:true}).isChecked(),true);
+ await toggle('국대 소집 거절',false);assert.equal((await summary()).flags.retired,true);await toggle('국대 은퇴',false);
+ await p.getByTestId('quick-national').click();assert.match(await p.locator('.national-status').innerText(),/설정을 해제했습니다/);await p.getByTestId('national-participation-history').waitFor();
+ await p.getByTestId('locker-tab').click();await p.getByTestId('advance-half').click();await ready();const resumed=await summary();assert.ok(resumed.matches.some(m=>m.played&&m.apps>0),'releasing both switches permits later real callups');
+ for(const m of blocked.matches)assert.deepEqual(resumed.matches.find(r=>r.id===m.id),m,'missed past games are not rewritten');
+ assert.equal(resumed.flags.history.length,4);assert.equal(resumed.flags.retired,false);assert.equal(resumed.flags.declineCallups,false);assert.deepEqual(resumed.attributes,initial.attributes);
+ await p.reload({waitUntil:'load'});await p.getByRole('button',{name:'이어서 플레이',exact:true}).click();await ready();assert.deepEqual(await summary(),resumed);assert.deepEqual(errors,[]);
+ await writeFile(out+'/results.json',JSON.stringify({url,source,version:await p.getByTestId('game-version').textContent(),boundedCheckboxSaving:true,mobileOverflow:false,independentSwitches:true,refusalExcludesActualAppearances:true,countryFixturesContinue:true,resumedRealAppearances:true,pastMatchesUnchanged:true,attributesUnchanged:true,twoReloads:true,history:resumed.flags.history,errors},null,2));console.log('National refusal/retirement, real resumed callups, persistent year history and mobile controls passed.');
+ }
+}catch(e){await writeFile(out+'/failure.json',JSON.stringify({error:String(e),errors},null,2));await p.screenshot({path:out+'/failure.png'}).catch(()=>{});throw e;}finally{await b.close();}

@@ -2,6 +2,7 @@ import {isFreeAgent,beginEmployment,changeEmployment} from './employment';
 import {personality,PERSONALITY_KEYS,type PersonalityKey,type Personality} from './personality';
 import {beginAchievementSeason} from './achievement-evidence';
 import {copySystems} from './snapshot';
+import {nationalParticipation,type NationalParticipationKey} from './national-participation';
 import {playSkillDefinitions,playSkillNames} from './play-skills';
 import {removeSkillMastery} from './growth';
 import {trackMonthlyLeague} from './extra-honours';
@@ -26,7 +27,7 @@ import { TALENT_PROFILES } from './talent';
 import type { Award, AttributeKey, Attributes, Career, CreateOptions, Fixture, GameProgress, Intensity, MatchRecord, Player, PlayerStats, SeasonState, SeasonSummary, Standing, Talent, TransferOffer } from './types';
 import type { PresentationEvent } from './revision-types';
 
-export const ENGINE_VERSION = '2.11.4';
+export const ENGINE_VERSION = '2.11.5';
 export const overall = calculateOverall;
 export { addStats, emptyStats, hashSeed, seededRandom } from './math';
 const TALENT_ORDER: Talent[] = ['D','C','B','A','S','SS','SSS'];
@@ -63,6 +64,20 @@ function touch(career:Career) {
   career.updatedAt=currentDate(career);
   career.news=career.news.slice(0,80);
   if(career.systems)career.systems.events=career.systems.events.slice(-180);
+}
+export function setNationalParticipation(career:Career,key:NationalParticipationKey,checked:boolean):Career{
+ if(career.stage==='retired'||!['declineCallups','retired'].includes(key)||typeof checked!=='boolean')throw new Error('현역 선수의 국가대표 소집 거절·은퇴 설정을 선택해 주세요.');
+ const next=editable(career,true),previous=nationalParticipation(career);
+ if(previous[key]!==checked){
+  next.systems!.nationalParticipation={...previous,[key]:checked,history:[...previous.history,{year:next.season.year,round:next.season.week,date:currentDate(next).slice(0,10),key,checked}]};
+  const l=next.systems!.leadership;
+  if(key==='retired'&&checked){
+   l.nationalRole='none';
+   for(const term of l.terms)if(term.scope==='national'&&term.endYear===undefined){term.endYear=next.season.year;term.endRound=next.systems!.national.matches.filter(m=>m.seasonYear===next.season.year&&m.playerPlayed).length;}
+  }
+  if(checked)for(const offer of l.offers??[])if(offer.scope==='national'&&offer.status==='pending'){offer.status='expired';offer.answeredYear=next.season.year;offer.answeredRound=next.season.week;}
+ }
+ touch(next);return next;
 }
 function news(career:Career,kind:Career['news'][number]['kind'],title:string,body:string) {
   career.news.unshift({id:`news_${career.season.year}_${career.season.week}_${career.revision}_${career.news.length}`,year:career.season.year,week:career.season.week,kind,title,body});

@@ -81,3 +81,8 @@
  .locker-season-details > summary > span:not(.disclosure-cue) { order:3; flex-basis:100%; }
  .honours-preview { grid-template-columns:1fr; }
 }
+.national-participation-controls {display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;}
+.national-participation-controls label {display:flex;gap:6px;align-items:center;color:#202124;font-size:14px;white-space:nowrap;}
+.national-participation-controls input {width:17px;height:17px;accent-color:#557b3e;}
+.national-participation-history {padding:12px 14px;border:1px solid #d9dee5;border-radius:8px;background:#fff;color:#202124;}
+.national-participation-history p {margin:6px 0 0;font-size:14px;}

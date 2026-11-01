@@ -52,6 +52,7 @@ export interface TrainingPlan {forYear:number;confirmed:boolean;confirmedAtRound
 export interface GrowthReport { year: number; half: 'first'|'season'; fromRound: number; toRound: number; startAttributes: Attributes; endAttributes: Attributes; ovrStart: number; ovrEnd: number; stats: PlayerStats; previousStats: PlayerStats; valueStart: number; valueEnd: number; context: string; growth?:GrowthLedger; offseasonAging?:AgingReport }
 export interface PresentationEvent { id: string; year: number; round: number; type: 'mom'|'injury'|'national'|'transfer'|'renewal'|'captain'|'award'|'growth'|'promotion'|'retirement'; title: string; body: string; importance: 'brief'|'decision'|'milestone' }
 export interface CareerSystems {
+  nationalParticipation?:import('./national-participation').NationalParticipation;
   commercial?:import('./commercial').CommercialState;
   personality?:import('./personality').Personality;
   employment?:EmploymentPeriod[];

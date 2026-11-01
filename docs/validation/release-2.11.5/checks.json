@@ -1,0 +1,61 @@
+{
+  "version": "2.11.5",
+  "core": {
+    "tests": 381,
+    "pass": 380,
+    "fail": 0,
+    "skip": 1,
+    "skipped": "Thirty seasons fully resimulated; separate existing checkpoint preservation test passed."
+  },
+  "nationalAndCompetitionFollowup": {
+    "tests": 29,
+    "pass": 29,
+    "fail": 0
+  },
+  "finalStorageAndNationalCalendarRemap": {
+    "tests": 34,
+    "pass": 34,
+    "fail": 0
+  },
+  "desktopMobileGeneralFlows": 11,
+  "newNationalUI": {
+    "realCountryMatchesAndResumedAppearances": true,
+    "boundedJournalControls": true,
+    "twoReloads": true,
+    "mobile390pxNoOverflow": true
+  },
+  "oldLargeSave": {
+    "bytes": 272717105,
+    "seasons": 14,
+    "controlsAndArchivePreservation": true,
+    "twoReloads": true
+  },
+  "thirtySeasonCheckpoint": {
+    "pass": 1,
+    "filtered": 11,
+    "fullResimulation": false,
+    "retirementAndKoreanTXT": true
+  },
+  "newActual108Career": {
+    "country": "일본",
+    "position": "ST",
+    "club": "레알 마드리드",
+    "physicalTechnical": 65,
+    "masteredMental": 110,
+    "personalityClutch": 10,
+    "otherPersonality": 5,
+    "ovr": 108,
+    "leagueGoals": 55,
+    "leagueAssists": 10,
+    "ballonRank": 1,
+    "fullJSONRoundtripAndRetirement": true
+  },
+  "optimization": {
+    "allFivePhaseGraphHashesEqual": true,
+    "fullIndependentSeasonFieldsEqualExceptElapsed": true
+  },
+  "isagiSourceRead": false,
+  "isagiTransferBlock": "Sediment executor download limit 32 MiB; requested ZIP. Independent examples are not user-save reproductions.",
+  "notReproduced": "Age40 second-division bench/<10goal situation; direct file inspection still required.",
+  "browserScope": "Linux Chromium; standalone HTML via localhost because managed file:// blocked; Windows Edge not directly tested."
+}

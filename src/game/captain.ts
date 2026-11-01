@@ -5,6 +5,7 @@ import { getClub } from './data';
 import { clamp,round,sumStats } from './math';
 import { getClubRatingOffset,worldPlayerAbility } from './world';
 import {nationalSquadPlayers} from './national';
+import {nationalAvailable} from './national-participation';
 import type { Career,MatchRecord,PlayerStats } from './types';
 import type { CaptainAssessment,CaptainOffer } from './revision-types';
 
@@ -49,7 +50,8 @@ export function getCaptainAssessment(c:Career,scope:Scope):CaptainAssessment{
   const reasons:string[]=[];
   if(scope==='club'&&p.squad==='youth')reasons.push('유소년 단계에서는 성인 클럽 주장 제의를 하지 않습니다. 1군에서 실력과 출전 경력을 쌓아야 합니다.');
   if(c.stage==='retired')reasons.push('은퇴한 선수에게 새 주장단 제의를 하지 않습니다.');
-  if(scope==='national'&&(!all.length||n.status==='unselected'||n.status==='watchlist'))reasons.push('현재 연령대 대표팀의 실제 발탁과 꾸준한 출전이 먼저 필요합니다.');
+  if(scope==='national'&&!nationalAvailable(c))reasons.push('국가대표 소집 거절·은퇴 설정 중에는 주장단 제의를 하지 않습니다.');
+  if(scope==='national'&&(!all.length||n.status==='unselected'||n.status==='watchlist'||n.status==='retired'))reasons.push('현재 연령대 대표팀의 실제 발탁과 꾸준한 출전이 먼저 필요합니다.');
   if(tenure<1&&!(abilityRank<=2&&all.length>=(scope==='national'?8:12)&&rating>=7&&mentalScore>=78))reasons.push('현재 팀에서 한 시즌의 근속 또는 충분한 실전 활약과 멘털 리더십이 필요합니다.');
   if(all.length<(junior?8:scope==='club'?12:8))reasons.push(`현재 팀 실제 출전 ${all.length}경기: 충분한 출전 경력이 필요합니다.`);
   if(stats.apps<(scope==='club'?6:4)||stats.minutes<(scope==='club'?360:240)||rating<6.4)reasons.push('최근 실제 출전 시간과 평균 평점 6.40 이상의 성과가 필요합니다.');

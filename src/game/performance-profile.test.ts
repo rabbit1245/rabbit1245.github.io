@@ -33,6 +33,14 @@ test('legacy missing action coverage remains missing and does not fabricate pres
  const frozen=Object.freeze({...defensive});assert.deepEqual(evaluateFieldPerformance({position:'RW',stats:frozen}),evaluateFieldPerformance({position:'RW',stats:defensive}));
 });
 
+test('exceptional production keeps counting beyond channel thresholds without a linear deduction from bounded ratings',()=>{
+ const s=stats({apps:60,starts:55,minutes:5100,ratingCount:60,ratingSum:60*8.3,goals:75,assists:15,mom:18,passes:1500,passesCompleted:1300,keyPasses:100,progressivePasses:150,actionApps:60,actionMinutes:5100});
+ const more={...s,goals:95};
+ assert.ok(performanceChannels(more).FWD>performanceChannels(s).FWD,'high scoring no longer flattens at the old action channel cap');
+ assert.ok(evaluateFieldPerformance({position:'ST',stats:more}).value>evaluateFieldPerformance({position:'ST',stats:s}).value,'extra goals cannot become a bigger linear penalty against an already bounded rating');
+ assert.equal(s.goals,75,'judging does not rewrite the original production');
+});
+
 test('exceptional unconventional output can win a world vote and the old hard personal-score plateau no longer suppresses further output',()=>{
  const c=createCareer({name:'다양한 월드클래스',nationality:'네덜란드',age:27,height:180,weight:76,foot:'right',position:'RW',talent:'S',style:PLAY_STYLES.RW[0],clubId:'EN1_06',squad:'senior',difficulty:'realistic',seed:'versatile-vote',training:[]});c.player.ovr=92;
  const positions:Position[]=['CB','LB','RB','CM','CAM','RW','LW','ST'],rows:CompetitorSeason[]=Array.from({length:80},(_,i)=>({playerId:`peer-${i}`,name:`상대 ${i}`,position:positions[i%positions.length],clubId:'EN1_12',leagueId:'EN1',nationality:'네덜란드',ovr:88,stats:stats({goals:i%8>=5?18:3,assists:5,tackles:i%8<3?110:35,interceptions:i%8<3?85:25,pressingWins:70,cleanSheets:12,keyPasses:35,progressivePasses:100,dribblesCompleted:45}),nationalStats:emptyStats()}));

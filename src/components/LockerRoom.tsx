@@ -3,6 +3,7 @@ import {getClub,getLeague} from '../game/data';
 import {needsContractOfferRefresh} from '../game/career-systems';
 import {expiryReturnClub} from '../game/employment';
 import {InjuryControl} from './ManualAging';
+import {NationalParticipationControls,NationalParticipationHistory} from './NationalParticipation';
 import {currencyText} from '../game/currency';
 import { useEffect, useMemo, useState } from 'react';
 import { ArrowLeftRight, ArrowRight, Check, ChevronLeft, ChevronRight, Dumbbell, Play } from 'lucide-react';
@@ -89,6 +90,7 @@ export default function LockerRoom({career,busy,command,onMatch,onTraining,onCar
     <div className="locker-controls"><div className="season-progress"><div><strong>{phaseLabel(career)}</strong><span>{s.week} / {s.totalWeeks}라운드</span></div><div className="season-track"><span style={{width:`${Math.min(100,s.week/Math.max(1,s.totalWeeks)*100)}%`}}/></div></div><div className="action-inline">
       {career.stage!=='retired'&&<button data-testid="advance-half" className="button primary" disabled={busy||nextBlocked} onClick={()=>command(next.command)}><Play size={18}/>{next.label}<ArrowRight size={18}/></button>}
       {career.stage!=='retired'&&<InjuryControl career={career} busy={busy} open={injuryOpen} onToggle={()=>setInjuryOpen(v=>!v)} command={command}/>}
+      {career.stage!=='retired'&&<NationalParticipationControls career={career} busy={busy} command={command}/>}
       {career.stage!=='retired'&&<button className="button secondary" data-testid="transfer-window" disabled={busy} onClick={()=>{if(needsContractOfferRefresh(career))command({type:'refreshOffers'});setTransfers(true);}}><ArrowLeftRight size={18}/>{p.clubId==='FA'?'FA · 계약 제안':'이적 · 재계약'}</button>}
       {career.stage==='offseason'&&<>{!trainingConfirmed&&onTraining&&<button className="button secondary" data-testid="training-plan" disabled={busy} onClick={onTraining}><Dumbbell size={17}/>훈련 선택</button>}</>}
     </div></div>
@@ -103,6 +105,7 @@ export default function LockerRoom({career,busy,command,onMatch,onTraining,onCar
       <summary><strong>이번 시즌 통합 세부 기록</strong><span>{combined.apps}경기 · {combined.minutes.toLocaleString()}분 · 평점 {average(combined)}</span><span className="disclosure-cue">{p.position==='GK'?10:12}개 지표 <ChevronRight size={17}/></span></summary>
       <div className="panel-body" data-testid="locker-season-details"><StatsNine stats={combined} detailedStats={detailed} position={p.position}/><ShirtSales career={career}/>{onCareer&&<button className="text-button" onClick={()=>onCareer('records')}>대회별 · 경기별 전체 기록<ArrowRight size={16}/></button>}</div>
     </details>
+    <NationalParticipationHistory career={career} year={s.year}/>
     {!!career.systems?.manualInjuries?.length&&<details className="locker-detail injury-history" data-testid="injury-history"><summary>부상 · 결장 이력</summary><div className="panel-body">{[...career.systems.manualInjuries].reverse().slice(0,12).map(r=><p key={r.id}>{r.year}시즌 · {typeof r.duration==='number'?`${r.duration}경기 부상`:r.selectionVersion===2?'시즌 전체 부상':r.duration==='half'?'반 시즌 부상':'한 시즌 부상'} · {r.pendingNextSeason?'다음 시즌 예약':r.returned?'복귀 완료':'회복 중'} · 클럽 {r.missed.filter(m=>m.scope==='club').length} / 국대 {r.missed.filter(m=>m.scope==='national').length}경기 결장{r.remainingMatches!==undefined&&!r.returned?` · 클럽 ${r.remainingMatches}경기 남음`:''}</p>)}</div></details>}
     <ClubDevelopment career={career}/>
     {transfers&&<Transfers career={career} busy={busy} command={command} onClose={()=>setTransfers(false)}/>}

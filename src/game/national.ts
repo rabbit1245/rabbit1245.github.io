@@ -7,6 +7,7 @@ import { getLeagueRule } from './league-rules';
 import { fixtureDate, seasonDate,seasonHalfEndDate } from './calendar';
 import {syncManualInjury} from './manual-injury';
 import {worldPlayerAbility} from './world';
+import {nationalAvailable,nationalParticipationReason,nationalParticipation} from './national-participation';
 import { simulateMatch } from './match-engine';
 import { addStats, clamp, emptyStats, seededRandom, sumStats } from './math';
 import { nationalityForPlayer, normalizeNationality,currentNationality } from './national-data';
@@ -155,7 +156,7 @@ function poolFor(career: Career, country: string, squad: Squad): Candidate[] {
     const ovr=worldPlayerAbility(career,row,offsets);
     pool.push({id:row.id,name:row.name,position:row.position,ovr,age:row.age,clubId:row.clubId,nationality:country,injured:row.injuryWeeks>0,score:scoreCandidate(career,row.id,ovr,row.clubId,false)});
   }
-  if (normalizeNationality(career.player.nationality) === country && (squadFor(career) === squad || career.systems?.national.squad===squad&&squad==='U20'&&career.player.age<=21)) {
+  if (nationalAvailable(career)&&normalizeNationality(career.player.nationality) === country && (squadFor(career) === squad || career.systems?.national.squad===squad&&squad==='U20'&&career.player.age<=21)) {
     const p = career.player;
     pool.push({id:p.id,name:p.name,position:p.position,ovr:Math.round(playingAbility(p)),attributes:p.attributes,age:p.age,clubId:p.clubId,nationality:country,injured:p.injuryWeeks>0,score:scoreCandidate(career,p.id,playingAbility(p),p.clubId,true)});
   }
@@ -207,6 +208,7 @@ function selection(career: Career, state: NationalState): Candidate[] {
   const rank = Math.max(1, competitors.findIndex(row=>row.id===p.id)+1);
   const threshold = quotas[group(p.position)];
   if (career.stage==='retired') {state.status='retired';state.reason='국가대표 경력을 마쳤습니다.';}
+  else if(!nationalAvailable(career)){state.status=nationalParticipation(career).retired?'retired':'unselected';state.reason=nationalParticipationReason(career)!;}
   else if (p.injuryWeeks>0) {state.status='injured';state.reason=`부상 회복 중 · 남은 회복 ${p.injuryWeeks}주. 다음 소집에서 출전 상황을 다시 평가합니다.`;}
   else if (roster.some(row=>row.id===p.id)) {state.status='called';state.reason=`${state.country} ${state.squad==='U20'?'U20':'성인'} 대표 발탁 · 같은 포지션군 ${rank}위. 능력치·소속 리그 수준·출전시간·평점·컨디션을 종합했습니다.`;}
   else {state.status=rank<=threshold+3?'watchlist':'unselected';state.reason=`${state.status==='watchlist'?'관찰 명단':'미발탁'} · 같은 포지션군 ${competitors.length}명 중 ${rank}위, 소집 ${threshold}자리. 소속팀 출전시간·평점·능력치·컨디션이 경쟁 기준입니다.`;}
@@ -279,12 +281,12 @@ function play(career: Career, competition: Competition, homeCountry: string, awa
   captureNationalPower(career,competition.id,awayCountry,syntheticTeam(awayCountry,state.squad,awayPlayers).power);
   const fixture: Fixture = {id:`NAT|${state.squad}|${competition.id}|${stage}|${label}`,round:state.matches.length+1,homeId:teamId(homeCountry,state.squad),awayId:teamId(awayCountry,state.squad),played:false};
   const isOwn = homeCountry===state.country || awayCountry===state.country;
-  const called = isOwn && state.status==='called' && career.player.injuryWeeks===0;
+  const called = isOwn && nationalAvailable(career)&&state.status==='called' && career.player.injuryWeeks===0;
   const match = simulateMatch(isOwn?{...career,managerTrust:Math.max(career.managerTrust,playingAbility(career.player)>=nationalRosterPower(career,state.country,state.squad)?90:65)}:career,fixture,{home:syntheticTeam(homeCountry,state.squad,homePlayers),away:syntheticTeam(awayCountry,state.squad,awayPlayers),homePlayers,awayPlayers,scope:'national',competitionId:competition.id,date,userParticipates:called,neutralVenue:!['qualifying','friendly'].includes(stage)});
   if (['round32','round16','quarterfinal','semifinal','final','thirdPlace'].includes(stage) && match.homeGoals===match.awayGoals) resolveNationalShootout(career,match);
   match.playerClubId = isOwn ? teamId(state.country,state.squad) : match.homeId;
   if (isOwn) {
-    match.nationalSelection={called,role:match.playerStarted?'starter':match.playerPlayed?'substitute':called?'bench':'excluded',reason:called?(match.playerPlayed?'대표팀 실제 출전':'로테이션·체력·포지션 경쟁으로 벤치 대기'):state.reason};
+    match.nationalSelection={called,role:match.playerStarted?'starter':match.playerPlayed?'substitute':called?'bench':'excluded',reason:called?(match.playerPlayed?'대표팀 실제 출전':'로테이션·체력·포지션 경쟁으로 벤치 대기'):(nationalParticipationReason(career)??state.reason)};
     state.matches.push(match);
     if (match.playerPlayed) {
       if (match.effects) {career.player.fitness=match.effects.fitnessAfter;career.player.form=match.effects.formAfter;career.player.morale=match.effects.moraleAfter;career.player.injuryWeeks=match.effects.injuryWeeksAfter;}

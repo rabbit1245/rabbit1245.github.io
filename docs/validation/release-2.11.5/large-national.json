@@ -1,0 +1,44 @@
+{
+  "url": "http://127.0.0.1:4194/Kball.html",
+  "source": "test-results/coherence/large/career.json",
+  "version": "K볼 2.11.5 · A FOOTBALL LIFE",
+  "controlsOnly": true,
+  "boundedCheckboxSaving": true,
+  "mobileOverflow": false,
+  "independentSwitches": true,
+  "oldClubAndNationalHistoryPreserved": true,
+  "oldMatchesPreserved": true,
+  "attributesUnchanged": true,
+  "twoReloads": true,
+  "history": [
+    {
+      "year": 2039,
+      "round": 38,
+      "date": "2040-06-30",
+      "key": "declineCallups",
+      "checked": true
+    },
+    {
+      "year": 2039,
+      "round": 38,
+      "date": "2040-06-30",
+      "key": "retired",
+      "checked": true
+    },
+    {
+      "year": 2039,
+      "round": 38,
+      "date": "2040-06-30",
+      "key": "declineCallups",
+      "checked": false
+    },
+    {
+      "year": 2039,
+      "round": 38,
+      "date": "2040-06-30",
+      "key": "retired",
+      "checked": false
+    }
+  ],
+  "errors": []
+}

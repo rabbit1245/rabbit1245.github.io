@@ -1,0 +1,44 @@
+{
+  "url": "http://127.0.0.1:4194/Kball.html",
+  "source": "test-results/national-2115/source.json",
+  "version": "K볼 2.11.5 · A FOOTBALL LIFE",
+  "controlsOnly": true,
+  "boundedCheckboxSaving": true,
+  "mobileOverflow": false,
+  "independentSwitches": true,
+  "oldClubAndNationalHistoryPreserved": true,
+  "oldMatchesPreserved": true,
+  "attributesUnchanged": true,
+  "twoReloads": true,
+  "history": [
+    {
+      "year": 2026,
+      "round": 0,
+      "date": "2026-07-01",
+      "key": "declineCallups",
+      "checked": true
+    },
+    {
+      "year": 2026,
+      "round": 0,
+      "date": "2026-07-01",
+      "key": "retired",
+      "checked": true
+    },
+    {
+      "year": 2026,
+      "round": 0,
+      "date": "2026-07-01",
+      "key": "declineCallups",
+      "checked": false
+    },
+    {
+      "year": 2026,
+      "round": 0,
+      "date": "2026-07-01",
+      "key": "retired",
+      "checked": false
+    }
+  ],
+  "errors": []
+}

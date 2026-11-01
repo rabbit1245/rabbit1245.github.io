@@ -1,0 +1,19 @@
+{
+  "version": "2.11.5",
+  "htmlBytes": 28611412,
+  "htmlSha256": "8b01e7cbc73e260f86097b059e3cf14b0c905a0722ff934cda2e107cc39b42f0",
+  "zipBytes": 21562166,
+  "zipSha256": "f030bd7dab03d01500b04d79f32c78076755e2bec89cb3401654f53167ac8a09",
+  "zipCRC": true,
+  "innerHtmlIdentical": true,
+  "members": [
+    "Kball.html",
+    "읽어주세요.txt",
+    "FONT-LICENSE.txt",
+    "CREST-LICENSE.txt"
+  ],
+  "standalone": true,
+  "typecheck": true,
+  "viteBuild": true,
+  "diffCheck": true
+}

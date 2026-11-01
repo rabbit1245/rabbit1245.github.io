@@ -1,6 +1,6 @@
 import {playingAbility,leadershipAbility} from './attributes';
 import {personalityEdge,personality} from './personality';
-import {skillSuccess,openPlaySaveChance,shareShotSupply} from './ability-contests';
+import {skillSuccess,openPlaySaveChance,shareShotSupply,pressureAbility,cognitiveOpportunity} from './ability-contests';
 import {phasePasses,resolvePressing,resolveAirClaims,headerProbability,headerDelivery,aerialQuality,type ActionEmitter} from './match-actions';
 import { CLUBS, ROSTERS } from './data';
 import { clamp, emptyStats, hashSeed, integer, round, seededRandom } from './math';
@@ -8,7 +8,7 @@ import type { MatchOptions, MatchParticipant, MatchPerformance } from './revisio
 import type { AttributeKey, Career, Club, Fixture, MatchEvent, MatchRecord, PlayerStats, Position } from './types';
 
 const CLUB_INDEX = new Map(CLUBS.map(club=>[club.id,club]));
-interface Actor extends MatchPerformance { from:number;to:number;teamId:string;user:boolean;style:string;creation:number }
+interface Actor extends MatchPerformance { from:number;to:number;teamId:string;user:boolean;style:string;creation:number;pressure?:number }
 interface Team { club:Club; actors:Actor[]; power:number; referencePower:number; leadership:number }
 const FORWARD = new Set<Position>(['ST','CF','SS','LW','RW']);
 const MIDFIELD = new Set<Position>(['CDM','CM','CAM','LM','RM']);
@@ -17,11 +17,11 @@ const SHOTS:Record<Position,number>={GK:.025,CB:.55,LB:.65,RB:.65,LWB:.9,RWB:.9,
 const PASSES:Record<Position,number>={GK:19,CB:43,LB:39,RB:39,LWB:38,RWB:38,CDM:52,CM:57,CAM:46,LM:37,RM:37,LW:29,RW:29,CF:29,SS:26,ST:23};
 const CREATION_ROLE:Record<Position,number>={GK:.03,CB:.2,LB:.85,RB:.85,LWB:1.1,RWB:1.1,CDM:.75,CM:1.45,CAM:2.4,LM:1.8,RM:1.8,LW:1.8,RW:1.8,CF:1.75,SS:1.75,ST:1.4};
 // World NPCs carry a validated 1–100 OVR rather than thirty identical attribute entries.
-const ability=(p:MatchParticipant,key:AttributeKey)=>{
+const ability=(p:MatchParticipant&{pressure?:number},key:AttributeKey)=>{
  if(!p.attributes)return p.ovr;
- const raw=p.attributes[key];if(raw!==undefined)return clamp(raw,1,110);
+ const raw=p.attributes[key];if(raw!==undefined){const value=clamp(raw,1,110);return p.pressure?pressureAbility(value,key,p.pressure):value;}
  // Missing GK physical/field traits use actual keeper ability, never the 120 display conversion.
- return clamp(p.ovr>100?playingAbility({...p,attributes:p.attributes,style:'style'in p?String(p.style):'',ovr:undefined}):p.ovr,1,110);
+ const value=clamp(p.ovr>100?playingAbility({...p,attributes:p.attributes,style:'style'in p?String(p.style):'',ovr:undefined}):p.ovr,1,110);return p.pressure?pressureAbility(value,key,p.pressure):value;
 };
 const duration=(p:Actor)=>Math.max(0,p.to-p.from)/90;
 const roundedCount=(mean:number,rng:()=>number)=>Math.max(0,Math.floor(mean+rng()));
@@ -135,7 +135,9 @@ function sampleActions(actor:Actor,opponentPower:number,rng:()=>number,emit:Acti
     const phases=phasePasses(actor,team,opposition,seed,emit,detailed,styleFactor(actor,'pass'),endurance,passProbability,recordActions);
     s.passesCompleted=phases.completed+success(s.passes-phases.attempts,passProbability);loggedPasses=phases.logged;loggedCompleted=phases.loggedCompleted;
     const wide=['LW','RW','LM','RM','LB','RB','LWB','RWB'].includes(actor.position);
-    actor.creation=(.15+a('vision')*.021+a('passing')*.007+a('crossing')*(wide?.019:.008)+a('decisions')*.006+a('setPieces')*.006+a('teamwork')*.005)*CREATION_ROLE[actor.position]*styleFactor(actor,'pass')*endurance;
+    // Scalar NPCs have equal component abilities; the weighted average is OVR.
+    const reading=actor.attributes?a('vision')*.35+a('decisions')*.3+a('anticipation')*.2+a('positioning')*.15:actor.ovr;
+    actor.creation=(.15+a('vision')*.021+a('passing')*.007+a('crossing')*(wide?.019:.008)+a('decisions')*.006+a('setPieces')*.006+a('teamwork')*.005)*CREATION_ROLE[actor.position]*styleFactor(actor,'pass')*endurance*(1+cognitiveOpportunity(reading,opponentPower,team.referencePower)*.25);
     s.dribbleAttempts=count((FORWARD.has(actor.position)?5.2:MIDFIELD.has(actor.position)?3.4:1.9)*styleFactor(actor,'dribble')*(.55+a('speed')*.007)*endurance);
     s.dribblesCompleted=success(s.dribbleAttempts,skillSuccess(.7135,a('dribbling')*.51+a('agility')*.22+a('ballControl')*.13+a('speed')*.08+a('strength')*.06,opponentPower,.032,.022)*endurance);
     const pressingForward=FORWARD.has(actor.position)&&/수비형|압박|프레싱/.test(actor.style);
@@ -230,7 +232,7 @@ export function simulateMatch(career:Career,fixture:Fixture,options:MatchOptions
   const seed=`${career.seed}:match-v2:${career.season.year}:${fixture.id}`;
   const actionSeed=hashSeed(seed).toString(36);
   const stage=(fixture as Fixture&{stage?:string}).stage;
-  const bigMatch=!!stage&&/^(결승|준결승|8강|16강|final|semifinal|quarterfinal|round16)$/.test(stage)||/(?:^|[|:])(final|semifinal|quarterfinal|round16)(?:[|:]|$)/.test(fixture.id)||home.power>=80&&away.power>=80&&Math.abs(home.power-away.power)<=8;
+  const bigMatch=!!stage&&/^(결승|준결승|4강|8강|16강|final|semifinal|quarterfinal|round16)$/.test(stage)||/(?:^|[|:])(final|semifinal|quarterfinal|round16)(?:[|:]|$)/.test(fixture.id)||home.power>=80&&away.power>=80&&Math.abs(home.power-away.power)<=8;
   const rng=seededRandom(seed),selectRng=seededRandom(`${seed}:selection`);
   const p=career.player;
   const suppliedHome=options.homePlayers?.some(row=>row.id===p.id),suppliedAway=options.awayPlayers?.some(row=>row.id===p.id);
@@ -271,6 +273,7 @@ export function simulateMatch(career:Career,fixture:Fixture,options:MatchOptions
   }
   assignCaptain(career,teams[0],userTeam,options.scope??'club',options.homePlayers);
   assignCaptain(career,teams[1],userTeam,options.scope??'club',options.awayPlayers);
+  if(bigMatch&&userTeam)for(const actor of teams.find(t=>t.club.id===userTeam)!.actors)if(actor.user)actor.pressure=personalityEdge(career,'clutch');
   const events:MatchEvent[]=[];
   let eventIndex=0;
   const emit:ActionEmitter=(type,actor,minute,detail,relatedId,action)=>{
@@ -311,11 +314,16 @@ export function simulateMatch(career:Career,fixture:Fixture,options:MatchOptions
       const a=(key:AttributeKey)=>ability(shooter,key);
       const minutes=duration(shooter);
       const clutch=shooter.user&&bigMatch?personalityEdge(career,'clutch'):0;
-      const threat=a('positioning')*.28+a('anticipation')*.16+a('decisions')*.14+a('speed')*.14+a('ballControl')*.14+a('dribbling')*.14;
+      // Finding space off the ball and beating a marker with the ball are
+      // different routes to one opportunity, rather than requiring both builds.
+      const offBall=shooter.attributes?a('positioning')*.4+a('anticipation')*.25+a('decisions')*.2+a('speed')*.15:shooter.ovr;
+      const onBall=shooter.attributes?a('dribbling')*.35+a('speed')*.25+a('ballControl')*.25+a('decisions')*.15:shooter.ovr;
+      const threat=Math.max(offBall,onBall);
       const selfCreation=shooter.position==='GK'?1:clamp(1+(threat-opposition.power)*.012,.65,1.65);
       const opportunities=SHOTS[shooter.position]*minutes*styleFactor(shooter,'shot')*powerFactor*actionFactor*tactics[side].supply*tactics[1-side].coverage*selfCreation*(.43+a('positioning')*.006+a('speed')*.002+a('decisions')*.001)*organizationFactor*(1+clutch*.03);
       const headerChance=headerProbability(shooter,team),finishing=a('shooting')*(1-headerChance)+aerialQuality(shooter)*headerChance;
-      return {opportunities,headerChance,contest:FORWARD.has(shooter.position),quality:finishing*.45+a('positioning')*.2+a('composure')*.15+a('anticipation')*.1+a('decisions')*.1};
+      const reading=shooter.attributes?a('vision')*.35+a('decisions')*.3+a('anticipation')*.2+a('positioning')*.15:shooter.ovr;
+      return {opportunities,headerChance,clearSpace:cognitiveOpportunity(reading,opposition.power,team.referencePower),contest:FORWARD.has(shooter.position),quality:finishing*.45+a('positioning')*.2+a('composure')*.15+a('anticipation')*.1+a('decisions')*.1};
     });
     const shared=shareShotSupply(shotSupply,team.power);
     for(const [actorIndex,shooter] of team.actors.entries()){
@@ -330,7 +338,7 @@ export function simulateMatch(career:Career,fixture:Fixture,options:MatchOptions
         const keeper=keeperAt(minute);if(!keeper)continue;
         const k=(key:AttributeKey)=>ability(keeper,key);
         const typeRoll=shotRng();
-        const shotType=typeRoll<.02?'penalty':typeRoll<.11?'setPiece':typeRoll<.11+headerChance?'header':typeRoll<.29+headerChance?'oneOnOne':'open';
+        const shotType=typeRoll<.02?'penalty':typeRoll<.11?'setPiece':typeRoll<.11+headerChance?'header':typeRoll<.29+headerChance+shotSupply[actorIndex].clearSpace*.08?'oneOnOne':'open';
         const header=shotType==='header'?headerDelivery(team,opposition,shooter,keeper,minute,headerRng,emit,recordActions):undefined;
         if(shotType==='header'&&!header?.won)continue;
         const shotId=emit('shot',shooter,minute,shotType==='penalty'?'페널티킥':shotType==='setPiece'?'프리킥 슈팅':shotType==='header'?'헤더 슈팅':shotType==='oneOnOne'?'일대일 슈팅':'슈팅',recordActions?header?.crossId:undefined,recordActions&&header?{kind:'headerShot',phase:header.phase,duelId:header.duelId}:undefined);

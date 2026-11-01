@@ -1,5 +1,5 @@
 import {recordCommandChange} from './command-patches';
-import {releaseContract,setPlaySkill,refreshContractOffers,setPersonality,setPersonalityValues} from './engine';
+import {releaseContract,setPlaySkill,refreshContractOffers,setPersonality,setPersonalityValues,setNationalParticipation} from './engine';
 import type { Career, GameCommand,GameProgress } from './types';
 import { advanceCareer, advanceHalf, dismissChoice, setTraining, acceptTransfer, stayAtClub, startNextSeason, retireCareer, respondToCaptainOffer,configureCheats,cheatIncreaseAttribute,manuallyAge,setAttributeLock,setAllAttributeLocks,manuallyInjure } from './engine';
 
@@ -8,6 +8,7 @@ export function executeCommand(career: Career, command: GameCommand, commandId: 
   if (career.processedCommands.includes(commandId)) return career;
   let next: Career;
   switch (command.type) {
+    case 'nationalParticipation':next=setNationalParticipation(career,command.key,command.checked);break;
     case 'personality':next=setPersonality(career,command.key,command.value);break;
     case 'personalitySet':next=setPersonalityValues(career,command.values);break;
     case 'refreshOffers':next=refreshContractOffers(career);break;

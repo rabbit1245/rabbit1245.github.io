@@ -1,0 +1,156 @@
+TAP version 13
+# Subtest: independent reversible national switches use a bounded journal and preserve immutable world and past matches
+ok 1 - independent reversible national switches use a bounded journal and preserve immutable world and past matches
+  ---
+  duration_ms: 1717.84944
+  ...
+# Subtest: refusal excludes the actual roster and appearances but country matches continue; releasing it restores merit-based eligibility
+ok 2 - refusal excludes the actual roster and appearances but country matches continue; releasing it restores merit-based eligibility
+  ---
+  duration_ms: 886.531004
+  ...
+# Subtest: retirement carries across seasons and records its year, and resuming does not restore an old captain appointment
+ok 3 - retirement carries across seasons and records its year, and resuming does not restore an old captain appointment
+  ---
+  duration_ms: 343.595576
+  ...
+# Subtest: retained source nationality follows the player, not the country of their club
+ok 4 - retained source nationality follows the player, not the country of their club
+  ---
+  duration_ms: 0.759124
+  ...
+# Subtest: January and July season calendars use future June windows without retroactive World Cups
+ok 5 - January and July season calendars use future June windows without retroactive World Cups
+  ---
+  duration_ms: 340.261118
+  ...
+# Subtest: national windows replay exactly, preserve club contracts, and archive without duplicate statistics
+ok 6 - national windows replay exactly, preserve club contracts, and archive without duplicate statistics
+  ---
+  duration_ms: 467.298301
+  ...
+# Subtest: injury and real positional competition explain non-selection without awarding phantom appearances
+ok 7 - injury and real positional competition explain non-selection without awarding phantom appearances
+  ---
+  duration_ms: 340.219199
+  ...
+# Subtest: U20 and senior match ledgers remain separate across season changes
+ok 8 - U20 and senior match ledgers remain separate across season changes
+  ---
+  duration_ms: 103.682573
+  ...
+# Subtest: qualification uses played group scores and knockout titles use the actual final winner
+ok 9 - qualification uses played group scores and knockout titles use the actual final winner
+  ---
+  duration_ms: 8900.280468
+  ...
+# Subtest: a single star does not erase whole-country strength over repeated tournaments
+ok 10 - a single star does not erase whole-country strength over repeated tournaments
+  ---
+  duration_ms: 14801.511627
+  ...
+# {"same92OVRStar64WorldCups":[{"country":"프랑스","titles":25,"qualified":64,"finals":37},{"country":"베트남","titles":0,"qualified":46,"finals":0}]}
+# Subtest: a small continental field uses earned finalists and never invents a semifinal opponent
+ok 11 - a small continental field uses earned finalists and never invents a semifinal opponent
+  ---
+  duration_ms: 41.909106
+  ...
+# Subtest: an older in-progress semifinal bracket keeps its recorded opponents without fabricated earlier qualifiers
+ok 12 - an older in-progress semifinal bracket keeps its recorded opponents without fabricated earlier qualifiers
+  ---
+  duration_ms: 94.739192
+  ...
+# Subtest: played qualifying groups stay fixed when another country’s squad changes before the semifinal
+ok 13 - played qualifying groups stay fixed when another country’s squad changes before the semifinal
+  ---
+  duration_ms: 92.234305
+  ...
+# Subtest: goalkeepers retain keeper metrics and competitors receive exactly their national match ledger
+ok 14 - goalkeepers retain keeper metrics and competitors receive exactly their national match ledger
+  ---
+  duration_ms: 193.981115
+  ...
+# Subtest: qualification carries between seasons, intermediate windows play friendlies, and calendar switches do not replay finals
+ok 15 - qualification carries between seasons, intermediate windows play friendlies, and calendar switches do not replay finals
+  ---
+  duration_ms: 111.968958
+  ...
+# Subtest: shootout takers are the eligible players still on the pitch and do not change regular statistics
+ok 16 - shootout takers are the eligible players still on the pitch and do not change regular statistics
+  ---
+  duration_ms: 2.879393
+  ...
+# Subtest: international windows follow the local calendar and its displayed year
+ok 17 - international windows follow the local calendar and its displayed year
+  ---
+  duration_ms: 3.773401
+  ...
+# Subtest: only due international matches affect the player and the standings
+ok 18 - only due international matches affect the player and the standings
+  ---
+  duration_ms: 94.309525
+  ...
+# Subtest: incremental dates and a single due-date advance produce the same actual match ledger
+ok 19 - incremental dates and a single due-date advance produce the same actual match ledger
+  ---
+  duration_ms: 210.942887
+  ...
+# Subtest: already completed calendar windows survive league and age-group changes without replaying a match
+ok 20 - already completed calendar windows survive league and age-group changes without replaying a match
+  ---
+  duration_ms: 67.056211
+  ...
+# Subtest: old mid-window saves skip elapsed call-ups without fabricating past player actions
+ok 21 - old mid-window saves skip elapsed call-ups without fabricating past player actions
+  ---
+  duration_ms: 16.182175
+  ...
+# Subtest: legacy whole-window records and keys remain authoritative after restoring a save
+ok 22 - legacy whole-window records and keys remain authoritative after restoring a save
+  ---
+  duration_ms: 135.852919
+  ...
+# Subtest: a restored career with played fixtures uses its last club date as its migration cursor
+ok 23 - a restored career with played fixtures uses its last club date as its migration cursor
+  ---
+  duration_ms: 5.50982
+  ...
+# Subtest: international injury is visible to the next club selection before that match is simulated
+ok 24 - international injury is visible to the next club selection before that match is simulated
+  ---
+  duration_ms: 165.774301
+  ...
+# Subtest: a youth player sees the real U19 stage and no predicted senior or international cups
+ok 25 - a youth player sees the real U19 stage and no predicted senior or international cups
+  ---
+  duration_ms: 194.493751
+  ...
+# Subtest: actual national appearances are deduplicated, age-scoped and retain the qualifying stage
+ok 26 - actual national appearances are deduplicated, age-scoped and retain the qualifying stage
+  ---
+  duration_ms: 103.097188
+  ...
+# Subtest: a stale called flag cannot fabricate participation for a new season or age group
+ok 27 - a stale called flag cannot fabricate participation for a new season or age group
+  ---
+  duration_ms: 153.671419
+  ...
+# Subtest: a verified current-season callup shows selection without inventing an appearance
+ok 28 - a verified current-season callup shows selection without inventing an appearance
+  ---
+  duration_ms: 152.661648
+  ...
+# Subtest: offseason transfers do not relabel the club competition just completed
+ok 29 - offseason transfers do not relabel the club competition just completed
+  ---
+  duration_ms: 181.060417
+  ...
+1..29
+# tests 29
+# suites 0
+# pass 29
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 26669.885757
