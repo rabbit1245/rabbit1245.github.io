@@ -2,6 +2,8 @@
 
 골 결정력·오프더볼·압박·태클·개인기를 추가하고 기존 수비를 수비지능으로 구분합니다. 실제 경기의 프리킥·페널티 득점/도움, 결정적 기회 창출, 압박 성공률과 볼 회수를 경기부터 은퇴 TXT까지 연결합니다. 개별 능력치 최대 120 + 실제 숙련 보정 최대 10으로 OVR 130을 적용하며 선택만으로 점수는 오르지 않습니다. [변경·기존 저장·검수 결과](docs/RELEASE-2.12.0.md).
 
+[K볼 2.12.0 다운로드](https://github.com/rabbit1245/rabbit1245.github.io/raw/92ddb2121d649cde86e5eb938e41b4bbbc9815f0/Kball.zip?download=1) · ZIP 압축을 풀고 `Kball.html`을 엽니다.
+
 ## K볼 2.11.7 · 포지션 변경과 구단 전설·5년 통합 수상
 
 포지션·유형의 실제 OVR 가중치를 화살표로 보여주고 훈련 화면에서 포지션과 유형을 변경합니다. 전후 OVR·날짜·포지션을 커리어와 연도별 TXT에 남기며, 구단의 역사적 위상에 따른 중복 없는 영구결번과 최근 5시즌을 비교하는 슈퍼 발롱도르를 추가합니다. [규칙·보존·검수](docs/RELEASE-2.11.7.md).
@@ -181,7 +183,7 @@ GitHub Pages에는 `dist/`를 배포합니다. 저장소 Settings → Pages의 S
 
 ## 파일로 바로 플레이
 
-[K볼 2.11.1 다운로드](https://github.com/rabbit1245/rabbit1245.github.io/raw/568b46ea89ffb0145053450f95943985a009ba7b/Kball.zip?download=1)을 내려받아 압축을 풀고 `Kball.html`을 최신 Chrome 또는 Edge로 엽니다. 게임 코드, 선수 명단과 구단 로고가 파일 안에 포함되어 있습니다. 사용자에게 Node.js나 Python 설치는 필요하지 않습니다. 저장 데이터는 브라우저에 보관되므로 파일 이름·위치 또는 브라우저를 바꾸기 전에 JSON으로 내보내세요.
+[K볼 2.12.0 다운로드](https://github.com/rabbit1245/rabbit1245.github.io/raw/92ddb2121d649cde86e5eb938e41b4bbbc9815f0/Kball.zip?download=1)을 내려받아 압축을 풀고 `Kball.html`을 최신 Chrome 또는 Edge로 엽니다. 게임 코드, 선수 명단과 구단 로고가 파일 안에 포함되어 있습니다. 사용자에게 Node.js나 Python 설치는 필요하지 않습니다. 저장 데이터는 브라우저에 보관되므로 파일 이름·위치 또는 브라우저를 바꾸기 전에 JSON으로 내보내세요.
 
 개발자가 이 파일을 다시 생성하려면 Node.js와 Python 3가 설치된 환경에서 다음 명령을 사용합니다.
 

@@ -75,3 +75,12 @@ node tests/kball-expanded.test.mjs
 npm run build
 npm run build:playable
 ```
+
+## 배포 확인
+
+[2.12.0 ZIP 다운로드](https://github.com/rabbit1245/rabbit1245.github.io/raw/92ddb2121d649cde86e5eb938e41b4bbbc9815f0/Kball.zip?download=1)를 공개 경로에서 다시 받아 HTTP 200, 21,586,293바이트, ZIP CRC와 검수 HTML의 바이트 일치를 확인했다. 파일 하단에서 2.12.0을 확인하고 기존 진행은 JSON으로 가져온다.
+
+- 게임 소스: `a7dcc5179ca770d7de2b54f4180238596ab34f5b`
+- 다운로드 배포: `92ddb2121d649cde86e5eb938e41b4bbbc9815f0`
+- ZIP SHA-256: `602d5ba54ff4e3047caf75592d2ad61690ff65e72abcdbfe59a2285586f199eb`
+- [공개 다운로드 검증](validation/release-2.12.0/public-download.json)

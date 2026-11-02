@@ -1,0 +1,24 @@
+{
+  "status": 200,
+  "bytes": 21586293,
+  "url": "https://raw.githubusercontent.com/rabbit1245/rabbit1245.github.io/92ddb2121d649cde86e5eb938e41b4bbbc9815f0/Kball.zip",
+  "version": "2.12.0",
+  "zipBytes": 21586293,
+  "zipSha256": "602d5ba54ff4e3047caf75592d2ad61690ff65e72abcdbfe59a2285586f199eb",
+  "htmlBytes": 28643799,
+  "htmlSha256": "16adbad54507d44d2fb6e3e59390efab05fb78d8f4a8d2d20ac07d6af6a7f73f",
+  "members": [
+    "Kball.html",
+    "읽어주세요.txt",
+    "FONT-LICENSE.txt",
+    "CREST-LICENSE.txt"
+  ],
+  "crc": "pass",
+  "innerHTML": "identical",
+  "sourceCommit": "a7dcc5179ca770d7de2b54f4180238596ab34f5b",
+  "releaseCommit": "92ddb2121d649cde86e5eb938e41b4bbbc9815f0",
+  "verifiedAt": "2026-11-02T05:23:21.804320+00:00",
+  "downloadUrl": "https://github.com/rabbit1245/rabbit1245.github.io/raw/92ddb2121d649cde86e5eb938e41b4bbbc9815f0/Kball.zip?download=1",
+  "publicCRC": "pass",
+  "publicHTMLMatchesTestedHTML": true
+}
