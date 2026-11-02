@@ -1,0 +1,14 @@
+{
+  "passed": [
+    "1366x768 and 1920x1080 show all 25 abilities and training rows with primary fonts of at least 17px",
+    "creation training, three menus, one-command half progression and identical skipped/reduced-motion results",
+    "all league teams in one modal, actual W/D/L/GF/GA/GD/points and league-only scorer table",
+    "actual season conserves club/personal fan sales and displays the saved personal share on desktop/mobile",
+    "annual-only contracts, one training route, current competitions, locker combined details and reconciled records",
+    "JSON export, independent import slot, checksum rejection and previous-good backup restore",
+    "contract-controlled wage, transfer fees separate from income, next season, reload and retirement totals",
+    "one click downloads one complete UTF-8 career TXT, leaves saves untouched and awards show only own selection"
+  ],
+  "pageErrors": [],
+  "failure": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n\n16 !== 10\n"
+}

@@ -7,6 +7,7 @@ export const FIELD_PLAY_SKILLS:PlaySkill[]=[
  ['ballControl','벨벳','Velvet'],['dribbling','팬텀','Phantom'],['passing','아키텍트','Architect'],['crossing','휘프','Whip'],['shooting','스나이퍼','Sniper'],
  ['heading','에어리얼','Aerial'],['defending','락다운','Lockdown'],['setPieces','데드아이','Deadeye'],['decisions','오라클','Oracle'],['vision','니들','Needle'],
  ['anticipation','인터셉터','Interceptor'],['positioning','섀도우','Shadow'],['composure','아이스맨','Iceman'],['concentration','포커스','Focus'],['teamwork','커맨더','Commander'],
+ ['finishing','클리니컬','Clinical'],['offTheBall','고스트런','Ghost Run'],['pressing','프레셔','Pressure'],['tackling','볼헌터','Ball Hunter'],['skillMoves','매지션','Magician'],
 ].map(([key,name,english])=>({key:key as AttributeKey,name,english}));
 export const GK_PLAY_SKILLS:PlaySkill[]=[
  ['gkShotStopping','아이언월','Iron Wall'],['gkReflexes','리플렉스','Reflex'],['gkHandling','세이프핸즈','Safe Hands'],['gkAerialCommand','에어커맨드','Air Command'],
@@ -14,8 +15,8 @@ export const GK_PLAY_SKILLS:PlaySkill[]=[
  ['concentration','스틸마인드','Steel Mind'],['gkDefensiveOrganization','필드마셜','Field Marshal'],
 ].map(([key,name,english])=>({key:key as AttributeKey,name,english}));
 export const playSkillDefinitions=(position:Position)=>position==='GK'?GK_PLAY_SKILLS:FIELD_PLAY_SKILLS;
-export const attributeCap=(p:Pick<Player,'playSkills'>,key:AttributeKey)=>p.playSkills?.includes(key)?110:100;
-export interface PlaySkillChange {year:number;round:number;key:AttributeKey;selected:boolean;before:number;after:number;position:Position}
+export const attributeCap=(p:Pick<Player,'playSkills'|'abilityVersion'>,key:AttributeKey)=>p.abilityVersion===2?120:p.playSkills?.includes(key)?110:100;
+export interface PlaySkillChange {abilityVersion?:2;year:number;round:number;key:AttributeKey;selected:boolean;before:number;after:number;position:Position}
 /** Replay the actual acquisition/removal year, never copy today's skills into old seasons. */
 export function playSkillsForYear(c:Career,year:number):AttributeKey[]{
  const changes=c.systems?.playSkillChanges;

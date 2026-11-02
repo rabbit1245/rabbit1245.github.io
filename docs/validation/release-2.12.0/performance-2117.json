@@ -1,0 +1,36 @@
+{
+  "root": "/workspace/kball-2120-baseline",
+  "batches": [
+    {
+      "wallMs": 1798.7196509999999,
+      "cpuMs": 1252.738,
+      "eventsPerMatch": 163.7525,
+      "sourceBytesPerMatch": 64118.63333333333
+    },
+    {
+      "wallMs": 1550.7220790000001,
+      "cpuMs": 1071.975,
+      "eventsPerMatch": 163.7525,
+      "sourceBytesPerMatch": 64118.63333333333
+    },
+    {
+      "wallMs": 1445.1030719999999,
+      "cpuMs": 928.917,
+      "eventsPerMatch": 163.7525,
+      "sourceBytesPerMatch": 64118.63333333333
+    },
+    {
+      "wallMs": 1354.99536,
+      "cpuMs": 575.97,
+      "eventsPerMatch": 163.7525,
+      "sourceBytesPerMatch": 64118.63333333333
+    },
+    {
+      "wallMs": 1936.9028600000001,
+      "cpuMs": 920.903,
+      "eventsPerMatch": 163.7525,
+      "sourceBytesPerMatch": 64118.63333333333
+    }
+  ],
+  "heapAfterGC": 34703768
+}

@@ -77,7 +77,7 @@ test('every roster is playable, indexed by its own club, with globally unique pl
 test('all sixteen positions have ten distinct playable styles and valid ability profiles', () => {
   assert.equal(positions.length, 16);
   assert.equal(talents.length, 7);
-  assert.equal(FIELD_ATTRIBUTES.length, 20);
+  assert.equal(FIELD_ATTRIBUTES.length, 25);
   assert.equal(GK_ATTRIBUTES.length, 10);
   assert.ok(unique(FIELD_ATTRIBUTES));
   assert.ok(unique(GK_ATTRIBUTES));
@@ -115,7 +115,7 @@ test('OVR stays on one global scale across leagues and talent, with bounded miss
       }
       const extremes = (value: number) => Object.fromEntries(keys.map(key => [key, value])) as Attributes;
       assert.equal(overall({...subject, attributes: extremes(-300)}), 1);
-      assert.equal(overall({...subject, attributes: extremes(500)}), 100);
+      assert.equal(overall({...subject, attributes: extremes(500)}), 120);
       assert.equal(overall({...subject, attributes: extremes(Number.NaN)}), 1);
       assert.equal(overall({...subject, attributes: {}}), 1);
     }

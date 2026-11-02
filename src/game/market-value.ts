@@ -1,3 +1,4 @@
+import {comparableLegacyOVR} from './ability-expansion';
 import {getClub,getLeague} from './data';
 import {playingAbility} from './attributes';
 import {personalityEdge} from './personality';
@@ -10,13 +11,16 @@ import type {MarketAssessment} from './revision-types';
  * season at unchanged ability has no decline pressure; repeated low ability does. */
 export function marketDeclineEvidence(c:Career){
  const ability=playingAbility(c.player),a=c.systems?.economics.assessment;
- let reference=Math.max(ability,c.season.ovrStart??ability,a?.ability??ability);
- for(const h of c.history)for(const value of [h.ovrStart,h.ovrEnd])if(Number.isFinite(value))reference=Math.max(reference,value);
- for(const r of c.systems?.manualAging??[])if((!r.playerId||r.playerId===c.player.id)&&Number.isFinite(r.ovrBefore))reference=Math.max(reference,r.ovrBefore);
+ const converted=!!c.systems?.abilityUpgrade&&c.player.abilityVersion===2;
+ const start=converted&&c.systems!.abilityUpgrade!.year===c.season.year?comparableLegacyOVR(c,c.season.ovrStart):c.season.ovrStart;
+ const assessed=a&&converted&&a.abilityVersion!==2?(a.ability===c.systems!.abilityUpgrade!.ovrBefore?c.systems!.abilityUpgrade!.ovrAfter:comparableLegacyOVR(c,a.ability)):a?.ability;
+ let reference=Math.max(ability,start??ability,assessed??ability);
+ for(const h of c.history){const legacy=converted&&h.details?.abilityVersion!==2;for(const value of [legacy?comparableLegacyOVR(c,h.ovrStart,h.details?.startAttributes,h.position,h.details?.playSkills):h.ovrStart,legacy?comparableLegacyOVR(c,h.ovrEnd,h.details?.attributes,h.position,h.details?.playSkills):h.ovrEnd])if(Number.isFinite(value))reference=Math.max(reference,value);}
+ for(const r of c.systems?.manualAging??[])if((!r.playerId||r.playerId===c.player.id)&&Number.isFinite(r.ovrBefore))reference=Math.max(reference,converted&&!('finishing'in r.before)?comparableLegacyOVR(c,r.ovrBefore,r.before):r.ovrBefore);
  const severity=clamp((reference-ability-8)/32,0,1),threshold=reference-8;
  let years=0,expected=c.season.year-1;
  for(const h of [...c.history].filter(h=>h.completed&&h.year<c.season.year&&h.squad!=='youth').sort((x,y)=>y.year-x.year)){
-  if(h.year!==expected||h.ovrEnd>=threshold)break;years++;expected--;
+  if(h.year!==expected||(converted&&h.details?.abilityVersion!==2?comparableLegacyOVR(c,h.ovrEnd,h.details?.attributes,h.position,h.details?.playSkills):h.ovrEnd)>=threshold)break;years++;expected--;
  }
  let fraction=clamp(c.season.week/Math.max(1,c.season.totalWeeks),0,1);
  const closed=c.history.find(h=>h.year===c.season.year&&h.completed);
@@ -54,7 +58,7 @@ export function marketEstimate(c:Career):number {
  return Math.max(1000,Math.min(350000000,Math.round(quality*youth*potential*(total?form/total:.9)*(total?exposure/total:.65)*prestige*international*injury*breakout*recognition*achievement*(1+personalityEdge(c,'stardom')*.06)/1000)*1000));
 }
 export function assessmentNow(c:Career):MarketAssessment{
- return {year:c.season.year,round:c.season.week,totalRounds:c.season.totalWeeks,ability:playingAbility(c.player),injuryWeeks:c.player.injuryWeeks,stardom:c.systems?.personality?.stardom??5};
+ return {abilityVersion:c.player.abilityVersion,year:c.season.year,round:c.season.week,totalRounds:c.season.totalWeeks,ability:playingAbility(c.player),injuryWeeks:c.player.injuryWeeks,stardom:c.systems?.personality?.stardom??5};
 }
 export function marketQuote(c:Career):number {
  const e=c.systems?.economics;if(!e)return marketEstimate(c);
@@ -68,7 +72,8 @@ export function marketQuote(c:Career):number {
  const rate=up?(firstBreakout?.95:.55)*progress:(.3+.65*confirmed)*progress;
  const eventRate=freshInjury>=4?Math.min(.18,freshInjury*.01):starChange>0?.06:0;
  let value=e.marketValue+(target-e.marketValue)*Math.max(rate,eventRate);
- const retained=now.ability>=a.ability-2,young=c.player.age<=29;
+ const oldAssessment=a.abilityVersion!==2&&c.systems?.abilityUpgrade?(a.ability===c.systems.abilityUpgrade.ovrBefore?c.systems.abilityUpgrade.ovrAfter:comparableLegacyOVR(c,a.ability)):a.ability;
+ const retained=now.ability>=oldAssessment-2,young=c.player.age<=29;
  const ordinaryDrop=(retained&&young?.12:.35)*clamp(elapsed,0,1);
  const maxDrop=clamp(Math.max(ordinaryDrop,1-Math.exp(-2.6*confirmed*elapsed))+Math.min(.15,freshInjury*.01),0,1);
  const floor=Math.ceil(e.marketValue*(1-maxDrop)/1000)*1000;

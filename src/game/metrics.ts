@@ -1,8 +1,14 @@
+import {extendedCoverage} from './extended-metrics';
 import {actionCoverage} from './action-metrics';
 import type { AttributeKey, PlayerStats } from './types';
 
 /** These descriptions name the actual action checks used by match-engine.ts. */
 export const ATTRIBUTE_EFFECTS: Record<AttributeKey, {action:string;metrics:(keyof PlayerStats)[];description:string}> = {
+  finishing:{action:'득점 기회 마무리',metrics:['goals'],description:'골문을 향한 슈팅을 실제 득점으로 마무리하는 판정에 작용합니다.'},
+  offTheBall:{action:'공격 침투·수비 이탈',metrics:['shots','goals'],description:'공 없이 수비를 따돌려 공격적인 슈팅 기회를 얻는 행동에 작용합니다.'},
+  pressing:{action:'추격·소유권 회복 유도',metrics:['pressingAttempts','pressingSuccesses','ballRecoveries'],description:'압박 기회와 상대의 실수를 유도하는 판정에 작용하며 실제 팀 회수가 있어야 성공입니다.'},
+  tackling:{action:'직접 볼 탈취',metrics:['tackles','ballRecoveries'],description:'상대 볼 소유자와의 실제 태클 경합 기술을 평가합니다.'},
+  skillMoves:{action:'좁은 공간 돌파',metrics:['dribblesCompleted'],description:'좁은 공간에서 개인기로 상대를 제치는 판정에 작용합니다.'},
   strength:{action:'몸싸움·태클·공중볼',metrics:['tackles','aerialWon'],description:'경합에서 공을 지키고 태클과 공중볼을 이길 확률이 높아집니다.'},
   stamina:{action:'후반 활동과 성공',metrics:['lateActions','lateSuccesses','pressingWins'],description:'경기 후반 활동량과 행동 성공률을 유지하고 경기 후 체력 소모를 줄입니다.'},
   speed:{action:'돌파·침투',metrics:['dribbleAttempts','dribblesCompleted','shots','pressingWins'],description:'돌파와 침투로 슈팅 기회를 얻는 횟수가 늘어납니다.'},
@@ -14,7 +20,7 @@ export const ATTRIBUTE_EFFECTS: Record<AttributeKey, {action:string;metrics:(key
   crossing:{action:'크로스 기회 창출',metrics:['keyPasses','assists'],description:'측면에서 크로스를 슈팅과 득점 기회로 연결합니다.'},
   shooting:{action:'슈팅 정확도',metrics:['shotsOnTarget','goals'],description:'슈팅이 골문으로 향하고 골키퍼를 넘을 확률이 높아집니다.'},
   heading:{action:'헤더',metrics:['aerialWon','shotsOnTarget','goals','headerGoals'],description:'공중볼을 확보하고 헤더를 골문으로 보낼 확률이 높아집니다.'},
-  defending:{action:'태클·압박',metrics:['tackles','pressingWins'],description:'상대의 공격을 태클로 끊는 확률이 높아집니다.'},
+  defending:{action:'수비지능·공격 경로 차단',metrics:['interceptions','ballRecoveries'],description:'수비 위치와 상대의 의도를 읽어 공격 경로를 차단하며 태클·압박의 판단도 돕습니다.'},
   setPieces:{action:'프리킥·페널티·세트피스',metrics:['shotsOnTarget','keyPasses','goals'],description:'세트피스 슈팅 정확도와 세트피스에서 기회를 만드는 능력을 높입니다.'},
   decisions:{action:'패스·돌파 판단',metrics:['passesCompleted','keyPasses','sweepingSuccesses','progressivePasses','pressingWins','punches'],description:'안전한 패스와 효과적인 공격, 골키퍼의 전진 시점을 선택합니다.'},
   vision:{action:'찬스 탐색·전진 패스',metrics:['keyPasses','assists','progressivePasses'],description:'슈팅할 수 있는 동료를 발견하는 횟수가 늘어납니다.'},
@@ -37,6 +43,10 @@ export const successRate=(success:number|undefined,attempts:number|undefined):nu
 export const per90=(value:number|undefined,minutes:number):number => minutes>0?(value??0)*90/minutes:0;
 export const averageRating=(stats:PlayerStats):number => stats.ratingCount?stats.ratingSum/stats.ratingCount:0;
 export interface MetricLine { key:string; label:string; value:number|null; attempts?:number; rate?:number|null }
+function extendedMetricLines(s:PlayerStats):MetricLine[]{return [
+    ...(['freeKickGoals','freeKickAssists','penaltyGoals','bigChancesCreated','ballRecoveries'] as const).map(key=>({key,label:({freeKickGoals:'프리킥 득점',freeKickAssists:'프리킥 도움',penaltyGoals:'페널티킥 득점',bigChancesCreated:'결정적 기회 창출',ballRecoveries:'볼 회수'}[key]),value:extendedCoverage(s).known?s[key]??0:null})),
+    {key:'pressingRate',label:'압박 성공률',value:extendedCoverage(s).known?successRate(s.pressingSuccesses,s.pressingAttempts):null},
+  ];}
 export function fieldMetrics(s:PlayerStats):MetricLine[] {
   return [
     {key:'goals',label:'득점',value:s.goals},{key:'assists',label:'도움',value:s.assists},
@@ -48,6 +58,7 @@ export function fieldMetrics(s:PlayerStats):MetricLine[] {
     {key:'interceptions',label:'인터셉트',value:s.interceptions},
     {key:'aerials',label:'공중볼 경합',value:s.aerialWon??0,attempts:s.aerialAttempts??0,rate:successRate(s.aerialWon,s.aerialAttempts)},
     {key:'headerGoals',label:'헤더 득점',value:actionCoverage(s).known?s.headerGoals??0:null},{key:'pressingWins',label:'압박 성공',value:actionCoverage(s).known?s.pressingWins??0:null},{key:'progressivePasses',label:'전진 패스 성공',value:actionCoverage(s).known?s.progressivePasses??0:null},
+    ...extendedMetricLines(s),
   ];
 }
 export function goalkeeperMetrics(s:PlayerStats):MetricLine[] {
@@ -61,5 +72,6 @@ export function goalkeeperMetrics(s:PlayerStats):MetricLine[] {
     {key:'buildUp',label:'빌드업 패스',value:s.buildUpCompleted??0,attempts:s.buildUpPasses??0,rate:successRate(s.buildUpCompleted,s.buildUpPasses)},
     {key:'longKicks',label:'롱킥',value:s.longKicksCompleted??0,attempts:s.longKicks??0,rate:successRate(s.longKicksCompleted,s.longKicks)},
     {key:'punches',label:'펀칭 성공',value:actionCoverage(s).known?s.punches??0:null},
+    ...extendedMetricLines(s),
   ];
 }

@@ -1,0 +1,29 @@
+{
+  "url": "http://127.0.0.1:4194/Kball.html",
+  "checks": [
+    {
+      "width": 1366,
+      "legacyOriginalAbilitiesAndEventsPreserved": true,
+      "oneTimeUpgradeAndReload": true,
+      "oldNewStatsUntracked": true,
+      "fieldCells": 18,
+      "noOverflow": true
+    },
+    {
+      "width": 390,
+      "legacyOriginalAbilitiesAndEventsPreserved": true,
+      "oneTimeUpgradeAndReload": true,
+      "oldNewStatsUntracked": true,
+      "fieldCells": 18,
+      "noOverflow": true
+    },
+    {
+      "rawCap120": true,
+      "fiveSelectionsAddZero": true,
+      "all25SkillLabels": true,
+      "cardManagementZeroSaved": true,
+      "earned130Loads": true
+    }
+  ],
+  "errors": []
+}

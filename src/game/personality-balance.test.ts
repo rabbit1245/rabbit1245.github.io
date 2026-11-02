@@ -24,7 +24,7 @@ test('five independent personality controls preserve attributes and OVR, journal
  let c=original;await saveCareer(c);
  for(const key of PERSONALITY_KEYS){const next=executeCommand(c,{type:'personality',key,value:10},`personality-${key}`);assert.ok(commandChange(c,next));await saveCareerChange(c,next);c=next;assert.deepEqual(c.player.attributes,attrs);assert.equal(c.player.ovr,rating);}
  assert.equal(JSON.stringify(original),before);assert.ok(PERSONALITY_KEYS.every(k=>c.systems!.personality![k]===10));assert.deepEqual((await loadCareer(c.id))!.systems!.personality,c.systems!.personality);assert.deepEqual((await verifySaveText(await exportCareer(c))).systems!.personality,c.systems!.personality);
- assert.throws(()=>setPersonality(c,'fairPlay',0));assert.throws(()=>setPersonality(c,'fairPlay',11));assert.throws(()=>setPersonality(c,'fairPlay',2.5));const bad=structuredClone(c);bad.systems!.personality!.clutch=99;assert.throws(()=>validateCareer(bad));
+ assert.equal(setPersonality(c,'fairPlay',0).systems!.personality!.fairPlay,0);assert.throws(()=>setPersonality(c,'leadership',0));assert.throws(()=>setPersonality(c,'fairPlay',11));assert.throws(()=>setPersonality(c,'fairPlay',2.5));const bad=structuredClone(c);bad.systems!.personality!.clutch=99;assert.throws(()=>validateCareer(bad));
  const neutral=setPersonality(original,'stardom',5);assert.deepEqual(neutral.player,original.player);assert.deepEqual(neutral.training,original.training);
 });
 
@@ -48,10 +48,10 @@ test('an elite 40-year-old retains meaningful value, multi-year first-team offer
  for(let i=0;i<80;i++){young.seed=old.seed=`veteran-${i}`;const a=simulateMatch(young,f),b=simulateMatch(old,f);assert.equal(a.playerStarted,b.playerStarted);assert.equal(a.playerMinutes,b.playerMinutes);}
 });
 
-test('fair play 10 produces no cards, while 1 produces materially more real disciplinary events',()=>{
+test('card management 10 reduces actual cards without immunity; 1 materially increases disciplinary risk',()=>{
  const c=elite(),f=c.season.fixtures.find(f=>f.homeId===c.player.clubId)!;let clean=0,rough=0;
  for(let i=0;i<180;i++)for(const level of [1,10]){const r={...c,seed:`fair-${i}`,systems:{...c.systems!,personality:{...DEFAULT_PERSONALITY,fairPlay:level}}};const m=simulateMatch(r,f,{detailed:false});const cards=m.playerStats.yellowCards+m.playerStats.redCards;assert.equal(m.events.filter(e=>e.playerId===c.player.id&&(e.type==='yellow'||e.type==='red')).length,cards);if(level===10)clean+=cards;else rough+=cards;}
- assert.equal(clean,0);assert.ok(rough>35,`rough cards ${rough}`);
+ assert.ok(clean>0);assert.ok(rough>clean*3,`cards ${rough} / ${clean}`);
 });
 
 test('stardom changes valuation and leadership changes captain assessment without changing ability',()=>{

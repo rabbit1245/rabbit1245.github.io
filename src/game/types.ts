@@ -5,18 +5,20 @@ export type Foot = 'right'|'left'|'both';
 export type Squad = 'youth'|'senior';
 export type Intensity = 'balanced'|'intense'|'rest';
 export interface GameProgress {year:number;round:number;total:number}
-export type AttributeKey = 'strength'|'stamina'|'speed'|'agility'|'jumping'|'ballControl'|'dribbling'|'passing'|'crossing'|'shooting'|'heading'|'defending'|'setPieces'|'decisions'|'vision'|'anticipation'|'positioning'|'composure'|'concentration'|'teamwork'|'gkShotStopping'|'gkReflexes'|'gkHandling'|'gkAerialCommand'|'gkOneOnOnes'|'gkPositioning'|'gkDistribution'|'gkDefensiveOrganization';
+export type AttributeKey = 'finishing'|'offTheBall'|'pressing'|'tackling'|'skillMoves'|'strength'|'stamina'|'speed'|'agility'|'jumping'|'ballControl'|'dribbling'|'passing'|'crossing'|'shooting'|'heading'|'defending'|'setPieces'|'decisions'|'vision'|'anticipation'|'positioning'|'composure'|'concentration'|'teamwork'|'gkShotStopping'|'gkReflexes'|'gkHandling'|'gkAerialCommand'|'gkOneOnOnes'|'gkPositioning'|'gkDistribution'|'gkDefensiveOrganization';
 export type Attributes = Partial<Record<AttributeKey, number>>;
 export interface Club { id: string; name: string; nativeName: string; country: string; leagueId: string; power: number; color: string; crest?: string }
 export interface League { id: string; name: string; country: string; tier: number; verified: boolean }
 export interface RosterPlayer { id: string; name: string; clubId: string; position: Position; ovr: number; age: number }
 export interface Player {
   id: string; name: string; nationality: string; age: number; height: number; weight: number; foot: Foot;
+  abilityVersion?:2;skillMastery?:Attributes;
   position: Position; secondaryPositions: Position[]; talent: Talent; style: string; attributes: Attributes; playSkills?:AttributeKey[];
   clubId: string; squad: Squad; fitness: number; morale: number; form: number; injuryWeeks: number;
   ovr: number; potential: number; wage: number; contractYears: number;
 }
 export interface PlayerStats {
+  freeKickGoals?:number;freeKickAssists?:number;penaltyGoals?:number;bigChancesCreated?:number;bigChanceAssists?:number;pressingAttempts?:number;pressingSuccesses?:number;ballRecoveries?:number;pressureRecoveries?:number;extendedApps?:number;extendedMinutes?:number;
   apps: number; starts: number; minutes: number; goals: number; assists: number;
   shots: number; shotsOnTarget: number; passes: number; passesCompleted: number;
   tackles: number; interceptions: number; saves: number; goalsConceded: number;
@@ -34,16 +36,20 @@ export interface PlayerStats {
 export interface Standing { clubId: string; played: number; won: number; drawn: number; lost: number; goalsFor: number; goalsAgainst: number; points: number }
 export interface Fixture { id: string; round: number; homeId: string; awayId: string; played: boolean; homeGoals?: number; awayGoals?: number }
 export type MatchAction =
+  | {kind:'shot';shotType:'open'|'oneOnOne'|'freeKick'|'penalty';bigChance:boolean}
+  | {kind:'bigChance';receiverId:string;quality:number}
+  | {kind:'ballDuel';method:'tackle'|'interception';possessionId:string;holderId:string;holderTeamId:string;success:boolean}
   | {kind:'phasePass';fromZone:number;toZone:number;completed:boolean;receiverId:string}
   | {kind:'pressure';possessionId:string;holderId:string;holderTeamId:string;recovered:boolean}
-  | {kind:'recovery';possessionId:string;fromTeamId:string}
+  | {kind:'recovery';possessionId:string;fromTeamId:string;method?:'pressure'|'tackle'|'interception'}
   | {kind:'cross';keeperId:string;claimable:boolean;phase:'open'|'setPiece'}
   | {kind:'airClaim';success:boolean;destination:'held'|'safe'|'danger'}
   | {kind:'setPiece';delivery:'corner'|'freeKick'}
   | {kind:'headerDuel';attackerId:string;defenderId:string;winnerId:string}
   | {kind:'headerShot';phase:'open'|'setPiece';duelId:string};
-export interface MatchEvent { id: string; minute: number; type: 'shot'|'goal'|'save'|'assist'|'yellow'|'red'|'injury'|'substitution'|'pass'|'keyPass'|'dribble'|'tackle'|'interception'|'aerial'|'handling'|'sweep'|'longKick'|'pressure'|'recovery'|'cross'|'catch'|'punch'|'setPiece'; teamId: string; playerName: string; playerId?: string; relatedId?: string; detail: string; action?:MatchAction }
+export interface MatchEvent { id: string; minute: number; type: 'shot'|'goal'|'save'|'assist'|'yellow'|'red'|'injury'|'substitution'|'pass'|'keyPass'|'dribble'|'tackle'|'interception'|'aerial'|'handling'|'sweep'|'longKick'|'pressure'|'recovery'|'bigChance'|'cross'|'catch'|'punch'|'setPiece'; teamId: string; playerName: string; playerId?: string; relatedId?: string; detail: string; action?:MatchAction }
 export interface MatchRecord {
+  extendedVersion?:1;
   lineupVersion?:2;
   aggregate?:{home:number;away:number};nationalSelection?:{called:boolean;role:'starter'|'substitute'|'bench'|'excluded';reason:string;};
   id: string; fixtureId: string; round: number; seasonYear: number; homeId: string; awayId: string;
@@ -70,7 +76,7 @@ export interface SeasonSummary {
 }
 export interface SeasonDetails {
   employmentStandings?:{clubId:string;leagueId:string;rank:number;played:number;won:number;drawn:number;lost:number;points:number}[];
-  playSkills?:AttributeKey[];
+  abilityVersion?:2;skillMastery?:Attributes;playSkills?:AttributeKey[];
   version:1; clubDevelopment?:ClubSeasonDevelopment; table:Standing[]; attributes:Attributes; startAttributes:Attributes;
   marketValue:number; seasonStartValue?:number; contract:{clubId:string;wage:number;years:number;signedYear:number;expiresYear:number;role:string};
   personalRanks:{goals:number|null;assists:number|null;cleanSheets:number|null};
@@ -92,6 +98,6 @@ export interface CreateOptions {
   position: Position; secondaryPositions?: Position[]; talent: Talent; style: string; clubId: string;
   squad: Squad; difficulty: 'realistic'|'challenge'|'free'; seed: string; training?: AttributeKey[]; intensity?: Intensity;
 }
-export type GameCommand = {type:'changePosition';position:Position;style:string} | {type:'nationalParticipation';key:import('./national-participation').NationalParticipationKey;checked:boolean} | {type:'personalitySet';values:import('./personality').Personality} | {type:'personality';key:import('./personality').PersonalityKey;value:number} | {type:'refreshOffers'} | {type:'releaseContract'} | {type:'playSkill';key:AttributeKey;selected:boolean} | {type:'manualAging';amount:1|5|10;key:AttributeKey} | {type:'attributeLock';key:AttributeKey;locked:boolean} | {type:'attributeLockAll';locked:boolean} | {type:'manualInjury';duration:'half'|'season'|5|10|20} | {type:'advance'; weeks:number} | {type:'training'; keys:AttributeKey[]; intensity:Intensity} | {type:'transfer'; offerId:string} | {type:'captainDecision';offerId:string;accept:boolean} | {type:'cheatSettings';enabled:boolean;freezeAging:boolean} | {type:'increaseAttribute';key:AttributeKey;amount:number} | {type:'stay'} | {type:'nextSeason'} | {type:'retire'} | {type:'advanceHalf'} | {type:'continueHalf'} | {type:'dismissChoice'};
+export type GameCommand = {type:'upgradeAbilities'} | {type:'changePosition';position:Position;style:string} | {type:'nationalParticipation';key:import('./national-participation').NationalParticipationKey;checked:boolean} | {type:'personalitySet';values:import('./personality').Personality} | {type:'personality';key:import('./personality').PersonalityKey;value:number} | {type:'refreshOffers'} | {type:'releaseContract'} | {type:'playSkill';key:AttributeKey;selected:boolean} | {type:'manualAging';amount:1|5|10;key:AttributeKey} | {type:'attributeLock';key:AttributeKey;locked:boolean} | {type:'attributeLockAll';locked:boolean} | {type:'manualInjury';duration:'half'|'season'|5|10|20} | {type:'advance'; weeks:number} | {type:'training'; keys:AttributeKey[]; intensity:Intensity} | {type:'transfer'; offerId:string} | {type:'captainDecision';offerId:string;accept:boolean} | {type:'cheatSettings';enabled:boolean;freezeAging:boolean} | {type:'increaseAttribute';key:AttributeKey;amount:number} | {type:'stay'} | {type:'nextSeason'} | {type:'retire'} | {type:'advanceHalf'} | {type:'continueHalf'} | {type:'dismissChoice'};
 export interface SaveSlot { id: string; name: string; playerName: string; clubName: string; year: number; age: number; ovr: number; updatedAt: string; revision: number }
 export interface SaveEnvelope { format: 'kball-save'; schemaVersion: 1; hash: string; savedAt: string; career: Career }

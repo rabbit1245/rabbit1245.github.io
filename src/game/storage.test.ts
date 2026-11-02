@@ -96,7 +96,7 @@ test('published v2 envelopes preserve their checksum and do not invent new impro
   assert.equal((imported.systems as unknown as Record<string, unknown>).growthLedger, undefined);
   const upgraded = retireCareer(imported);
   const ledger = upgraded.systems!.growthLedger!;
-  assert.deepEqual(ledger.baselineAttributes, original.player.attributes);
+  assert.deepEqual(ledger.baselineAttributes, {...original.player.attributes,...upgraded.systems!.abilityUpgrade?.added});
   assert.ok(Object.values(ledger.byCause).every(cause => Object.keys(cause).length === 0));
   assert.equal(upgraded.systems!.economics.contractHistory!.length, 1);
   assert.equal(upgraded.systems!.economics.contractHistory![0].type, 'legacy');
@@ -446,7 +446,7 @@ test('the first editable command upgrades legacy systems without rewriting old m
   assert.equal(upgraded.season.matches[0].metricsVersion, undefined);
   assert.equal(upgraded.systems!.growthLedger!.legacy, true);
   assert.equal(upgraded.systems!.growthLedger!.trackedFromRound, original.season.week);
-  assert.deepEqual(upgraded.systems!.growthLedger!.baselineAttributes, original.player.attributes);
+  assert.deepEqual(upgraded.systems!.growthLedger!.baselineAttributes, {...original.player.attributes,...upgraded.systems!.abilityUpgrade?.added});
   assert.ok(Object.values(upgraded.systems!.growthLedger!.byCause).every(cause => Object.keys(cause).length === 0));
   assert.equal(upgraded.systems!.economics.contractHistory![0].type, 'legacy');
   assert.equal(upgraded.systems!.economics.contractHistory![0].previous, undefined);
@@ -485,7 +485,7 @@ test('a continued v1 career retains old match coverage and saves new detailed ma
   assert.equal(original.systems, undefined);
   const ledger = continued.systems!.growthLedger!;
   assert.equal(ledger.trackedFromRound, original.season.week);
-  assert.deepEqual(ledger.baselineAttributes, original.player.attributes);
+  assert.deepEqual(ledger.baselineAttributes, {...original.player.attributes,...continued.systems!.abilityUpgrade?.added});
   const alteredGain = structuredClone(continued);
   const firstAttribute = Object.keys(continued.player.attributes)[0] as keyof typeof continued.player.attributes;
   alteredGain.systems!.growthLedger!.byCause.training[firstAttribute] = (ledger.byCause.training[firstAttribute] ?? 0) + 1;

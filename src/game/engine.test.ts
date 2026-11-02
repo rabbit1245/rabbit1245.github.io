@@ -65,7 +65,7 @@ test('same seed and commands replay exactly without mutating prior snapshots',()
 test('creation rejects invalid input and defines every field/GK attribute',()=>{
   for(const position of Object.keys(POSITION_LABELS) as Position[]) {
     const career=createCareer(options({position,style:PLAY_STYLES[position][0]}));
-    assert.equal(Object.keys(career.player.attributes).length,position==='GK'?10:20);
+    assert.equal(Object.keys(career.player.attributes).length,position==='GK'?10:25);
     assert.equal(career.player.ovr,overall(career.player));
     for(const value of Object.values(career.player.attributes))assert.ok(value!>=1&&value!<=100);
   }

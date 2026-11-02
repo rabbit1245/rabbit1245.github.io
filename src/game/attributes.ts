@@ -8,9 +8,10 @@ export const POSITION_LABELS: Record<Position, string> = {
 };
 
 export const ATTRIBUTE_LABELS: Record<AttributeKey, string> = {
+  finishing:'골 결정력',offTheBall:'오프더볼 움직임',pressing:'압박 능력',tackling:'태클 기술',skillMoves:'개인기',
   strength: '근력', stamina: '체력', speed: '속도', agility: '민첩성', jumping: '점프',
   ballControl: '볼 컨트롤', dribbling: '드리블', passing: '패스', crossing: '크로스',
-  shooting: '슈팅', heading: '헤딩', defending: '수비', setPieces: '세트피스',
+  shooting: '슈팅', heading: '헤딩', defending: '수비지능', setPieces: '세트피스',
   decisions: '판단력', vision: '시야', anticipation: '예측력', positioning: '위치 선정',
   composure: '침착성', concentration: '집중력', teamwork: '팀워크',
   gkShotStopping: '선방', gkReflexes: '반사신경', gkHandling: '핸들링',
@@ -18,11 +19,14 @@ export const ATTRIBUTE_LABELS: Record<AttributeKey, string> = {
   gkDistribution: '배급', gkDefensiveOrganization: '수비 조율',
 };
 
-export const FIELD_ATTRIBUTES: AttributeKey[] = [
+export const LEGACY_FIELD_ATTRIBUTES: AttributeKey[] = [
   'strength', 'stamina', 'speed', 'agility', 'jumping',
   'ballControl', 'dribbling', 'passing', 'crossing', 'shooting', 'heading', 'defending', 'setPieces',
   'decisions', 'vision', 'anticipation', 'positioning', 'composure', 'concentration', 'teamwork',
 ];
+
+export const NEW_FIELD_ATTRIBUTES:AttributeKey[]=['finishing','offTheBall','pressing','tackling','skillMoves'];
+export const FIELD_ATTRIBUTES:AttributeKey[]=[...LEGACY_FIELD_ATTRIBUTES,...NEW_FIELD_ATTRIBUTES];
 
 export const GK_ATTRIBUTES: AttributeKey[] = [
   'gkShotStopping', 'gkReflexes', 'gkHandling', 'gkAerialCommand', 'gkOneOnOnes',
@@ -30,7 +34,7 @@ export const GK_ATTRIBUTES: AttributeKey[] = [
 ];
 
 /** Ordered core attributes. Every field attribute still contributes to the absolute OVR. */
-export const POSITION_ATTRIBUTES: Record<Position, AttributeKey[]> = {
+export const LEGACY_POSITION_ATTRIBUTES: Record<Position, AttributeKey[]> = {
   GK: [...GK_ATTRIBUTES],
   CB: ['defending', 'positioning', 'anticipation', 'strength', 'heading', 'jumping', 'concentration', 'decisions'],
   LB: ['speed', 'stamina', 'defending', 'positioning', 'crossing', 'passing', 'anticipation', 'agility'],
@@ -47,6 +51,24 @@ export const POSITION_ATTRIBUTES: Record<Position, AttributeKey[]> = {
   CF: ['ballControl', 'passing', 'vision', 'positioning', 'composure', 'shooting', 'decisions', 'dribbling'],
   SS: ['positioning', 'composure', 'shooting', 'ballControl', 'vision', 'passing', 'decisions', 'dribbling'],
   ST: ['shooting', 'positioning', 'composure', 'ballControl', 'anticipation', 'heading', 'speed', 'strength'],
+};
+
+export const POSITION_ATTRIBUTES:Record<Position,AttributeKey[]>={...LEGACY_POSITION_ATTRIBUTES,
+ CB:['defending','tackling','positioning','anticipation','strength','heading','jumping','concentration'],
+ LB:['speed','stamina','defending','tackling','positioning','crossing','passing','pressing'],
+ RB:['speed','stamina','defending','tackling','positioning','crossing','passing','pressing'],
+ LWB:['stamina','speed','crossing','dribbling','offTheBall','passing','pressing','tackling'],
+ RWB:['stamina','speed','crossing','dribbling','offTheBall','passing','pressing','tackling'],
+ CDM:['defending','tackling','pressing','anticipation','positioning','passing','decisions','concentration'],
+ CM:['passing','vision','decisions','ballControl','stamina','pressing','offTheBall','teamwork'],
+ CAM:['vision','passing','ballControl','skillMoves','decisions','offTheBall','composure','finishing'],
+ LM:['crossing','passing','dribbling','skillMoves','speed','stamina','offTheBall','pressing'],
+ RM:['crossing','passing','dribbling','skillMoves','speed','stamina','offTheBall','pressing'],
+ LW:['dribbling','speed','skillMoves','ballControl','finishing','offTheBall','agility','composure'],
+ RW:['dribbling','speed','skillMoves','ballControl','finishing','offTheBall','agility','composure'],
+ CF:['ballControl','passing','vision','offTheBall','finishing','composure','decisions','skillMoves'],
+ SS:['offTheBall','finishing','composure','ballControl','vision','passing','decisions','skillMoves'],
+ ST:['finishing','offTheBall','shooting','positioning','composure','heading','anticipation','skillMoves'],
 };
 
 export const PLAY_STYLES: Record<Position, string[]> = {
@@ -95,13 +117,19 @@ const STYLE_EMPHASES: {pattern: RegExp; keys: AttributeKey[]}[] = [
 ];
 
 /** Normalized weights form a global ability scale; club, league and talent do not enter this calculation. */
-export function attributeWeights(position: Position, style: string): Partial<Record<AttributeKey, number>> {
-  const attributes = position === 'GK' ? GK_ATTRIBUTES : FIELD_ATTRIBUTES;
-  const core = POSITION_ATTRIBUTES[position];
+export function attributeWeights(position: Position, style: string,legacy=false): Partial<Record<AttributeKey, number>> {
+  const attributes = position === 'GK' ? GK_ATTRIBUTES : legacy?LEGACY_FIELD_ATTRIBUTES:FIELD_ATTRIBUTES;
+  const core = (legacy?LEGACY_POSITION_ATTRIBUTES:POSITION_ATTRIBUTES)[position];
   const weights: Partial<Record<AttributeKey, number>> = {};
   for (const key of attributes) weights[key] = 0.65;
   core.forEach((key, index) => { weights[key] = 3.7 - index * 0.25; });
-  const emphasis = STYLE_EMPHASES.find(rule => rule.pattern.test(style))?.keys ?? core.slice(0, 3);
+  let emphasis = STYLE_EMPHASES.find(rule => rule.pattern.test(style))?.keys ?? core.slice(0, 3);
+  if(!legacy&&position!=='GK'){
+   if(/포처|골 사냥|침투|쉐도우/.test(style))emphasis=['finishing','offTheBall','composure'];
+   else if(/드리블|돌파|인사이드|인버티드 윙어/.test(style))emphasis=['skillMoves','dribbling','agility'];
+   else if(/프레싱|압박/.test(style))emphasis=['pressing','stamina','tackling'];
+   else if(/스토퍼|대인|볼 위닝/.test(style))emphasis=['tackling','defending','strength'];
+  }
   emphasis.forEach((key, index) => {
     if (attributes.includes(key)) weights[key] = (weights[key] ?? 0.65) + 2.0 - index * 0.3;
   });
@@ -121,16 +149,20 @@ export function leadershipAbility(attributes:Player['attributes'],trait:number):
   const mental=((attributes.decisions??50)+(attributes.concentration??50)+(attributes.composure??50)+(attributes.teamwork??50))/4;
   return Math.round(Math.max(0,Math.min(100,Math.max(mental*.75+trait*.25,trait*.7+mental*.3)))*10)/10;
 }
-/** Selection and career comparisons keep earned mastery on the displayed OVR
- * scale. Individual actions still read their specific physical/technical skills. */
-export function playingAbility(player: Pick<Player, 'attributes'|'position'|'style'>&{ovr?:number}): number {
-  // Preserve the established 0–100 comparison scale, including old saves and external roster records.
-  if(player.ovr!==undefined&&!Object.values(player.attributes).some(v=>(v??0)>100))return player.ovr;
-  const weighted=Object.entries(attributeWeights(player.position,player.style)).reduce((n,[key,w])=>n+Math.max(1,Math.min(110,player.attributes[key as AttributeKey]??1))*(w??0),0);
-  return player.ovr===undefined?weighted:Math.max(weighted,player.ovr);
+const boundedAbility=(raw:unknown)=>typeof raw==='number'&&Number.isFinite(raw)?Math.max(1,Math.min(120,raw)):1;
+/** Earned display OVR is the comparison scale; actions still read actual skills. */
+export function playingAbility(player:Pick<Player,'attributes'|'position'|'style'>&{ovr?:number}):number{
+ if(player.ovr!==undefined)return player.ovr;
+ return Object.entries(attributeWeights(player.position,player.style)).reduce((n,[k,w])=>n+boundedAbility(player.attributes[k as AttributeKey])*w!,0);
 }
-export function overall(player: Pick<Player, 'attributes'|'position'|'style'|'playSkills'>): number {
-  const weights = attributeWeights(player.position, player.style);
+export function overall(player:Pick<Player,'attributes'|'position'|'style'|'playSkills'|'skillMastery'>):number{
+ const weights=attributeWeights(player.position,player.style),base=Object.entries(weights).reduce((n,[k,w])=>n+boundedAbility(player.attributes[k as AttributeKey])*w!,0);
+ const allowed=player.position==='GK'?GK_ATTRIBUTES:FIELD_ATTRIBUTES,selected=[...new Set(player.playSkills??[])].filter(k=>allowed.includes(k));
+ const bonus=selected.length>5?0:selected.reduce((n,k)=>n+Math.min(20,Math.max(0,player.skillMastery?.[k]??0),Math.max(0,(player.attributes[k]??0)-100))*.1,0);
+ return Math.max(1,Math.min(130,Math.round(base+bonus)));
+}
+export function legacyOverall(player: Pick<Player, 'attributes'|'position'|'style'|'playSkills'>): number {
+  const weights = attributeWeights(player.position, player.style,true);
   let value = 0;
   for (const [key, weight] of Object.entries(weights)) {
     const raw = player.attributes[key as AttributeKey];

@@ -1,7 +1,8 @@
+import {upgradeAbilities} from './ability-expansion';
 import {evaluateRetiredNumbers} from './legacy-honours';
 import {validatePositionChoice} from './position-changes';
 import {isFreeAgent,beginEmployment,changeEmployment} from './employment';
-import {personality,PERSONALITY_KEYS,type PersonalityKey,type Personality} from './personality';
+import {personality,PERSONALITY_KEYS,personalityMinimum,type PersonalityKey,type Personality} from './personality';
 import {beginAchievementSeason} from './achievement-evidence';
 import {copySystems} from './snapshot';
 import {nationalParticipation,type NationalParticipationKey} from './national-participation';
@@ -29,7 +30,7 @@ import { TALENT_PROFILES } from './talent';
 import type { Award, AttributeKey, Attributes, Career, CreateOptions, Fixture, GameProgress, Intensity, MatchRecord, Player, PlayerStats, Position, SeasonState, SeasonSummary, Standing, Talent, TransferOffer } from './types';
 import type { PresentationEvent } from './revision-types';
 
-export const ENGINE_VERSION = '2.11.7';
+export const ENGINE_VERSION = '2.12.0';
 export const overall = calculateOverall;
 export { addStats, emptyStats, hashSeed, seededRandom } from './math';
 const TALENT_ORDER: Talent[] = ['D','C','B','A','S','SS','SSS'];
@@ -43,6 +44,7 @@ function editable(career:Career,light=false):Career {
     systems:career.systems?copySystems(career.systems,light):undefined,
   };
   initializeSystems(next);
+  upgradeAbilities(next);
   ensureEconomicHistory(next);
   ensureEconomicMarket(next);
   ensureGrowthTracking(next);
@@ -54,11 +56,11 @@ function editable(career:Career,light=false):Career {
 }
 function currentDate(c:Career):string{const date=seasonDate(c.season);return c.systems?.manualClock&&c.systems.manualClock>date?c.systems.manualClock:date;}
 export function setPersonality(career:Career,key:PersonalityKey,value:number):Career{
- if(!PERSONALITY_KEYS.includes(key))throw new Error('성향은 현역 중 각 1~10 범위로 조정할 수 있습니다.');
+ if(!PERSONALITY_KEYS.includes(key))throw new Error('성향은 현역 중 1~10, 카드 관리는 0~10 범위로 조정할 수 있습니다.');
  return setPersonalityValues(career,{...personality(career),[key]:value});
 }
 export function setPersonalityValues(career:Career,values:Personality):Career{
- if(career.stage==='retired'||!values||typeof values!=='object'||Array.isArray(values)||Object.keys(values).length!==PERSONALITY_KEYS.length||PERSONALITY_KEYS.some(key=>!Object.prototype.hasOwnProperty.call(values,key)||!Number.isInteger(values[key])||values[key]<1||values[key]>10))throw new Error('성향은 현역 중 각 1~10 범위로 조정할 수 있습니다.');
+ if(career.stage==='retired'||!values||typeof values!=='object'||Array.isArray(values)||Object.keys(values).length!==PERSONALITY_KEYS.length||PERSONALITY_KEYS.some(key=>!Object.prototype.hasOwnProperty.call(values,key)||!Number.isInteger(values[key])||values[key]<personalityMinimum(key)||values[key]>10))throw new Error('성향은 현역 중 1~10, 카드 관리는 0~10 범위로 조정할 수 있습니다.');
  const next=editable(career,true);next.systems!.personality={...values};touch(next);return next;
 }
 function touch(career:Career) {
@@ -149,10 +151,10 @@ export function previewPlayer(options:CreateOptions):Player {
   const attributes: Attributes={};
   const keys=options.position==='GK'?GK_ATTRIBUTES:FIELD_ATTRIBUTES;
   for(const key of keys) attributes[key]=clamp(Math.round(base+integer(rng,-7,7)+(POSITION_ATTRIBUTES[options.position].slice(0,3).includes(key)?4:0)),25,90);
-  const player: Player={id:'player_'+hashSeed(options.seed+'|'+options.name).toString(36),name:options.name.trim(),nationality:options.nationality,age:options.age,height:options.height,weight:options.weight,foot:options.foot,position:options.position,secondaryPositions:[...(options.secondaryPositions??[])],talent:options.talent,style:options.style,attributes,clubId:club.id,squad:options.squad,fitness:100,morale:72,form:65,injuryWeeks:0,ovr:0,potential:0,wage:0,contractYears:3};
+  const player: Player={abilityVersion:2,skillMastery:{},id:'player_'+hashSeed(options.seed+'|'+options.name).toString(36),name:options.name.trim(),nationality:options.nationality,age:options.age,height:options.height,weight:options.weight,foot:options.foot,position:options.position,secondaryPositions:[...(options.secondaryPositions??[])],talent:options.talent,style:options.style,attributes,clubId:club.id,squad:options.squad,fitness:100,morale:72,form:65,injuryWeeks:0,ovr:0,potential:0,wage:0,contractYears:3};
   player.ovr=overall(player);
   const [low,high]=TALENT_PROFILES[player.talent].potential;
-  player.potential=Math.max(player.ovr+2,integer(rng,low,high)); player.potential=Math.min(100,player.potential);
+  player.potential=Math.max(player.ovr+2,integer(rng,low,high)); player.potential=Math.min(120,player.potential);
   player.wage=salary(player.ovr,club.power);
   return player;
 }
@@ -307,6 +309,12 @@ function validateTraining(position:Player['position'],keys:AttributeKey[],intens
   const allowed=position==='GK'?GK_ATTRIBUTES:FIELD_ATTRIBUTES;
   if(!Array.isArray(keys)||keys.length>3||new Set(keys).size!==keys.length||keys.some(key=>!allowed.includes(key)))throw new Error('서로 다른 유효 능력치를 최대 3개까지 선택해 주세요. 선택 없이 진행할 수도 있습니다.');
 }
+export function upgradeAbilityModel(career:Career):Career {
+ if(career.player.abilityVersion===2||career.stage==='retired')return career;
+ const next=editable(career,true),change=next.systems!.abilityUpgrade!;
+ present(next,'growth','능력치 체계 확장 적용',`기존 능력치 수치를 보존하고 새 항목의 도입 기준값을 계산했습니다. 현재 OVR ${change.ovrBefore} → ${change.ovrAfter} · 과거 시즌 점수와 기록은 보존합니다.`,'milestone');
+ touch(next);return next;
+}
 export function changePosition(career:Career,position:Position,style:string):Career {
  validatePositionChoice(career,position,style);
  const next=editable(career,true),p=next.player;
@@ -333,7 +341,7 @@ export function setTraining(career:Career,keys:AttributeKey[],intensity:Intensit
 }
 export function manuallyAge(career:Career,amount:1|5|10,key:AttributeKey):Career{
  if(career.stage==='retired'||![1,5,10].includes(amount))throw new Error('현역 선수에게 -1/-5/-10 중 하나를 적용해 주세요.');
- if(career.player.attributes[key]===undefined)throw new Error('감소할 능력치를 선택해 주세요.');
+ if(!(career.player.position==='GK'?GK_ATTRIBUTES:FIELD_ATTRIBUTES).includes(key))throw new Error('감소할 능력치를 선택해 주세요.');
  const next=editable(career,true),before={...next.player.attributes},ovrBefore=next.player.ovr;
  applyManualAging(next,amount,key);
  (next.systems!.manualAging??=[]).push({playerId:next.player.id,playerName:next.player.name,id:`manual-aging:${next.id}:${next.revision}`,year:next.season.year,round:next.season.week,date:currentDate(next),amount,key,before,after:{...next.player.attributes},ovrBefore,ovrAfter:next.player.ovr});
@@ -352,11 +360,12 @@ export function setPlaySkill(career:Career,key:AttributeKey,selected:boolean):Ca
  if(selected&&prior.length>=5)throw new Error('플레이스킬은 최대 5개까지 선택할 수 있습니다.');
  const next=editable(career,true),before=next.player.attributes[key]??0;
  next.player.playSkills=selected?[...prior,key]:prior.filter(k=>k!==key);
+ next.player.skillMastery={...next.player.skillMastery};if(selected)next.player.skillMastery[key]=0;else delete next.player.skillMastery[key];
  if(!selected)removeSkillMastery(next,key);
  const year=next.season.year+(next.stage==='offseason'?1:0);
- next.systems!.playSkillChanges=[...(next.systems!.playSkillChanges??[]),{year,round:next.season.week,key,selected,before,after:next.player.attributes[key]??0,position:next.player.position}];
+ next.systems!.playSkillChanges=[...(next.systems!.playSkillChanges??[]),{year,round:next.season.week,key,selected,before,after:next.player.attributes[key]??0,position:next.player.position,abilityVersion:2}];
  next.player.ovr=overall(next.player);
- present(next,'growth',selected?'플레이스킬 선택':'플레이스킬 삭제',`${playSkillNames(next.player.position,[key])[0]} · ${selected?'성장 상한 110 해제 · 현재 능력 유지':'선택 해제 · 이전 숙련 기록 보존'}`);
+ present(next,'growth',selected?'플레이스킬 선택':'플레이스킬 삭제',`${playSkillNames(next.player.position,[key])[0]} · ${selected?'숙련 훈련 시작 · 현재 능력 유지':'선택 해제 · 숙련 보정 종료 · 능력치 유지'}`);
  if(!selected&&before>100)updateMarketValue(next,'플레이스킬 초과 숙련 종료');
  touch(next);return next;
 }

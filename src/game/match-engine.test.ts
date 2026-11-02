@@ -118,7 +118,7 @@ test('scores, shot references, saves, assists and both-team MOM reconcile over 2
   }
 });
 
-const fieldTargets:Record<string,keyof PlayerStats>={strength:'tackles',stamina:'lateSuccesses',speed:'dribbleAttempts',agility:'dribblesCompleted',jumping:'aerialWon',ballControl:'passesCompleted',dribbling:'dribblesCompleted',passing:'passesCompleted',crossing:'keyPasses',shooting:'shotsOnTarget',heading:'aerialWon',defending:'tackles',setPieces:'shotsOnTarget',decisions:'passesCompleted',vision:'keyPasses',anticipation:'interceptions',positioning:'shots',composure:'shotsOnTarget',concentration:'passesCompleted',teamwork:'passes'};
+const fieldTargets:Record<string,keyof PlayerStats>={strength:'tackles',stamina:'lateSuccesses',speed:'dribbleAttempts',agility:'dribblesCompleted',jumping:'aerialWon',ballControl:'passesCompleted',dribbling:'dribblesCompleted',passing:'passesCompleted',crossing:'keyPasses',shooting:'shotsOnTarget',heading:'aerialWon',defending:'interceptions',setPieces:'shotsOnTarget',decisions:'passesCompleted',vision:'keyPasses',anticipation:'interceptions',positioning:'shots',composure:'shotsOnTarget',concentration:'passesCompleted',teamwork:'passes',finishing:'goals',offTheBall:'shots',pressing:'pressingSuccesses',tackling:'tackles',skillMoves:'dribblesCompleted'};
 const keeperTargets:Record<string,keyof PlayerStats>={gkShotStopping:'saves',gkReflexes:'saves',gkHandling:'handlingSuccesses',gkAerialCommand:'crossesCaught',gkOneOnOnes:'oneOnOneSaves',gkPositioning:'sweepingSuccesses',gkDistribution:'buildUpCompleted',decisions:'sweepingSuccesses',concentration:'handlingSuccesses',gkDefensiveOrganization:'shotsFaced'};
 for(const [position,attributes,targets] of [['CM',FIELD_ATTRIBUTES,fieldTargets],['GK',GK_ATTRIBUTES,keeperTargets]] as const){
   for(const attribute of attributes)test(`${position}: ${attribute} changes ${targets[attribute]} in its intended direction across 240 paired games with OVR held fixed`,()=>{
@@ -171,7 +171,7 @@ test('national synthetic teams preserve domestic membership and non-user fixture
 test('field and goalkeeper metric displays sum denominators and support per90 rather than averaging match percentages',()=>{
   const first={...emptyStats(),minutes:90,passes:10,passesCompleted:10},second={...emptyStats(),minutes:30,passes:90,passesCompleted:45};
   const total=sumStats([first,second]);
-  assert.equal(fieldMetrics(total).length,12);assert.equal(goalkeeperMetrics(total).length,10);
+  assert.equal(fieldMetrics(total).length,18);assert.equal(goalkeeperMetrics(total).length,16);
   assert.equal(successRate(total.passesCompleted,total.passes),55);
   assert.equal(successRate(0,0),null);assert.equal(per90(4,120),3);
 });

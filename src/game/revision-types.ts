@@ -1,9 +1,9 @@
 import type { AttributeKey, Attributes, Award, Club, Fixture, MatchRecord, PlayerStats, Position, Standing } from './types';
 export interface WorldState {financeVersion?:1;}
-export interface MarketAssessment {year:number;round:number;totalRounds:number;ability:number;injuryWeeks:number;stardom:number;}
+export interface MarketAssessment {abilityVersion?:2;year:number;round:number;totalRounds:number;ability:number;injuryWeeks:number;stardom:number;}
 export interface Economics {valuationVersion?:1|2;assessment?:MarketAssessment;}
 
-export interface MatchParticipant { id: string; name: string; position: Position; ovr: number; attributes?: Attributes; nationality?: string; clubId: string }
+export interface MatchParticipant {abilityVersion?:2;playSkills?:AttributeKey[];skillMastery?:Attributes; id: string; name: string; position: Position; ovr: number; attributes?: Attributes; nationality?: string; clubId: string }
 export interface MatchPerformance extends MatchParticipant { stats: PlayerStats; rating: number; minutes: number; started: boolean; captain?: boolean; teamId?: string; emergencyGoalkeeper?:{from:number;to:number} }
 export interface MatchEffects { fitnessAfter: number; moraleAfter: number; formAfter: number; injuryWeeksAfter: number; trustAfter: number }
 export interface MatchOptions {
@@ -52,6 +52,7 @@ export interface TrainingPlan {forYear:number;confirmed:boolean;confirmedAtRound
 export interface GrowthReport { year: number; half: 'first'|'season'; fromRound: number; toRound: number; startAttributes: Attributes; endAttributes: Attributes; ovrStart: number; ovrEnd: number; stats: PlayerStats; previousStats: PlayerStats; valueStart: number; valueEnd: number; context: string; growth?:GrowthLedger; offseasonAging?:AgingReport }
 export interface PresentationEvent { id: string; year: number; round: number; type: 'mom'|'injury'|'national'|'transfer'|'renewal'|'captain'|'award'|'growth'|'promotion'|'retirement'; title: string; body: string; importance: 'brief'|'decision'|'milestone' }
 export interface CareerSystems {
+  abilityUpgrade?:{version:2;year:number;round:number;ovrBefore:number;ovrAfter:number;added:Attributes};
   positionChanges?:import('./position-changes').PositionChange[];
   nationalParticipation?:import('./national-participation').NationalParticipation;
   commercial?:import('./commercial').CommercialState;

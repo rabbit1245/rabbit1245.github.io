@@ -1,3 +1,4 @@
+import {expandedPlayer,hasFieldBaseline} from './ability-expansion';
 import {FIELD_ATTRIBUTES,GK_ATTRIBUTES,PLAY_STYLES,POSITION_LABELS,overall} from './attributes';
 import type {Career,Position} from './types';
 
@@ -5,9 +6,9 @@ export interface PositionChange {year:number;round:number;date:string;from:Posit
 export function canChangePosition(c:Career,to:Position):boolean{
  if(!Object.hasOwn(POSITION_LABELS,to)||(to==='GK')!==(c.player.position==='GK'))return false;
  const allowed=to==='GK'?GK_ATTRIBUTES:FIELD_ATTRIBUTES;
- return allowed.every(key=>Number.isFinite(c.player.attributes[key]));
+ return c.player.abilityVersion!==2&&to!=='GK'?hasFieldBaseline(c.player):allowed.every(key=>Number.isFinite(c.player.attributes[key]));
 }
-export function positionPreview(c:Career,to:Position,style:string):number{return overall({...c.player,position:to,style});}
+export function positionPreview(c:Career,to:Position,style:string):number{return overall({...expandedPlayer(c.player),position:to,style});}
 export function positionChangeLines(c:Career,year?:number):string[]{
  return (c.systems?.positionChanges??[]).filter(r=>year===undefined||r.year===year).map(r=>`${r.date.slice(0,10)}${r.afterSeason?' · 시즌 종료 후':''} · ${r.from} ${POSITION_LABELS[r.from]} (${r.fromStyle}) → ${r.to} ${POSITION_LABELS[r.to]} (${r.toStyle}) · OVR ${r.ovrBefore} → ${r.ovrAfter}`);
 }

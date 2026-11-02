@@ -1,7 +1,8 @@
+import {cardRiskMultiplier,expectedDefensiveActivity} from './discipline';
 import {playingAbility,leadershipAbility} from './attributes';
 import {personalityEdge,personality} from './personality';
-import {skillSuccess,openPlaySaveChance,shareShotSupply,pressureAbility,cognitiveOpportunity} from './ability-contests';
-import {phasePasses,resolvePressing,resolveAirClaims,headerProbability,headerDelivery,aerialQuality,type ActionEmitter} from './match-actions';
+import {skillSuccess,openPlaySaveChance,shareShotSupply,cognitiveOpportunity} from './ability-contests';
+import {actionAbility as ability,phasePasses,resolvePressing,resolveBallDuels,resolveAirClaims,headerProbability,headerDelivery,aerialQuality,type ActionEmitter} from './match-actions';
 import { CLUBS, ROSTERS } from './data';
 import { clamp, emptyStats, hashSeed, integer, round, seededRandom } from './math';
 import type { MatchOptions, MatchParticipant, MatchPerformance } from './revision-types';
@@ -17,12 +18,6 @@ const SHOTS:Record<Position,number>={GK:.025,CB:.55,LB:.65,RB:.65,LWB:.9,RWB:.9,
 const PASSES:Record<Position,number>={GK:19,CB:43,LB:39,RB:39,LWB:38,RWB:38,CDM:52,CM:57,CAM:46,LM:37,RM:37,LW:29,RW:29,CF:29,SS:26,ST:23};
 const CREATION_ROLE:Record<Position,number>={GK:.03,CB:.2,LB:.85,RB:.85,LWB:1.1,RWB:1.1,CDM:.75,CM:1.45,CAM:2.4,LM:1.8,RM:1.8,LW:1.8,RW:1.8,CF:1.75,SS:1.75,ST:1.4};
 // World NPCs carry a validated 1–100 OVR rather than thirty identical attribute entries.
-const ability=(p:MatchParticipant&{pressure?:number},key:AttributeKey)=>{
- if(!p.attributes)return p.ovr;
- const raw=p.attributes[key];if(raw!==undefined){const value=clamp(raw,1,110);return p.pressure?pressureAbility(value,key,p.pressure):value;}
- // Missing GK physical/field traits use actual keeper ability, never the 120 display conversion.
- const value=clamp(p.ovr>100?playingAbility({...p,attributes:p.attributes,style:'style'in p?String(p.style):'',ovr:undefined}):p.ovr,1,110);return p.pressure?pressureAbility(value,key,p.pressure):value;
-};
 const duration=(p:Actor)=>Math.max(0,p.to-p.from)/90;
 const roundedCount=(mean:number,rng:()=>number)=>Math.max(0,Math.floor(mean+rng()));
 const group=(p:Position)=>p==='GK'?0:DEFENCE.has(p)?1:MIDFIELD.has(p)?2:3;
@@ -69,7 +64,7 @@ function makeTeam(career:Career,club:Club,provided:MatchParticipant[]|undefined,
     if(best){chosen.push(best);used.add(best.id);}
   }
   const includesUser=userTeam===club.id&&selection.to>selection.from;
-  const userParticipant:MatchParticipant={id:user.id,name:user.name,clubId:user.clubId,position:user.position,ovr:user.ovr,attributes:{...user.attributes},nationality:user.nationality};
+  const userParticipant:MatchParticipant={abilityVersion:user.abilityVersion,playSkills:user.playSkills,skillMastery:user.skillMastery,id:user.id,name:user.name,clubId:user.clubId,position:user.position,ovr:user.ovr,attributes:{...user.attributes},nationality:user.nationality};
   const closestIndex=()=>chosen.reduce((best,p,i)=>{
     if(user.position==='GK')return p.position==='GK'?i:best;
     if(p.position==='GK')return best;
@@ -126,7 +121,7 @@ function sampleActions(actor:Actor,opponentPower:number,rng:()=>number,emit:Acti
   const lateEnergy=Math.min(1,.48+a('stamina')*.0052);
   const endurance=1-(1-lateEnergy)*lateMinutes/Math.max(1,actor.minutes);
   s.apps=actor.minutes>0?1:0;s.starts=actor.started?1:0;s.minutes=actor.minutes;s.detailedApps=1;
-  s.actionApps=s.apps;s.actionMinutes=s.minutes;
+  s.actionApps=s.apps;s.actionMinutes=s.minutes;s.extendedApps=s.apps;s.extendedMinutes=s.minutes;
   let loggedPasses=0,loggedCompleted=0;
   if(actor.position==='GK'){
     s.buildUpPasses=count(PASSES.GK*styleFactor(actor,'pass'));
@@ -147,10 +142,11 @@ function sampleActions(actor:Actor,opponentPower:number,rng:()=>number,emit:Acti
     const reading=actor.attributes?a('vision')*.35+a('decisions')*.3+a('anticipation')*.2+a('positioning')*.15:actor.ovr;
     actor.creation=(.15+a('vision')*.021+a('passing')*.007+a('crossing')*(wide?.019:.008)+a('decisions')*.006+a('setPieces')*.006+a('teamwork')*.005)*CREATION_ROLE[actor.position]*styleFactor(actor,'pass')*endurance*(1+cognitiveOpportunity(reading,opponentPower,team.referencePower)*.25);
     s.dribbleAttempts=count((FORWARD.has(actor.position)?5.2:MIDFIELD.has(actor.position)?3.4:1.9)*styleFactor(actor,'dribble')*(.55+a('speed')*.007)*endurance);
-    s.dribblesCompleted=success(s.dribbleAttempts,skillSuccess(.7135,a('dribbling')*.51+a('agility')*.22+a('ballControl')*.13+a('speed')*.08+a('strength')*.06,opponentPower,.032,.022)*endurance);
+    s.dribblesCompleted=0;
+    for(let i=0;i<s.dribbleAttempts;i++){const tight=rng()<(['CAM','CF','SS','ST'].includes(actor.position)?.65:wide?.45:.3),quality=tight?a('skillMoves')*.5+a('ballControl')*.25+a('agility')*.15+a('dribbling')*.1:a('dribbling')*.55+a('speed')*.2+a('ballControl')*.15+a('strength')*.1;if(rng()<skillSuccess(.7135,quality,opponentPower,.032,.022)*endurance)s.dribblesCompleted++;}
     const pressingForward=FORWARD.has(actor.position)&&/수비형|압박|프레싱/.test(actor.style);
     s.tackleAttempts=count((DEFENCE.has(actor.position)?4.3:MIDFIELD.has(actor.position)?3.1:pressingForward?2.7:1.6)*styleFactor(actor,'tackle')*endurance);
-    s.tackles=success(s.tackleAttempts,skillSuccess(.646,a('defending')*.68+a('strength')*.24+a('decisions')*.08,opponentPower,.032,.025)*endurance);
+    s.tackles=0;
     s.interceptions=count((DEFENCE.has(actor.position)?2.1:MIDFIELD.has(actor.position)?1.5:pressingForward?1:.65)*(.2+a('anticipation')*.013+a('positioning')*.004+a('concentration')*.002)*endurance);
     s.aerialAttempts=count((actor.position==='CB'||actor.position==='ST'?4.5:2.1)*styleFactor(actor,'aerial'));
     s.aerialWon=success(s.aerialAttempts,skillSuccess(.632,a('jumping')*.5+a('heading')*.273+a('strength')*.227,opponentPower,.035,.027));
@@ -161,8 +157,8 @@ function sampleActions(actor:Actor,opponentPower:number,rng:()=>number,emit:Acti
   if(detailed&&actor.user){
     const rows:[MatchEvent['type'],number,number,string][]=[
       ['pass',s.passes-loggedPasses,s.passesCompleted-loggedCompleted,'패스'],
-      ['dribble',s.dribbleAttempts??0,s.dribblesCompleted??0,'드리블'],['tackle',s.tackleAttempts??0,s.tackles,'태클'],
-      ['interception',s.interceptions,s.interceptions,'패스 차단'],['aerial',s.aerialAttempts??0,s.aerialWon??0,'공중볼 경합'],
+      ['dribble',s.dribbleAttempts??0,s.dribblesCompleted??0,'드리블'],
+      ['aerial',s.aerialAttempts??0,s.aerialWon??0,'공중볼 경합'],
       ['handling',s.handlingAttempts??0,s.handlingSuccesses??0,'공 처리'],['sweep',s.sweepingAttempts??0,s.sweepingSuccesses??0,'뒷공간 처리'],
       ['longKick',s.longKicks??0,s.longKicksCompleted??0,'롱킥'],
     ];
@@ -266,8 +262,8 @@ export function simulateMatch(career:Career,fixture:Fixture,options:MatchOptions
   const played=selection.to>selection.from;
   let redMinute:number|undefined,injuryMinute:number|undefined,injuryWeeks=0;
   if(played&&!options.forceSelection){
-    const fair=personality(career).fairPlay,discipline=(10-fair)/5*(fair<=2?2:1);
-    if(selectRng()<.009*discipline){redMinute=integer(selectRng,Math.max(2,selection.from+1),selection.to);selection.to=redMinute;}
+    const fair=personality(career).fairPlay,discipline=cardRiskMultiplier(fair);
+    if(selectRng()<.003*discipline*expectedDefensiveActivity(p.position,p.style)){redMinute=integer(selectRng,Math.max(2,selection.from+1),selection.to);selection.to=redMinute;}
     else if(selectRng()<.012+(100-p.fitness)*.00025){injuryMinute=integer(selectRng,Math.max(2,selection.from+1),selection.to);selection.to=injuryMinute;injuryWeeks=integer(selectRng,1,5);}
   }
   const teams=[makeTeam(career,home,options.homePlayers,userTeam,selection,selectRng),makeTeam(career,away,options.awayPlayers,userTeam,selection,selectRng)];
@@ -297,9 +293,13 @@ export function simulateMatch(career:Career,fixture:Fixture,options:MatchOptions
   const userActor=teams.flatMap(t=>t.actors).find(actor=>actor.user);
   if(userActor&&redMinute){userActor.stats.redCards=1;emit('red',userActor,redMinute,'퇴장');}
   if(userActor&&injuryMinute)emit('injury',userActor,injuryMinute,`${injuryWeeks}주 치료가 필요한 부상`);
-  const fair=personality(career).fairPlay,discipline=(10-fair)/5*(fair<=2?2:1);
-  if(userActor&&!redMinute&&selectRng()<.12*discipline*duration(userActor)){userActor.stats.yellowCards=1;emit('yellow',userActor,integer(selectRng,userActor.from+1,userActor.to),'경고');}
+  resolveBallDuels(teams,actionSeed,emit,recordActions);
   resolvePressing(teams,actionSeed,emit,detailed,recordActions);resolveAirClaims(teams,actionSeed,emit,recordActions);
+  for(const actor of teams.flatMap(t=>t.actors)){
+   if(actor.stats.redCards)continue;
+   const discipline=cardRiskMultiplier(actor.user?personality(career).fairPlay:5),risk=((actor.stats.tackleAttempts??0)*.025+Math.max(0,(actor.stats.tackleAttempts??0)-actor.stats.tackles)*.014+(actor.stats.pressingAttempts??0)*.008+actor.stats.interceptions*.003+(actor.stats.sweepingAttempts??0)*.004)*(1-Math.min(.3,Math.max(0,ability(actor,'decisions')-65)*.006));
+   if(seededRandom(`${seed}:${actor.id}:discipline`)()<Math.min(.8,risk*discipline)){actor.stats.yellowCards=1;emit('yellow',actor,integer(seededRandom(`${seed}:${actor.id}:card-minute`),actor.from+1,actor.to),'수비 행동 중 경고');}
+  }
   // Successful build-up and defensive actions change the chances that reach either goal.
   // These totals already reflect each actor's actual minutes, including substitutions.
   const buildUp=teams.map(t=>t.actors.reduce((n,a)=>n+(a.stats.passesCompleted-(a.stats.progressivePasses??0))*.004+(a.stats.progressivePasses??0)*.012+(a.stats.dribblesCompleted??0)*.09+(a.stats.lateSuccesses??0)*.006,0));
@@ -324,12 +324,12 @@ export function simulateMatch(career:Career,fixture:Fixture,options:MatchOptions
       const clutch=shooter.user&&bigMatch?personalityEdge(career,'clutch'):0;
       // Finding space off the ball and beating a marker with the ball are
       // different routes to one opportunity, rather than requiring both builds.
-      const offBall=shooter.attributes?a('positioning')*.4+a('anticipation')*.25+a('decisions')*.2+a('speed')*.15:shooter.ovr;
-      const onBall=shooter.attributes?a('dribbling')*.35+a('speed')*.25+a('ballControl')*.25+a('decisions')*.15:shooter.ovr;
+      const offBall=shooter.attributes?a('offTheBall')*.4+a('positioning')*.15+a('anticipation')*.2+a('decisions')*.15+a('speed')*.1:shooter.ovr;
+      const onBall=shooter.attributes?a('dribbling')*.25+a('skillMoves')*.25+a('speed')*.2+a('ballControl')*.2+a('decisions')*.1:shooter.ovr;
       const threat=Math.max(offBall,onBall);
       const selfCreation=shooter.position==='GK'?1:clamp(1+(threat-opposition.power)*.012,.65,1.65);
-      const opportunities=SHOTS[shooter.position]*minutes*styleFactor(shooter,'shot')*powerFactor*actionFactor*tactics[side].supply*tactics[1-side].coverage*selfCreation*(.43+a('positioning')*.006+a('speed')*.002+a('decisions')*.001)*organizationFactor*(1+clutch*.03);
-      const headerChance=headerProbability(shooter,team),finishing=a('shooting')*(1-headerChance)+aerialQuality(shooter)*headerChance;
+      const opportunities=SHOTS[shooter.position]*minutes*styleFactor(shooter,'shot')*powerFactor*actionFactor*tactics[side].supply*tactics[1-side].coverage*selfCreation*(.43+a('offTheBall')*.004+a('positioning')*.002+a('speed')*.002+a('decisions')*.001)*organizationFactor*(1+clutch*.03);
+      const headerChance=headerProbability(shooter,team),finishing=(a('finishing')*.7+a('shooting')*.3)*(1-headerChance)+aerialQuality(shooter)*headerChance;
       const reading=shooter.attributes?a('vision')*.35+a('decisions')*.3+a('anticipation')*.2+a('positioning')*.15:shooter.ovr;
       return {opportunities,headerChance,clearSpace:cognitiveOpportunity(reading,opposition.power,team.referencePower),contest:FORWARD.has(shooter.position),quality:finishing*.45+a('positioning')*.2+a('composure')*.15+a('anticipation')*.1+a('decisions')*.1};
     });
@@ -349,7 +349,8 @@ export function simulateMatch(career:Career,fixture:Fixture,options:MatchOptions
         const shotType=typeRoll<.02?'penalty':typeRoll<.11?'setPiece':typeRoll<.11+headerChance?'header':typeRoll<.29+headerChance+shotSupply[actorIndex].clearSpace*.08?'oneOnOne':'open';
         const header=shotType==='header'?headerDelivery(team,opposition,shooter,keeper,minute,headerRng,emit,recordActions):undefined;
         if(shotType==='header'&&!header?.won)continue;
-        const shotId=emit('shot',shooter,minute,shotType==='penalty'?'페널티킥':shotType==='setPiece'?'프리킥 슈팅':shotType==='header'?'헤더 슈팅':shotType==='oneOnOne'?'일대일 슈팅':'슈팅',recordActions?header?.crossId:undefined,recordActions&&header?{kind:'headerShot',phase:header.phase,duelId:header.duelId}:undefined);
+        const shotAction:import('./types').MatchAction=header?{kind:'headerShot',phase:header.phase,duelId:header.duelId}:{kind:'shot',shotType:shotType==='setPiece'?'freeKick':shotType==='header'?'open':shotType,bigChance:false};
+        const shotId=emit('shot',shooter,minute,shotType==='penalty'?'페널티킥':shotType==='setPiece'?'프리킥 슈팅':shotType==='header'?'헤더 슈팅':shotType==='oneOnOne'?'일대일 슈팅':'슈팅',recordActions?header?.crossId:undefined,recordActions?shotAction:undefined);
         shooter.stats.shots++;
         // A key pass is an actual final pass before this shot, never an independent estimated count.
         const creatorGate=creatorRng(),creatorPick=creatorRng();
@@ -365,6 +366,12 @@ export function simulateMatch(career:Career,fixture:Fixture,options:MatchOptions
           for(let i=0;i<creators.length;i++){pick-=weights[i];if(pick<=0){creator=creators[i];break;}}
         }
         if(creator){creator.stats.keyPasses=(creator.stats.keyPasses??0)+1;if(detailed)emit('keyPass',creator,minute,'동료의 슈팅으로 연결한 패스',shotId);}
+        let bigChance=false;
+        if(creator){
+          const q=ability(creator,'vision')*.35+ability(creator,'passing')*.3+ability(creator,'decisions')*.2+ability(creator,'ballControl')*.15;
+          bigChance=shotType==='oneOnOne'||creatorRng()<skillSuccess(.23,q,opposition.power,.035,.025);
+          if(bigChance){creator.stats.bigChancesCreated=(creator.stats.bigChancesCreated??0)+1;if(shotAction.kind==='shot')shotAction.bigChance=true;if(recordActions)emit('bigChance',creator,minute,'수비를 넘어 동료에게 명확한 득점 기회 공급',shotId,{kind:'bigChance',receiverId:shooter.id,quality:clamp(.3+(q-opposition.power)*.004,.2,.8)});}
+        }
         const late=minute>60?Math.min(1,.62+a('stamina')*.0038):1;
         const shootingQuality=shotType==='header'?a('heading')*.445+a('jumping')*.162+a('positioning')*.182+a('strength')*.101+a('composure')*.11:shotType==='setPiece'||shotType==='penalty'?a('shooting')*.38+a('composure')*.2+a('setPieces')*.42:a('shooting')*.68+a('composure')*.25+a('setPieces')*.07;
         const aim=clamp(skillSuccess(shotType==='header'?.7635:shotType==='setPiece'||shotType==='penalty'?.6855:.51975,shootingQuality,opposition.power,.037,.01)*late*(1+clutch*.018),.07,.98);
@@ -372,7 +379,7 @@ export function simulateMatch(career:Career,fixture:Fixture,options:MatchOptions
         if(!onTarget)continue;
         shooter.stats.shotsOnTarget++;keeper.stats.shotsFaced=(keeper.stats.shotsFaced??0)+1;
         const keeping=k('gkShotStopping')*.455+k('gkReflexes')*.227+k('gkPositioning')*.152+k('concentration')*.106+k('gkHandling')*.06;
-        const finishing=(shotType==='header'?aerialQuality(shooter):a('shooting'))*.65+a('composure')*.25+a('decisions')*.1;
+        const finishing=(shotType==='header'?aerialQuality(shooter)*.55+a('finishing')*.45:a('finishing'))*.65+a('composure')*.25+a('decisions')*.1;
         let saveChance=openPlaySaveChance(keeping,finishing);
         if(shotType==='oneOnOne'){keeper.stats.oneOnOneAttempts=(keeper.stats.oneOnOneAttempts??0)+1;saveChance=.10+k('gkOneOnOnes')*.0038+k('gkReflexes')*.0012+k('gkPositioning')*.001+k('decisions')*.001-a('composure')*.0016;}
         if(shotType==='penalty'){keeper.stats.penaltiesFaced=(keeper.stats.penaltiesFaced??0)+1;saveChance=.04+k('gkOneOnOnes')*.0023+k('gkReflexes')*.0008+k('gkPositioning')*.0007-a('setPieces')*.0007;}
@@ -385,9 +392,11 @@ export function simulateMatch(career:Career,fixture:Fixture,options:MatchOptions
           emit('save',keeper,minute,shotType==='penalty'?'페널티킥 선방':shotType==='oneOnOne'?'일대일 선방':'선방',shotId);
         }else{
           shooter.stats.goals++;scores[side]++;goalMinutes[side].push(minute);keeper.stats.goalsConceded++;
+          if(shotType==='setPiece')shooter.stats.freeKickGoals=(shooter.stats.freeKickGoals??0)+1;
+          if(shotType==='penalty')shooter.stats.penaltyGoals=(shooter.stats.penaltyGoals??0)+1;
           if(shotType==='header')shooter.stats.headerGoals=(shooter.stats.headerGoals??0)+1;
           const goalId=emit('goal',shooter,minute,shotType==='header'?'헤더 득점':'득점',shotId);
-          if(creator){creator.stats.assists++;emit('assist',creator,minute,'득점으로 연결한 마지막 패스',goalId);}
+          if(creator){creator.stats.assists++;if(bigChance)creator.stats.bigChanceAssists=(creator.stats.bigChanceAssists??0)+1;if(header?.delivery==='freeKick')creator.stats.freeKickAssists=(creator.stats.freeKickAssists??0)+1;emit('assist',creator,minute,'득점으로 연결한 마지막 패스',goalId);}
         }
       }
     }
@@ -400,7 +409,7 @@ export function simulateMatch(career:Career,fixture:Fixture,options:MatchOptions
     if(actor.position!=='GK'&&actor.minutes>=60&&!goalMinutes[1-side].some(minute=>minute>actor.from&&minute<=actor.to))s.cleanSheets=1;
     const isGK=actor.position==='GK';
     const contribution=isGK?s.saves*.20+(s.oneOnOneSaves??0)*.12+(s.penaltiesSaved??0)*.65+s.cleanSheets*.45-s.goalsConceded*.38+(s.crossesCaught??0)*.035+(s.sweepingSuccesses??0)*.04:
-      s.goals*.95+s.assists*.65+(s.keyPasses??0)*.07+s.tackles*(FORWARD.has(actor.position)?.12:.075)+s.interceptions*(FORWARD.has(actor.position)?.11:.065)+(s.dribblesCompleted??0)*.055+(s.aerialWon??0)*.025+s.shotsOnTarget*.055-(s.passes-s.passesCompleted)*.018-((s.dribbleAttempts??0)-(s.dribblesCompleted??0))*.035;
+      s.goals*.95+s.assists*.65+Math.max(0,(s.keyPasses??0)-s.assists-Math.max(0,(s.bigChancesCreated??0)-(s.bigChanceAssists??0)))*.07+Math.max(0,(s.bigChancesCreated??0)-(s.bigChanceAssists??0))*.11+(s.pressureRecoveries??0)*.075+Math.max(0,(s.pressingSuccesses??0)-(s.pressureRecoveries??0))*.03+s.tackles*(FORWARD.has(actor.position)?.12:.075)+s.interceptions*(FORWARD.has(actor.position)?.11:.065)+(s.dribblesCompleted??0)*.055+(s.aerialWon??0)*.025+s.shotsOnTarget*.055-(s.passes-s.passesCompleted)*.018-((s.dribbleAttempts??0)-(s.dribblesCompleted??0))*.035;
     const resultBonus=scores[side]>scores[1-side]?.22:scores[side]<scores[1-side]?-.16:.02;
     actor.rating=round(clamp(6.05+contribution+resultBonus-s.yellowCards*.15-s.redCards*1.7+(rng()-.5)*.18,3,10),1);
     s.ratingSum=actor.rating;s.ratingCount=s.apps;
@@ -414,12 +423,12 @@ export function simulateMatch(career:Career,fixture:Fixture,options:MatchOptions
   const stamina=ability(p,'stamina');
   const minutes=userActor?.minutes??0;
   events.sort((a,b)=>a.minute-b.minute||Number(a.id.slice(a.id.lastIndexOf('e')+1))-Number(b.id.slice(b.id.lastIndexOf('e')+1)));
-  const performers:MatchPerformance[]=allActors.map(actor=>({id:actor.id,name:actor.name,clubId:actor.clubId,teamId:actor.teamId,position:actor.position,ovr:actor.ovr,nationality:actor.nationality,attributes:actor.attributes,stats:actor.stats,rating:actor.rating,minutes:actor.minutes,started:actor.started,...(actor.captain?{captain:true}:{})}));
+  const performers:MatchPerformance[]=allActors.map(actor=>({abilityVersion:actor.abilityVersion,playSkills:actor.playSkills,skillMastery:actor.skillMastery,id:actor.id,name:actor.name,clubId:actor.clubId,teamId:actor.teamId,position:actor.position,ovr:actor.ovr,nationality:actor.nationality,attributes:actor.attributes,stats:actor.stats,rating:actor.rating,minutes:actor.minutes,started:actor.started,...(actor.captain?{captain:true}:{})}));
   return {
     id:`match:${career.season.year}:${fixture.id}`,fixtureId:fixture.id,round:fixture.round,seasonYear:career.season.year,
     homeId:home.id,awayId:away.id,homeGoals:scores[0],awayGoals:scores[1],homeName:home.name,awayName:away.name,
     events,playerClubId:userTeam??p.clubId,playerPlayed:minutes>0,playerStarted:userActor?.started??false,playerMinutes:minutes,playerRating:rating,playerStats,seed,
-    metricsVersion:2,lineupVersion:2,...(recordActions?{actionVersion:1 as const}:{}),scope:options.scope??'club',competitionId:options.competitionId??home.leagueId,date:options.date,performers,momPlayerId:mom?.id,
+    metricsVersion:2,lineupVersion:2,...(recordActions?{actionVersion:1 as const,extendedVersion:1 as const}:{}),scope:options.scope??'club',competitionId:options.competitionId??home.leagueId,date:options.date,performers,momPlayerId:mom?.id,
     effects:{fitnessAfter:round(clamp(p.fitness-minutes/90*(25-stamina*.13),15,100)),moraleAfter:round(clamp(p.morale+(minutes?(userScore>opponentScore?2:userScore<opponentScore?-2:0)+(rating-6.5)*1.4:-.4),5,100)),formAfter:round(clamp(minutes?p.form*.84+rating*1.6:p.form*.98+1,20,100)),injuryWeeksAfter:injuryWeeks||p.injuryWeeks,trustAfter:round(clamp(career.managerTrust+(minutes?(rating-6.35)*1.2:-.25),0,100))},
   };
 }

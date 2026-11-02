@@ -12,7 +12,7 @@ import {decodeStored,isBlobCareer,prepareStored,metadataFor,journalEntry,storedH
 import {validateCompetitionData} from './competition-validation';
 import { validateCareerExtensions } from './extension-validation';
 import { CLUBS, LEAGUES, INTERNATIONAL_CLUBS, INTERNATIONAL_LEAGUES } from './data';
-import { CORE_STATS, DETAIL_STATS, ACTION_STATS, ACTION_COUNTERS } from './math';
+import { CORE_STATS, DETAIL_STATS, ACTION_STATS, ACTION_COUNTERS, EXTENDED_STATS } from './math';
 import type { Career, MatchRecord, PlayerStats, SaveEnvelope, SaveSlot } from './types';
 
 const DATABASE = 'kball-careers';
@@ -22,9 +22,9 @@ const leagues = new Set([...LEAGUES,...INTERNATIONAL_LEAGUES].map(league => leag
 const positions = new Set(['GK', 'CB', 'LB', 'RB', 'LWB', 'RWB', 'CDM', 'CM', 'CAM', 'LM', 'RM', 'LW', 'RW', 'CF', 'SS', 'ST']);
 const fieldAttributes = ['strength', 'stamina', 'speed', 'agility', 'jumping', 'ballControl', 'dribbling', 'passing', 'crossing', 'shooting', 'heading', 'defending', 'setPieces', 'decisions', 'vision', 'anticipation', 'positioning', 'composure', 'concentration', 'teamwork'];
 const keeperAttributes = ['gkShotStopping', 'gkReflexes', 'gkHandling', 'gkAerialCommand', 'gkOneOnOnes', 'gkPositioning', 'gkDistribution', 'decisions', 'concentration', 'gkDefensiveOrganization'];
-const allAttributes = new Set([...fieldAttributes, ...keeperAttributes]);
+const allAttributes = new Set([...fieldAttributes, ...keeperAttributes,'finishing','offTheBall','pressing','tackling','skillMoves']);
 const statKeys = CORE_STATS;
-const eventTypes = new Set(['shot', 'goal', 'save', 'assist', 'yellow', 'red', 'injury', 'substitution', 'pass', 'keyPass', 'dribble', 'tackle', 'interception', 'aerial', 'handling', 'sweep', 'longKick','pressure','recovery','cross','catch','punch','setPiece']);
+const eventTypes = new Set(['shot', 'goal', 'save', 'assist', 'yellow', 'red', 'injury', 'substitution', 'pass', 'keyPass', 'dribble', 'tackle', 'interception', 'aerial', 'handling', 'sweep', 'longKick','pressure','recovery','bigChance','cross','catch','punch','setPiece']);
 const poisonedKeys = new Set(['__proto__', 'prototype', 'constructor']);
 
 interface SlotMetadata extends SaveSlot { hash: string; deleted?: boolean }
@@ -119,7 +119,7 @@ function stringify(value: unknown): string {
   return serialized;
 }
 
-function attributes(value: unknown, label: string, required?: string[], minimum = 0, maximum = 110): void {
+function attributes(value: unknown, label: string, required?: string[], minimum = 0, maximum = 120): void {
   const values = object(value, label);
   for (const [key, amount] of Object.entries(values)) {
     assert(allAttributes.has(key), `${label}에 알 수 없는 능력치가 있습니다.`);
@@ -167,18 +167,27 @@ function growthLedger(value: unknown, end: unknown, throughRound: number, year: 
   }
 }
 
-function agingReport(value: unknown, year: number, label: string, seasonStart: unknown): void {
+function agingReport(value: unknown, year: number, label: string, seasonStart: unknown, introduction?: unknown): void {
   const row = object(value, label);
   assert(number(row.year, `${label}.year`, 1900, 2500, true) === year, `${label}의 연도가 다릅니다.`);
   attributes(row.startAttributes, `${label}.startAttributes`); attributes(row.endAttributes, `${label}.endAttributes`); attributes(row.changes, `${label}.changes`, undefined, -1e6, 1e6);
   const start = object(row.startAttributes, `${label}.startAttributes`), end = object(row.endAttributes, `${label}.endAttributes`), changes = object(row.changes, `${label}.changes`);
   sameAttributes(start, end, label);
-  sameAttributeValues(end, object(seasonStart, `${label}.seasonStart`), label);
+  const baseline={...object(seasonStart, `${label}.seasonStart`)};
+  // An old aging report predates the five-attribute introduction; validate its
+  // exact original values while allowing only the explicitly logged new keys.
+  if(introduction&&typeof introduction==='object'&&!Array.isArray(introduction)){
+    const intro=introduction as Record<string,unknown>;
+    if(intro.version===2&&intro.year===year&&intro.added&&typeof intro.added==='object')for(const [key,value]of Object.entries(intro.added)){
+      if(['finishing','offTheBall','pressing','tackling','skillMoves'].includes(key)&&!(key in end)&&baseline[key]===value)delete baseline[key];
+    }
+  }
+  sameAttributeValues(end,baseline,label);
   assert(Object.keys(changes).every(key => key in start), `${label}의 변화량에 다른 능력치가 있습니다.`);
   for (const key of Object.keys(start)) {
     assert(Number(changes[key] ?? 0) <= 0 && Math.abs(Number(start[key]) + Number(changes[key] ?? 0) - Number(end[key])) <= .025, `${label}의 연령 변화 합계와 능력치가 다릅니다.`);
   }
-  const ovrStart = number(row.ovrStart, `${label}.ovrStart`, 1, 120), ovrEnd = number(row.ovrEnd, `${label}.ovrEnd`, 1, 120);
+  const ovrStart = number(row.ovrStart, `${label}.ovrStart`, 1, 130), ovrEnd = number(row.ovrEnd, `${label}.ovrEnd`, 1, 130);
   assert(ovrEnd <= ovrStart, `${label}의 연령 변화 종합 능력치가 올바르지 않습니다.`);
 }
 
@@ -209,6 +218,13 @@ function stats(value: unknown, label: string, detailed = false, actions=false): 
   }
   assert(Number(values.headerGoals??0)<=Number(values.goals),`${label}의 헤더 득점이 전체 득점보다 많습니다.`);
   assert(Number(values.progressivePasses??0)<=Number(values.passesCompleted),`${label}의 전진 패스 성공이 전체 패스 성공보다 많습니다.`);
+  for(const key of EXTENDED_STATS)if(values[key]!==undefined)number(values[key],`${label}.${key}`,0,100_000_000,true);
+  if(Number(values.extendedApps)>0){
+   for(const key of EXTENDED_STATS)number(values[key],`${label}.${key}`,0,100_000_000,true);
+   assert(Number(values.extendedApps)<=Number(values.apps)&&Number(values.extendedMinutes)<=Number(values.minutes),`${label}의 확장 집계 범위가 전체를 초과합니다.`);
+   assert(Number(values.freeKickGoals)+Number(values.penaltyGoals)<=Number(values.goals)&&Number(values.freeKickAssists)<=Number(values.assists),`${label}의 프리킥·페널티 하위 기록이 전체를 초과합니다.`);
+   assert(Number(values.bigChanceAssists)<=Math.min(Number(values.bigChancesCreated),Number(values.assists))&&Number(values.pressingSuccesses)<=Number(values.pressingAttempts),`${label}의 확장 성공·도움 기록이 모순됩니다.`);
+  }
   if(ACTION_COUNTERS.some(k=>Number(values[k])>0))assert(Number(values.actionApps)>0,`${label}의 신규 행동 집계 범위가 없습니다.`);
   assert(Number(values.starts) <= Number(values.apps), `${label}의 선발 수가 출전 수보다 많습니다.`);
   assert(Number(values.minutes) <= Number(values.apps) * 130, `${label}의 출전 시간이 올바르지 않습니다.`);
@@ -277,6 +293,8 @@ function matches(value: unknown, label: string, playerId: string, national = fal
     const minutes = number(match.playerMinutes, `${prefix}.playerMinutes`, 0, 130, true);
     const rating = number(match.playerRating, `${prefix}.playerRating`, 0, 10);
     const personal = stats(match.playerStats, `${prefix}.playerStats`, match.metricsVersion === 2,match.actionVersion===1);
+    if(Number(personal.extendedApps)>0)assert(match.extendedVersion===1,`${prefix}의 확장 지표 원장 버전이 없습니다.`);
+    if(match.extendedVersion!==undefined)assert(match.extendedVersion===1&&match.actionVersion===1,`${prefix}의 확장 지표 버전이 올바르지 않습니다.`);
     if((personal.actionApps??0)>0)assert(match.actionVersion===1,`${prefix}의 신규 지표 원장 버전이 없습니다.`);
     assert(personal.apps === Number(played) && personal.starts === Number(started) && personal.minutes === minutes, `${prefix}의 출장 집계가 일치하지 않습니다.`);
     assert(personal.ratingCount === Number(played) && Math.abs(personal.ratingSum - rating) < 0.000001, `${prefix}의 평점 집계가 일치하지 않습니다.`);
@@ -327,7 +345,7 @@ function matches(value: unknown, label: string, playerId: string, national = fal
       for (const row of performers) {
         text(row.name, `${prefix}.performer.name`);
         assert(positions.has(String(row.position)), `${prefix}의 경기 선수 포지션이 올바르지 않습니다.`);
-        number(row.ovr, `${prefix}.performer.ovr`, 1, 120);
+        number(row.ovr, `${prefix}.performer.ovr`, 1, 130);
         if (national) {
           if (String(row.clubId).startsWith('NAT:')) teamId(row.clubId, `${prefix}.performer.clubId`, true);
           // Club affiliation is a historical snapshot. A free agent may still
@@ -345,7 +363,7 @@ function matches(value: unknown, label: string, playerId: string, national = fal
         const performerRating = number(row.rating, `${prefix}.performer.rating`, 0, 10);
         const performerStarted = bool(row.started, `${prefix}.performer.started`);
         assert(performerStats.minutes === performerMinutes && performerStats.starts === Number(performerStarted) && performerStats.ratingSum === performerRating, `${prefix}의 경기 선수 집계가 일치하지 않습니다.`);
-        if (row.id === playerId) for (const key of [...statKeys, ...DETAIL_STATS,...ACTION_STATS]) assert((performerStats[key] ?? 0) === (personal[key] ?? 0), `${prefix}의 개인 기록과 경기 선수 기록이 다릅니다.`);
+        if (row.id === playerId) for (const key of [...statKeys, ...DETAIL_STATS,...ACTION_STATS,...EXTENDED_STATS]) assert((performerStats[key] ?? 0) === (personal[key] ?? 0), `${prefix}의 개인 기록과 경기 선수 기록이 다릅니다.`);
       }
       if (match.momPlayerId !== undefined) {
         assert(performers.some(row => row.id === text(match.momPlayerId, `${prefix}.momPlayerId`)), `${prefix}의 MOM 선수가 경기 명단에 없습니다.`);
@@ -386,7 +404,7 @@ function reconciledStats(value: unknown, records: MatchRecord[], label: string):
     const sum = records.reduce((total, match) => total + match.playerStats[key], 0);
     assert(Math.abs(totals[key] - sum) < 0.000001, `${label}.${key}가 경기 원장 합계와 다릅니다.`);
   }
-  for (const key of [...DETAIL_STATS,...ACTION_STATS]) if (totals[key] !== undefined) {
+  for (const key of [...DETAIL_STATS,...ACTION_STATS,...EXTENDED_STATS]) if (totals[key] !== undefined) {
     const sum = records.reduce((total, match) => total + (match.playerStats[key] ?? 0), 0);
     assert(Math.abs(totals[key]! - sum) < 0.000001, `${label}.${key}가 경기 원장 합계와 다릅니다.`);
   }
@@ -465,7 +483,7 @@ function validateSystems(career: Record<string, unknown>, player: Record<string,
   if (systems.legacyMetrics !== undefined) bool(systems.legacyMetrics, 'systems.legacyMetrics');
   const currentSeason = object(career.season, 'season'), currentYear = Number(currentSeason.year), currentRound = Number(currentSeason.week);
   if (systems.growthLedger !== undefined) growthLedger(systems.growthLedger, player.attributes, currentRound, currentYear, 'systems.growthLedger', currentSeason.attributeStart);
-  if (systems.agingReport !== undefined) agingReport(systems.agingReport, currentYear, 'systems.agingReport', currentSeason.attributeStart);
+  if (systems.agingReport !== undefined) agingReport(systems.agingReport, currentYear, 'systems.agingReport', currentSeason.attributeStart, systems.abilityUpgrade);
   if (systems.trainingPlan !== undefined) {
     const plan = object(systems.trainingPlan, 'systems.trainingPlan');
     const year = number(plan.forYear, 'trainingPlan.forYear', currentYear, currentYear + 1, true), confirmed = bool(plan.confirmed, 'trainingPlan.confirmed');
@@ -498,7 +516,7 @@ function validateSystems(career: Record<string, unknown>, player: Record<string,
     assert(rosterOwner.get(id) === owner, '월드 선수의 구단 명단과 소속이 다릅니다.');
     text(row.name, 'world.player.name'); text(row.nationality, 'world.player.nationality');
     assert(positions.has(String(row.position)), '월드 선수 포지션이 올바르지 않습니다.');
-    number(row.age, 'world.player.age', 14, 100); number(row.ovr, 'world.player.ovr', 1, 120); number(row.potential, 'world.player.potential', 1, 100);
+    number(row.age, 'world.player.age', 14, 100); number(row.ovr, 'world.player.ovr', 1, 130); number(row.potential, 'world.player.potential', 1, 120);
     number(row.injuryWeeks, 'world.player.injuryWeeks', 0, 104, true); number(row.leadership, 'world.player.leadership', 0, 100);
   }
   const competitions = dictionary(world.competitions, 'world.competitions', LEAGUES.length);
@@ -511,7 +529,7 @@ function validateSystems(career: Record<string, unknown>, player: Record<string,
     assert(text(row.playerId, 'world.stats.playerId') === id && (id === playerId || worldPlayers.has(id) || temporaryReserve(id, row)), '월드 선수 기록 참조가 올바르지 않습니다.');
     text(row.name, 'world.stats.name'); clubId(row.clubId, 'world.stats.clubId'); leagueId(row.leagueId, 'world.stats.leagueId');
     assert(positions.has(String(row.position)), '월드 선수 기록 포지션이 올바르지 않습니다.');
-    text(row.nationality, 'world.stats.nationality'); number(row.ovr, 'world.stats.ovr', 1, 120); stats(row.stats, 'world.stats.stats');
+    text(row.nationality, 'world.stats.nationality'); number(row.ovr, 'world.stats.ovr', 1, 130); stats(row.stats, 'world.stats.stats');
     if (row.rank !== undefined) number(row.rank, 'world.stats.rank', 1, 128, true);
     if (row.nationalStats !== undefined) stats(row.nationalStats, 'world.stats.nationalStats');
   }
@@ -567,7 +585,7 @@ function validateSystems(career: Record<string, unknown>, player: Record<string,
   }
   const economy = object(systems.economics, 'systems.economics');
   if(economy.valuationVersion!==undefined)assert(economy.valuationVersion===1||economy.valuationVersion===2,'시장 평가 버전이 올바르지 않습니다.');
-  if(economy.assessment!==undefined){const a=object(economy.assessment,'시장 평가 기준');number(a.year,'평가 연도',1900,currentYear,true);number(a.round,'평가 라운드',0,150,true);number(a.totalRounds,'평가 시즌 길이',1,150,true);assert(Number(a.round)<=Number(a.totalRounds),'평가 라운드가 시즌 길이를 초과합니다.');number(a.ability,'평가 기량',1,120);number(a.injuryWeeks,'평가 부상',0,1000,true);number(a.stardom,'평가 스타성',1,10,true);}
+  if(economy.assessment!==undefined){const a=object(economy.assessment,'시장 평가 기준');number(a.year,'평가 연도',1900,currentYear,true);number(a.round,'평가 라운드',0,150,true);number(a.totalRounds,'평가 시즌 길이',1,150,true);assert(Number(a.round)<=Number(a.totalRounds),'평가 라운드가 시즌 길이를 초과합니다.');number(a.ability,'평가 기량',1,130);number(a.injuryWeeks,'평가 부상',0,1000,true);number(a.stardom,'평가 스타성',1,10,true);}
   for (const key of ['marketValue', 'previousValue', 'peakValue', 'salaryIncome', 'bonusIncome', 'totalTransferFees', 'highestWage']) number(economy[key], `economics.${key}`, 0, 1e15);
   assert(Number(economy.peakValue) >= Number(economy.marketValue), '최고 몸값이 현재 몸값보다 작습니다.');
   assert(Math.abs(Number(economy.salaryIncome) + Number(economy.bonusIncome) - Number(career.careerIncome)) < 0.01, '급여·보너스와 커리어 수입 합계가 다릅니다.');
@@ -647,9 +665,9 @@ function validateSystems(career: Record<string, unknown>, player: Record<string,
       assert(status!=='pending'||career.stage!=='retired','은퇴한 선수의 주장 제의가 아직 열려 있습니다.');
       const a=object(row.assessment,'captainOffer.assessment');
       assert(a.scope===scope&&a.teamId===row.teamId&&a.eligibleRole===role,'주장 제의와 평가 대상·역할이 다릅니다.');
-      for(const key of ['teamPower','squadOvr','playerOvr'])number(a[key],`captainAssessment.${key}`,1,key==='playerOvr'?120:110);
+      for(const key of ['teamPower','squadOvr','playerOvr'])number(a[key],`captainAssessment.${key}`,1,key==='playerOvr'?130:120);
       for(const key of ['leadership','trust'])number(a[key],`captainAssessment.${key}`,0,100);
-      if(a.mental!==undefined){const mental=object(a.mental,'captainAssessment.mental');for(const key of ['decisions','concentration','composure','teamwork'])number(mental[key],`captainAssessment.mental.${key}`,0,110);number(mental.score,'captainAssessment.mental.score',0,110);assert(Math.abs(Number(mental.score)-(['decisions','concentration','composure','teamwork'].reduce((sum,key)=>sum+Number(mental[key]),0)/4))<=.051,'주장 평가의 멘털 평균이 다릅니다.');}
+      if(a.mental!==undefined){const mental=object(a.mental,'captainAssessment.mental');for(const key of ['decisions','concentration','composure','teamwork'])number(mental[key],`captainAssessment.mental.${key}`,0,120);number(mental.score,'captainAssessment.mental.score',0,120);assert(Math.abs(Number(mental.score)-(['decisions','concentration','composure','teamwork'].reduce((sum,key)=>sum+Number(mental[key]),0)/4))<=.051,'주장 평가의 멘털 평균이 다릅니다.');}
       number(a.age,'captainAssessment.age',14,100,true);number(a.tenure,'captainAssessment.tenure',0,200,true);
       for(const key of ['abilityRank','candidateRank'])number(a[key],`captainAssessment.${key}`,1,100_000,true);
       for(const key of ['apps','recentApps','recentMinutes'])number(a[key],`captainAssessment.${key}`,0,10_000_000,true);
@@ -692,12 +710,12 @@ function validateSystems(career: Record<string, unknown>, player: Record<string,
     const row = object(raw, 'growthReport'); number(row.year, 'growthReport.year', 1900, 2500, true); choice(row.half, ['first', 'season'], 'growthReport.half');
     const from = number(row.fromRound, 'growthReport.fromRound', 0, 150, true); number(row.toRound, 'growthReport.toRound', from, 150, true);
     attributes(row.startAttributes, 'growthReport.startAttributes'); attributes(row.endAttributes, 'growthReport.endAttributes');
-    number(row.ovrStart, 'growthReport.ovrStart', 1, 120); number(row.ovrEnd, 'growthReport.ovrEnd', 1, 120); stats(row.stats, 'growthReport.stats'); stats(row.previousStats, 'growthReport.previousStats');
+    number(row.ovrStart, 'growthReport.ovrStart', 1, 130); number(row.ovrEnd, 'growthReport.ovrEnd', 1, 130); stats(row.stats, 'growthReport.stats'); stats(row.previousStats, 'growthReport.previousStats');
     number(row.valueStart, 'growthReport.valueStart', 0, 1e15); number(row.valueEnd, 'growthReport.valueEnd', 0, 1e15); text(row.context, 'growthReport.context', 8_000);
     if (row.growth !== undefined) growthLedger(row.growth, row.endAttributes, Number(row.toRound), Number(row.year), 'growthReport.growth', row.startAttributes);
-    if (row.offseasonAging !== undefined) agingReport(row.offseasonAging, Number(row.year), 'growthReport.offseasonAging', row.startAttributes);
+    if (row.offseasonAging !== undefined) agingReport(row.offseasonAging, Number(row.year), 'growthReport.offseasonAging', row.startAttributes, systems.abilityUpgrade);
   }
-  if (systems.firstHalfSnapshot !== undefined) { const row = object(systems.firstHalfSnapshot, 'systems.firstHalfSnapshot'); attributes(row.attributes, 'snapshot.attributes'); stats(row.stats, 'snapshot.stats'); number(row.ovr, 'snapshot.ovr', 1, 120); number(row.value, 'snapshot.value', 0, 1e15); number(row.round, 'snapshot.round', 0, 150, true); }
+  if (systems.firstHalfSnapshot !== undefined) { const row = object(systems.firstHalfSnapshot, 'systems.firstHalfSnapshot'); attributes(row.attributes, 'snapshot.attributes'); stats(row.stats, 'snapshot.stats'); number(row.ovr, 'snapshot.ovr', 1, 130); number(row.value, 'snapshot.value', 0, 1e15); number(row.round, 'snapshot.round', 0, 150, true); }
   if (systems.pendingChoice !== undefined) {
     const row = object(systems.pendingChoice, 'systems.pendingChoice'); choice(row.kind, ['renewal', 'transfer'], 'pendingChoice.kind');
     const offerIds = list(row.offerIds, 'pendingChoice.offerIds', 50).map(raw => text(raw, 'pendingChoice.offerId')); unique(offerIds, '계약 선택 제안');
@@ -745,21 +763,21 @@ export function validateCareer(value: unknown,ownedJSON=false): Career {
   number(player.age, 'player.age', 14, 100, true);
   number(player.height, 'player.height', 150, 210);
   number(player.weight, 'player.weight', 45, 120);
-  number(player.ovr, 'player.ovr', 1, 120);
-  number(player.potential, 'player.potential', 1, 100);
+  number(player.ovr, 'player.ovr', 1, 130);
+  number(player.potential, 'player.potential', 1, 120);
   number(player.fitness, 'player.fitness', 0, 100);
   number(player.morale, 'player.morale', 0, 100);
   number(player.form, 'player.form', 0, 100);
   number(player.injuryWeeks, 'player.injuryWeeks', 0, 104, true);
   number(player.wage, 'player.wage', 0, 1e12);
   number(player.contractYears, 'player.contractYears', 0, 20, true);
-  attributes(player.attributes, 'player.attributes', player.position === 'GK' ? keeperAttributes : fieldAttributes);
+  attributes(player.attributes, 'player.attributes', player.position === 'GK' ? keeperAttributes : player.abilityVersion===2?[...fieldAttributes,'finishing','offTheBall','pressing','tackling','skillMoves']:fieldAttributes);
   const secondaries = list(player.secondaryPositions, 'player.secondaryPositions', 2).map(item => text(item, 'secondaryPosition'));
   assert(secondaries.every(position => positions.has(position) && position !== player.position), '부 포지션이 올바르지 않습니다.');
   unique(secondaries, '부 포지션');
   const training = list(career.training, 'training', 3).map(item => text(item, 'training.attribute'));
   unique(training, '훈련 능력치');
-  assert(training.every(key => (player.position === 'GK' ? keeperAttributes : fieldAttributes).includes(key)), '훈련 능력치가 포지션과 맞지 않습니다.');
+  assert(training.every(key => (player.position === 'GK' ? keeperAttributes : [...fieldAttributes,'finishing','offTheBall','pressing','tackling','skillMoves']).includes(key)), '훈련 능력치가 포지션과 맞지 않습니다.');
 
   const season = object(career.season, 'season');
   const seasonYear = number(season.year, 'season.year', 1900, 2500, true);
@@ -780,7 +798,7 @@ export function validateCareer(value: unknown,ownedJSON=false): Career {
     }
   }
   text(season.competitionName, 'season.competitionName');
-  number(season.ovrStart, 'season.ovrStart', 1, 120);
+  number(season.ovrStart, 'season.ovrStart', 1, 130);
   attributes(season.attributeStart, 'season.attributeStart');
   const completed = bool(season.completed, 'season.completed');
   assert(completed === (week === totalWeeks), '시즌 완료 상태와 진행 주차가 일치하지 않습니다.');
@@ -855,8 +873,8 @@ export function validateCareer(value: unknown,ownedJSON=false): Career {
     text(summary.competitionName, `${prefix}.competitionName`);
     number(summary.age, `${prefix}.age`, 14, 100, true);
     number(summary.rank, `${prefix}.rank`, summary.clubId==='FA'?0:1, 128, true);
-    number(summary.ovrStart, `${prefix}.ovrStart`, 1, 120);
-    number(summary.ovrEnd, `${prefix}.ovrEnd`, 1, 120);
+    number(summary.ovrStart, `${prefix}.ovrStart`, 1, 130);
+    number(summary.ovrEnd, `${prefix}.ovrEnd`, 1, 130);
     number(summary.income, `${prefix}.income`, 0, 1e15);
     assert(positions.has(String(summary.position)) && ['youth', 'senior'].includes(String(summary.squad)), `${prefix}의 포지션·소속 단계가 올바르지 않습니다.`);
     bool(summary.completed, `${prefix}.completed`);

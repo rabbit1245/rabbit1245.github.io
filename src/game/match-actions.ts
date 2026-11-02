@@ -1,7 +1,8 @@
 import {playingAbility} from './attributes';
+import {derivedAttribute,specialtyAbility} from './ability-expansion';
 import {pressureAbility} from './ability-contests';
 import {clamp,integer,seededRandom} from './math';
-import type {MatchPerformance} from './revision-types';
+import type {MatchPerformance,MatchParticipant} from './revision-types';
 import type {AttributeKey,MatchAction,MatchEvent,Position} from './types';
 
 export interface ActionActor extends MatchPerformance {from:number;to:number;teamId:string;user:boolean;style:string;creation:number;pressure?:number}
@@ -25,10 +26,18 @@ const active=(team:ActionTeam,minute:number)=>{
   return rows.find(r=>minute<=r.until)?.players??[];
 };
 const zonePools=(players:ActionActor[])=>{let pools=byZone.get(players);if(!pools){pools=[0,1,2].map(z=>players.filter(p=>zone(p.position)===z));byZone.set(players,pools);}return pools;};
-export const actionAbility=(p:ActionActor,key:AttributeKey)=>{
-  if(!p.attributes)return p.ovr;
-  const raw=p.attributes[key],value=raw!==undefined?clamp(raw,1,110):clamp(p.ovr>100?playingAbility({...p,attributes:p.attributes,style:p.style,ovr:undefined}):p.ovr,1,110);
-  return p.pressure?pressureAbility(value,key,p.pressure):value;
+const abilityValues=new WeakMap<MatchParticipant,Partial<Record<AttributeKey,number>>>();
+const fieldPlayers=new WeakMap<ActionActor[],ActionActor[]>();
+const outfield=(players:ActionActor[])=>{let rows=fieldPlayers.get(players);if(!rows){rows=players.filter(p=>p.position!=='GK');fieldPlayers.set(players,rows);}return rows;};
+/** Actor abilities are immutable inside one match; pressure is applied at use. */
+export const actionAbility=(p:MatchParticipant&{pressure?:number;style?:string},key:AttributeKey)=>{
+ if(!p.attributes)return p.ovr;
+ let values=abilityValues.get(p);if(!values){values={};abilityValues.set(p,values);}
+ let value=values[key];if(value===undefined){
+  const raw=p.attributes[key]??(['finishing','offTheBall','pressing','tackling','skillMoves'].includes(key)?derivedAttribute(p.attributes,key):undefined);
+  value=specialtyAbility(p,key,raw!==undefined?clamp(raw,1,120):clamp(p.ovr>100?playingAbility({...p,attributes:p.attributes,style:p.style??'',ovr:undefined}):p.ovr,1,120));values[key]=value;
+ }
+ return p.pressure?pressureAbility(value,key,p.pressure):value;
 };
 
 /** Only a bounded number of attacking phase transitions are expanded; ordinary passes keep the existing fast aggregate. */
@@ -61,8 +70,8 @@ export function resolvePressing(teams:ActionTeam[],seed:string,emit:ActionEmitte
   for(let side=0;side<2;side++)for(const actor of teams[side].actors){
     if(actor.position==='GK'||!actor.minutes)continue;
     const rng=seededRandom(`${seed}:${actor.id}:pressure`),a=(k:AttributeKey)=>actionAbility(actor,k),style=/프레싱|압박|수비형/.test(actor.style)?1.3:1;
-    const opportunities=count(PRESS_RATES[actor.position]*duration(actor)*(.35+(a('stamina')*.6+a('speed')*.4)*.008)*style,rng);
-    const quality=a('defending')*.24+a('anticipation')*.2+a('teamwork')*.18+a('decisions')*.16+a('speed')*.12+a('stamina')*.1,cooperation=a('teamwork')*.0012;
+    const opportunities=count(PRESS_RATES[actor.position]*duration(actor)*(.35+(a('stamina')*.3+a('speed')*.2+a('pressing')*.5)*.008)*style,rng);
+    const quality=a('pressing')*.38+a('defending')*.12+a('anticipation')*.12+a('teamwork')*.12+a('decisions')*.12+a('speed')*.07+a('stamina')*.07,cooperation=a('teamwork')*.0012;
     for(let i=0;i<opportunities;i++){
       const minute=integer(rng,actor.from+1,actor.to),opponents=active(teams[1-side],minute),mates=active(teams[side],minute);if(!opponents.length||!mates.length)continue;
       const nearby=zonePools(opponents)[2-zone(actor.position)],pool=nearby.length?nearby:opponents,holder=pool[integer(rng,0,pool.length-1)];
@@ -71,11 +80,32 @@ export function resolvePressing(teams:ActionTeam[],seed:string,emit:ActionEmitte
       let best=recoverers.get(mates);if(!best){best=mates.reduce((best,p)=>actionAbility(p,'anticipation')+actionAbility(p,'teamwork')>actionAbility(best,'anticipation')+actionAbility(best,'teamwork')?p:best,mates[0]);recoverers.set(mates,best);}
       const recoverer=rng()<.6?actor:best;
       const recovery=forced&&rng()<clamp(.4+actionAbility(recoverer,'anticipation')*.003+actionAbility(recoverer,'teamwork')*.001+(actionAbility(recoverer,'speed')-actionAbility(holder,'speed'))*.002,.15,.95);
-      if(!recovery&&!(detailed&&actor.user))continue;
+      actor.stats.pressingAttempts=(actor.stats.pressingAttempts??0)+1;
       if(record){const possessionId=`${actor.id}:press:${i}`,pressureId=emit('pressure',actor,minute,recovery?'압박으로 상대의 볼 처리를 방해':'압박했지만 상대 소유권 유지',undefined,{kind:'pressure',possessionId,holderId:holder.id,holderTeamId:holder.teamId??holder.clubId,recovered:recovery});if(recovery)emit('recovery',recoverer,minute,'압박 이후 우리 팀 소유권 회복',pressureId,{kind:'recovery',possessionId,fromTeamId:holder.teamId??holder.clubId});}
-      if(recovery)actor.stats.pressingWins=(actor.stats.pressingWins??0)+1;
+      if(recovery){actor.stats.pressingWins=(actor.stats.pressingWins??0)+1;actor.stats.pressingSuccesses=(actor.stats.pressingSuccesses??0)+1;recoverer.stats.ballRecoveries=(recoverer.stats.ballRecoveries??0)+1;recoverer.stats.pressureRecoveries=(recoverer.stats.pressureRecoveries??0)+1;}
     }
   }
+}
+
+/** Resolve an actual on-pitch holder duel, then a single ownership-change event. */
+export function resolveBallDuels(teams:ActionTeam[],seed:string,emit:ActionEmitter,record=true){
+ for(let side=0;side<2;side++)for(const actor of teams[side].actors){
+  if(actor.position==='GK'||actor.minutes<=0)continue;
+  const planned={tackle:actor.stats.tackleAttempts??0,interception:actor.stats.interceptions};actor.stats.tackleAttempts=0;actor.stats.tackles=0;actor.stats.interceptions=0;
+  const rng=seededRandom(`${seed}:${actor.id}:ball-duels`),a=(k:AttributeKey)=>actionAbility(actor,k);
+  const qualities={tackle:a('tackling')*.5+a('defending')*.18+a('decisions')*.12+a('strength')*.12+a('agility')*.08,interception:a('defending')*.3+a('anticipation')*.3+a('positioning')*.2+a('concentration')*.1+a('decisions')*.1};
+  for(const method of ['tackle','interception'] as const)for(let i=0;i<planned[method];i++){
+   const minute=integer(rng,actor.from+1,actor.to),opponents=outfield(active(teams[1-side],minute));if(!opponents.length)continue;
+   const holder=opponents[integer(rng,0,opponents.length-1)],h=(k:AttributeKey)=>actionAbility(holder,k);
+   const quality=qualities[method];
+   const resistance=method==='tackle'?h('ballControl')*.35+h('skillMoves')*.25+h('dribbling')*.2+h('agility')*.2:h('passing')*.5+h('vision')*.25+h('decisions')*.25;
+   const success=rng()<1/(1+Math.exp(-(Math.log((method==='tackle'?.64:.7)/(method==='tackle'?.36:.3))+(quality-65)*.032-(resistance-65)*.025)));
+   if(method==='tackle')actor.stats.tackleAttempts=(actor.stats.tackleAttempts??0)+1;
+   const possessionId=`${actor.id}:${method}:${i}`;
+   const duel=record?emit(method,actor,minute,`${method==='tackle'?'태클':'패스 차단'} ${success?'성공':'실패'}`,undefined,{kind:'ballDuel',method,possessionId,holderId:holder.id,holderTeamId:holder.teamId,success}):'';
+   if(success){if(method==='tackle')actor.stats.tackles++;else actor.stats.interceptions++;actor.stats.ballRecoveries=(actor.stats.ballRecoveries??0)+1;if(record)emit('recovery',actor,minute,'수비 경합 후 우리 팀 소유권 회복',duel,{kind:'recovery',method,possessionId,fromTeamId:holder.teamId});}
+  }
+ }
 }
 
 function supplier(team:ActionTeam,minute:number,rng:()=>number,exclude?:string,setPiece=false){
@@ -111,7 +141,7 @@ export function headerProbability(actor:ActionActor,team:ActionTeam){
   const service=wide.length?wide.reduce((n,p)=>n+actionAbility(p,'crossing'),0)/wide.length:team.power;
   return clamp(base*clamp(.35+quality/100+(quality-other)*.015,.25,2.5)*(.75+service*.0035),.005,.65);
 }
-export function headerDelivery(team:ActionTeam,opposition:ActionTeam,shooter:ActionActor,keeper:ActionActor,minute:number,rng:()=>number,emit:ActionEmitter,record=true):{won:boolean;crossId:string;duelId:string;phase:'open'|'setPiece';crosser:ActionActor}|undefined{
+export function headerDelivery(team:ActionTeam,opposition:ActionTeam,shooter:ActionActor,keeper:ActionActor,minute:number,rng:()=>number,emit:ActionEmitter,record=true):{won:boolean;crossId:string;duelId:string;phase:'open'|'setPiece';crosser:ActionActor;delivery?:'corner'|'freeKick'}|undefined{
   const phase=shooter.position==='CB'||rng()<.35?'setPiece':'open',crosser=supplier(team,minute,rng,shooter.id,phase==='setPiece');if(!crosser)return;
   const delivery=phase==='setPiece'?(rng()<.6?'corner':'freeKick'):undefined;
   const setPieceId=record&&delivery?emit('setPiece',crosser,minute,'세트피스 크로스 공급',undefined,{kind:'setPiece',delivery}):undefined;
@@ -121,5 +151,5 @@ export function headerDelivery(team:ActionTeam,opposition:ActionTeam,shooter:Act
   shooter.stats.aerialAttempts=(shooter.stats.aerialAttempts??0)+1;defender.stats.aerialAttempts=(defender.stats.aerialAttempts??0)+1;
   const won=rng()<clamp(.5+(aerialQuality(shooter)-aerialQuality(defender))*.009,.05,.93),winner=won?shooter:defender;winner.stats.aerialWon=(winner.stats.aerialWon??0)+1;
   const duelId=record?emit('aerial',winner,minute,won?'공중 경합 후 헤더 기회 확보':'크로스를 공중볼 경합으로 차단',crossId,{kind:'headerDuel',attackerId:shooter.id,defenderId:defender.id,winnerId:winner.id}):'';
-  return {won,crossId,duelId,phase,crosser};
+  return {won,crossId,duelId,phase,crosser,delivery};
 }

@@ -1,0 +1,65 @@
+{
+  "rows": [
+    {
+      "level": 85,
+      "ovr": 85,
+      "games": 600,
+      "goals": 266,
+      "assists": 68,
+      "shots": 2201,
+      "wins": 258,
+      "draws": 160,
+      "losses": 182
+    },
+    {
+      "level": 100,
+      "ovr": 100,
+      "games": 600,
+      "goals": 788,
+      "assists": 102,
+      "shots": 3863,
+      "wins": 426,
+      "draws": 93,
+      "losses": 81
+    },
+    {
+      "level": 110,
+      "ovr": 110,
+      "games": 600,
+      "goals": 1262,
+      "assists": 160,
+      "shots": 5314,
+      "wins": 524,
+      "draws": 48,
+      "losses": 28
+    },
+    {
+      "level": 120,
+      "ovr": 120,
+      "games": 600,
+      "goals": 1624,
+      "assists": 175,
+      "shots": 6340,
+      "wins": 552,
+      "draws": 30,
+      "losses": 18
+    },
+    {
+      "level": 130,
+      "ovr": 130,
+      "games": 600,
+      "goals": 1653,
+      "assists": 175,
+      "shots": 6457,
+      "wins": 554,
+      "draws": 30,
+      "losses": 16
+    }
+  ],
+  "weakTeam130Against95": {
+    "games": 600,
+    "wins": 11,
+    "draws": 13,
+    "losses": 576
+  }
+}

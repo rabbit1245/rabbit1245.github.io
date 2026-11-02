@@ -33,23 +33,25 @@ function apply(career:Career,key:AttributeKey,amount:number,cause:GrowthCause):v
   const accumulated=amount+(remainders?.[key]??0);
   const next=round(clamp(current+accumulated,0,attributeCap(career.player,key))),change=round(next-current);
   if(remainders)remainders[key]=next>=attributeCap(career.player,key)?0:Math.max(-.005,Math.min(.005,accumulated-change));
+  if(career.player.abilityVersion===2&&accumulating&&career.player.playSkills?.includes(key)){career.player.skillMastery={...career.player.skillMastery,[key]:Math.min(20,(career.player.skillMastery?.[key]??0)+Math.max(0,amount))};}
+  if(cause==='cheat'&&amount>0&&career.player.abilityVersion===2&&career.player.playSkills?.includes(key))career.player.skillMastery={...career.player.skillMastery,[key]:Math.min(20,(career.player.skillMastery?.[key]??0)+change)};
   if(!change)return;
   career.player.attributes[key]=next;
   const row=ledger.byCause[cause]??(ledger.byCause[cause]={});row[key]=round((row[key]??0)+change);
 }
 /** Explicit removal ends excess mastery; its former value remains in the skill-change ledger. */
-export function removeSkillMastery(career:Career,key:AttributeKey):void{const value=career.player.attributes[key]??0;if(value>100)apply(career,key,100-value,'skillChange');}
+export function removeSkillMastery(career:Career,key:AttributeKey):void{const value=career.player.attributes[key]??0;if(career.player.abilityVersion!==2&&value>100)apply(career,key,100-value,'skillChange');}
 function growthCeiling(c:Career,key:AttributeKey):number{
  const p=c.player,ordinary=p.playSkills?.length?overall({...p,playSkills:[]}):p.ovr,normal=ordinary>=p.potential?0:clamp((p.potential-ordinary+4)/12,.025,1.15);
  if(!p.playSkills?.includes(key))return normal;
  // Learned mastery is separate from ordinary potential; talent and age still govern its pace.
  const aptitude:Record<Talent,number>={D:.002,C:.004,B:.006,A:.009,S:.015,SS:.045,SSS:.12};
- const mastery=aptitude[p.talent]*clamp((110-(p.attributes[key]??0)+4)/12,.35,1.15);
+ const mastery=aptitude[p.talent]*clamp((120-(p.attributes[key]??0)+4)/12,.35,1.15);
  return (p.attributes[key]??0)<100?Math.max(normal,mastery):mastery;
 }
 export function increaseAttribute(career:Career,key:AttributeKey,amount:number):void{
   apply(career,key,amount,'cheat');career.player.ovr=overall(career.player);
-  career.player.potential=Math.min(100,Math.max(career.player.potential,career.player.ovr));
+  career.player.potential=Math.min(120,Math.max(career.player.potential,career.player.ovr));
 }
 function cappedGain(career:Career,key:AttributeKey,amount:number,cause:'experience'|'development',cap:number):void {
   const prior=ensureGrowthTracking(career).byCause[cause][key]??0;
@@ -82,9 +84,10 @@ export function applyMatchExperience(career:Career,stats:PlayerStats):void {
   const add=(key:AttributeKey,value:number)=>{if(allowed.includes(key))weights.set(key,Math.min(1.4,(weights.get(key)??.15)+value));};
   if(stats.passesCompleted>=10)add(p.position==='GK'?'gkDistribution':'passing',.45);
   if((stats.keyPasses??0)>0)add('vision',.5);
-  if(stats.tackles+stats.interceptions>=2){add('defending',.5);add('anticipation',.35);}
-  if((stats.dribblesCompleted??0)>=2){add('ballControl',.4);add('dribbling',.45);}
-  if(stats.shotsOnTarget>0){add('shooting',.45);add('composure',.35);}
+  if(stats.tackles+stats.interceptions>=2){add('defending',.3);add('tackling',.5);add('anticipation',.35);}
+  if((stats.pressingSuccesses??0)>0)add('pressing',.5);
+  if((stats.dribblesCompleted??0)>=2){add('ballControl',.4);add('dribbling',.35);add('skillMoves',.4);}
+  if(stats.shotsOnTarget>0){add('shooting',.45);add('composure',.35);add('finishing',.45);add('offTheBall',.25);}
   if(stats.saves>0){add('gkShotStopping',.45);add('gkReflexes',.35);add('gkPositioning',.3);}
   if(stats.minutes>=60){add('stamina',.2);add('decisions',.25);}
   const talent:Record<Talent,number>={D:.45,C:.58,B:.74,A:.9,S:1.15,SS:1.35,SSS:1.55};

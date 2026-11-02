@@ -1,0 +1,90 @@
+TAP version 13
+# Subtest: five new attributes change their own actual match actions while display OVR and opponents are held constant
+ok 1 - five new attributes change their own actual match actions while display OVR and opponents are held constant
+  ---
+  duration_ms: 5149.856047
+  ...
+# Subtest: free-kick/penalty subsets, real big chances and unique recoveries reconcile with their source events
+ok 2 - free-kick/penalty subsets, real big chances and unique recoveries reconcile with their source events
+  ---
+  duration_ms: 721.345287
+  ...
+# Subtest: the raw 120 + earned mastery 10 model reaches 130 and selecting a skill alone never raises OVR
+ok 3 - the raw 120 + earned mastery 10 model reaches 130 and selecting a skill alone never raises OVR
+  ---
+  duration_ms: 765.00835
+  ...
+# Subtest: unselected raw attributes can reach 120, locks stop increases, and manual selected growth alone earns mastery
+ok 4 - unselected raw attributes can reach 120, locks stop increases, and manual selected growth alone earns mastery
+  ---
+  duration_ms: 481.392599
+  ...
+# Subtest: an actual 2.11.7 midseason save upgrades once without changing previous abilities, matches or awards
+ok 5 - an actual 2.11.7 midseason save upgrades once without changing previous abilities, matches or awards
+  ---
+  duration_ms: 7205.08775
+  ...
+# Subtest: a verified old aging report remains exact when only the five introduced baseline keys are added
+ok 6 - a verified old aging report remains exact when only the five introduced baseline keys are added
+  ---
+  duration_ms: 8174.685559
+  ...
+# Subtest: extended match → competition/year → career → Korean TXT totals survive retirement and reload
+ok 7 - extended match → competition/year → career → Korean TXT totals survive retirement and reload
+  ---
+  duration_ms: 7412.38428
+  ...
+# Subtest: card management five is neutral, ten is finite, and active pressing retains real card risk
+ok 8 - card management five is neutral, ten is finite, and active pressing retains real card risk
+  ---
+  duration_ms: 1654.702482
+  ...
+# Subtest: annual retirement skills explain the specialty for field players and keepers
+ok 9 - annual retirement skills explain the specialty for field players and keepers
+  ---
+  duration_ms: 408.515245
+  ...
+# Subtest: all 35 skill mappings and expanded OVR ranges are complete, unique by context and have examples
+ok 10 - all 35 skill mappings and expanded OVR ranges are complete, unique by context and have examples
+  ---
+  duration_ms: 0.541082
+  ...
+# Subtest: choosing skills adds no abilities, OVR or hidden bonus; sixth choice and wrong-position skills are rejected
+ok 11 - choosing skills adds no abilities, OVR or hidden bonus; sixth choice and wrong-position skills are rejected
+  ---
+  duration_ms: 1037.274681
+  ...
+# Subtest: locks, explicit manual aging, deletion above 100 and a complete export/import preserve the skill history
+ok 12 - locks, explicit manual aging, deletion above 100 and a complete export/import preserve the skill history
+  ---
+  duration_ms: 1265.132947
+  ...
+# Subtest: 110 mental attributes keep derived leadership within its percentage scale and remain saveable after a real round
+ok 13 - 110 mental attributes keep derived leadership within its percentage scale and remain saveable after a real round
+  ---
+  duration_ms: 1667.211232
+  ...
+# Subtest: annual retirement skills start at acquisition and disappear from deletion year; neither skills nor narratives enter totals
+ok 14 - annual retirement skills start at acquisition and disappear from deletion year; neither skills nor narratives enter totals
+  ---
+  duration_ms: 489.50616
+  ...
+# Subtest: every position and tactical style uses raw 120 plus at most 2 per earned skill, up to 130
+ok 15 - every position and tactical style uses raw 120 plus at most 2 per earned skill, up to 130
+  ---
+  duration_ms: 19.14918
+  ...
+# Subtest: actual training at the raw cap can earn specialty mastery in all positions without unchecked growth or cheats
+ok 16 - actual training at the raw cap can earn specialty mastery in all positions without unchecked growth or cheats
+  ---
+  duration_ms: 5680.044885
+  ...
+1..16
+# tests 16
+# suites 0
+# pass 16
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 32124.994981

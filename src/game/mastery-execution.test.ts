@@ -10,10 +10,10 @@ import type {AttributeKey,Career,Fixture,Position} from './types';
 
 const base=createCareer({name:'기량 연동 검수',nationality:'일본',age:27,height:180,weight:76,foot:'right',position:'ST',talent:'SSS',style:'포처',clubId:'ES1_01',squad:'senior',difficulty:'realistic',seed:'mastery-execution-2115',training:[]});
 function profile(position:Position='ST',mental=false):Career{
- const attributes=Object.fromEntries((position==='GK'?GK_ATTRIBUTES:FIELD_ATTRIBUTES).map(k=>[k,mental?65:90]));
+ const attributes=Object.fromEntries((position==='GK'?GK_ATTRIBUTES:FIELD_ATTRIBUTES).map(k=>[k,mental?95:90]));
  const skills:AttributeKey[]=mental?['positioning','anticipation','decisions','composure','vision']:[];
- for(const key of skills)attributes[key]=110;if(mental){attributes.concentration=100;attributes.teamwork=100;}
- const player={...base.player,position,style:PLAY_STYLES[position][0],attributes,playSkills:skills,fitness:100,form:75};player.ovr=overall(player);
+ for(const key of skills)attributes[key]=120;if(mental){attributes.concentration=120;attributes.teamwork=120;attributes.speed=65;attributes.dribbling=65;attributes.skillMoves=65;attributes.agility=65;attributes.strength=65;attributes.shooting=90;}
+ const player={...base.player,position,style:PLAY_STYLES[position][0],attributes,playSkills:skills,skillMastery:Object.fromEntries(skills.map(k=>[k,20])),fitness:100,form:75};player.ovr=overall(player);
  return {...base,player,managerTrust:70,systems:{...base.systems!,personality:{leadership:5,stardom:5,fairPlay:5,clutch:5,winning:5}}};
 }
 const positions:Position[]=['GK','CB','CB','LB','RB','CDM','CM','CAM','LW','RW','ST','CM','GK'];
@@ -24,10 +24,10 @@ function game(c:Career,seed:number,level=85,stage?:string){
  return simulateMatch({...c,seed:'isagi-control-'+seed},fixture,{home,away,homePlayers:roster(home.id),awayPlayers:roster(away.id),detailed:false});
 }
 
-test('earned mental mastery keeps 108 on the selection scale while physical and technical actions retain their real values',()=>{
+test('earned mental mastery stays on the selection scale while physical and technical actions retain their real values',()=>{
  const c=profile('ST',true),before=JSON.stringify(c.player.attributes);
- assert.equal(c.player.ovr,108);assert.ok(playingAbility({...c.player,ovr:undefined})<85,'the old raw-only comparison would have understated this earned mastery');
- assert.equal(playingAbility(c.player),108);assert.equal(c.player.attributes.speed,65);assert.equal(c.player.attributes.shooting,65);assert.equal(JSON.stringify(c.player.attributes),before);
+ assert.ok(c.player.ovr>=100);assert.ok(playingAbility({...c.player,ovr:undefined})<c.player.ovr,'actual earned specialty adds at most ten to the raw average');
+ assert.equal(playingAbility(c.player),c.player.ovr);assert.equal(c.player.attributes.speed,65);assert.equal(c.player.attributes.shooting,90);assert.equal(JSON.stringify(c.player.attributes),before);
  assert.equal(cognitiveOpportunity(90,65,65),0,'ordinary lower-division skills get no extra cognitive multiplier');
  const at100={...c.player,attributes:{...c.player.attributes}};for(const key of at100.playSkills??[])at100.attributes[key]=100;at100.ovr=overall(at100);
  const selected={...at100,playSkills:[]};assert.equal(overall(selected),at100.ovr,'selection alone still grants no OVR');
@@ -42,7 +42,7 @@ test('identical retained ability and condition produce identical club decisions 
 test('exceptional reading creates real space and supply without turning weak dribbling into elite dribbling',()=>{
  const brain=profile('ST',true),ordinary=profile(),a=emptyStats(),b=emptyStats();
  for(let i=0;i<240;i++){addStats(a,game(brain,i).playerStats);addStats(b,game(ordinary,i).playerStats);}
- assert.ok(a.goals>b.goals&&a.assists>b.assists,'a retained 108 cerebral striker can outperform an ordinary 90 through actual chances');
+ assert.ok(a.goals>b.goals&&a.assists>b.assists,'a high-ability cerebral striker can outperform an ordinary 90 through actual chances');
  assert.ok(a.dribblesCompleted!<b.dribblesCompleted!,'technical weaknesses remain observable');
 });
 

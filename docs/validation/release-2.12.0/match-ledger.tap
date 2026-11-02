@@ -1,0 +1,327 @@
+TAP version 13
+# Subtest: all 16 positions produce source-backed, non-duplicated counters and preserve input abilities
+ok 1 - all 16 positions produce source-backed, non-duplicated counters and preserve input abilities
+  ---
+  duration_ms: 1512.94311
+  ...
+# Subtest: equal-OVR aerial and technical strikers have different actual header shot and goal shares
+ok 2 - equal-OVR aerial and technical strikers have different actual header shot and goal shares
+  ---
+  duration_ms: 3302.546208
+  ...
+# Subtest: aerial centre backs head real set-piece deliveries without losing ordinary aerial contests
+ok 3 - aerial centre backs head real set-piece deliveries without losing ordinary aerial contests
+  ---
+  duration_ms: 1362.970604
+  ...
+# Subtest: pressing strength and work rate distinguish equal-OVR forwards, wingers and midfielders
+ok 4 - pressing strength and work rate distinguish equal-OVR forwards, wingers and midfielders
+  ---
+  duration_ms: 5057.803961
+  ...
+# Subtest: pressure attempts require a separate possession recovery and cannot duplicate tackles or interceptions
+ok 5 - pressure attempts require a separate possession recovery and cannot duplicate tackles or interceptions
+  ---
+  duration_ms: 62.219985
+  ...
+# Subtest: equal-OVR build-up defenders and playmakers advance zones with completed passes, not sideways labels
+ok 6 - equal-OVR build-up defenders and playmakers advance zones with completed passes, not sideways labels
+  ---
+  duration_ms: 3681.447434
+  ...
+# Subtest: keepers choose between holding a cross and punching it safe; the same ball is never counted twice
+ok 7 - keepers choose between holding a cross and punching it safe; the same ball is never counted twice
+  ---
+  duration_ms: 2151.053416
+  ...
+# Subtest: 100-plus mastered attributes still affect actual header and progression decisions
+ok 8 - 100-plus mastered attributes still affect actual header and progression decisions
+  ---
+  duration_ms: 1743.450526
+  ...
+# Subtest: legacy unknown, measured zero and mixed coverage remain distinct in sums and Korean retirement text
+ok 9 - legacy unknown, measured zero and mixed coverage remain distinct in sums and Korean retirement text
+  ---
+  duration_ms: 850.146865
+  ...
+# Subtest: header goal subsets and goalkeeper punch counts do not duplicate field-player award credit
+ok 10 - header goal subsets and goalkeeper punch counts do not duplicate field-player award credit
+  ---
+  duration_ms: 8.042072
+  ...
+# Subtest: discarded NPC details use the same decisions and counters while career and national sources cannot be disabled
+ok 11 - discarded NPC details use the same decisions and counters while career and national sources cannot be disabled
+  ---
+  duration_ms: 843.527218
+  ...
+# Subtest: real league progression saves and reloads all new event counters without changing progression systems
+ok 12 - real league progression saves and reloads all new event counters without changing progression systems
+  ---
+  duration_ms: 11349.414127
+  ...
+# Subtest: five new attributes change their own actual match actions while display OVR and opponents are held constant
+ok 13 - five new attributes change their own actual match actions while display OVR and opponents are held constant
+  ---
+  duration_ms: 16791.360459
+  ...
+# Subtest: free-kick/penalty subsets, real big chances and unique recoveries reconcile with their source events
+ok 14 - free-kick/penalty subsets, real big chances and unique recoveries reconcile with their source events
+  ---
+  duration_ms: 2598.481318
+  ...
+# Subtest: the raw 120 + earned mastery 10 model reaches 130 and selecting a skill alone never raises OVR
+ok 15 - the raw 120 + earned mastery 10 model reaches 130 and selecting a skill alone never raises OVR
+  ---
+  duration_ms: 2253.612763
+  ...
+# Subtest: unselected raw attributes can reach 120, locks stop increases, and manual selected growth alone earns mastery
+ok 16 - unselected raw attributes can reach 120, locks stop increases, and manual selected growth alone earns mastery
+  ---
+  duration_ms: 1492.86368
+  ...
+# Subtest: an actual 2.11.7 midseason save upgrades once without changing previous abilities, matches or awards
+ok 17 - an actual 2.11.7 midseason save upgrades once without changing previous abilities, matches or awards
+  ---
+  duration_ms: 17092.867043
+  ...
+# Subtest: a verified old aging report remains exact when only the five introduced baseline keys are added
+ok 18 - a verified old aging report remains exact when only the five introduced baseline keys are added
+  ---
+  duration_ms: 15609.6456
+  ...
+# Subtest: extended match → competition/year → career → Korean TXT totals survive retirement and reload
+ok 19 - extended match → competition/year → career → Korean TXT totals survive retirement and reload
+  ---
+  duration_ms: 13135.466392
+  ...
+# Subtest: card management five is neutral, ten is finite, and active pressing retains real card risk
+ok 20 - card management five is neutral, ten is finite, and active pressing retains real card risk
+  ---
+  duration_ms: 3020.501347
+  ...
+# Subtest: paired complete league schedules turn individual actions into different points and rank distributions
+ok 21 - paired complete league schedules turn individual actions into different points and rank distributions
+  ---
+  duration_ms: 20863.001732
+  ...
+# {"paired40Seasons":[{"ability":25,"meanPoints":11.025,"meanRank":6.975,"titles":0,"goals":18},{"ability":95,"meanPoints":31.125,"meanRank":2,"titles":0,"goals":773}]}
+# Subtest: a weak club’s world-class striker raises earned points without unbounded lower-league scoring
+ok 22 - a weak club’s world-class striker raises earned points without unbounded lower-league scoring
+  ---
+  duration_ms: 18397.569307
+  ...
+# {"weakClubEight38GameSeasons":[{"ability":25,"meanPoints":18.375,"meanRank":18.75,"goals":[1,2,1,0,3,2,0,1]},{"ability":90,"meanPoints":73.75,"meanRank":5.5,"goals":[46,56,43,55,65,47,49,53]},{"ability":95,"meanPoints":78.125,"meanRank":4.5,"goals":[63,67,58,65,75,57,56,59]}]}
+# Subtest: seed replay is pure, and output verbosity does not change any performance
+ok 23 - seed replay is pure, and output verbosity does not change any performance
+  ---
+  duration_ms: 51.95365
+  ...
+# Subtest: scores, shot references, saves, assists and both-team MOM reconcile over 240 games
+ok 24 - scores, shot references, saves, assists and both-team MOM reconcile over 240 games
+  ---
+  duration_ms: 1142.551797
+  ...
+# Subtest: CM: strength changes tackles in its intended direction across 240 paired games with OVR held fixed
+ok 25 - CM: strength changes tackles in its intended direction across 240 paired games with OVR held fixed
+  ---
+  duration_ms: 1187.231029
+  ...
+# Subtest: CM: stamina changes lateSuccesses in its intended direction across 240 paired games with OVR held fixed
+ok 26 - CM: stamina changes lateSuccesses in its intended direction across 240 paired games with OVR held fixed
+  ---
+  duration_ms: 906.546036
+  ...
+# Subtest: CM: speed changes dribbleAttempts in its intended direction across 240 paired games with OVR held fixed
+ok 27 - CM: speed changes dribbleAttempts in its intended direction across 240 paired games with OVR held fixed
+  ---
+  duration_ms: 725.789046
+  ...
+# Subtest: CM: agility changes dribblesCompleted in its intended direction across 240 paired games with OVR held fixed
+ok 28 - CM: agility changes dribblesCompleted in its intended direction across 240 paired games with OVR held fixed
+  ---
+  duration_ms: 735.876138
+  ...
+# Subtest: CM: jumping changes aerialWon in its intended direction across 240 paired games with OVR held fixed
+ok 29 - CM: jumping changes aerialWon in its intended direction across 240 paired games with OVR held fixed
+  ---
+  duration_ms: 740.946483
+  ...
+# Subtest: CM: ballControl changes passesCompleted in its intended direction across 240 paired games with OVR held fixed
+ok 30 - CM: ballControl changes passesCompleted in its intended direction across 240 paired games with OVR held fixed
+  ---
+  duration_ms: 814.427257
+  ...
+# Subtest: CM: dribbling changes dribblesCompleted in its intended direction across 240 paired games with OVR held fixed
+ok 31 - CM: dribbling changes dribblesCompleted in its intended direction across 240 paired games with OVR held fixed
+  ---
+  duration_ms: 670.969522
+  ...
+# Subtest: CM: passing changes passesCompleted in its intended direction across 240 paired games with OVR held fixed
+ok 32 - CM: passing changes passesCompleted in its intended direction across 240 paired games with OVR held fixed
+  ---
+  duration_ms: 1002.686267
+  ...
+# Subtest: CM: crossing changes keyPasses in its intended direction across 240 paired games with OVR held fixed
+ok 33 - CM: crossing changes keyPasses in its intended direction across 240 paired games with OVR held fixed
+  ---
+  duration_ms: 922.487644
+  ...
+# Subtest: CM: shooting changes shotsOnTarget in its intended direction across 240 paired games with OVR held fixed
+ok 34 - CM: shooting changes shotsOnTarget in its intended direction across 240 paired games with OVR held fixed
+  ---
+  duration_ms: 701.724477
+  ...
+# Subtest: CM: heading changes aerialWon in its intended direction across 240 paired games with OVR held fixed
+ok 35 - CM: heading changes aerialWon in its intended direction across 240 paired games with OVR held fixed
+  ---
+  duration_ms: 884.276051
+  ...
+# Subtest: CM: defending changes interceptions in its intended direction across 240 paired games with OVR held fixed
+ok 36 - CM: defending changes interceptions in its intended direction across 240 paired games with OVR held fixed
+  ---
+  duration_ms: 1125.664431
+  ...
+# Subtest: CM: setPieces changes shotsOnTarget in its intended direction across 240 paired games with OVR held fixed
+ok 37 - CM: setPieces changes shotsOnTarget in its intended direction across 240 paired games with OVR held fixed
+  ---
+  duration_ms: 947.24535
+  ...
+# Subtest: CM: decisions changes passesCompleted in its intended direction across 240 paired games with OVR held fixed
+ok 38 - CM: decisions changes passesCompleted in its intended direction across 240 paired games with OVR held fixed
+  ---
+  duration_ms: 682.549448
+  ...
+# Subtest: CM: vision changes keyPasses in its intended direction across 240 paired games with OVR held fixed
+ok 39 - CM: vision changes keyPasses in its intended direction across 240 paired games with OVR held fixed
+  ---
+  duration_ms: 648.278636
+  ...
+# Subtest: CM: anticipation changes interceptions in its intended direction across 240 paired games with OVR held fixed
+ok 40 - CM: anticipation changes interceptions in its intended direction across 240 paired games with OVR held fixed
+  ---
+  duration_ms: 567.622289
+  ...
+# Subtest: CM: positioning changes shots in its intended direction across 240 paired games with OVR held fixed
+ok 41 - CM: positioning changes shots in its intended direction across 240 paired games with OVR held fixed
+  ---
+  duration_ms: 905.622515
+  ...
+# Subtest: CM: composure changes shotsOnTarget in its intended direction across 240 paired games with OVR held fixed
+ok 42 - CM: composure changes shotsOnTarget in its intended direction across 240 paired games with OVR held fixed
+  ---
+  duration_ms: 620.47985
+  ...
+# Subtest: CM: concentration changes passesCompleted in its intended direction across 240 paired games with OVR held fixed
+ok 43 - CM: concentration changes passesCompleted in its intended direction across 240 paired games with OVR held fixed
+  ---
+  duration_ms: 577.925562
+  ...
+# Subtest: CM: teamwork changes passes in its intended direction across 240 paired games with OVR held fixed
+ok 44 - CM: teamwork changes passes in its intended direction across 240 paired games with OVR held fixed
+  ---
+  duration_ms: 640.615559
+  ...
+# Subtest: CM: finishing changes goals in its intended direction across 240 paired games with OVR held fixed
+ok 45 - CM: finishing changes goals in its intended direction across 240 paired games with OVR held fixed
+  ---
+  duration_ms: 739.015651
+  ...
+# Subtest: CM: offTheBall changes shots in its intended direction across 240 paired games with OVR held fixed
+ok 46 - CM: offTheBall changes shots in its intended direction across 240 paired games with OVR held fixed
+  ---
+  duration_ms: 765.117706
+  ...
+# Subtest: CM: pressing changes pressingSuccesses in its intended direction across 240 paired games with OVR held fixed
+ok 47 - CM: pressing changes pressingSuccesses in its intended direction across 240 paired games with OVR held fixed
+  ---
+  duration_ms: 826.91174
+  ...
+# Subtest: CM: tackling changes tackles in its intended direction across 240 paired games with OVR held fixed
+ok 48 - CM: tackling changes tackles in its intended direction across 240 paired games with OVR held fixed
+  ---
+  duration_ms: 861.587178
+  ...
+# Subtest: CM: skillMoves changes dribblesCompleted in its intended direction across 240 paired games with OVR held fixed
+ok 49 - CM: skillMoves changes dribblesCompleted in its intended direction across 240 paired games with OVR held fixed
+  ---
+  duration_ms: 1086.28227
+  ...
+# Subtest: GK: gkShotStopping changes saves in its intended direction across 240 paired games with OVR held fixed
+ok 50 - GK: gkShotStopping changes saves in its intended direction across 240 paired games with OVR held fixed
+  ---
+  duration_ms: 893.063586
+  ...
+# Subtest: GK: gkReflexes changes saves in its intended direction across 240 paired games with OVR held fixed
+ok 51 - GK: gkReflexes changes saves in its intended direction across 240 paired games with OVR held fixed
+  ---
+  duration_ms: 825.813946
+  ...
+# Subtest: GK: gkHandling changes handlingSuccesses in its intended direction across 240 paired games with OVR held fixed
+ok 52 - GK: gkHandling changes handlingSuccesses in its intended direction across 240 paired games with OVR held fixed
+  ---
+  duration_ms: 853.405136
+  ...
+# Subtest: GK: gkAerialCommand changes crossesCaught in its intended direction across 240 paired games with OVR held fixed
+ok 53 - GK: gkAerialCommand changes crossesCaught in its intended direction across 240 paired games with OVR held fixed
+  ---
+  duration_ms: 835.663693
+  ...
+# Subtest: GK: gkOneOnOnes changes oneOnOneSaves in its intended direction across 240 paired games with OVR held fixed
+ok 54 - GK: gkOneOnOnes changes oneOnOneSaves in its intended direction across 240 paired games with OVR held fixed
+  ---
+  duration_ms: 861.182254
+  ...
+# Subtest: GK: gkPositioning changes sweepingSuccesses in its intended direction across 240 paired games with OVR held fixed
+ok 55 - GK: gkPositioning changes sweepingSuccesses in its intended direction across 240 paired games with OVR held fixed
+  ---
+  duration_ms: 649.011795
+  ...
+# Subtest: GK: gkDistribution changes buildUpCompleted in its intended direction across 240 paired games with OVR held fixed
+ok 56 - GK: gkDistribution changes buildUpCompleted in its intended direction across 240 paired games with OVR held fixed
+  ---
+  duration_ms: 784.133392
+  ...
+# Subtest: GK: decisions changes sweepingSuccesses in its intended direction across 240 paired games with OVR held fixed
+ok 57 - GK: decisions changes sweepingSuccesses in its intended direction across 240 paired games with OVR held fixed
+  ---
+  duration_ms: 786.343247
+  ...
+# Subtest: GK: concentration changes handlingSuccesses in its intended direction across 240 paired games with OVR held fixed
+ok 58 - GK: concentration changes handlingSuccesses in its intended direction across 240 paired games with OVR held fixed
+  ---
+  duration_ms: 777.730777
+  ...
+# Subtest: GK: gkDefensiveOrganization changes shotsFaced in its intended direction across 240 paired games with OVR held fixed
+ok 59 - GK: gkDefensiveOrganization changes shotsFaced in its intended direction across 240 paired games with OVR held fixed
+  ---
+  duration_ms: 697.048835
+  ...
+# Subtest: bench, injuries and red cards respect playing intervals; forced selection controls experiments
+ok 60 - bench, injuries and red cards respect playing intervals; forced selection controls experiments
+  ---
+  duration_ms: 1295.668484
+  ...
+# Subtest: national synthetic teams preserve domestic membership and non-user fixtures contain no user performance
+ok 61 - national synthetic teams preserve domestic membership and non-user fixtures contain no user performance
+  ---
+  duration_ms: 4.786042
+  ...
+# Subtest: field and goalkeeper metric displays sum denominators and support per90 rather than averaging match percentages
+ok 62 - field and goalkeeper metric displays sum denominators and support per90 rather than averaging match percentages
+  ---
+  duration_ms: 0.692017
+  ...
+# Subtest: successful passing builds actual team chances and successful defending prevents actual opposing chances
+ok 63 - successful passing builds actual team chances and successful defending prevents actual opposing chances
+  ---
+  duration_ms: 2935.86441
+  ...
+1..63
+# tests 63
+# suites 0
+# pass 63
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 73972.586156

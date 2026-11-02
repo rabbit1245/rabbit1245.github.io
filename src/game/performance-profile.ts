@@ -25,8 +25,8 @@ export function performanceChannels(s:PlayerStats):Channels{
  const buildup=passing*(8*(1-coverage)+rate(ordinary,35)*4*coverage)+rate(progressive,5)*8;
  return {
   FWD:rate(s.goals,.52)*32,
-  MID:rate(s.assists,.22)*18+rate(Math.max(0,(s.keyPasses??0)-s.assists),1.6)*10+buildup+rate(s.dribblesCompleted??0,2)*6,
-  DEF:rate(s.tackles+s.interceptions+(s.pressingWins??0)*1.2,4+2.5*coverage)*25+rate(s.aerialWon??0,2.3)*7+s.cleanSheets/Math.max(1,s.apps)*22,
+  MID:rate(s.assists,.22)*18+rate(Math.max(0,(s.keyPasses??0)-s.assists-Math.max(0,(s.bigChancesCreated??0)-(s.bigChanceAssists??0)))+Math.max(0,(s.bigChancesCreated??0)-(s.bigChanceAssists??0))*1.55,1.6)*10+buildup+rate(s.dribblesCompleted??0,2)*6,
+  DEF:rate(s.tackles+s.interceptions+(s.pressureRecoveries??0)+Math.max(0,(s.pressingWins??0)-(s.pressingSuccesses??0))*1.2+Math.max(0,(s.pressingSuccesses??0)-(s.pressureRecoveries??0))*.25,4+2.5*coverage)*25+rate(s.aerialWon??0,2.3)*7+s.cleanSheets/Math.max(1,s.apps)*22,
  };
 }
 const median=(values:number[])=>{values.sort((a,b)=>a-b);const m=Math.floor(values.length/2);return values.length%2?values[m]:(values[m-1]+values[m])/2;};

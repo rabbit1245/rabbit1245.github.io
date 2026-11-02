@@ -8,7 +8,7 @@ export const TALENT_PROFILES:Record<Talent,{potential:[number,number];slowAge:nu
  A:{potential:[77,88],slowAge:28,declineAge:31,reference:'상위 리그 핵심'},
  S:{potential:[85,89],slowAge:29,declineAge:32,reference:'손흥민급 세계적인 선수'},
  SS:{potential:[94,99],slowAge:31,declineAge:34,reference:'살라·레반도프스키급 최상위 선수'},
- SSS:{potential:[98,100],slowAge:32,declineAge:35,reference:'호날두·메시급 역사적 재능 · 초과 숙련으로 100 이상 도전'},
+ SSS:{potential:[105,120],slowAge:32,declineAge:35,reference:'역사적 재능 · 능력치 120과 숙련 보정으로 OVR 130 도전'},
 };
 export function growthAgeFactor(p:Pick<Player,'talent'|'age'|'position'>):number{
  const slow=TALENT_PROFILES[p.talent].slowAge+(p.position==='GK'?3:0);

@@ -1,0 +1,36 @@
+{
+  "root": "/workspace/rabbit1245.github.io",
+  "batches": [
+    {
+      "wallMs": 2275.632793,
+      "cpuMs": 1667.329,
+      "eventsPerMatch": 432.6075,
+      "sourceBytesPerMatch": 155318.8
+    },
+    {
+      "wallMs": 2030.256907,
+      "cpuMs": 1301.227,
+      "eventsPerMatch": 432.6075,
+      "sourceBytesPerMatch": 155318.8
+    },
+    {
+      "wallMs": 1446.2653970000001,
+      "cpuMs": 1236.694,
+      "eventsPerMatch": 432.6075,
+      "sourceBytesPerMatch": 155318.8
+    },
+    {
+      "wallMs": 1663.059992999999,
+      "cpuMs": 780.516,
+      "eventsPerMatch": 432.6075,
+      "sourceBytesPerMatch": 155318.8
+    },
+    {
+      "wallMs": 1915.9015020000006,
+      "cpuMs": 729.121,
+      "eventsPerMatch": 432.6075,
+      "sourceBytesPerMatch": 155318.8
+    }
+  ],
+  "heapAfterGC": 35026128
+}

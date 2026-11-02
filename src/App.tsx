@@ -128,7 +128,7 @@ export default function App() {
     if (locked.current) return;
     if (!confirmReplace('다른 저장을 불러올까요')) return;
     locked.current = true; setBusy(true); setError('');const resume=beginFullTask();releaseIdleGameWorker();
-    try { const next = await loadCareer(id); display(next); setSelectedMatch(null); setSaveStatus('saved'); setCommon(false); navigate('locker'); setToast('커리어를 불러왔습니다.'); }
+    try { let next = await loadCareer(id),saved=true;if(next.player.abilityVersion!==2&&next.stage!=='retired'){const previous=next;next=await runGameCommand(next,{type:'upgradeAbilities'});saved=await commit(next,previous);}else{display(next);setSaveStatus('saved');}setSelectedMatch(null);setCommon(false);navigate('locker');if(saved)setToast('커리어를 불러왔습니다.'); }
     catch (e) { setError(errorMessage(e)); }
     finally { resume?.();locked.current = false; setBusy(false); setProgress(null); }
   }
@@ -151,7 +151,7 @@ export default function App() {
     const file = event.target.files?.[0]; event.target.value = '';
     if (!file || locked.current || !confirmReplace('가져온 커리어를 열까요')) return;
     locked.current = true; setBusy(true); setError('');const resume=beginFullTask();
-    try { const next = await importCareer(file); const saved = await commit(next); setSelectedMatch(null); setCommon(false); navigate('locker'); if (saved) setToast('별도 슬롯으로 커리어를 가져왔습니다.'); }
+    try { let next = await importCareer(file);if(next.player.abilityVersion!==2&&next.stage!=='retired')next=await runGameCommand(next,{type:'upgradeAbilities'});const saved = await commit(next); setSelectedMatch(null); setCommon(false); navigate('locker'); if (saved) setToast('별도 슬롯으로 커리어를 가져왔습니다.'); }
     catch (e) { setError(errorMessage(e)); }
     finally { resume?.();locked.current = false; setBusy(false); setProgress(null); }
   }
@@ -184,7 +184,7 @@ export default function App() {
     <input ref={fileRef} type="file" hidden accept=".json,application/json" aria-label="K볼 저장 파일 가져오기" onChange={importFile}/>
     {!career?<Landing slots={slots} loading={loading} busy={busy} onNew={requestNewCareer} onLoad={load} onImport={()=>fileRef.current?.click()}/>:<div className="app-shell">
       <header className="app-header"><div className="header-inner"><Brand/><nav className="main-nav" aria-label="주요 화면">{NAVIGATION.map(n=><button key={n.id} data-testid={`${n.id}-tab`} aria-current={page===n.id?'page':undefined} className={page===n.id?'active':''} onClick={()=>navigate(n.id)}><n.icon size={17}/><span>{n.label}{n.id==='player'&&career.systems?.leadership.offers?.some(o=>o.status==='pending')&&<small className="nav-captain-offer">주장 제의</small>}</span></button>)}</nav><div className="header-tools"><span className={`save-status ${saveStatus}`} data-testid="save-status" aria-live="polite">{saveStatus==='saving'?<Loader2 size={13} className="spinner"/>:saveStatus==='error'?<AlertCircle size={13}/>:<CheckCircle2 size={13}/>}<span>{saveStatus==='saved'?'자동 저장됨':saveStatus==='saving'?'저장 중':'저장 실패'}</span></span><button className="icon-button" data-testid="common-menu" aria-label="저장 및 설정 메뉴" onClick={()=>setCommon(true)}><Menu size={21}/></button></div>{toast&&<div className="toast" role="status"><CheckCircle2 size={17}/>{toast}</div>}</div></header>
-      <main className="game-main">{strip}{competitions}<div className="page-title"><h1>{page==='locker'?'라커룸':page==='player'?'선수':'커리어'}</h1><span className="page-context">{calendarLabel(career)} · {phaseLabel(career)} · {career.season.competitionName}</span></div>
+      <main className="game-main">{strip}{competitions}{page!=='player'&&<div className="page-title"><h1>{page==='locker'?'라커룸':'커리어'}</h1><span className="page-context">{calendarLabel(career)} · {phaseLabel(career)} · {career.season.competitionName}</span></div>}
         {error&&<div className="error-banner" role="alert"><AlertCircle size={18}/><span>{error}</span><button className="icon-button" aria-label="오류 알림 닫기" onClick={()=>setError('')}><X size={16}/></button></div>}
         {busy&&<div className="processing" role="status"><Loader2 className="spinner" size={17}/>{progress?`${progress.year}시즌 · ${progress.round}/${progress.total}라운드 계산 중`:'경기와 성장 기록을 계산하고 있습니다.'}</div>}
         {page==='locker'&&<LockerRoom career={career} busy={busy} command={command} onMatch={setSelectedMatch} presenting={Boolean(presentation)} onTraining={openTraining} onCareer={openCareer}/>}{page==='player'&&<PlayerPanel career={career} busy={busy} command={command} requestedView={playerView} viewRequest={playerViewRequest}/>} {page==='career'&&<CareerPanel career={career} busy={busy} command={command} onExport={exportFile} onCopy={copyCareer} onMatch={setSelectedMatch} requestedView={careerView}/>}

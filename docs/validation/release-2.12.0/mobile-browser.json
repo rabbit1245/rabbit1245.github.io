@@ -1,0 +1,13 @@
+{
+  "passed": [
+    "mobile three-menu navigation, ten goalkeeper abilities, half progression and sixteen goalkeeper metrics",
+    "mobile full standings retain every team and allow reaching the last points column",
+    "season honours split trophies/personal awards; cheats edit attributes, retain freeze preference and survive reload on desktop/mobile",
+    "standalone HTML makes no external HTTP asset requests"
+  ],
+  "skipped": [],
+  "pageErrors": [],
+  "httpRequests": [
+    "http://127.0.0.1:4194/Kball.html"
+  ]
+}

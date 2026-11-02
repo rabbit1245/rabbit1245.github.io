@@ -72,16 +72,16 @@ async function desktopLayouts(page) {
     }
     await page.screenshot({path:path.join(results,`kball-locker-${viewport.width}.png`),fullPage:false});
     await page.setViewportSize(viewport);await navigate(page,'player');await page.getByTestId('player-view-attributes').click();
-    await visibleRows(page,'.attribute-row',20,`${viewport.width}x${viewport.height} attributes`);
+    await visibleRows(page,'.attribute-row',25,`${viewport.width}x${viewport.height} attributes`);
     await page.screenshot({path:path.join(results,`kball-attributes-${viewport.width}.png`),fullPage:false});
-    await page.getByTestId('player-view-training').click();await visibleRows(page,'.training-row',20,`${viewport.width}x${viewport.height} training`);
+    await page.getByTestId('player-view-training').click();await visibleRows(page,'.training-row',25,`${viewport.width}x${viewport.height} training`);
     assert.equal(await page.getByTestId('confirm-training').count(),0,'the first-season creation plan is already confirmed');
     await page.screenshot({path:path.join(results,`kball-training-${viewport.width}.png`),fullPage:false});
   }
   await page.setViewportSize({width:1093,height:614});await navigate(page,'player');await page.getByTestId('player-view-attributes').click();
   await noOverflow(page,'125% equivalent desktop layout');
   const enlarged=await page.locator('.attribute-name').evaluateAll(rows=>rows.map(row=>parseFloat(getComputedStyle(row).fontSize)));
-  assert.equal(enlarged.length,20);assert.ok(enlarged.every(size=>size>=17),'a smaller CSS viewport reflows without reducing the primary font');
+  assert.equal(enlarged.length,25);assert.ok(enlarged.every(size=>size>=17),'a smaller CSS viewport reflows without reducing the primary font');
   await page.setViewportSize({width:1440,height:1000});await navigate(page,'locker');
 }
 async function skipPresentation(page) { const skip=page.getByRole('button',{name:'연출 건너뛰기'});if(await skip.isVisible())await skip.click(); }
@@ -126,7 +126,7 @@ async function create(page,{name,age=20,position='CAM',talent='S',difficulty='re
   await dialog.getByTestId('creation-club').waitFor();await dialog.getByLabel('난이도',{exact:true}).selectOption(difficulty);
   await dialog.getByLabel('국가',{exact:true}).selectOption('대한민국');await dialog.getByLabel('리그',{exact:true}).selectOption('KR1');await dialog.getByLabel('시작 소속',{exact:true}).selectOption('senior');
   await dialog.getByTestId('next-creation-step').click();await dialog.getByTestId('creation-training').waitFor();
-  assert.equal(await dialog.locator('.training-row').count(),position==='GK'?10:20);assert.equal(await dialog.locator('.training-row[aria-pressed="true"]').count(),3);
+  assert.equal(await dialog.locator('.training-row').count(),position==='GK'?10:25);assert.equal(await dialog.locator('.training-row[aria-pressed="true"]').count(),3);
   assert.ok((await dialog.locator('.training-row > strong').allTextContents()).every(value=>/^\d+$/.test(value)),'creation training displays the actual preview values');
   const previewValues=await dialog.locator('.training-row').evaluateAll(rows=>Object.fromEntries(rows.map(row=>[row.dataset.testid.replace('training-',''),Number(row.querySelector('strong').textContent)])));
   await dialog.getByLabel('훈련 강도').selectOption(intensity);await dialog.getByTestId('create-career').click();await page.getByRole('heading',{level:1,name:'라커룸',exact:true}).waitFor();await ready(page);
@@ -147,6 +147,7 @@ async function dismissRenewal(page, id) {
 
 try {
  if(!process.env.KBALL_CHEATS_ONLY){
+ if(!process.env.KBALL_MOBILE_ONLY){
   const context=await browser.newContext({viewport:{width:1440,height:1000},acceptDownloads:true,reducedMotion:'no-preference'}),page=await context.newPage();observe(page);
   await page.goto(baseURL,{waitUntil:'networkidle'});await page.getByTestId('new-career').waitFor();await noOverflow(page,'desktop landing');await page.screenshot({path:path.join(results,'kball-landing.png'),fullPage:true});
   await page.evaluate(()=>localStorage.setItem('career24-legacy-test-sentinel','preserve-existing-save'));
@@ -154,8 +155,8 @@ try {
   assert.equal(await page.getByRole('navigation',{name:'주요 화면'}).getByRole('button').count(),3);assert.equal(career.intensity,'intense');
   const baselinePath=await exportFile(page,'career-baseline.json'),baseline=JSON.parse(await readFile(baselinePath,'utf8'));assert.equal(baseline.format,'kball-save');assert.equal(baseline.career.id,originalId);
   assert.equal(career.systems.trainingPlan.confirmed,true);assert.equal(career.systems.trainingPlan.forYear,initialYear);
-  await desktopLayouts(page);completed.push('1366x768 and 1920x1080 show all 20 abilities and training rows with primary fonts of at least 17px');
-  await navigate(page,'player');assert.equal(await page.locator('.attribute-row').count(),20);assert.equal(await page.getByTestId('attribute-passing').locator('.attribute-values strong').textContent(),String(Math.round(career.player.attributes.passing)));
+  await desktopLayouts(page);completed.push('1366x768 and 1920x1080 show all 25 abilities and training rows with primary fonts of at least 17px');
+  await navigate(page,'player');assert.equal(await page.locator('.attribute-row').count(),25);assert.equal(await page.getByTestId('attribute-passing').locator('.attribute-values strong').textContent(),String(Math.round(career.player.attributes.passing)));
   for(const view of ['growth','contract','leadership']){await page.getByTestId(`player-view-${view}`).click();assert.equal(await page.getByTestId(`player-view-${view}`).getAttribute('aria-current'),'page');}
   await navigate(page,'locker');await page.screenshot({path:path.join(results,'kball-dashboard.png'),fullPage:true});
   // Two clicks in one task must create a single half-season command.
@@ -171,19 +172,19 @@ try {
   assert.equal(await worldDigest(page,replicaId),firstWorld,'presentation choice must not change the persistent world');assert.deepEqual(career.player,firstHalf.player);assert.deepEqual(career.season,firstHalf.season);assert.deepEqual(career.systems.economics,firstHalf.systems.economics);assert.deepEqual(career.systems.national,firstHalf.systems.national);assert.equal(await page.locator('.presentation').count(),0);
   completed.push('creation training, three menus, one-command half progression and identical skipped/reduced-motion results');
   assert.equal(career.systems.pendingChoice,undefined);assert.deepEqual(career.offers,[]);assert.equal(await page.getByTestId('transfer-window').count(),1);assert.equal(await page.getByTestId('training-plan').count(),0);assert.equal(await page.getByText('팀 현황',{exact:true}).count(),0);
-  await page.getByTestId('season-details-disclosure').locator(':scope > summary').click();const details=page.getByTestId('locker-season-details');assert.equal(await details.locator('.stat-detail').count(),12);
+  await page.getByTestId('season-details-disclosure').locator(':scope > summary').click();const details=page.getByTestId('locker-season-details');assert.equal(await details.locator('.stat-detail').count(),18);
   const currentNational=[...new Map([...career.systems.national.history.flatMap(h=>h.matches),...career.systems.national.matches].filter(m=>m.seasonYear===career.season.year).map(m=>[m.id,m])).values()];
   const combinedMinutes=career.season.playerStats.minutes+(career.systems.clubCompetitions?.current??[]).flatMap(t=>t.matches).reduce((n,m)=>n+m.playerStats.minutes,0)+currentNational.reduce((sum,m)=>sum+m.playerStats.minutes,0);
   assert.equal(await details.locator('.shared-stats > span').nth(2).textContent(),`시간 ${combinedMinutes.toLocaleString()}′`,'locker details combine actual club and national minutes');
   assert.equal(await page.getByTestId('season-competitions').count(),1);assert.ok((await page.getByTestId('club-competition').allTextContents()).join(' ').includes(career.season.competitionName));
   await navigate(page,'player');await page.getByTestId('player-view-training').click();assert.equal(await page.locator('.training-row:enabled').count(),0);assert.equal(await page.getByTestId('confirm-training').count(),0);await navigate(page,'locker');
-  await page.locator('.match-row').first().click();assert.equal(await page.getByRole('dialog').locator('[data-testid="role-metrics"] .stat-detail').count(),12);await closeDialog(page);
+  await page.locator('.match-row').first().click();assert.equal(await page.getByRole('dialog').locator('[data-testid="role-metrics"] .stat-detail').count(),18);await closeDialog(page);
   await fullStandings(page,career);
   await page.getByTestId('league-leaders-more').click();assert.ok(await page.getByTestId('league-leaders').locator('tbody tr').count()>0);await closeDialog(page);
   completed.push('all league teams in one modal, actual W/D/L/GF/GA/GD/points and league-only scorer table');
-  await navigate(page,'career');assert.equal(await page.locator('.record-summary > button').count(),3);await page.getByTestId('records-scope-club').click();assert.equal(await page.getByTestId('role-metrics').locator('.stat-detail').count(),12);
+  await navigate(page,'career');assert.equal(await page.locator('.record-summary > button').count(),3);await page.getByTestId('records-scope-club').click();assert.equal(await page.getByTestId('role-metrics').locator('.stat-detail').count(),18);
   const rows=await page.locator('.record-summary > button').evaluateAll(buttons=>buttons.map(b=>Array.from(b.children).slice(1).map(e=>Number(e.textContent.replace(/[^\d]/g,'')))));for(const column of[0,1,2,3])assert.equal(rows[0][column],rows[1][column]+rows[2][column]);
-  await page.getByTestId('records-scope-national').click();assert.equal(await page.getByTestId('role-metrics').locator('.stat-detail').count(),12);await navigate(page,'locker');
+  await page.getByTestId('records-scope-national').click();assert.equal(await page.getByTestId('role-metrics').locator('.stat-detail').count(),18);await navigate(page,'locker');
   await page.getByTestId('advance-half').click();career=await waitState(page,c=>c.id===replicaId&&c.stage==='offseason','second half and season archive');await ready(page);
   assert.equal(career.history.length,1);assert.ok(career.season.fixtures.every(f=>f.played));assert.equal(career.history[0].stats.goals,career.history[0].matches.reduce((s,m)=>s+m.playerStats.goals,0));assert.equal(career.systems.growthReports.filter(r=>r.year===initialYear).length,2);
   const market=career.systems.commercial.seasons.find(s=>s.year===initialYear);assert.equal(market.modelVersion,2);
@@ -200,7 +201,7 @@ try {
   assert.equal(await page.getByTestId('advance-half').isDisabled(),false,'current contract or FA permits progressing without forced renewal');
   await page.getByTestId('training-plan').click();
   for(const viewport of [{width:1366,height:768},{width:1920,height:1080}]){
-    await page.setViewportSize(viewport);await visibleRows(page,'.training-row',20,`${viewport.width} offseason training`);
+    await page.setViewportSize(viewport);await visibleRows(page,'.training-row',25,`${viewport.width} offseason training`);
     const box=await page.getByTestId('confirm-training').boundingBox();assert.ok(box&&box.y+box.height<=viewport.height+1,'offseason confirmation must fit with all training rows');
     const panel=await page.locator('.training-panel').boundingBox();assert.ok(panel&&panel.y+panel.height<=viewport.height+1,'the complete offseason training panel must fit');
     await page.screenshot({path:path.join(results,`kball-offseason-training-${viewport.width}.png`),fullPage:false});
@@ -229,7 +230,8 @@ try {
   completed.push('one click downloads one complete UTF-8 career TXT, leaves saves untouched and awards show only own selection');
   if(await page.evaluate(()=>!!document.querySelector('script[src*="assets/"]'))){await page.waitForFunction(()=>navigator.serviceWorker.controller!==null);await context.setOffline(true);await page.reload({waitUntil:'domcontentloaded'});await page.getByRole('button',{name:'이어서 플레이',exact:true}).click();await page.getByRole('heading',{level:1,name:'라커룸',exact:true}).waitFor();assert.equal((await saved(page)).length,2);await context.setOffline(false);completed.push('production offline reload with saved slots');}else skipped.push('offline cache reload requires a production build');
 
-  const mobile=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true,reducedMotion:'reduce'}),mobilePage=await mobile.newPage();observe(mobilePage);await mobilePage.goto(baseURL,{waitUntil:'networkidle'});await noOverflow(mobilePage,'mobile landing');let keeper=await create(mobilePage,{name:'이수호',age:24,position:'GK',talent:'SSS',difficulty:'free',intensity:'balanced'});const keeperId=keeper.id;await noOverflow(mobilePage,'mobile locker room');await mobilePage.screenshot({path:path.join(results,'kball-mobile.png'),fullPage:true});await navigate(mobilePage,'player');assert.equal(await mobilePage.locator('.attribute-row').count(),10);assert.equal(await mobilePage.getByTestId('attribute-gkHandling').locator('.attribute-values strong').textContent(),String(Math.round(keeper.player.attributes.gkHandling)));await mobilePage.getByTestId('player-view-training').click();assert.equal(await mobilePage.locator('.training-row').count(),10);await noOverflow(mobilePage,'mobile goalkeeper training');await navigate(mobilePage,'locker');await mobilePage.getByTestId('advance-half').click();keeper=await waitState(mobilePage,c=>c.id===keeperId&&c.season.week===c.systems.halfRound,'mobile goalkeeper half');await ready(mobilePage);keeper=await dismissRenewal(mobilePage,keeperId);assert.ok(keeper.season.playerStats.apps>0);assert.ok(keeper.season.playerStats.saves>0);assert.ok(keeper.season.playerStats.goals<=keeper.season.playerStats.shotsOnTarget);await navigate(mobilePage,'career');await mobilePage.getByTestId('records-scope-club').click();assert.equal(await mobilePage.getByTestId('role-metrics').locator('.stat-detail').count(),10);await noOverflow(mobilePage,'mobile goalkeeper records');await mobilePage.screenshot({path:path.join(results,'kball-mobile-records.png'),fullPage:true});completed.push('mobile three-menu navigation, ten goalkeeper abilities, half progression and ten goalkeeper metrics');
+ }
+  const mobile=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true,reducedMotion:'reduce'}),mobilePage=await mobile.newPage();observe(mobilePage);await mobilePage.goto(baseURL,{waitUntil:'networkidle'});await noOverflow(mobilePage,'mobile landing');let keeper=await create(mobilePage,{name:'이수호',age:24,position:'GK',talent:'SSS',difficulty:'free',intensity:'balanced'});const keeperId=keeper.id;await noOverflow(mobilePage,'mobile locker room');await mobilePage.screenshot({path:path.join(results,'kball-mobile.png'),fullPage:true});await navigate(mobilePage,'player');assert.equal(await mobilePage.locator('.attribute-row').count(),10);assert.equal(await mobilePage.getByTestId('attribute-gkHandling').locator('.attribute-values strong').textContent(),String(Math.round(keeper.player.attributes.gkHandling)));await mobilePage.getByTestId('player-view-training').click();assert.equal(await mobilePage.locator('.training-row').count(),10);await noOverflow(mobilePage,'mobile goalkeeper training');await navigate(mobilePage,'locker');await mobilePage.getByTestId('advance-half').click();keeper=await waitState(mobilePage,c=>c.id===keeperId&&c.season.week===c.systems.halfRound,'mobile goalkeeper half');await ready(mobilePage);keeper=await dismissRenewal(mobilePage,keeperId);assert.ok(keeper.season.playerStats.apps>0);assert.ok(keeper.season.playerStats.saves>0);assert.ok(keeper.season.playerStats.goals<=keeper.season.playerStats.shotsOnTarget);await navigate(mobilePage,'career');await mobilePage.getByTestId('records-scope-club').click();assert.equal(await mobilePage.getByTestId('role-metrics').locator('.stat-detail').count(),16);await noOverflow(mobilePage,'mobile goalkeeper records');await mobilePage.screenshot({path:path.join(results,'kball-mobile-records.png'),fullPage:true});completed.push('mobile three-menu navigation, ten goalkeeper abilities, half progression and sixteen goalkeeper metrics');
   await navigate(mobilePage,'locker');await fullStandings(mobilePage,keeper,true);completed.push('mobile full standings retain every team and allow reaching the last points column');
  }
   const cheatContext=await browser.newContext({viewport:{width:1366,height:768},reducedMotion:'reduce'}),cheatPage=await cheatContext.newPage();observe(cheatPage);await cheatPage.goto(baseURL,{waitUntil:'networkidle'});
@@ -237,12 +239,12 @@ try {
   await openCommon(cheatPage);await cheatPage.getByLabel('치트 모드',{exact:true}).check();edited=await waitState(cheatPage,c=>c.id===editorId&&c.systems.cheats?.enabled,'cheat mode ON');await ready(cheatPage);
   await cheatPage.getByLabel('노화 중지',{exact:true}).check();edited=await waitState(cheatPage,c=>c.id===editorId&&c.systems.cheats?.freezeAging,'freeze aging setting');await ready(cheatPage);
   await cheatPage.getByRole('button',{name:'능력치 편집 열기',exact:true}).click();await cheatPage.getByTestId('player-view-attributes').click();await cheatPage.getByLabel('치트 증가량').selectOption('5');await cheatPage.getByRole('button',{name:'슈팅 +5',exact:true}).click();
-  edited=await waitState(cheatPage,c=>c.id===editorId&&c.player.attributes.shooting===Math.min(100,originalShot+5),'manual attribute increase');await ready(cheatPage);assert.equal(edited.systems.growthLedger.byCause.cheat.shooting,5);
+  edited=await waitState(cheatPage,c=>c.id===editorId&&c.player.attributes.shooting===Math.min(120,originalShot+5),'manual attribute increase');await ready(cheatPage);assert.equal(edited.systems.growthLedger.byCause.cheat.shooting,5);
   await cheatPage.getByTestId('player-view-training').click();await openCommon(cheatPage);await cheatPage.getByRole('button',{name:'능력치 편집 열기',exact:true}).click();await cheatPage.locator('[data-testid="player-view-training"][aria-current="page"]').waitFor();assert.equal(await cheatPage.getByTestId('player-view-training').getAttribute('aria-current'),'page','settings editing opens the training cheat controls');await cheatPage.getByTestId('player-view-attributes').click();
   for(const viewport of [{width:1366,height:768},{width:390,height:844}]){await cheatPage.setViewportSize(viewport);await noOverflow(cheatPage,'cheat editor');const clipped=await cheatPage.locator('.attribute-row').evaluateAll(rows=>rows.filter(row=>Array.from(row.children).some(child=>child.getBoundingClientRect().right>row.getBoundingClientRect().right+1)).length);assert.equal(clipped,0);await cheatPage.screenshot({path:path.join(results,`kball-cheats-${viewport.width}.png`),fullPage:true});}
-  await cheatPage.reload({waitUntil:'networkidle'});await cheatPage.getByRole('button',{name:'이어서 플레이',exact:true}).click();await ready(cheatPage);edited=(await saved(cheatPage)).find(c=>c.id===editorId);assert.equal(edited.systems.cheats.freezeAging,true);assert.equal(edited.player.attributes.shooting,Math.min(100,originalShot+5));
+  await cheatPage.reload({waitUntil:'networkidle'});await cheatPage.getByRole('button',{name:'이어서 플레이',exact:true}).click();await ready(cheatPage);edited=(await saved(cheatPage)).find(c=>c.id===editorId);assert.equal(edited.systems.cheats.freezeAging,true);assert.equal(edited.player.attributes.shooting,Math.min(120,originalShot+5));
   assert.ok((await cheatPage.getByTestId('season-honours').textContent()).includes('우승한 대회'));assert.ok((await cheatPage.getByTestId('season-honours').textContent()).includes('내 개인 수상'));
-  await openCommon(cheatPage);await cheatPage.getByLabel('치트 모드',{exact:true}).uncheck();edited=await waitState(cheatPage,c=>c.id===editorId&&!c.systems.cheats.enabled,'cheat mode OFF');await ready(cheatPage);await closeDialog(cheatPage);await navigate(cheatPage,'player');assert.equal(await cheatPage.locator('.attribute-cheat-button').count(),0);assert.equal(edited.player.attributes.shooting,Math.min(100,originalShot+5));
+  await openCommon(cheatPage);await cheatPage.getByLabel('치트 모드',{exact:true}).uncheck();edited=await waitState(cheatPage,c=>c.id===editorId&&!c.systems.cheats.enabled,'cheat mode OFF');await ready(cheatPage);await closeDialog(cheatPage);await navigate(cheatPage,'player');assert.equal(await cheatPage.locator('.attribute-cheat-button').count(),0);assert.equal(edited.player.attributes.shooting,Math.min(120,originalShot+5));
   completed.push('season honours split trophies/personal awards; cheats edit attributes, retain freeze preference and survive reload on desktop/mobile');await cheatContext.close();
   if(portable){assert.deepEqual([...new Set(requests)],[baseURL],'portable game must not fetch external code/data/images');completed.push('standalone HTML makes no external HTTP asset requests');}
   assert.deepEqual(errors,[],`Browser page errors: ${errors.join(' | ')}`);await writeFile(path.join(results,'browser-results.json'),JSON.stringify({passed:completed,skipped,pageErrors:errors,httpRequests:[...new Set(requests)]},null,2));console.log('Kball browser E2E passed:',JSON.stringify(completed));

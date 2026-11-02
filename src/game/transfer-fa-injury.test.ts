@@ -15,7 +15,7 @@ const fresh=()=>createCareer({name:'FA 부상 검수',nationality:'대한민국'
 
 test('skill mastery above 100 accumulates tiny gains; no automatic injury or age loss',()=>{
  let c=setPlaySkill(fresh(),'shooting',true);c=configureCheats(c,true,false);for(let i=0;i<10;i++)c=cheatIncreaseAttribute(c,'shooting',10);
- c=manuallyAge(c,10,'shooting');assert.equal(c.player.attributes.shooting,100);c.training=['shooting'];c.player.age=38;c.player.injuryWeeks=8;beginGrowthSeason(c);
+ c=manuallyAge(manuallyAge(c,10,'shooting'),10,'shooting');assert.equal(c.player.attributes.shooting,100);c.training=['shooting'];c.player.age=38;c.player.injuryWeeks=8;beginGrowthSeason(c);
  const before={...c.player.attributes};for(let i=0;i<150;i++){c.season.week=i%38+1;trainRound(c);}assert.ok(c.player.attributes.shooting!>100,`stuck ${c.player.attributes.shooting}`);
  for(const [key,n] of Object.entries(before))assert.ok(c.player.attributes[key as keyof typeof before]!>=n);
  c=setAllAttributeLocks(c,true);const locked={...c.player.attributes};trainRound(c);assert.deepEqual(c.player.attributes,locked);

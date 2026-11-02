@@ -1,0 +1,10 @@
+{
+  "injected": "QuotaExceededError on upgrade write",
+  "saveFailureRemainsVisible": true,
+  "unsavedExpandedPlayerRetained": true,
+  "originalDurableSaveUntouched": true,
+  "original": {
+    "version": null,
+    "attributes": 20
+  }
+}

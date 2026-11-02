@@ -40,7 +40,7 @@ test('healthy elite starters are judged against actual positional rivals, indepe
  const young=run(27),old=run(40);assert.deepEqual(old,young);assert.ok(young.starts>=380,JSON.stringify(young));
 });
 
-test('the requested player comparisons are shown without changing numerical OVR or skill ceilings',()=>{
- assert.ok(ovrLevel(90)!.examples.includes('손흥민'));assert.ok(ovrLevel(95)!.examples.includes('해리 케인'));assert.ok(ovrLevel(95)!.examples.includes('카림 벤제마'));assert.ok(ovrLevel(100)!.examples.includes('리오넬 메시'));assert.ok(ovrLevel(110)!.examples.some(s=>s.includes('호날두')));
+test('the revised player comparisons keep the global scale and extend its highest region',()=>{
+ assert.ok(ovrLevel(85)!.examples.includes('손흥민'));assert.ok(ovrLevel(90)!.examples.includes('카림 벤제마'));assert.ok(ovrLevel(95)!.examples.includes('네이마르'));assert.ok(ovrLevel(100)!.examples.includes('리오넬 메시'));assert.match(ovrLevel(110)!.label,/넘어서는/);assert.match(ovrLevel(130)!.label,/존재한 적 없는/);
  const c=sample('ST',90);assert.equal(c.player.ovr,90);assert.equal(overall(c.player),90);
 });

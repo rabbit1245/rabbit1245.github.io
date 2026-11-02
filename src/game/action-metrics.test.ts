@@ -74,7 +74,7 @@ test('pressing strength and work rate distinguish equal-OVR forwards, wingers an
 test('pressure attempts require a separate possession recovery and cannot duplicate tackles or interceptions',()=>{
   const c=profile('ST');c.player.style='프레싱 포워드';let m:MatchRecord|undefined;
   for(let i=0;i<30;i++){const candidate=game(c,i,true);if(candidate.events.some(e=>e.type==='recovery'&&candidate.events.find(p=>p.id===e.relatedId)?.playerId===c.player.id)){m=candidate;break;}}
-  assert.ok(m);const recovery=m.events.find(e=>e.type==='recovery')!;
+  assert.ok(m);const recovery=m.events.find(e=>e.type==='recovery'&&m!.events.find(p=>p.id===e.relatedId)?.action?.kind==='pressure')!;
   const missing=structuredClone(m);missing.events=missing.events.filter(e=>e.id!==recovery.id);assert.throws(()=>validateActionLedger(missing,c.player.id),/회복|구분|불일치/);
   const duplicate=structuredClone(m);duplicate.events.push({...structuredClone(recovery),id:`${recovery.id}:duplicate`});assert.throws(()=>validateActionLedger(duplicate,c.player.id),/두 번/);
   const tackle=structuredClone(m);tackle.events.push({...structuredClone(recovery),id:'duplicate-tackle',type:'tackle',action:undefined});assert.throws(()=>validateActionLedger(tackle,c.player.id),/중복/);

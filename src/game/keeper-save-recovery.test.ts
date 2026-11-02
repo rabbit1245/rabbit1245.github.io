@@ -19,7 +19,7 @@ test('outfield insertion cannot evict a goalkeeper when its positional group is 
 });
 test('a sent-off goalkeeper is replaced by withdrawing an outfielder, retaining exactly ten active players',()=>{
  const c=fresh('GK'),{f,options}=setup(c);c.systems!.personality={leadership:5,stardom:5,fairPlay:1,clutch:5,winning:5};let found=false;
- for(let i=0;i<500;i++){c.seed=`keeper-red-${i}`;const m=simulateMatch(c,f,{...options,forceSelection:undefined});if(!m.playerStats.redCards)continue;found=true;validateActionLedger(m,c.player.id);const minute=m.playerMinutes+1,team=m.performers!.filter(p=>p.teamId===f.homeId&&((p.started?0:m.events.find(e=>e.type==='substitution'&&e.playerId===p.id)!.minute)+p.minutes)>=minute);assert.equal(team.length,10);assert.equal(team.filter(p=>p.position==='GK').length,1);break;}assert.ok(found);
+ for(let i=0;i<500;i++){c.seed=`keeper-red-${i}`;const m=simulateMatch(c,f,{...options,forceSelection:undefined});if(!m.playerStats.redCards)continue;validateActionLedger(m,c.player.id);const exit=m.events.find(e=>e.type==='red'&&e.playerId===c.player.id)!.minute;if(exit===90)continue;found=true;const minute=exit+.5,team=m.performers!.filter(p=>p.teamId===f.homeId&&(p.started?0:m.events.find(e=>e.type==='substitution'&&e.playerId===p.id)!.minute)<minute&&((p.started?0:m.events.find(e=>e.type==='substitution'&&e.playerId===p.id)!.minute)+p.minutes)>=minute);assert.equal(team.length,10);assert.equal(team.filter(p=>p.position==='GK').length,1);break;}assert.ok(found);
 });
 test('a goalkeeper who enters from the bench and leaves early has three continuous, non-overlapping keeper spells',()=>{
  const c=fresh('GK'),{f,options}=setup(c),m=simulateMatch(c,f,{...options,forceSelection:{from:60,to:75,started:false}});
@@ -29,7 +29,7 @@ test('a goalkeeper who enters from the bench and leaves early has three continuo
 });
 test('an injured or sent-off substitute keeper retains complete keeper coverage and the correct active headcount',()=>{
  const c=fresh('GK'),{f,options}=setup(c);c.managerTrust=0;c.player.fitness=30;c.systems!.personality={leadership:5,stardom:5,fairPlay:1,clutch:5,winning:5};let injury=false,red=false;
- for(let i=0;i<1200&&(!injury||!red);i++){
+ for(let i=0;i<6000&&(!injury||!red);i++){
   const m=simulateMatch({...c,seed:`keeper-bench-exit-${i}`},f,{...options,forceSelection:undefined,detailed:false});if(m.playerStarted||!m.playerPlayed||!m.playerStats.redCards&&!m.events.some(e=>e.type==='injury'&&e.playerId===c.player.id))continue;
   validateActionLedger(m,c.player.id);const exit=m.events.find(e=>(e.type==='injury'||e.type==='red')&&e.playerId===c.player.id)!.minute;
   if(exit===90)continue;const active=m.performers!.filter(p=>p.teamId===f.homeId&&(p.started?0:m.events.find(e=>e.type==='substitution'&&e.playerId===p.id)!.minute)<=exit&&((p.started?0:m.events.find(e=>e.type==='substitution'&&e.playerId===p.id)!.minute)+p.minutes)>exit);

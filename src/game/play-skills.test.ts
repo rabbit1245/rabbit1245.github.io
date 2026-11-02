@@ -24,11 +24,11 @@ test('annual retirement skills explain the specialty for field players and keepe
  assert.doesNotMatch(buildCareerText(setPlaySkill(c,'stamina',false)),/엔진\(/);
 });
 
-test('all 30 skill mappings and all 24 OVR ranges are complete, unique by context and have five examples',()=>{
+test('all 35 skill mappings and expanded OVR ranges are complete, unique by context and have examples',()=>{
  assert.deepEqual(FIELD_PLAY_SKILLS.map(s=>s.key),FIELD_ATTRIBUTES);assert.deepEqual(GK_PLAY_SKILLS.map(s=>s.key),GK_ATTRIBUTES);
- assert.equal(new Set([...FIELD_ATTRIBUTES,...GK_ATTRIBUTES]).size,28);
- for(let v=0;v<=120;v++)assert.equal(OVR_LEVELS.filter(r=>v>=r.min&&v<=r.max).length,1);
- assert.ok(OVR_LEVELS.every(r=>r.examples.length===5));
+ assert.equal(new Set([...FIELD_ATTRIBUTES,...GK_ATTRIBUTES]).size,33);
+ for(let v=0;v<=130;v++)assert.equal(OVR_LEVELS.filter(r=>v>=r.min&&v<=r.max).length,1);
+ assert.ok(OVR_LEVELS.every(r=>r.examples.length>=1));
 });
 
 test('choosing skills adds no abilities, OVR or hidden bonus; sixth choice and wrong-position skills are rejected',()=>{
@@ -44,13 +44,13 @@ test('choosing skills adds no abilities, OVR or hidden bonus; sixth choice and w
 test('locks, explicit manual aging, deletion above 100 and a complete export/import preserve the skill history',async()=>{
  let c=setPlaySkill(fresh(),'shooting',true);c=configureCheats(c,true,false);
  for(let n=0;n<8;n++)c=cheatIncreaseAttribute(c,'shooting',10);
- assert.equal(c.player.attributes.shooting,110);assert.ok(c.player.ovr>c.season.ovrStart);
+ assert.equal(c.player.attributes.shooting,120);assert.ok(c.player.ovr>c.season.ovrStart);
  c=setAllAttributeLocks(c,true);const locked=c.player.attributes.shooting;trainRound(c);assert.equal(c.player.attributes.shooting,locked);
- c=manuallyAge(c,1,'shooting');assert.equal(c.player.attributes.shooting,109);assert.ok(c.player.playSkills?.includes('shooting'));
- c=setPlaySkill(c,'shooting',false);assert.equal(c.player.attributes.shooting,100);assert.equal(c.systems!.playSkillChanges!.at(-1)!.before,109);
+ c=manuallyAge(c,1,'shooting');assert.equal(c.player.attributes.shooting,119);assert.ok(c.player.playSkills?.includes('shooting'));
+ c=setPlaySkill(c,'shooting',false);assert.equal(c.player.attributes.shooting,119);assert.equal(c.systems!.playSkillChanges!.at(-1)!.before,119);
  assert.ok(c.systems!.attributeLocks!.includes('shooting'));validateCareer(c);
  const imported=await verifySaveText(await exportCareer(c));assert.deepEqual(imported.systems!.playSkillChanges,c.systems!.playSkillChanges);
- assert.equal(imported.player.attributes.shooting,100);
+ assert.equal(imported.player.attributes.shooting,119);
 });
 test('110 mental attributes keep derived leadership within its percentage scale and remain saveable after a real round',()=>{
  let c=configureCheats(setPlaySkill(setPlaySkill(fresh(),'teamwork',true),'composure',true),true,false);
@@ -66,33 +66,34 @@ test('annual retirement skills start at acquisition and disappear from deletion 
  const txt=buildCareerText(c),basic=txt.split('C. 연도별 기록')[0];assert.ok(!basic.includes('플레이스타일'));assert.ok(!txt.includes('낭만'));
 });
 
-test('every position and tactical style can reach exactly 120 with five fully grown core skills, never with four',()=>{
+test('every position and tactical style uses raw 120 plus at most 2 per earned skill, up to 130',()=>{
  for(const position of Object.keys(POSITION_LABELS)as Position[])for(const style of PLAY_STYLES[position]){
   const chosen=core(position,style),allowed=position==='GK'?GK_ATTRIBUTES:FIELD_ATTRIBUTES;
   for(let n=0;n<=5;n++){
-   const skills=chosen.slice(0,n),p={position,style,playSkills:skills,attributes:Object.fromEntries(allowed.map(k=>[k,skills.includes(k)?110:75]))};
-   assert.ok(overall(p)<=100+4*n,position+' '+style);if(n===5)assert.equal(overall(p),120,position+' '+style);
+   const skills=chosen.slice(0,n),p={position,style,playSkills:skills,skillMastery:Object.fromEntries(skills.map(k=>[k,20])),attributes:Object.fromEntries(allowed.map(k=>[k,120]))};
+   assert.equal(overall(p),120+2*n,position+' '+style);
+   assert.equal(overall({...p,skillMastery:{}}),120,'selection alone adds zero');
   }
  }
 });
 
-test('actual training and experience, without cheat increases or automatic unchecked growth, reach 120 in all sixteen positions',()=>{
- const results=[];
+test('actual training at the raw cap can earn specialty mastery in all positions without unchecked growth or cheats',()=>{
  for(const position of Object.keys(POSITION_LABELS)as Position[]){
-  let c=fresh(position);for(const key of core(position))c=setPlaySkill(c,key,true);
-  const untouched={...c.player.attributes},selected=c.player.playSkills!;
-  for(let season=0;season<24&&c.player.ovr<120;season++){
-   c.season={...c.season,year:2026+season,week:0,attributeStart:{...c.player.attributes},playerStats:emptyStats(),totalWeeks:38};c.player.age=16+season;
-   c.training=[...selected].sort((a,b)=>(c.player.attributes[a]??0)-(c.player.attributes[b]??0)).slice(0,3);c.intensity='intense';beginGrowthSeason(c);
+  let c=fresh(position);const keys=position==='GK'?GK_ATTRIBUTES:FIELD_ATTRIBUTES;
+  // Controlled already-developed raw abilities, not a promise of reaching 130
+  // from a teenage novice by training only five of twenty-five attributes.
+  c.player.attributes=Object.fromEntries(keys.map(k=>[k,120]));c.player.potential=120;c.player.ovr=overall(c.player);
+  for(const key of core(position))c=setPlaySkill(c,key,true);
+  const before={...c.player.attributes};c.player.age=20;c.intensity='intense';
+  for(let season=0;season<50&&c.player.ovr<130;season++){
+   c.season={...c.season,year:2026+season,week:0,attributeStart:{...before},playerStats:emptyStats(),totalWeeks:38};
+   beginGrowthSeason(c);
    for(let week=1;week<=38;week++){
-    c.season.week=week;c.season.playerStats.minutes=(week-1)*75;trainRound(c);
-    // Controlled full appearances exercise the real experience code; no final attribute value is assigned.
+    c.training=[...c.player.playSkills!].sort((a,b)=>(c.player.skillMastery?.[a]??0)-(c.player.skillMastery?.[b]??0)).slice(0,3);
+    c.season.week=week;trainRound(c);
     applyMatchExperience(c,{...emptyStats(),apps:1,starts:1,minutes:90,ratingCount:1,ratingSum:7.5,shotsOnTarget:2,passesCompleted:30,keyPasses:2,tackles:3,interceptions:2,dribblesCompleted:2,saves:4});
    }
   }
-  for(const key of Object.keys(untouched)as AttributeKey[])if(!selected.includes(key))assert.equal(c.player.attributes[key],untouched[key],position+' unchecked '+key);
-  assert.equal(c.player.ovr,120,position+' '+JSON.stringify(c.player.attributes));assert.ok(!c.systems!.cheats?.used);
-  results.push({position,age:c.player.age,ovr:c.player.ovr});
+  assert.deepEqual(c.player.attributes,before);assert.equal(c.player.ovr,130,position);assert.ok(!c.systems!.cheats?.used);
  }
- console.log('Normal growth reachability:',JSON.stringify(results));
 });

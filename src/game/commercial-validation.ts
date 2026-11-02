@@ -28,7 +28,7 @@ function season(s:ShirtSeason,c:Career){
  const players=new Set<string>();for(let i=0;i<s.leaders.length;i++){const r=s.leaders[i];seller(r);check(r.rank===i+1&&!players.has(r.playerId)&&(!i||s.leaders[i-1].units>=r.units),'세계 순위표');players.add(r.playerId);if(r.playerId===c.player.id)check(r.units===s.playerUnits&&r.rank===s.playerRank,'본인 순위 일치');}
  for(const r of s.clubLeaders){seller(r);check(ownIds.has(r.clubId),'소속 구단 비교 선수');}
  for(const id of ownIds){const rows=s.clubLeaders.filter(r=>r.clubId===id);check(rows.reduce((n,r)=>n+r.units,0)===s.clubs.find(r=>r.clubId===id)!.named,'구단 선수 판매량 합계');const own=rows.find(r=>r.playerId===c.player.id);check(own&&own.units===s.playerClubs.find(r=>r.clubId===id)!.units,'개인 원장');}
- const e=s.evidence;check(e&&Number.isFinite(e.ability)&&e.ability>=0&&e.ability<=120&&Number.isInteger(e.stardom)&&e.stardom>=1&&e.stardom<=10,'실력·스타성 근거');for(const k of ['goals','assists','minutes'] as const)integer(e[k],`기록 ${k}`);check(Number.isFinite(e.rating)&&e.rating>=0&&e.rating<=10,'평점 근거');
+ const e=s.evidence;check(e&&Number.isFinite(e.ability)&&e.ability>=0&&e.ability<=130&&Number.isInteger(e.stardom)&&e.stardom>=1&&e.stardom<=10,'실력·스타성 근거');for(const k of ['goals','assists','minutes'] as const)integer(e[k],`기록 ${k}`);check(Number.isFinite(e.rating)&&e.rating>=0&&e.rating<=10,'평점 근거');
 }
 export function validateCommercial(c:Career):void{
  const state=c.systems?.commercial;if(!state)return;

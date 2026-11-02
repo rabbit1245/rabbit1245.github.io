@@ -1,4 +1,4 @@
-import {changePosition} from './engine';
+import {changePosition,upgradeAbilityModel} from './engine';
 import {recordCommandChange} from './command-patches';
 import {releaseContract,setPlaySkill,refreshContractOffers,setPersonality,setPersonalityValues,setNationalParticipation} from './engine';
 import type { Career, GameCommand,GameProgress } from './types';
@@ -9,6 +9,7 @@ export function executeCommand(career: Career, command: GameCommand, commandId: 
   if (career.processedCommands.includes(commandId)) return career;
   let next: Career;
   switch (command.type) {
+    case 'upgradeAbilities':next=upgradeAbilityModel(career);break;
     case 'changePosition':next=changePosition(career,command.position,command.style);break;
     case 'nationalParticipation':next=setNationalParticipation(career,command.key,command.checked);break;
     case 'personality':next=setPersonality(career,command.key,command.value);break;

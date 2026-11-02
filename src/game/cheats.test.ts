@@ -12,13 +12,13 @@ test('manual increases require ON, obey bounds and retain a distinct growth caus
  let changed=configureCheats(c,true,false);assert.equal(JSON.stringify(c),before);
  const old=changed.player.attributes.shooting!;
  changed=executeCommand(changed,{type:'increaseAttribute',key:'shooting',amount:5},'manual-shot');
- assert.equal(changed.player.attributes.shooting,Math.min(100,old+5));
+ assert.equal(changed.player.attributes.shooting,Math.min(120,old+5));
  assert.equal(changed.systems!.growthLedger!.byCause.cheat!.shooting,5);
  assert.equal(executeCommand(changed,{type:'increaseAttribute',key:'shooting',amount:5},'manual-shot'),changed);
  for(let n=0;n<10;n++)changed=cheatIncreaseAttribute(changed,'shooting',10);
- assert.equal(changed.player.attributes.shooting,100);assert.equal(changed.player.attributes.passing,c.player.attributes.passing);
+ assert.equal(changed.player.attributes.shooting,120);assert.equal(changed.player.attributes.passing,c.player.attributes.passing);
  validateCareer(changed);const imported=await importCareer(await exportCareer(changed));assert.deepEqual(imported.systems!.cheats,changed.systems!.cheats);
- const off=configureCheats(imported,false,true);assert.equal(off.player.attributes.shooting,100);assert.throws(()=>cheatIncreaseAttribute(off,'shooting',5),/치트/);
+ const off=configureCheats(imported,false,true);assert.equal(off.player.attributes.shooting,120);assert.throws(()=>cheatIncreaseAttribute(off,'shooting',5),/치트/);
  assert.throws(()=>cheatIncreaseAttribute(changed,'gkHandling',1),/능력치/);assert.throws(()=>cheatIncreaseAttribute(changed,'shooting',-1),/증가량/);
  const bad=structuredClone(changed);(bad.systems!.cheats as any).enabled='true';assert.throws(()=>validateCareer(bad),/치트/);
 });

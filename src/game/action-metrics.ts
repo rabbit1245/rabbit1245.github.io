@@ -1,3 +1,4 @@
+import {validateExtendedLedger} from './extended-metrics';
 import {ACTION_COUNTERS} from './math';
 import type {MatchEvent,MatchRecord,PlayerStats} from './types';
 import {matchInterval} from './keeper-recovery';
@@ -59,7 +60,8 @@ export function validateActionLedger(m:MatchRecord,playerId:string):void{
     }else if(a.kind==='pressure'){
       fail(e.type==='pressure'&&text(a.possessionId)&&text(a.holderId)&&opposite(a.holderTeamId,e.teamId)&&typeof a.recovered==='boolean','압박 전 상대 소유권');active(a.holderId,e.minute,a.holderTeamId);
     }else if(a.kind==='recovery'){
-      const p=index.get(e.relatedId??'');fail(e.type==='recovery'&&p?.type==='pressure'&&p.action?.kind==='pressure','회복을 유도한 압박');
+      const p=index.get(e.relatedId??'');fail(e.type==='recovery'&&(p?.type==='pressure'&&p.action?.kind==='pressure'||p?.action?.kind==='ballDuel'),'회복을 유도한 압박·수비 경합');
+      if(p?.action?.kind==='ballDuel')fail(p.minute===e.minute&&p.teamId===e.teamId&&p.action.success&&p.action.possessionId===a.possessionId&&p.action.holderTeamId===a.fromTeamId&&a.method===p.action.method,'실제 경합 승리 후 소유권 회복');
       if(p?.action?.kind==='pressure')fail(p.minute===e.minute&&p.teamId===e.teamId&&p.action.recovered&&p.action.possessionId===a.possessionId&&p.action.holderTeamId===a.fromTeamId&&opposite(a.fromTeamId,e.teamId),'확인된 팀 소유권 회복');
       fail(!recoveries.has(a.possessionId),'같은 소유권을 두 번 회복');recoveries.set(a.possessionId,e);
     }else if(a.kind==='cross'){
@@ -79,7 +81,8 @@ export function validateActionLedger(m:MatchRecord,playerId:string):void{
       const cross=index.get(e.relatedId??''),duel=index.get(a.duelId);fail(e.type==='shot'&&cross?.action?.kind==='cross'&&duel?.action?.kind==='headerDuel','헤더 슈팅의 공급·경합');
       if(cross?.action?.kind==='cross'&&duel?.action?.kind==='headerDuel')fail(cross.minute===e.minute&&cross.teamId===e.teamId&&cross.action.phase===a.phase&&duel.relatedId===cross.id&&duel.action.winnerId===e.playerId&&duel.action.attackerId===e.playerId&&!claims.has(cross.id),'실제 경합 승리 후 헤더');
       fail(!headers.has(e.relatedId??''),'한 크로스의 헤더 슈팅 중복');headers.add(e.relatedId??'');
-    }else fail(false,'지원하지 않는 행동 종류');
+    }else if(['shot','bigChance','ballDuel'].includes(a.kind)){fail(m.extendedVersion===1,'확장 행동의 집계 버전');if(a.kind==='ballDuel')active(a.holderId,e.minute,a.holderTeamId);}
+    else fail(false,'지원하지 않는 행동 종류');
   }
   for(const e of events){
     if(e.action?.kind==='pressure')fail(e.action.recovered===recoveries.has(e.action.possessionId),'압박 시도와 실제 회복 구분');
@@ -93,4 +96,5 @@ export function validateActionLedger(m:MatchRecord,playerId:string):void{
     if(actors.get(id)?.position==='GK'||actors.get(id)?.emergencyGoalkeeper)fail(s.crossesFaced===t.crossesFaced&&s.crossesCaught===t.crossesCaught,'크로스 포구·펀칭 원장');
   };
   check(playerId,m.playerStats);for(const p of actors.values())check(p.id,p.stats);
+  validateExtendedLedger(m,playerId);
 }

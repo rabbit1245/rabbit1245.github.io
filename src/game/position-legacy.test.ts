@@ -43,7 +43,7 @@ test('invalid/retired position changes are rejected and an old save acquires no 
  const broken=changePosition(c,'CB','스토퍼');broken.systems!.positionChanges![0].toStyle='포처';assert.throws(()=>validateCareer(broken),/선수 유형/);
 });
 test('a valid older custom style is preserved as historical text when changing to a current position/type',()=>{
- const c=fresh();c.player.style='기존 커스텀 선수 유형';validateCareer(c);
+ const c=fresh();c.player.style='기존 커스텀 선수 유형';c.player.ovr=overall(c.player);validateCareer(c);
  const next=changePosition(c,'CB','스토퍼');validateCareer(next);assert.equal(next.systems!.positionChanges![0].fromStyle,c.player.style);
 });
 test('the next actual game uses the new position, while the original career and earlier game stay unchanged',()=>{
