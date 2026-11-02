@@ -1,6 +1,6 @@
 import type { AttributeKey, Attributes, Award, Club, Fixture, MatchRecord, PlayerStats, Position, Standing } from './types';
 export interface WorldState {financeVersion?:1;}
-export interface MarketAssessment {abilityVersion?:2;year:number;round:number;totalRounds:number;ability:number;injuryWeeks:number;stardom:number;}
+export interface MarketAssessment {abilityVersion?:2;ovrVersion?:2;year:number;round:number;totalRounds:number;ability:number;injuryWeeks:number;stardom:number;}
 export interface Economics {valuationVersion?:1|2;assessment?:MarketAssessment;}
 
 export interface MatchParticipant {abilityVersion?:2;playSkills?:AttributeKey[];skillMastery?:Attributes; id: string; name: string; position: Position; ovr: number; attributes?: Attributes; nationality?: string; clubId: string }
@@ -42,16 +42,17 @@ export interface BallonDorYear { diagnostics?:{name:string;scope:string;eligible
 export interface CupFixture extends Fixture {stage:string;step:number;leg:number;tieId:string;date?:string;winnerId?:string;shootout?:{home:number;away:number};}
 export interface ClubTournament {format?:'groups'|'intercontinental'|'super';groups?:string[][];singleLeg?:boolean;doubleFinal?:boolean;calendar?:string[];maxSteps?:number;playerStats?:Record<string,CompetitorSeason>;id:string;name:string;year:number;country?:string;kind:'cup'|'leagueCup'|'continental';entrants:string[];basis:string;rules:string;phase:'league'|'knockout'|'completed';step:number;leagueRounds:number;stage:string;active:string[];byes:string[];fixtures:CupFixture[];matches:MatchRecord[];table:Standing[];winnerId?:string;startedAtRound:number;}
 export interface ClubCompetitions {version:1;year:number;current:ClubTournament[];history:ClubTournament[];}
-export interface ManualAging {key?:AttributeKey;playerId?:string;playerName?:string;id:string;year:number;round:number;date:string;amount:1|5|10;before:Attributes;after:Attributes;ovrBefore:number;ovrAfter:number;}
+export interface ManualAging {key?:AttributeKey;playerId?:string;playerName?:string;id:string;year:number;round:number;date:string;amount:1|5|10;ovrVersion?:2;before:Attributes;after:Attributes;ovrBefore:number;ovrAfter:number;}
 export interface ManualInjury {id:string;year:number;clubId:string;duration:'half'|'season'|5|10|20;start:string;end:string;pendingNextSeason?:boolean;returned?:string;selectionVersion?:2;remainingMatches?:number;targetMatches?:number;lastCheckedDate?:string;missed:{fixtureId:string;year:number;scope:'club'|'national';date?:string}[];}
 export type GrowthCause='training'|'experience'|'development'|'injury'|'aging'|'cheat'|'skillChange';
 export type GrowthBreakdown=Record<Exclude<GrowthCause,'cheat'|'skillChange'>,Attributes>&{cheat?:Attributes;skillChange?:Attributes};
 export interface GrowthLedger {year:number;baselineAttributes:Attributes;trackedFromRound:number;byCause:GrowthBreakdown;fractionalGains?:Partial<Record<GrowthCause,Attributes>>;injuredRounds:number;trainingQuality:number;legacy:boolean}
 export interface AgingReport {year:number;startAttributes:Attributes;endAttributes:Attributes;changes:Attributes;ovrStart:number;ovrEnd:number}
 export interface TrainingPlan {forYear:number;confirmed:boolean;confirmedAtRound:number;source:'creation'|'offseason'|'legacy'}
-export interface GrowthReport { year: number; half: 'first'|'season'; fromRound: number; toRound: number; startAttributes: Attributes; endAttributes: Attributes; ovrStart: number; ovrEnd: number; stats: PlayerStats; previousStats: PlayerStats; valueStart: number; valueEnd: number; context: string; growth?:GrowthLedger; offseasonAging?:AgingReport }
+export interface GrowthReport {ovrAdjustment?:number; year: number; half: 'first'|'season'; fromRound: number; toRound: number; startAttributes: Attributes; endAttributes: Attributes; ovrStart: number; ovrEnd: number; stats: PlayerStats; previousStats: PlayerStats; valueStart: number; valueEnd: number; context: string; growth?:GrowthLedger; offseasonAging?:AgingReport }
 export interface PresentationEvent { id: string; year: number; round: number; type: 'mom'|'injury'|'national'|'transfer'|'renewal'|'captain'|'award'|'growth'|'promotion'|'retirement'; title: string; body: string; importance: 'brief'|'decision'|'milestone' }
 export interface CareerSystems {
+  ovrUpgrade?:{version:2;priorAbilityVersion?:2;year:number;round:number;ovrBefore:number;ovrAfter:number};
   abilityUpgrade?:{version:2;year:number;round:number;ovrBefore:number;ovrAfter:number;added:Attributes};
   positionChanges?:import('./position-changes').PositionChange[];
   nationalParticipation?:import('./national-participation').NationalParticipation;

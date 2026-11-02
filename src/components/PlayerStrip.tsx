@@ -1,3 +1,4 @@
+import {seasonOVRChange} from '../game/ability-expansion';
 import type { Career } from '../game/types';
 import { getSeasonCompetitions } from '../game/season-competitions';
 import { TALENT_PROFILES } from '../game/talent';
@@ -16,7 +17,7 @@ export default function PlayerStrip({career}: {career: Career}) {
       </strong>
       <span>{p.age}세 · {p.position} · {p.squad === 'youth' ? 'U19' : '1군'} · {teamName(p.clubId)}</span>
     </div></div>
-    <div className="strip-ovr"><span>OVR</span><strong>{p.ovr}</strong><Delta value={p.ovr - career.season.ovrStart}/></div>
+    <div className="strip-ovr"><span>OVR</span><strong>{p.ovr}</strong><Delta value={seasonOVRChange(career)}/></div>
     <div className="strip-economics"><span>몸값 <b>{economics ? compactMoney(economics.marketValue) : '미집계'}</b></span>
       <span>주급 <b>{compactMoney(p.wage)}</b></span><small>{economics?.contract.role || '계약 역할 미집계'}</small></div>
     <div className="strip-national"><span>국가대표 <b>{status}</b></span><small>{national.teamName}</small></div>

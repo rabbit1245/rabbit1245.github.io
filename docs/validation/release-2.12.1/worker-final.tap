@@ -1,0 +1,30 @@
+TAP version 13
+# Subtest: actual games preserve all results, actions, statistics and unchanged match identities through Worker transport
+ok 1 - actual games preserve all results, actions, statistics and unchanged match identities through Worker transport
+  ---
+  duration_ms: 3961.41312
+  ...
+# Subtest: retirement reuses archived match sources while retaining the complete new annual record
+ok 2 - retirement reuses archived match sources while retaining the complete new annual record
+  ---
+  duration_ms: 2869.284168
+  ...
+# Subtest: opaque long histories and duplicate source aliases survive without copying their event graphs
+ok 3 - opaque long histories and duplicate source aliases survive without copying their event graphs
+  ---
+  duration_ms: 453.848285
+  ...
+# Subtest: mismatched bases and unsafe reference paths are rejected without modifying the original save
+ok 4 - mismatched bases and unsafe reference paths are rejected without modifying the original save
+  ---
+  duration_ms: 457.566093
+  ...
+1..4
+# tests 4
+# suites 0
+# pass 4
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 8151.507808

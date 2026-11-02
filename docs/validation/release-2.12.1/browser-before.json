@@ -1,0 +1,125 @@
+{
+  "label": "before",
+  "url": "http://127.0.0.1:4195/before/Kball.html",
+  "source": "test-results/coherence/large/career.json",
+  "samples": [
+    {
+      "name": "import",
+      "ms": 49496,
+      "workers": [
+        {
+          "kind": "send",
+          "operation": "verifyFile",
+          "ms": 0.19999999925494194
+        },
+        {
+          "kind": "response",
+          "operation": "verifyFile",
+          "ms": 18460.900000002235,
+          "reused": 0
+        },
+        {
+          "kind": "send",
+          "operation": "prepare",
+          "ms": 1365.3999999985099
+        },
+        {
+          "kind": "response",
+          "operation": "prepare",
+          "ms": 30211.89999999851,
+          "reused": 0
+        }
+      ]
+    },
+    {
+      "name": "training-confirm",
+      "ms": 288,
+      "workers": []
+    },
+    {
+      "name": "contract",
+      "ms": 54596,
+      "workers": [
+        {
+          "kind": "send",
+          "operation": "transfer",
+          "ms": 1838.1000000014901
+        },
+        {
+          "kind": "response",
+          "operation": "transfer",
+          "ms": 16518.800000000745,
+          "reused": 0
+        },
+        {
+          "kind": "send",
+          "operation": "prepare",
+          "ms": 3114.89999999851
+        },
+        {
+          "kind": "response",
+          "operation": "prepare",
+          "ms": 37217.29999999702,
+          "reused": 0
+        }
+      ]
+    },
+    {
+      "name": "next-season",
+      "ms": 27567,
+      "workers": [
+        {
+          "kind": "send",
+          "operation": "nextSeason",
+          "ms": 871.7999999970198
+        },
+        {
+          "kind": "response",
+          "operation": "nextSeason",
+          "ms": 7192.29999999702,
+          "reused": 0
+        },
+        {
+          "kind": "send",
+          "operation": "prepare",
+          "ms": 1067.9000000022352
+        },
+        {
+          "kind": "response",
+          "operation": "prepare",
+          "ms": 19671.10000000149,
+          "reused": 0
+        }
+      ]
+    },
+    {
+      "name": "first-half-and-autosave",
+      "ms": 48321,
+      "workers": [
+        {
+          "kind": "send",
+          "operation": "advanceHalf",
+          "ms": 773.4000000022352
+        },
+        {
+          "kind": "response",
+          "operation": "advanceHalf",
+          "ms": 22497.10000000149,
+          "reused": 0
+        },
+        {
+          "kind": "send",
+          "operation": "prepare",
+          "ms": 1320.8999999985099
+        },
+        {
+          "kind": "response",
+          "operation": "prepare",
+          "ms": 25435.800000000745,
+          "reused": 0
+        }
+      ]
+    }
+  ],
+  "errors": []
+}

@@ -52,3 +52,8 @@
 
 .player-season-label{margin-left:auto;align-self:center;font-size:14px;color:var(--muted)}
 @media(min-width:1200px){.player-workspace .attribute-grid:not(.cheating){grid-template-columns:repeat(5,minmax(0,1fr))}}
+
+@media(min-width:1200px){
+ .player-workspace .attribute-grid:not(.cheating) .attribute-name{display:block;word-break:keep-all;overflow-wrap:normal}
+ .player-workspace .attribute-grid:not(.cheating) .attribute-name .core-dot{margin-right:4px}
+}

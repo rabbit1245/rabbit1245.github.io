@@ -7,7 +7,7 @@ import {Modal} from './Shared';
 
 export function OvrImportance({position,style,attribute}:{position:Position;style:string;attribute:AttributeKey}){
  const level=attributeImportance(position,style)[attribute]??0,weight=attributeWeights(position,style)[attribute]??0;
- return level?<span className="ovr-importance" data-testid={`importance-${attribute}`} data-level={level} title={`현재 포지션·유형의 OVR 가중치 ${(weight*100).toFixed(1)}%`} aria-label={`OVR 기여도 ${level}단계`}>{'↑'.repeat(level)}</span>:null;
+ return level?<span className="ovr-importance" data-testid={`importance-${attribute}`} data-level={level} title={`현재 포지션·유형의 OVR 가중치 ${(weight*100).toFixed(1)}% · 이 능력치 +10이면 기초 OVR 약 +${(weight*10).toFixed(2)} (정수 표시·숙련 별도)`} aria-label={`OVR 기여도 ${level}단계`}>{'↑'.repeat(level)}</span>:null;
 }
 export default function PositionControls({career,busy,command}:{career:Career;busy:boolean;command:(c:GameCommand)=>void}){
  const [open,setOpen]=useState(false),[position,setPosition]=useState(career.player.position),[style,setStyle]=useState(career.player.style),p=career.player;

@@ -18,6 +18,8 @@ function details(h:SeasonSummary){const d=h.details;if(!d)return;check(d.version
 /** Optional extension fields do not initialize or rewrite legacy saves while loading. */
 export function validateCareerExtensions(c:Career){
  validateCommercial(c);
+ if(c.systems?.ovrUpgrade!==undefined){const u=c.systems.ovrUpgrade;check(u.version===2&&c.player.ovrVersion===2&&(u.priorAbilityVersion===undefined||u.priorAbilityVersion===2),'OVR 가중치 개편 버전');num(u.year,'OVR 개편 연도',1900,c.season.year,true);num(u.round,'OVR 개편 라운드',0,150,true);num(u.ovrBefore,'개편 전 OVR',1,130);num(u.ovrAfter,'개편 후 OVR',1,130);}
+ if(c.season.ovrVersion!==undefined)check(c.season.ovrVersion===2,'시즌 OVR 버전');
  if(c.systems?.abilityUpgrade!==undefined){const u=c.systems.abilityUpgrade;check(u&&u.version===2&&c.player.abilityVersion===2,'능력치 확장 버전');num(u.year,'능력치 도입 연도',1900,c.season.year,true);num(u.round,'능력치 도입 시점',0,150,true);num(u.ovrBefore,'도입 전 OVR',1,130);num(u.ovrAfter,'도입 후 OVR',1,130);check(u.added&&typeof u.added==='object','도입 능력치');for(const [key,value]of Object.entries(u.added)){check(['finishing','offTheBall','pressing','tackling','skillMoves'].includes(key),'도입 항목');num(value,'도입 기준값',0,120);}}
 
  if(c.systems?.positionChanges!==undefined){

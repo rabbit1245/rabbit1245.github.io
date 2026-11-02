@@ -1,0 +1,14 @@
+{
+  "source": "actual 14-season career fixture",
+  "seasons": 14,
+  "fullBytes": 272712996,
+  "wireBytes": 45684864,
+  "byteReduction": 0.8324800626663205,
+  "fullCloneMs": 6782.957845000001,
+  "packMs": 12.29089699999895,
+  "wireCloneMs": 1585.509646999999,
+  "hydrateMs": 42.5862100000013,
+  "sourceReferences": 3625,
+  "completeOutputHash": "5fc4a8b6b86414e75d24e5de544564a0c75816336db4610d41f776217cf026c0",
+  "allRecordsIdentical": true
+}

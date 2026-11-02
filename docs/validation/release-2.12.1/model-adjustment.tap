@@ -1,0 +1,35 @@
+TAP version 13
+# Subtest: all 160 profiles bound every attribute contribution, preserve specialization and normalize to one
+ok 1 - all 160 profiles bound every attribute contribution, preserve specialization and normalize to one # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.910591
+  ...
+# Subtest: raising any field ability by fifty adds at least two displayed OVR; striker stamina adds three
+ok 2 - raising any field ability by fifty adds at least two displayed OVR; striker stamina adds three # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.179241
+  ...
+# Subtest: uniform global ratings, five-skill earned ceiling and importance order remain coherent across every style
+ok 3 - uniform global ratings, five-skill earned ceiling and importance order remain coherent across every style # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.189237
+  ...
+# Subtest: real 2.12.0 save validates before a one-time reweight, preserving raw abilities, mastery and all existing records
+ok 4 - real 2.12.0 save validates before a one-time reweight, preserving raw abilities, mastery and all existing records # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.089673
+  ...
+# Subtest: model conversion alone never creates long-term ability-decline pressure or changes a signed contract
+ok 5 - model conversion alone never creates long-term ability-decline pressure or changes a signed contract
+  ---
+  duration_ms: 327.672425
+  ...
+1..5
+# tests 5
+# suites 0
+# pass 1
+# fail 0
+# cancelled 0
+# skipped 4
+# todo 0
+# duration_ms 783.342206

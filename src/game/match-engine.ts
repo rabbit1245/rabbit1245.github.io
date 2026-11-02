@@ -22,6 +22,7 @@ const duration=(p:Actor)=>Math.max(0,p.to-p.from)/90;
 const roundedCount=(mean:number,rng:()=>number)=>Math.max(0,Math.floor(mean+rng()));
 const group=(p:Position)=>p==='GK'?0:DEFENCE.has(p)?1:MIDFIELD.has(p)?2:3;
 const styleFactor=(p:Actor,kind:'shot'|'pass'|'dribble'|'tackle'|'aerial'|'sweep')=>{
+  if(!p.style)return 1;
   if(kind==='shot'&&/포처|골 사냥|침투|쉐도우|인사이드/.test(p.style))return 1.25;
   if(kind==='pass'&&/플레이메이커|레지스타|연계|템포|빌드업|배급|펄스/.test(p.style))return 1.2;
   if(kind==='dribble'&&/드리블|돌파|볼 운반|테크니컬/.test(p.style))return 1.35;
@@ -30,6 +31,11 @@ const styleFactor=(p:Actor,kind:'shot'|'pass'|'dribble'|'tackle'|'aerial'|'sweep
   if(kind==='sweep'&&/스위퍼|공격형 골키퍼/.test(p.style))return 1.6;
   return 1;
 };
+
+/** Stable actor shape avoids spreading differently shaped roster objects in every fixture. */
+function actorFor(p:MatchParticipant,teamId:string,from:number,to:number,started:boolean,user:Career['player']):Actor{
+ return {id:p.id,name:p.name,clubId:p.clubId,position:p.position,ovr:p.ovr,attributes:p.attributes,nationality:p.nationality,abilityVersion:p.abilityVersion,playSkills:p.playSkills,skillMastery:p.skillMastery,teamId,stats:emptyStats(),rating:0,minutes:to-from,started,from,to,user:p.id===user.id,style:p.id===user.id?user.style:'',creation:0,pressure:undefined,captain:undefined};
+}
 
 function sourcePlayers(career:Career,club:Club,provided?:MatchParticipant[]):MatchParticipant[] {
   if(provided?.length)return provided;
@@ -74,7 +80,7 @@ function makeTeam(career:Career,club:Club,provided:MatchParticipant[]|undefined,
     return quality(p,i)>quality(chosen[best],best)?i:best;
   },0);
   if(includesUser&&selection.started)chosen[closestIndex()]=userParticipant;
-  const actors:Actor[]=chosen.map(p=>({...p,teamId:club.id,stats:emptyStats(),rating:0,minutes:90,started:true,from:0,to:90,user:p.id===user.id,style:p.id===user.id?user.style:'',creation:0}));
+  const actors:Actor[]=chosen.map(p=>actorFor(p,club.id,0,90,true,user));
   let out:Actor|undefined;let substitute:MatchParticipant|undefined;let minute=integer(rng,64,77);
   if(includesUser&&!selection.started){
     out=actors[closestIndex()];substitute=userParticipant;minute=selection.from;
@@ -90,7 +96,7 @@ function makeTeam(career:Career,club:Club,provided:MatchParticipant[]|undefined,
   if(out&&substitute){
     out.to=minute;out.minutes=minute;
     const to=substitute.id===user.id?selection.to:90;
-    actors.push({...substitute,teamId:club.id,stats:emptyStats(),rating:0,minutes:to-minute,started:false,from:minute,to,user:substitute.id===user.id,style:substitute.id===user.id?user.style:'',creation:0});
+    actors.push(actorFor(substitute,club.id,minute,to,false,user));
   }
   const userActor=actors.find(p=>p.user);
   if(userActor){userActor.from=selection.from;userActor.to=selection.to;userActor.minutes=selection.to-selection.from;userActor.started=selection.started;}
@@ -100,7 +106,7 @@ function makeTeam(career:Career,club:Club,provided:MatchParticipant[]|undefined,
   // another outfielder for a sent-off GK, preserving ten active players.
   if(includesUser&&!selection.started&&selection.to<90){
     const replacement=candidates.filter(p=>!used.has(p.id)&&!actors.some(a=>a.id===p.id)&&(user.position==='GK'?p.position==='GK':p.position!=='GK')).sort((a,b)=>(b.position===user.position?100:0)+b.ovr-((a.position===user.position?100:0)+a.ovr))[0];
-    if(replacement)actors.push({...replacement,teamId:club.id,stats:emptyStats(),rating:0,minutes:90-selection.to,started:false,from:selection.to,to:90,user:false,style:'',creation:0});
+    if(replacement)actors.push(actorFor(replacement,club.id,selection.to,90,false,user));
   }
   const worldPower=career.systems?.world.clubs[club.id]?.power;
   // Supplied teams already carry their current power (including national teams).

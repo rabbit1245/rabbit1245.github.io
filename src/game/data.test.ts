@@ -124,7 +124,7 @@ test('OVR stays on one global scale across leagues and talent, with bounded miss
 
 test('specialist styles reward their relevant abilities rather than a fixed title bonus', () => {
   const attributes = Object.fromEntries(FIELD_ATTRIBUTES.map(key => [key, 55])) as Attributes;
-  attributes.shooting = 95;
+  attributes.shooting = 95;attributes.finishing=95;attributes.offTheBall=95;
   attributes.positioning = 95;
   attributes.composure = 95;
   const poacher = overall({position: 'ST', style: '포처', attributes});

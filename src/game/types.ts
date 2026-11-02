@@ -12,7 +12,7 @@ export interface League { id: string; name: string; country: string; tier: numbe
 export interface RosterPlayer { id: string; name: string; clubId: string; position: Position; ovr: number; age: number }
 export interface Player {
   id: string; name: string; nationality: string; age: number; height: number; weight: number; foot: Foot;
-  abilityVersion?:2;skillMastery?:Attributes;
+  abilityVersion?:2;ovrVersion?:2;skillMastery?:Attributes;
   position: Position; secondaryPositions: Position[]; talent: Talent; style: string; attributes: Attributes; playSkills?:AttributeKey[];
   clubId: string; squad: Squad; fitness: number; morale: number; form: number; injuryWeeks: number;
   ovr: number; potential: number; wage: number; contractYears: number;
@@ -62,6 +62,7 @@ export interface MatchRecord {
 }
 export interface Award { id: string; name: string; year: number; clubId: string; description: string; organiser?: string; criterion?: string; sourceUrl?: string; category?: string; official?: boolean; position?: Position; rank?: number; ruleVersion?:string; evaluationPeriod?:string; verification?:'game-model' }
 export interface SeasonState {
+  ovrVersion?:2;
   year: number; index: number; week: number; totalWeeks: number; leagueId: string; competitionName: string;
   calendarYear?: number;
   fixtures: Fixture[]; table: Standing[]; matches: MatchRecord[]; playerStats: PlayerStats;
@@ -76,7 +77,7 @@ export interface SeasonSummary {
 }
 export interface SeasonDetails {
   employmentStandings?:{clubId:string;leagueId:string;rank:number;played:number;won:number;drawn:number;lost:number;points:number}[];
-  abilityVersion?:2;skillMastery?:Attributes;playSkills?:AttributeKey[];
+  abilityVersion?:2;ovrVersion?:2;skillMastery?:Attributes;playSkills?:AttributeKey[];
   version:1; clubDevelopment?:ClubSeasonDevelopment; table:Standing[]; attributes:Attributes; startAttributes:Attributes;
   marketValue:number; seasonStartValue?:number; contract:{clubId:string;wage:number;years:number;signedYear:number;expiresYear:number;role:string};
   personalRanks:{goals:number|null;assists:number|null;cleanSheets:number|null};

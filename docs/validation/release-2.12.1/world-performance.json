@@ -1,0 +1,56 @@
+{
+  "rows": [
+    {
+      "trial": 0,
+      "label": "before",
+      "wallMs": 8077.204629,
+      "cpuMs": 13673.723,
+      "hash": "161afae3e1ad9cd098b837d8d40b8b0abea2497cbb05f01cb732906ce04ed55f",
+      "fixtures": 3396
+    },
+    {
+      "trial": 0,
+      "label": "after",
+      "wallMs": 5364.735719999999,
+      "cpuMs": 10063.639,
+      "hash": "161afae3e1ad9cd098b837d8d40b8b0abea2497cbb05f01cb732906ce04ed55f",
+      "fixtures": 3396
+    },
+    {
+      "trial": 1,
+      "label": "after",
+      "wallMs": 3966.169528999999,
+      "cpuMs": 4776.897,
+      "hash": "161afae3e1ad9cd098b837d8d40b8b0abea2497cbb05f01cb732906ce04ed55f",
+      "fixtures": 3396
+    },
+    {
+      "trial": 1,
+      "label": "before",
+      "wallMs": 5987.652319000001,
+      "cpuMs": 7967.683,
+      "hash": "161afae3e1ad9cd098b837d8d40b8b0abea2497cbb05f01cb732906ce04ed55f",
+      "fixtures": 3396
+    },
+    {
+      "trial": 2,
+      "label": "before",
+      "wallMs": 5626.020570000004,
+      "cpuMs": 6870.768,
+      "hash": "161afae3e1ad9cd098b837d8d40b8b0abea2497cbb05f01cb732906ce04ed55f",
+      "fixtures": 3396
+    },
+    {
+      "trial": 2,
+      "label": "after",
+      "wallMs": 3649.3454980000024,
+      "cpuMs": 4188.563,
+      "hash": "161afae3e1ad9cd098b837d8d40b8b0abea2497cbb05f01cb732906ce04ed55f",
+      "fixtures": 3396
+    }
+  ],
+  "fullOutputsIdentical": true,
+  "beforeMedianMs": 5987.652319000001,
+  "afterMedianMs": 3966.169528999999,
+  "reduction": 0.3376085788390616
+}

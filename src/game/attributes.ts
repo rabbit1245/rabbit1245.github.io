@@ -117,7 +117,7 @@ const STYLE_EMPHASES: {pattern: RegExp; keys: AttributeKey[]}[] = [
 ];
 
 /** Normalized weights form a global ability scale; club, league and talent do not enter this calculation. */
-export function attributeWeights(position: Position, style: string,legacy=false): Partial<Record<AttributeKey, number>> {
+function originalAttributeWeights(position: Position, style: string,legacy=false): Partial<Record<AttributeKey, number>> {
   const attributes = position === 'GK' ? GK_ATTRIBUTES : legacy?LEGACY_FIELD_ATTRIBUTES:FIELD_ATTRIBUTES;
   const core = (legacy?LEGACY_POSITION_ATTRIBUTES:POSITION_ATTRIBUTES)[position];
   const weights: Partial<Record<AttributeKey, number>> = {};
@@ -138,10 +138,25 @@ export function attributeWeights(position: Position, style: string,legacy=false)
   return weights;
 }
 
+/** Preserve both published models for checksum validation and historical comparison. */
+export const expanded2120Weights=(position:Position,style:string)=>originalAttributeWeights(position,style);
+const FOUNDATION:Partial<Record<AttributeKey,number>>={stamina:.065,speed:.045,strength:.045,agility:.04,ballControl:.045,decisions:.045,teamwork:.045,concentration:.04};
+const WEIGHT_CACHE=new Map<string,Partial<Record<AttributeKey,number>>>();
+const FOUNDATION_REMAINDER=(1-Object.values(FOUNDATION).reduce((n,v)=>n+v!,0))/(FIELD_ATTRIBUTES.length-Object.keys(FOUNDATION).length);
+/** Shared football fundamentals prevent non-core skills disappearing from OVR.
+ * The remaining positional component preserves role/style differences. */
+export function attributeWeights(position:Position,style:string,legacy=false):Partial<Record<AttributeKey,number>>{
+ if(legacy)return originalAttributeWeights(position,style,true);
+ const id=position+'|'+style,cached=WEIGHT_CACHE.get(id);if(cached)return cached;
+ const role=originalAttributeWeights(position,style),keys=position==='GK'?GK_ATTRIBUTES:FIELD_ATTRIBUTES;
+ const result=Object.freeze(Object.fromEntries(keys.map(k=>[k,position==='GK'?.035+(role[k]??0)*.65:(FOUNDATION[k]??FOUNDATION_REMAINDER)*.7+(role[k]??0)*.3])));
+ if(PLAY_STYLES[position].includes(style))WEIGHT_CACHE.set(id,result);return result;
+}
+
 /** Display the existing positional/type weights; never alter growth or OVR. */
 export function attributeImportance(position:Position,style:string):Partial<Record<AttributeKey,0|1|2|3>>{
  const weights=attributeWeights(position,style),values=Object.values(weights) as number[],max=Math.max(...values),min=Math.min(...values);
- return Object.fromEntries(Object.entries(weights).map(([key,w])=>[key,w!>=max*.75?3:w!>=max*.45?2:w!>min+1e-9?1:0]));
+ return Object.fromEntries(Object.entries(weights).map(([key,w])=>[key,w!>=min+(max-min)*.75-1e-9?3:w!>=min+(max-min)*.35-1e-9?2:1]));
 }
 
 /** Current mental excellence and established leadership use the same scale on and off the pitch. */
@@ -155,11 +170,19 @@ export function playingAbility(player:Pick<Player,'attributes'|'position'|'style
  if(player.ovr!==undefined)return player.ovr;
  return Object.entries(attributeWeights(player.position,player.style)).reduce((n,[k,w])=>n+boundedAbility(player.attributes[k as AttributeKey])*w!,0);
 }
-export function overall(player:Pick<Player,'attributes'|'position'|'style'|'playSkills'|'skillMastery'>):number{
- const weights=attributeWeights(player.position,player.style),base=Object.entries(weights).reduce((n,[k,w])=>n+boundedAbility(player.attributes[k as AttributeKey])*w!,0);
+function weightedOverall(player:Pick<Player,'attributes'|'position'|'style'|'playSkills'|'skillMastery'>,weights:Partial<Record<AttributeKey,number>>):number{
+ const base=Object.entries(weights).reduce((n,[k,w])=>n+boundedAbility(player.attributes[k as AttributeKey])*w!,0);
  const allowed=player.position==='GK'?GK_ATTRIBUTES:FIELD_ATTRIBUTES,selected=[...new Set(player.playSkills??[])].filter(k=>allowed.includes(k));
  const bonus=selected.length>5?0:selected.reduce((n,k)=>n+Math.min(20,Math.max(0,player.skillMastery?.[k]??0),Math.max(0,(player.attributes[k]??0)-100))*.1,0);
  return Math.max(1,Math.min(130,Math.round(base+bonus)));
+}
+export const overall=(player:Pick<Player,'attributes'|'position'|'style'|'playSkills'|'skillMastery'>)=>weightedOverall(player,attributeWeights(player.position,player.style));
+export const expanded2120Overall=(player:Pick<Player,'attributes'|'position'|'style'|'playSkills'|'skillMastery'>)=>weightedOverall(player,expanded2120Weights(player.position,player.style));
+/** Convert comparison evidence only; the original historical number is never rewritten. */
+export function reweightedOVR(value:number,attributes:Player['attributes'],position:Position,style:string):number{
+ const old=expanded2120Weights(position,style),next=attributeWeights(position,style);
+ const shift=Object.entries(next).reduce((n,[k,w])=>n+boundedAbility(attributes[k as AttributeKey])*(w!-(old[k as AttributeKey]??0)),0);
+ return Math.max(1,Math.min(130,Math.round(value+shift)));
 }
 export function legacyOverall(player: Pick<Player, 'attributes'|'position'|'style'|'playSkills'>): number {
   const weights = attributeWeights(player.position, player.style,true);

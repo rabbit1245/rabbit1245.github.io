@@ -1,5 +1,5 @@
 import {attributeCap,playSkillDefinitions} from './play-skills';
-import {overall,legacyOverall,POSITION_LABELS} from './attributes';
+import {overall,expanded2120Overall,legacyOverall,POSITION_LABELS} from './attributes';
 import type {AttributeKey,Career,Position} from './types';
 
 export function validatePlaySkills(c:Career):void{
@@ -9,12 +9,13 @@ export function validatePlaySkills(c:Career):void{
   const rows=value as AttributeKey[],allowed=playSkillDefinitions(position).map(s=>s.key);
   check(new Set(rows).size===rows.length&&rows.every(k=>allowed.includes(k)),'중복 또는 포지션이 맞지 않는 선택입니다.');return rows;
  };
+ if(c.player.ovrVersion!==undefined)check(c.player.ovrVersion===2&&c.player.abilityVersion===2,'OVR 가중치 버전입니다.');
  const selected=c.player.playSkills===undefined?[]:keys(c.player.playSkills,c.player.position);
  check(c.player.ovr<=(c.player.abilityVersion===2?130:100+4*selected.length),'종합 능력치 상한을 초과합니다.');
  if(c.player.abilityVersion!==undefined)check(c.player.abilityVersion===2,'능력치 체계 버전입니다.');
  if(c.player.skillMastery!==undefined){check(c.player.abilityVersion===2&&c.player.skillMastery&&typeof c.player.skillMastery==='object'&&!Array.isArray(c.player.skillMastery),'숙련 형식입니다.');for(const [key,value]of Object.entries(c.player.skillMastery))check(selected.includes(key as AttributeKey)&&Number.isFinite(value)&&value>=0&&value<=20,'선택한 능력치의 실제 숙련 범위입니다.');}
  for(const [key,value]of Object.entries(c.player.attributes))check(value<=attributeCap(c.player,key as AttributeKey),c.player.abilityVersion===2?'개별 능력치의 120 상한을 초과합니다.':'구버전 미선택 능력치의 100 또는 선택 능력치의 110 상한을 초과합니다.');
- if(c.player.playSkills!==undefined||c.player.abilityVersion===2)check(c.player.ovr===(c.player.abilityVersion===2?overall(c.player):legacyOverall(c.player)),'종합 능력치와 실제 숙련이 다릅니다.');
+ if(c.player.playSkills!==undefined||c.player.abilityVersion===2)check(c.player.ovr===(c.player.abilityVersion===2?(c.player.ovrVersion===2?overall(c.player):expanded2120Overall(c.player)):legacyOverall(c.player)),'종합 능력치와 실제 숙련이 다릅니다.');
  const events=c.systems?.playSkillChanges;
  if(events!==undefined){
   check(Array.isArray(events)&&events.length<=10000,'변경 이력이 올바르지 않습니다.');
@@ -30,6 +31,7 @@ export function validatePlaySkills(c:Career):void{
   check(selected.length===replay.size&&selected.every(k=>replay.has(k)),'현재 선택과 변경 이력이 다릅니다.');
  }
  for(const h of c.history)if(h.details){const d=h.details;
+  if(d.ovrVersion!==undefined)check(d.ovrVersion===2&&d.abilityVersion===2,'연도별 OVR 버전입니다.');
   if(d.abilityVersion!==undefined)check(d.abilityVersion===2,'연도별 능력치 체계 버전입니다.');
   const list=d.playSkills===undefined?[]:keys(d.playSkills,h.position);
   if(d.skillMastery!==undefined){check(d.abilityVersion===2&&d.skillMastery&&typeof d.skillMastery==='object'&&!Array.isArray(d.skillMastery),'연도별 숙련 형식입니다.');for(const [key,value]of Object.entries(d.skillMastery))check(list.includes(key as AttributeKey)&&Number.isFinite(value)&&value>=0&&value<=20,'연도별 선택한 능력치의 실제 숙련 범위입니다.');}

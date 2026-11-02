@@ -710,6 +710,7 @@ function validateSystems(career: Record<string, unknown>, player: Record<string,
     const row = object(raw, 'growthReport'); number(row.year, 'growthReport.year', 1900, 2500, true); choice(row.half, ['first', 'season'], 'growthReport.half');
     const from = number(row.fromRound, 'growthReport.fromRound', 0, 150, true); number(row.toRound, 'growthReport.toRound', from, 150, true);
     attributes(row.startAttributes, 'growthReport.startAttributes'); attributes(row.endAttributes, 'growthReport.endAttributes');
+    if(row.ovrAdjustment!==undefined)number(row.ovrAdjustment,'growthReport.ovrAdjustment',-129,129);
     number(row.ovrStart, 'growthReport.ovrStart', 1, 130); number(row.ovrEnd, 'growthReport.ovrEnd', 1, 130); stats(row.stats, 'growthReport.stats'); stats(row.previousStats, 'growthReport.previousStats');
     number(row.valueStart, 'growthReport.valueStart', 0, 1e15); number(row.valueEnd, 'growthReport.valueEnd', 0, 1e15); text(row.context, 'growthReport.context', 8_000);
     if (row.growth !== undefined) growthLedger(row.growth, row.endAttributes, Number(row.toRound), Number(row.year), 'growthReport.growth', row.startAttributes);

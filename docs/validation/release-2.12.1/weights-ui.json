@@ -1,0 +1,27 @@
+{
+  "checks": [
+    {
+      "width": 1366,
+      "actual2120Import": true,
+      "originalStatsAndMatchesPreserved": true,
+      "reweightOnlyOnce": true,
+      "staminaRaised": 50,
+      "ovrGain": 2,
+      "tooltipUsesActualWeight": true,
+      "reload": true,
+      "noOverflow": true
+    },
+    {
+      "width": 390,
+      "actual2120Import": true,
+      "originalStatsAndMatchesPreserved": true,
+      "reweightOnlyOnce": true,
+      "staminaRaised": 50,
+      "ovrGain": 2,
+      "tooltipUsesActualWeight": true,
+      "reload": true,
+      "noOverflow": true
+    }
+  ],
+  "errors": []
+}

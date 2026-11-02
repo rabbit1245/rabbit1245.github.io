@@ -1,3 +1,4 @@
+import {packGameResult} from './worker-result';
 import type { Career, GameCommand } from './types';
 import { executeCommand } from './commands';
 
@@ -9,7 +10,7 @@ self.addEventListener('message', (event: MessageEvent<Request>) => {
   try {
     if(!career)throw new Error('진행할 커리어 상태를 다시 불러와 주세요.');
     const result = executeCommand(career, command, id,progress=>self.postMessage({id,progress}));resident=result;
-    self.postMessage({ id, career: result });
+    self.postMessage({ id, wire:packGameResult(career,result) });
   } catch (error) {
     self.postMessage({ id, error: error instanceof Error ? error.message : '진행 중 오류가 발생했습니다.' });
   }

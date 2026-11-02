@@ -1,3 +1,4 @@
+import {needsAbilityUpgrade} from './game/ability-expansion';
 import {currencyText} from './game/currency';
 import {careerMatchLedger} from './game/career-text';
 import { useEffect, useMemo, useRef, useState, type ChangeEvent } from 'react';
@@ -128,7 +129,7 @@ export default function App() {
     if (locked.current) return;
     if (!confirmReplace('다른 저장을 불러올까요')) return;
     locked.current = true; setBusy(true); setError('');const resume=beginFullTask();releaseIdleGameWorker();
-    try { let next = await loadCareer(id),saved=true;if(next.player.abilityVersion!==2&&next.stage!=='retired'){const previous=next;next=await runGameCommand(next,{type:'upgradeAbilities'});saved=await commit(next,previous);}else{display(next);setSaveStatus('saved');}setSelectedMatch(null);setCommon(false);navigate('locker');if(saved)setToast('커리어를 불러왔습니다.'); }
+    try { let next = await loadCareer(id),saved=true;if(needsAbilityUpgrade(next.player)&&next.stage!=='retired'){const previous=next;next=await runGameCommand(next,{type:'upgradeAbilities'});saved=await commit(next,previous);}else{display(next);setSaveStatus('saved');}setSelectedMatch(null);setCommon(false);navigate('locker');if(saved)setToast('커리어를 불러왔습니다.'); }
     catch (e) { setError(errorMessage(e)); }
     finally { resume?.();locked.current = false; setBusy(false); setProgress(null); }
   }
@@ -151,7 +152,7 @@ export default function App() {
     const file = event.target.files?.[0]; event.target.value = '';
     if (!file || locked.current || !confirmReplace('가져온 커리어를 열까요')) return;
     locked.current = true; setBusy(true); setError('');const resume=beginFullTask();
-    try { let next = await importCareer(file);if(next.player.abilityVersion!==2&&next.stage!=='retired')next=await runGameCommand(next,{type:'upgradeAbilities'});const saved = await commit(next); setSelectedMatch(null); setCommon(false); navigate('locker'); if (saved) setToast('별도 슬롯으로 커리어를 가져왔습니다.'); }
+    try { let next = await importCareer(file);if(needsAbilityUpgrade(next.player)&&next.stage!=='retired')next=await runGameCommand(next,{type:'upgradeAbilities'});const saved = await commit(next); setSelectedMatch(null); setCommon(false); navigate('locker'); if (saved) setToast('별도 슬롯으로 커리어를 가져왔습니다.'); }
     catch (e) { setError(errorMessage(e)); }
     finally { resume?.();locked.current = false; setBusy(false); setProgress(null); }
   }

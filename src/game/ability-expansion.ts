@@ -7,20 +7,21 @@ export function derivedAttribute(a:Attributes,key:AttributeKey):number{
  return Math.round((values[key]??v(key))*100)/100;
 }
 export function expandedPlayer(p:Player):Player{
- if(p.abilityVersion===2)return p;
+ if(p.abilityVersion===2&&p.ovrVersion===2)return p;
  const attributes={...p.attributes};if(p.position!=='GK')for(const key of NEW_FIELD_ATTRIBUTES)if(attributes[key]===undefined)attributes[key]=derivedAttribute(attributes,key);
- const skillMastery:Attributes={};for(const k of p.playSkills??[])skillMastery[k]=Math.max(0,(attributes[k]??0)-100);
- const next={...p,attributes,skillMastery,abilityVersion:2 as const};next.ovr=overall(next);return next;
+ const skillMastery:Attributes=p.abilityVersion===2?{...p.skillMastery}:{};if(p.abilityVersion!==2)for(const k of p.playSkills??[])skillMastery[k]=Math.max(0,(attributes[k]??0)-100);
+ const next={...p,attributes,skillMastery,abilityVersion:2 as const,ovrVersion:2 as const};next.ovr=overall(next);return next;
 }
 /** Version upgrade, not growth: never rewrite old ability values or old seasons. */
 export function upgradeAbilities(c:Career):void{
- if(c.player.abilityVersion===2)return;
+ if(c.player.abilityVersion===2&&c.player.ovrVersion===2)return;
  const old=c.player,added:Attributes={},next=expandedPlayer(old);
  for(const key of NEW_FIELD_ATTRIBUTES)if(old.attributes[key]===undefined&&next.attributes[key]!==undefined)added[key]=next.attributes[key];
- if(next.talent==='SSS')next.potential=Math.max(next.potential,105+Math.max(0,Math.min(1,(old.potential-98)/2))*15);
+ if(old.abilityVersion!==2&&next.talent==='SSS')next.potential=Math.max(next.potential,105+Math.max(0,Math.min(1,(old.potential-98)/2))*15);
  c.player=next;
  if(c.systems){
-  c.systems.abilityUpgrade={version:2,year:c.season.year,round:c.season.week,ovrBefore:old.ovr,ovrAfter:next.ovr,added};
+  if(old.ovrVersion!==2)c.systems.ovrUpgrade={version:2,priorAbilityVersion:old.abilityVersion,year:c.season.year,round:c.season.week,ovrBefore:old.ovr,ovrAfter:next.ovr};
+  if(old.abilityVersion!==2)c.systems.abilityUpgrade={version:2,year:c.season.year,round:c.season.week,ovrBefore:old.ovr,ovrAfter:next.ovr,added};
   const ledger=c.systems.growthLedger;if(ledger?.year===c.season.year)ledger.baselineAttributes={...ledger.baselineAttributes,...added};
  }
  c.season.attributeStart={...c.season.attributeStart,...added};
@@ -35,4 +36,9 @@ export function comparableLegacyOVR(c:Career,value:number,attributes?:Attributes
  if(c.player.abilityVersion!==2)return value;
  if(!attributes)return value>100?100+(value-100)*.5:value;
  return expandedPlayer({...c.player,abilityVersion:undefined,attributes,position,playSkills,skillMastery:undefined,ovr:value}).ovr;
+}
+
+export const needsAbilityUpgrade=(p:Player)=>p.abilityVersion!==2||p.ovrVersion!==2;
+export function seasonOVRChange(c:Career):number{
+ const u=c.systems?.ovrUpgrade;return c.player.ovr-c.season.ovrStart-(u?.year===c.season.year?u.ovrAfter-u.ovrBefore:0);
 }

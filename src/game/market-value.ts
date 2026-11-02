@@ -1,31 +1,45 @@
 import {comparableLegacyOVR} from './ability-expansion';
 import {getClub,getLeague} from './data';
-import {playingAbility} from './attributes';
+import {playingAbility,reweightedOVR,PLAY_STYLES} from './attributes';
 import {personalityEdge} from './personality';
 import {clamp} from './math';
 import {observedSeasons,careerStanding} from './career-standing';
-import type {Career} from './types';
+import type {Career,Attributes,Position,AttributeKey} from './types';
 import type {MarketAssessment} from './revision-types';
 
 /** Retain the observed pre-decline class across assessments. A single quiet
  * season at unchanged ability has no decline pressure; repeated low ability does. */
+type AbilityEvidence={abilityVersion?:2;ovrVersion?:2;attributes?:Attributes;position?:Position;playSkills?:AttributeKey[]};
+/** Evaluate old evidence on today's scale without changing its stored score. */
+export function comparableRecordedAbility(c:Career,value:number,evidence:AbilityEvidence={}):number{
+ if(evidence.ovrVersion===2)return value;
+ const u=c.systems?.ovrUpgrade;
+ if(evidence.abilityVersion===2){
+  if(!u)return value;
+  const position=evidence.position??c.player.position,style=PLAY_STYLES[position].includes(c.player.style)?c.player.style:PLAY_STYLES[position][0];
+  return evidence.attributes?reweightedOVR(value,evidence.attributes,position,style):clamp(value+u.ovrAfter-u.ovrBefore,1,130);
+ }
+ if(c.systems?.abilityUpgrade){const a=c.systems.abilityUpgrade;if(!evidence.attributes&&value===a.ovrBefore)return a.ovrAfter;return comparableLegacyOVR(c,value,evidence.attributes,evidence.position,evidence.playSkills);}
+ if(u)return evidence.attributes?comparableRecordedAbility(c,value,{...evidence,abilityVersion:2}):clamp(value+u.ovrAfter-u.ovrBefore,1,130);
+ return value;
+}
 export function marketDeclineEvidence(c:Career){
- const ability=playingAbility(c.player),a=c.systems?.economics.assessment;
- const converted=!!c.systems?.abilityUpgrade&&c.player.abilityVersion===2;
- const start=converted&&c.systems!.abilityUpgrade!.year===c.season.year?comparableLegacyOVR(c,c.season.ovrStart):c.season.ovrStart;
- const assessed=a&&converted&&a.abilityVersion!==2?(a.ability===c.systems!.abilityUpgrade!.ovrBefore?c.systems!.abilityUpgrade!.ovrAfter:comparableLegacyOVR(c,a.ability)):a?.ability;
- let reference=Math.max(ability,start??ability,assessed??ability);
- for(const h of c.history){const legacy=converted&&h.details?.abilityVersion!==2;for(const value of [legacy?comparableLegacyOVR(c,h.ovrStart,h.details?.startAttributes,h.position,h.details?.playSkills):h.ovrStart,legacy?comparableLegacyOVR(c,h.ovrEnd,h.details?.attributes,h.position,h.details?.playSkills):h.ovrEnd])if(Number.isFinite(value))reference=Math.max(reference,value);}
- for(const r of c.systems?.manualAging??[])if((!r.playerId||r.playerId===c.player.id)&&Number.isFinite(r.ovrBefore))reference=Math.max(reference,converted&&!('finishing'in r.before)?comparableLegacyOVR(c,r.ovrBefore,r.before):r.ovrBefore);
+ const ability=playingAbility(c.player),a=c.systems?.economics.assessment,u=c.systems?.ovrUpgrade;
+ const startVersion=c.season.ovrVersion===2?2:u?.year===c.season.year?u.priorAbilityVersion:c.systems?.abilityUpgrade?.year===c.season.year?undefined:2;
+ const start=comparableRecordedAbility(c,c.season.ovrStart,{abilityVersion:startVersion,ovrVersion:c.season.ovrVersion,attributes:c.season.attributeStart});
+ let reference=Math.max(ability,start,a?comparableRecordedAbility(c,a.ability,a):ability);
+ const historical=(h:Career['history'][number],end:boolean)=>comparableRecordedAbility(c,end?h.ovrEnd:h.ovrStart,{...h.details,attributes:end?h.details?.attributes:h.details?.startAttributes,position:h.position});
+ for(const h of c.history)reference=Math.max(reference,historical(h,false),historical(h,true));
+ for(const r of c.systems?.manualAging??[])if((!r.playerId||r.playerId===c.player.id)&&Number.isFinite(r.ovrBefore))reference=Math.max(reference,comparableRecordedAbility(c,r.ovrBefore,{abilityVersion:'finishing'in r.before?2:undefined,ovrVersion:r.ovrVersion,attributes:r.before}));
  const severity=clamp((reference-ability-8)/32,0,1),threshold=reference-8;
  let years=0,expected=c.season.year-1;
  for(const h of [...c.history].filter(h=>h.completed&&h.year<c.season.year&&h.squad!=='youth').sort((x,y)=>y.year-x.year)){
-  if(h.year!==expected||(converted&&h.details?.abilityVersion!==2?comparableLegacyOVR(c,h.ovrEnd,h.details?.attributes,h.position,h.details?.playSkills):h.ovrEnd)>=threshold)break;years++;expected--;
+  if(h.year!==expected||historical(h,true)>=threshold)break;years++;expected--;
  }
  let fraction=clamp(c.season.week/Math.max(1,c.season.totalWeeks),0,1);
  const closed=c.history.find(h=>h.year===c.season.year&&h.completed);
- if(closed&&closed.ovrEnd>=threshold)fraction=0;
- else if(a?.year===c.season.year&&a.ability>=threshold)fraction=Math.max(0,fraction-a.round/a.totalRounds);
+ if(closed&&historical(closed,true)>=threshold)fraction=0;
+ else if(a?.year===c.season.year&&comparableRecordedAbility(c,a.ability,a)>=threshold)fraction=Math.max(0,fraction-a.round/a.totalRounds);
  const seasons=severity?years+fraction:0;
  return {reference,ability,severity,seasons,pressure:severity*clamp((seasons-.5)/1.5,0,1)};
 }
@@ -58,7 +72,7 @@ export function marketEstimate(c:Career):number {
  return Math.max(1000,Math.min(350000000,Math.round(quality*youth*potential*(total?form/total:.9)*(total?exposure/total:.65)*prestige*international*injury*breakout*recognition*achievement*(1+personalityEdge(c,'stardom')*.06)/1000)*1000));
 }
 export function assessmentNow(c:Career):MarketAssessment{
- return {abilityVersion:c.player.abilityVersion,year:c.season.year,round:c.season.week,totalRounds:c.season.totalWeeks,ability:playingAbility(c.player),injuryWeeks:c.player.injuryWeeks,stardom:c.systems?.personality?.stardom??5};
+ return {abilityVersion:c.player.abilityVersion,ovrVersion:c.player.ovrVersion,year:c.season.year,round:c.season.week,totalRounds:c.season.totalWeeks,ability:playingAbility(c.player),injuryWeeks:c.player.injuryWeeks,stardom:c.systems?.personality?.stardom??5};
 }
 export function marketQuote(c:Career):number {
  const e=c.systems?.economics;if(!e)return marketEstimate(c);
@@ -72,7 +86,7 @@ export function marketQuote(c:Career):number {
  const rate=up?(firstBreakout?.95:.55)*progress:(.3+.65*confirmed)*progress;
  const eventRate=freshInjury>=4?Math.min(.18,freshInjury*.01):starChange>0?.06:0;
  let value=e.marketValue+(target-e.marketValue)*Math.max(rate,eventRate);
- const oldAssessment=a.abilityVersion!==2&&c.systems?.abilityUpgrade?(a.ability===c.systems.abilityUpgrade.ovrBefore?c.systems.abilityUpgrade.ovrAfter:comparableLegacyOVR(c,a.ability)):a.ability;
+ const oldAssessment=comparableRecordedAbility(c,a.ability,a);
  const retained=now.ability>=oldAssessment-2,young=c.player.age<=29;
  const ordinaryDrop=(retained&&young?.12:.35)*clamp(elapsed,0,1);
  const maxDrop=clamp(Math.max(ordinaryDrop,1-Math.exp(-2.6*confirmed*elapsed))+Math.min(.15,freshInjury*.01),0,1);
