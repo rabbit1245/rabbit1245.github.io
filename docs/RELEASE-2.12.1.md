@@ -69,3 +69,12 @@ KBALL_SPEED_LABEL=after KBALL_TEST_URL=http://127.0.0.1:4195/after/Kball.html no
 npm run build
 npm run build:playable
 ```
+
+## 배포 확인
+
+[2.12.1 ZIP 다운로드](https://github.com/rabbit1245/rabbit1245.github.io/raw/a99c3ecffd5ba2c3b0858369185675a290dad6f3/Kball.zip?download=1)를 공개 경로에서 다시 받아 HTTP 200, 21,591,115바이트, CRC·검수 HTML 바이트 일치를 확인했다.
+
+- 게임 소스: `846d060c2d03f1b8664070f79991993c10f0d944`
+- 배포: `a99c3ecffd5ba2c3b0858369185675a290dad6f3`
+- ZIP SHA-256: `9993cd19ce9f8c4689215d98117b3217af262e6939f01019a57383b8086a6d84`
+- [공개 다운로드 검증](validation/release-2.12.1/public-download.json)
