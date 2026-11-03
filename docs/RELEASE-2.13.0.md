@@ -50,3 +50,9 @@
 - [일반 경기 회귀·성능 대조](validation/release-2.13.0/performance.json): 800개 고정 시드를 6회 반복해 전후 각 4,800경기의 스코어·이벤트·개인/참여 선수 기록 해시가 동일합니다. 새로 추가한 판정 체계 버전 표기만 해시에서 제외합니다. 중앙값은 약 2.45초→2.31초였지만 공유 CPU 부하가 달라 개선율로 주장하지 않습니다.
 
 최종 단독 HTML에서도 [구버전 가져오기·원본 선택/숙련 보존·재접속](validation/release-2.13.0/import-ui.json)을 다시 확인했습니다. OVR 130 선수를 CB로 변경한 뒤 실제 반시즌 진행·자동 저장·훈련 미선택 능력치 유지도 UI 검사에 포함합니다. [배포 파일 CRC·내부 HTML 일치·SHA-256](validation/release-2.13.0/artifact.json).
+
+## 배포 확인
+
+[2.13.0 ZIP 다운로드](https://raw.githubusercontent.com/rabbit1245/rabbit1245.github.io/f4f6ff4aa89ece7267f72b239f9f9a7675a8f607/Kball.zip) · 21,596,811바이트.
+
+소스 `e813d44e82c5e5f8d13dc416a65b9ae42f82eced`, 배포 `f4f6ff4aa89ece7267f72b239f9f9a7675a8f607`. 실제 공개 URL HTTP 200, 내려받은 ZIP CRC·버전·내부 HTML 일치 확인. SHA-256 `70c4787abc581f68c38a50150aacbf77369dda5a8e2d9931730b0ff2f1d433b9`. [실제 다운로드 검증](validation/release-2.13.0/public-download.json).

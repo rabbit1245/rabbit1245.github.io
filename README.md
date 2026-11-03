@@ -2,6 +2,8 @@
 
 개별 능력치는 기본 상한 100, 선택한 5개 플레이스타일의 능력치만 120까지 성장합니다. 순수 능력 OVR 최대 120 + 숙련 최대 10으로 종합 130에 도달하며, 포지션별 모든 능력치 비중·실제 행동·기존 저장 호환을 함께 검수했습니다. [설계·산식·전환·검수와 한계](docs/RELEASE-2.13.0.md).
 
+[K볼 2.13.0 다운로드](https://raw.githubusercontent.com/rabbit1245/rabbit1245.github.io/f4f6ff4aa89ece7267f72b239f9f9a7675a8f607/Kball.zip) · ZIP 압축을 풀고 `Kball.html`을 엽니다. 기존 진행은 JSON으로 가져옵니다.
+
 ## K볼 2.12.1 · 모든 능력치의 OVR 반영과 장기 진행 속도
 
 16개 포지션·160개 유형의 3,850개 능력치 비중을 전수 점검해 과도한 핵심/비핵심 격차를 줄였습니다. 경기 계산의 반복 객체 생성과 과거 원장의 중복 전송을 줄여 실제 14시즌 파일의 진행·자동 저장도 검수했습니다. [가중치·성능·보존·검수](docs/RELEASE-2.12.1.md).
@@ -193,7 +195,7 @@ GitHub Pages에는 `dist/`를 배포합니다. 저장소 Settings → Pages의 S
 
 ## 파일로 바로 플레이
 
-[K볼 2.12.1 다운로드](https://github.com/rabbit1245/rabbit1245.github.io/raw/a99c3ecffd5ba2c3b0858369185675a290dad6f3/Kball.zip?download=1)을 내려받아 압축을 풀고 `Kball.html`을 최신 Chrome 또는 Edge로 엽니다. 게임 코드, 선수 명단과 구단 로고가 파일 안에 포함되어 있습니다. 사용자에게 Node.js나 Python 설치는 필요하지 않습니다. 저장 데이터는 브라우저에 보관되므로 파일 이름·위치 또는 브라우저를 바꾸기 전에 JSON으로 내보내세요.
+[K볼 2.13.0 다운로드](https://raw.githubusercontent.com/rabbit1245/rabbit1245.github.io/f4f6ff4aa89ece7267f72b239f9f9a7675a8f607/Kball.zip)을 내려받아 압축을 풀고 `Kball.html`을 최신 Chrome 또는 Edge로 엽니다. 게임 코드, 선수 명단과 구단 로고가 파일 안에 포함되어 있습니다. 사용자에게 Node.js나 Python 설치는 필요하지 않습니다. 저장 데이터는 브라우저에 보관되므로 파일 이름·위치 또는 브라우저를 바꾸기 전에 JSON으로 내보내세요.
 
 개발자가 이 파일을 다시 생성하려면 Node.js와 Python 3가 설치된 환경에서 다음 명령을 사용합니다.
 
