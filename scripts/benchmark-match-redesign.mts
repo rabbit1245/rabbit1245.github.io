@@ -1,0 +1,7 @@
+import {createHash} from 'node:crypto';
+const root=process.env.KBALL_BENCH_ROOT??process.cwd();const {createCareer}=await import(root+'/src/game/engine.ts');const {simulateMatch}=await import(root+'/src/game/match-engine.ts');const {getClub}=await import(root+'/src/game/data.ts');const {getWorldClubPlayers,getClubWorldPower}=await import(root+'/src/game/world.ts');
+const c=createCareer({name:'경기 연산 회귀 검수',nationality:'포르투갈',age:25,height:184,weight:80,foot:'right',position:'CAM',talent:'SSS',style:'엔간체',clubId:'EN1_12',squad:'senior',difficulty:'realistic',seed:'native-runtime-2130',training:[]});
+const f={id:'runtime-paired',round:1,homeId:'EN1_12',awayId:'EN1_13',played:false},opts={home:{...getClub(f.homeId),power:getClubWorldPower(c,f.homeId)},away:{...getClub(f.awayId),power:getClubWorldPower(c,f.awayId)},homePlayers:getWorldClubPlayers(c,f.homeId),awayPlayers:getWorldClubPlayers(c,f.awayId),detailed:false,forceSelection:{from:0,to:90,started:true}};
+for(let i=0;i<80;i++){c.seed='bench-warm-'+i;simulateMatch(c,f,opts);}
+const runs=[];for(let run=0;run<3;run++){const start=performance.now(),hash=createHash('sha256');for(let i=0;i<800;i++){c.seed='bench-measure-'+i;const m=simulateMatch(c,f,opts);hash.update(JSON.stringify({homeGoals:m.homeGoals,awayGoals:m.awayGoals,events:m.events,playerStats:m.playerStats,performers:m.performers.map(({ovrVersion,...p})=>p)}));}runs.push({ms:performance.now()-start,hash:hash.digest('hex')});}
+console.log(JSON.stringify({root,matches:800,trials:runs,medianMs:runs.map(x=>x.ms).sort((a,b)=>a-b)[1]}));

@@ -15,8 +15,8 @@ export const GK_PLAY_SKILLS:PlaySkill[]=[
  ['concentration','스틸마인드','Steel Mind'],['gkDefensiveOrganization','필드마셜','Field Marshal'],
 ].map(([key,name,english])=>({key:key as AttributeKey,name,english}));
 export const playSkillDefinitions=(position:Position)=>position==='GK'?GK_PLAY_SKILLS:FIELD_PLAY_SKILLS;
-export const attributeCap=(p:Pick<Player,'playSkills'|'abilityVersion'>,key:AttributeKey)=>p.abilityVersion===2?120:p.playSkills?.includes(key)?110:100;
-export interface PlaySkillChange {abilityVersion?:2;year:number;round:number;key:AttributeKey;selected:boolean;before:number;after:number;position:Position}
+export const attributeCap=(p:Pick<Player,'playSkills'|'abilityVersion'|'ovrVersion'>,key:AttributeKey)=>p.ovrVersion===3?(p.playSkills?.includes(key)?120:100):p.abilityVersion===2?120:p.playSkills?.includes(key)?110:100;
+export interface PlaySkillChange {abilityVersion?:2;ovrVersion?:3;year:number;round:number;key:AttributeKey;selected:boolean;before:number;after:number;position:Position}
 /** Replay the actual acquisition/removal year, never copy today's skills into old seasons. */
 export function playSkillsForYear(c:Career,year:number):AttributeKey[]{
  const changes=c.systems?.playSkillChanges;

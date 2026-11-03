@@ -219,6 +219,7 @@ export function* careerTextChunks(c:Career):Generator<string>{
   for(const period of h.employment)yield line(`소속 기간: ${period}`);
   yield line(`몸값: ${h.value}`);yield line(`주급: ${h.wage}`);
   yield line(`능력점수: ${h.ovrStart} → ${h.ovrEnd}`);
+  if(c.systems?.abilityRulesUpgrade?.year===h.year)yield line(`능력치 상한·OVR 체계 개편: ${c.systems.abilityRulesUpgrade.ovrBefore} → ${c.systems.abilityRulesUpgrade.ovrAfter} · 기본 상한 100 / 선택 상한 120 / 종합 130 · 실제 성장·노화와 구분`);
   if(c.systems?.ovrUpgrade?.year===h.year)yield line(`OVR 가중치 개편: ${c.systems.ovrUpgrade.ovrBefore} → ${c.systems.ovrUpgrade.ovrAfter} · 능력치 수치 유지 · 실제 성장과 구분`);
   if(c.systems?.abilityUpgrade?.year===h.year)yield line(`능력치 체계 확장: OVR ${c.systems.abilityUpgrade.ovrBefore} → ${c.systems.abilityUpgrade.ovrAfter} · 신규 항목은 도입 시점의 추정 기준값 · 기존 능력치 수치와 과거 기록 보존`);
   for(const change of h.positionChanges)yield line(`포지션 변경: ${change}`);

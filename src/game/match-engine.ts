@@ -34,7 +34,7 @@ const styleFactor=(p:Actor,kind:'shot'|'pass'|'dribble'|'tackle'|'aerial'|'sweep
 
 /** Stable actor shape avoids spreading differently shaped roster objects in every fixture. */
 function actorFor(p:MatchParticipant,teamId:string,from:number,to:number,started:boolean,user:Career['player']):Actor{
- return {id:p.id,name:p.name,clubId:p.clubId,position:p.position,ovr:p.ovr,attributes:p.attributes,nationality:p.nationality,abilityVersion:p.abilityVersion,playSkills:p.playSkills,skillMastery:p.skillMastery,teamId,stats:emptyStats(),rating:0,minutes:to-from,started,from,to,user:p.id===user.id,style:p.id===user.id?user.style:'',creation:0,pressure:undefined,captain:undefined};
+ return {id:p.id,name:p.name,clubId:p.clubId,position:p.position,ovr:p.ovr,attributes:p.attributes,nationality:p.nationality,abilityVersion:p.abilityVersion,ovrVersion:p.ovrVersion,playSkills:p.playSkills,skillMastery:p.skillMastery,teamId,stats:emptyStats(),rating:0,minutes:to-from,started,from,to,user:p.id===user.id,style:p.id===user.id?user.style:'',creation:0,pressure:undefined,captain:undefined};
 }
 
 function sourcePlayers(career:Career,club:Club,provided?:MatchParticipant[]):MatchParticipant[] {
@@ -70,7 +70,7 @@ function makeTeam(career:Career,club:Club,provided:MatchParticipant[]|undefined,
     if(best){chosen.push(best);used.add(best.id);}
   }
   const includesUser=userTeam===club.id&&selection.to>selection.from;
-  const userParticipant:MatchParticipant={abilityVersion:user.abilityVersion,playSkills:user.playSkills,skillMastery:user.skillMastery,id:user.id,name:user.name,clubId:user.clubId,position:user.position,ovr:user.ovr,attributes:{...user.attributes},nationality:user.nationality};
+  const userParticipant:MatchParticipant={abilityVersion:user.abilityVersion,ovrVersion:user.ovrVersion,playSkills:user.playSkills,skillMastery:user.skillMastery,id:user.id,name:user.name,clubId:user.clubId,position:user.position,ovr:user.ovr,attributes:{...user.attributes},nationality:user.nationality};
   const closestIndex=()=>chosen.reduce((best,p,i)=>{
     if(user.position==='GK')return p.position==='GK'?i:best;
     if(p.position==='GK')return best;
@@ -429,7 +429,7 @@ export function simulateMatch(career:Career,fixture:Fixture,options:MatchOptions
   const stamina=ability(p,'stamina');
   const minutes=userActor?.minutes??0;
   events.sort((a,b)=>a.minute-b.minute||Number(a.id.slice(a.id.lastIndexOf('e')+1))-Number(b.id.slice(b.id.lastIndexOf('e')+1)));
-  const performers:MatchPerformance[]=allActors.map(actor=>({abilityVersion:actor.abilityVersion,playSkills:actor.playSkills,skillMastery:actor.skillMastery,id:actor.id,name:actor.name,clubId:actor.clubId,teamId:actor.teamId,position:actor.position,ovr:actor.ovr,nationality:actor.nationality,attributes:actor.attributes,stats:actor.stats,rating:actor.rating,minutes:actor.minutes,started:actor.started,...(actor.captain?{captain:true}:{})}));
+  const performers:MatchPerformance[]=allActors.map(actor=>({abilityVersion:actor.abilityVersion,ovrVersion:actor.ovrVersion,playSkills:actor.playSkills,skillMastery:actor.skillMastery,id:actor.id,name:actor.name,clubId:actor.clubId,teamId:actor.teamId,position:actor.position,ovr:actor.ovr,nationality:actor.nationality,attributes:actor.attributes,stats:actor.stats,rating:actor.rating,minutes:actor.minutes,started:actor.started,...(actor.captain?{captain:true}:{})}));
   return {
     id:`match:${career.season.year}:${fixture.id}`,fixtureId:fixture.id,round:fixture.round,seasonYear:career.season.year,
     homeId:home.id,awayId:away.id,homeGoals:scores[0],awayGoals:scores[1],homeName:home.name,awayName:away.name,

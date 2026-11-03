@@ -1,5 +1,5 @@
 import {playingAbility} from './attributes';
-import {derivedAttribute,specialtyAbility} from './ability-expansion';
+import {derivedAttribute,specialtyAbility,matchExecutionBonus} from './ability-expansion';
 import {pressureAbility} from './ability-contests';
 import {clamp,integer,seededRandom} from './math';
 import type {MatchPerformance,MatchParticipant} from './revision-types';
@@ -27,6 +27,7 @@ const active=(team:ActionTeam,minute:number)=>{
 };
 const zonePools=(players:ActionActor[])=>{let pools=byZone.get(players);if(!pools){pools=[0,1,2].map(z=>players.filter(p=>zone(p.position)===z));byZone.set(players,pools);}return pools;};
 const abilityValues=new WeakMap<MatchParticipant,Partial<Record<AttributeKey,number>>>();
+const executionBonuses=new WeakMap<MatchParticipant,number>();
 const fieldPlayers=new WeakMap<ActionActor[],ActionActor[]>();
 const outfield=(players:ActionActor[])=>{let rows=fieldPlayers.get(players);if(!rows){rows=players.filter(p=>p.position!=='GK');fieldPlayers.set(players,rows);}return rows;};
 /** Actor abilities are immutable inside one match; pressure is applied at use. */
@@ -35,7 +36,7 @@ export const actionAbility=(p:MatchParticipant&{pressure?:number;style?:string},
  let values=abilityValues.get(p);if(!values){values={};abilityValues.set(p,values);}
  let value=values[key];if(value===undefined){
   const raw=p.attributes[key]??(['finishing','offTheBall','pressing','tackling','skillMoves'].includes(key)?derivedAttribute(p.attributes,key):undefined);
-  value=specialtyAbility(p,key,raw!==undefined?clamp(raw,1,120):clamp(p.ovr>100?playingAbility({...p,attributes:p.attributes,style:p.style??'',ovr:undefined}):p.ovr,1,120));values[key]=value;
+  value=specialtyAbility(p,key,raw!==undefined?clamp(raw,p.ovrVersion===3?0:1,120):clamp(p.ovr>100?playingAbility({...p,attributes:p.attributes,style:p.style??'',ovr:undefined}):p.ovr,1,120));let bonus=executionBonuses.get(p);if(bonus===undefined){bonus=matchExecutionBonus({...p,attributes:p.attributes});executionBonuses.set(p,bonus);}value+=Math.max(0,value-80)*bonus;values[key]=value;
  }
  return p.pressure?pressureAbility(value,key,p.pressure):value;
 };

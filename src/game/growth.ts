@@ -40,7 +40,7 @@ function apply(career:Career,key:AttributeKey,amount:number,cause:GrowthCause):v
   const row=ledger.byCause[cause]??(ledger.byCause[cause]={});row[key]=round((row[key]??0)+change);
 }
 /** Explicit removal ends excess mastery; its former value remains in the skill-change ledger. */
-export function removeSkillMastery(career:Career,key:AttributeKey):void{const value=career.player.attributes[key]??0;if(career.player.abilityVersion!==2&&value>100)apply(career,key,100-value,'skillChange');}
+export function removeSkillMastery(career:Career,key:AttributeKey):void{const value=career.player.attributes[key]??0;if((career.player.abilityVersion!==2||career.player.ovrVersion===3)&&value>100)apply(career,key,100-value,'skillChange');}
 function growthCeiling(c:Career,key:AttributeKey):number{
  const p=c.player,ordinary=p.playSkills?.length?overall({...p,playSkills:[]}):p.ovr,normal=ordinary>=p.potential?0:clamp((p.potential-ordinary+4)/12,.025,1.15);
  if(!p.playSkills?.includes(key))return normal;

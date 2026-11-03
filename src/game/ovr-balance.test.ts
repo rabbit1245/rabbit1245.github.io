@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {gunzipSync} from 'node:zlib';
-import {attributeWeights,expanded2120Weights,expanded2120Overall,overall,FIELD_ATTRIBUTES,GK_ATTRIBUTES,POSITION_LABELS,PLAY_STYLES,attributeImportance} from './attributes';
+import {attributeWeights,expanded2120Weights,expanded2120Overall,overall,overallParts,FIELD_ATTRIBUTES,GK_ATTRIBUTES,POSITION_LABELS,PLAY_STYLES,attributeImportance} from './attributes';
 import {upgradeAbilityModel,createCareer,advanceCareer} from './engine';
 import {seasonOVRChange} from './ability-expansion';
 import {marketDeclineEvidence} from './market-value';
@@ -30,19 +30,19 @@ test('raising any field ability by fifty adds at least two displayed OVR; strike
 });
 test('uniform global ratings, five-skill earned ceiling and importance order remain coherent across every style',()=>{
  for(const {position,style}of profiles){const keys=position==='GK'?GK_ATTRIBUTES:FIELD_ATTRIBUTES;
-  for(const level of [50,75,90,100,110,120])assert.equal(overall({position,style,attributes:uniform(position,level)}),level);
-  const playSkills=keys.slice(0,5),p={position,style,attributes:uniform(position,120),playSkills};assert.equal(overall(p),120);assert.equal(overall({...p,skillMastery:Object.fromEntries(playSkills.map(k=>[k,20]))}),130);
+  for(const level of [0,50,75,90,100])assert.equal(overall({position,style,attributes:uniform(position,level)}),level);
+  const playSkills=keys.slice(0,5),p={position,style,attributes:{...uniform(position,100),...Object.fromEntries(playSkills.map(k=>[k,120]))},playSkills};assert.equal(overall(p),120);assert.equal(overall({...p,skillMastery:Object.fromEntries(playSkills.map(k=>[k,20]))}),130);
   const w=attributeWeights(position,style),arrows=attributeImportance(position,style),sorted=Object.entries(w).sort((a,b)=>a[1]!-b[1]!);for(let i=1;i<sorted.length;i++)assert.ok(arrows[sorted[i][0] as AttributeKey]!>=arrows[sorted[i-1][0] as AttributeKey]!);
  }
 });
 test('real 2.12.0 save validates before a one-time reweight, preserving raw abilities, mastery and all existing records',async()=>{
  const old=await verifySaveText(gunzipSync(await readFile(new URL('../../tests/fixtures/kball-2120-midseason.json.gz',import.meta.url))).toString('utf8'));
  assert.equal(old.player.ovrVersion,undefined);assert.equal(old.player.ovr,expanded2120Overall(old.player));const prior=JSON.stringify(old),next=upgradeAbilityModel(old);
- assert.equal(JSON.stringify(old),prior);assert.equal(next.player.ovrVersion,2);assert.equal(next.player.ovr,overall(next.player));assert.deepEqual(next.player.attributes,old.player.attributes);assert.deepEqual(next.player.skillMastery,old.player.skillMastery);assert.deepEqual(next.player.playSkills,old.player.playSkills);
+ assert.equal(JSON.stringify(old),prior);assert.equal(next.player.ovrVersion,3);assert.equal(next.player.ovr,overall(next.player));assert.deepEqual(next.player.attributes,old.player.attributes);assert.deepEqual(next.player.skillMastery,old.player.skillMastery);assert.deepEqual(next.player.playSkills,old.player.playSkills);
  for(const key of ['history','awards','transfers'] as const)assert.deepEqual(next[key],old[key]);assert.deepEqual(next.season.matches,old.season.matches);assert.deepEqual(next.season.playerStats,old.season.playerStats);assert.deepEqual(next.systems!.economics,old.systems!.economics);
  assert.equal(next.season.ovrStart,old.season.ovrStart);assert.equal(seasonOVRChange(next),old.player.ovr-old.season.ovrStart);assert.equal(upgradeAbilityModel(next),next);validateCareer(next);
  const resumed=advanceCareer(next,1);validateCareer(resumed);const loaded=await verifySaveText(await exportCareer(resumed));assert.deepEqual(loaded.player,resumed.player);
- const bad=structuredClone(loaded);(bad.player as any).ovrVersion=3;assert.throws(()=>validateCareer(bad),/버전/);
+ const bad=structuredClone(loaded);(bad.player as any).ovrVersion=4;assert.throws(()=>validateCareer(bad),/버전/);
 });
 test('model conversion alone never creates long-term ability-decline pressure or changes a signed contract',()=>{
  const c=createCareer({name:'점수 척도 검수',nationality:'대한민국',age:26,height:180,weight:78,foot:'right',position:'ST',talent:'SSS',style:'포처',clubId:'EN1_12',squad:'senior',difficulty:'realistic',seed:'weights-market-2121',training:[]});

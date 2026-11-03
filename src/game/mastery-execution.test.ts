@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createCareer} from './engine';
-import {FIELD_ATTRIBUTES,GK_ATTRIBUTES,overall,playingAbility,PLAY_STYLES} from './attributes';
+import {FIELD_ATTRIBUTES,GK_ATTRIBUTES,overall,overallParts,playingAbility,PLAY_STYLES} from './attributes';
 import {simulateMatch} from './match-engine';
 import {getClub} from './data';
 import {emptyStats,addStats} from './math';
@@ -12,7 +12,7 @@ const base=createCareer({name:'기량 연동 검수',nationality:'일본',age:27
 function profile(position:Position='ST',mental=false):Career{
  const attributes=Object.fromEntries((position==='GK'?GK_ATTRIBUTES:FIELD_ATTRIBUTES).map(k=>[k,mental?95:90]));
  const skills:AttributeKey[]=mental?['positioning','anticipation','decisions','composure','vision']:[];
- for(const key of skills)attributes[key]=120;if(mental){attributes.concentration=120;attributes.teamwork=120;attributes.speed=65;attributes.dribbling=65;attributes.skillMoves=65;attributes.agility=65;attributes.strength=65;attributes.shooting=90;}
+ for(const key of skills)attributes[key]=120;if(mental){attributes.concentration=100;attributes.teamwork=100;attributes.speed=65;attributes.dribbling=65;attributes.skillMoves=65;attributes.agility=65;attributes.strength=65;attributes.shooting=90;}
  const player={...base.player,position,style:PLAY_STYLES[position][0],attributes,playSkills:skills,skillMastery:Object.fromEntries(skills.map(k=>[k,20])),fitness:100,form:75};player.ovr=overall(player);
  return {...base,player,managerTrust:70,systems:{...base.systems!,personality:{leadership:5,stardom:5,fairPlay:5,clutch:5,winning:5}}};
 }
@@ -26,7 +26,7 @@ function game(c:Career,seed:number,level=85,stage?:string){
 
 test('earned mental mastery stays on the selection scale while physical and technical actions retain their real values',()=>{
  const c=profile('ST',true),before=JSON.stringify(c.player.attributes);
- assert.ok(c.player.ovr>=100);assert.ok(playingAbility({...c.player,ovr:undefined})<c.player.ovr,'actual earned specialty adds at most ten to the raw average');
+ assert.ok(c.player.ovr>=100);assert.equal(playingAbility({...c.player,ovr:undefined}),overallParts(c.player).total,'selection and action execution share one earned scale');
  assert.equal(playingAbility(c.player),c.player.ovr);assert.equal(c.player.attributes.speed,65);assert.equal(c.player.attributes.shooting,90);assert.equal(JSON.stringify(c.player.attributes),before);
  assert.equal(cognitiveOpportunity(90,65,65),0,'ordinary lower-division skills get no extra cognitive multiplier');
  const at100={...c.player,attributes:{...c.player.attributes}};for(const key of at100.playSkills??[])at100.attributes[key]=100;at100.ovr=overall(at100);

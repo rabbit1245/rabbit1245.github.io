@@ -1,0 +1,145 @@
+TAP version 13
+# Subtest: 100→50 sustained for three years reprices new wages and fees at any age, while the signed contract stays fixed
+ok 1 - 100→50 sustained for three years reprices new wages and fees at any age, while the signed contract stays fixed
+  ---
+  duration_ms: 1985.671641
+  ...
+# Subtest: retained class after a quiet season keeps salary support; recovery removes sustained decline pressure
+ok 2 - retained class after a quiet season keeps salary support; recovery removes sustained decline pressure
+  ---
+  duration_ms: 679.650159
+  ...
+# Subtest: repeated same-point revaluations and offer refreshes do not change quotes, signed wages or past records
+ok 3 - repeated same-point revaluations and offer refreshes do not change quotes, signed wages or past records
+  ---
+  duration_ms: 1506.38675
+  ...
+# Subtest: established personal fans follow a high-star player to smaller clubs, with a finite common world market
+ok 4 - established personal fans follow a high-star player to smaller clubs, with a finite common world market
+  ---
+  duration_ms: 5777.603926
+  ...
+# Subtest: stardom increases portable demand; an unknown high-star name does not inherit a legend fanbase
+ok 5 - stardom increases portable demand; an unknown high-star name does not inherit a legend fanbase
+  ---
+  duration_ms: 3422.666209
+  ...
+# Subtest: one fanbase is split across midseason clubs instead of duplicated, and both ledgers reconcile
+ok 6 - one fanbase is split across midseason clubs instead of duplicated, and both ledgers reconcile
+  ---
+  duration_ms: 1578.437389
+  ...
+# Subtest: old sales stay immutable and save-compatible; new optional fan accounting survives JSON and rejects tampering
+ok 7 - old sales stay immutable and save-compatible; new optional fan accounting survives JSON and rejects tampering
+  ---
+  duration_ms: 2034.200594
+  ...
+# Subtest: FA international performers survive archival, autosave, reload and JSON without relaxing team validation
+ok 8 - FA international performers survive archival, autosave, reload and JSON without relaxing team validation
+  ---
+  duration_ms: 20170.759416
+  ...
+# Subtest: actual ability loss and poor form still permit short contracts; voluntary FA does not create a guaranteed renewal
+ok 9 - actual ability loss and poor form still permit short contracts; voluntary FA does not create a guaranteed renewal
+  ---
+  duration_ms: 762.379938
+  ...
+# Subtest: opening legacy proposals refreshes duration once without touching archived records or altering signed contracts
+ok 10 - opening legacy proposals refreshes duration once without touching archived records or altering signed contracts
+  ---
+  duration_ms: 37418.851988
+  ...
+# Subtest: veterans who retain first-team ability and performance receive multi-year offers
+ok 11 - veterans who retain first-team ability and performance receive multi-year offers
+  ---
+  duration_ms: 1252.194464
+  ...
+# Subtest: expiry keeps natural FA status and offers the former club as a selectable return, not forced renewal
+ok 12 - expiry keeps natural FA status and offers the former club as a selectable return, not forced renewal
+  ---
+  duration_ms: 72749.320592
+  ...
+# Subtest: all 160 profiles bound every attribute contribution, preserve specialization and normalize to one
+ok 13 - all 160 profiles bound every attribute contribution, preserve specialization and normalize to one
+  ---
+  duration_ms: 38.591817
+  ...
+# Subtest: raising any field ability by fifty adds at least two displayed OVR; striker stamina adds three
+ok 14 - raising any field ability by fifty adds at least two displayed OVR; striker stamina adds three
+  ---
+  duration_ms: 113.019315
+  ...
+# Subtest: uniform global ratings, five-skill earned ceiling and importance order remain coherent across every style
+ok 15 - uniform global ratings, five-skill earned ceiling and importance order remain coherent across every style
+  ---
+  duration_ms: 33.416668
+  ...
+# Subtest: real 2.12.0 save validates before a one-time reweight, preserving raw abilities, mastery and all existing records
+ok 16 - real 2.12.0 save validates before a one-time reweight, preserving raw abilities, mastery and all existing records
+  ---
+  duration_ms: 15818.994893
+  ...
+# Subtest: model conversion alone never creates long-term ability-decline pressure or changes a signed contract
+ok 17 - model conversion alone never creates long-term ability-decline pressure or changes a signed contract
+  ---
+  duration_ms: 854.934598
+  ...
+# Subtest: every position/style reaches 120 ability and 130 total with any five trained specialties, including its lowest weights
+ok 18 - every position/style reaches 120 ability and 130 total with any five trained specialties, including its lowest weights
+  ---
+  duration_ms: 141.254823
+  ...
+# Subtest: all 3850 weights respond monotonically both below 100 and within actual selected 100–120 growth
+ok 19 - all 3850 weights respond monotonically both below 100 and within actual selected 100–120 growth
+  ---
+  duration_ms: 8015.425133
+  ...
+# Subtest: caps, deletion under locks, manual aging, empty training, saving and retirement use the new rules
+ok 20 - caps, deletion under locks, manual aging, empty training, saving and retirement use the new rules
+  ---
+  duration_ms: 10318.213772
+  ...
+# Subtest: actual 2.12.1 raw-120 save authenticates, migrates once, archives originals and retains all events and signed finances
+ok 21 - actual 2.12.1 raw-120 save authenticates, migrates once, archives originals and retains all events and signed finances
+  ---
+  duration_ms: 1760.614267
+  ...
+# Subtest: position change preserves every raw attribute and learned specialty while recomposing OVR and action execution
+ok 22 - position change preserves every raw attribute and learned specialty while recomposing OVR and action execution
+  ---
+  duration_ms: 802.926388
+  ...
+# Subtest: actual action qualities retain specialty differences and have the same weighted mean as unrounded OVR
+ok 23 - actual action qualities retain specialty differences and have the same weighted mean as unrounded OVR
+  ---
+  duration_ms: 6144.696529
+  ...
+# Subtest: the defined zero baseline is saveable and an earned 130 is not an automatic match victory
+ok 24 - the defined zero baseline is saveable and an earned 130 is not an automatic match victory
+  ---
+  duration_ms: 1658.121641
+  ...
+# Subtest: legacy all-120 basics are archived and normalized without false market decline or growth
+ok 25 - legacy all-120 basics are archived and normalized without false market decline or growth
+  ---
+  duration_ms: 946.671149
+  ...
+# Subtest: valid legacy growth from a low baseline remains balanced after the basic cap is reduced
+ok 26 - valid legacy growth from a low baseline remains balanced after the basic cap is reduced
+  ---
+  duration_ms: 1554.440233
+  ...
+# Subtest: historical unselected abilities never inherit specialties selected in later years
+ok 27 - historical unselected abilities never inherit specialties selected in later years
+  ---
+  duration_ms: 239.41466
+  ...
+1..27
+# tests 27
+# suites 0
+# pass 27
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 133252.156449

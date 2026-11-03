@@ -1,0 +1,65 @@
+TAP version 13
+# Subtest: earned mental mastery stays on the selection scale while physical and technical actions retain their real values
+ok 1 - earned mental mastery stays on the selection scale while physical and technical actions retain their real values
+  ---
+  duration_ms: 1.171965
+  ...
+# Subtest: identical retained ability and condition produce identical club decisions at 27 and 40, with elite second-division starts
+ok 2 - identical retained ability and condition produce identical club decisions at 27 and 40, with elite second-division starts
+  ---
+  duration_ms: 298.401998
+  ...
+# Subtest: exceptional reading creates real space and supply without turning weak dribbling into elite dribbling
+ok 3 - exceptional reading creates real space and supply without turning weak dribbling into elite dribbling
+  ---
+  duration_ms: 588.852482
+  ...
+# Subtest: clutch reaches passing, defending and keeping in finals, with real contributions in some defeats and unchanged ordinary games
+ok 4 - clutch reaches passing, defending and keeping in finals, with real contributions in some defeats and unchanged ordinary games
+  ---
+  duration_ms: 1033.135368
+  ...
+# Subtest: every position/style reaches 120 ability and 130 total with any five trained specialties, including its lowest weights
+ok 5 - every position/style reaches 120 ability and 130 total with any five trained specialties, including its lowest weights
+  ---
+  duration_ms: 74.72292
+  ...
+# Subtest: all 3850 weights respond monotonically both below 100 and within actual selected 100–120 growth
+ok 6 - all 3850 weights respond monotonically both below 100 and within actual selected 100–120 growth
+  ---
+  duration_ms: 3814.726094
+  ...
+# Subtest: caps, deletion under locks, manual aging, empty training, saving and retirement use the new rules
+ok 7 - caps, deletion under locks, manual aging, empty training, saving and retirement use the new rules
+  ---
+  duration_ms: 4488.254368
+  ...
+# Subtest: actual 2.12.1 raw-120 save authenticates, migrates once, archives originals and retains all events and signed finances
+ok 8 - actual 2.12.1 raw-120 save authenticates, migrates once, archives originals and retains all events and signed finances
+  ---
+  duration_ms: 934.74126
+  ...
+# Subtest: position change preserves every raw attribute and learned specialty while recomposing OVR and action execution
+ok 9 - position change preserves every raw attribute and learned specialty while recomposing OVR and action execution
+  ---
+  duration_ms: 404.577055
+  ...
+# Subtest: actual action qualities retain specialty differences and have the same weighted mean as unrounded OVR
+ok 10 - actual action qualities retain specialty differences and have the same weighted mean as unrounded OVR
+  ---
+  duration_ms: 3983.364911
+  ...
+# Subtest: the defined zero baseline is saveable and an earned 130 is not an automatic match victory
+ok 11 - the defined zero baseline is saveable and an earned 130 is not an automatic match victory
+  ---
+  duration_ms: 1323.435386
+  ...
+1..11
+# tests 11
+# suites 0
+# pass 11
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 15654.391115

@@ -1,5 +1,5 @@
 import { getClub,getLeague } from './data';
-import {POSITION_LABELS,PLAY_STYLES} from './attributes';
+import {POSITION_LABELS,PLAY_STYLES,ATTRIBUTE_LABELS} from './attributes';
 import type { Career,SeasonSummary } from './types';
 import type { ClubSeasonDevelopment } from './revision-types';
 import {PERSONALITY_KEYS,personalityMinimum} from './personality';
@@ -8,7 +8,7 @@ function check(ok:unknown,label:string):asserts ok{if(!ok)throw new Error(`저�
 function num(v:unknown,label:string,min=0,max=1e15,int=false){check(typeof v==='number'&&Number.isFinite(v)&&v>=min&&v<=max&&(!int||Number.isInteger(v)),label);return v;}
 function starFunding(r:ClubSeasonDevelopment):number{
  const s=r.star;
- if(s){check(typeof s.playerId==='string'&&s.playerId.length>0&&typeof s.name==='string'&&s.position in POSITION_LABELS&&typeof s.retained==='boolean','핵심 선수 근거');num(s.ovr,'핵심 실력',1,130);num(s.apps,'핵심 출전',8,500,true);num(s.minutes,'핵심 시간',720,s.apps*90,true);num(s.rating,'핵심 평점',0,10);num(s.influence,'핵심 기여도',0,1);}
+ if(s){check(typeof s.playerId==='string'&&s.playerId.length>0&&typeof s.name==='string'&&s.position in POSITION_LABELS&&typeof s.retained==='boolean','핵심 선수 근거');num(s.ovr,'핵심 실력',0,130);num(s.apps,'핵심 출전',8,500,true);num(s.minutes,'핵심 시간',720,s.apps*90,true);num(s.rating,'핵심 평점',0,10);num(s.influence,'핵심 기여도',0,1);}
  if(r.starBudget===undefined)return 0;
  num(r.starBudget,'핵심 선수 예산');check(!!s?.retained,'핵심 선수 예산 근거');num(r.revenueBasis,'핵심 예산 수입 근거');
  check(r.starBudget<=Math.round(r.revenueBasis!*.07*s!.influence)+1,'핵심 선수 예산 한도');return r.starBudget;
@@ -18,15 +18,16 @@ function details(h:SeasonSummary){const d=h.details;if(!d)return;check(d.version
 /** Optional extension fields do not initialize or rewrite legacy saves while loading. */
 export function validateCareerExtensions(c:Career){
  validateCommercial(c);
- if(c.systems?.ovrUpgrade!==undefined){const u=c.systems.ovrUpgrade;check(u.version===2&&c.player.ovrVersion===2&&(u.priorAbilityVersion===undefined||u.priorAbilityVersion===2),'OVR 가중치 개편 버전');num(u.year,'OVR 개편 연도',1900,c.season.year,true);num(u.round,'OVR 개편 라운드',0,150,true);num(u.ovrBefore,'개편 전 OVR',1,130);num(u.ovrAfter,'개편 후 OVR',1,130);}
- if(c.season.ovrVersion!==undefined)check(c.season.ovrVersion===2,'시즌 OVR 버전');
- if(c.systems?.abilityUpgrade!==undefined){const u=c.systems.abilityUpgrade;check(u&&u.version===2&&c.player.abilityVersion===2,'능력치 확장 버전');num(u.year,'능력치 도입 연도',1900,c.season.year,true);num(u.round,'능력치 도입 시점',0,150,true);num(u.ovrBefore,'도입 전 OVR',1,130);num(u.ovrAfter,'도입 후 OVR',1,130);check(u.added&&typeof u.added==='object','도입 능력치');for(const [key,value]of Object.entries(u.added)){check(['finishing','offTheBall','pressing','tackling','skillMoves'].includes(key),'도입 항목');num(value,'도입 기준값',0,120);}}
+ if(c.systems?.ovrUpgrade!==undefined){const u=c.systems.ovrUpgrade;check(u.version===2&&[2,3].includes(c.player.ovrVersion??0)&&(u.priorAbilityVersion===undefined||u.priorAbilityVersion===2),'OVR 가중치 개편 버전');num(u.year,'OVR 개편 연도',1900,c.season.year,true);num(u.round,'OVR 개편 라운드',0,150,true);num(u.ovrBefore,'개편 전 OVR',0,130);num(u.ovrAfter,'개편 후 OVR',0,130);}
+ if(c.season.ovrVersion!==undefined)check([2,3].includes(c.season.ovrVersion),'시즌 OVR 버전');
+ if(c.systems?.abilityRulesUpgrade!==undefined){const u=c.systems.abilityRulesUpgrade;check(u.version===3&&c.player.ovrVersion===3&&(u.priorOvrVersion===undefined||u.priorOvrVersion===2),'능력치 상한 개편 버전');num(u.year,'상한 개편 연도',1900,c.season.year,true);num(u.round,'상한 개편 라운드',0,150,true);num(u.ovrBefore,'상한 개편 전 OVR',0,130);num(u.ovrAfter,'상한 개편 후 OVR',0,130);if(u.playSkillsBefore!==undefined)check(Array.isArray(u.playSkillsBefore)&&u.playSkillsBefore.length<=5&&new Set(u.playSkillsBefore).size===u.playSkillsBefore.length&&u.playSkillsBefore.every(k=>Object.hasOwn(ATTRIBUTE_LABELS,k)),'개편 전 선택 보존');if(u.skillMasteryBefore!==undefined){check(u.skillMasteryBefore&&typeof u.skillMasteryBefore==='object'&&!Array.isArray(u.skillMasteryBefore),'개편 전 숙련 보존');for(const [k,v]of Object.entries(u.skillMasteryBefore)){check(u.playSkillsBefore?.includes(k as keyof typeof ATTRIBUTE_LABELS),'개편 전 숙련 대상');num(v,'개편 전 숙련',0,20);}}for(const attrs of [u.attributesBefore,u.attributeStartBefore,...(u.baselineBefore?[u.baselineBefore]:[])]){check(attrs&&typeof attrs==='object'&&!Array.isArray(attrs)&&Object.keys(attrs).length<=33,'개편 전 능력치 보존');for(const [key,value]of Object.entries(attrs)){check(Object.hasOwn(ATTRIBUTE_LABELS,key),'보존 능력치 항목');num(value,'개편 전 보존 수치',0,120);}}}
+ if(c.systems?.abilityUpgrade!==undefined){const u=c.systems.abilityUpgrade;check(u&&u.version===2&&c.player.abilityVersion===2,'능력치 확장 버전');num(u.year,'능력치 도입 연도',1900,c.season.year,true);num(u.round,'능력치 도입 시점',0,150,true);num(u.ovrBefore,'도입 전 OVR',0,130);num(u.ovrAfter,'도입 후 OVR',0,130);check(u.added&&typeof u.added==='object','도입 능력치');for(const [key,value]of Object.entries(u.added)){check(['finishing','offTheBall','pressing','tackling','skillMoves'].includes(key),'도입 항목');num(value,'도입 기준값',0,120);}}
 
  if(c.systems?.positionChanges!==undefined){
   const rows=c.systems.positionChanges;check(Array.isArray(rows)&&rows.length<=10000,'포지션 변경 이력');let prior=1900;
   for(const r of rows){num(r.year,'포지션 변경 연도',prior,c.season.year,true);prior=r.year;num(r.round,'포지션 변경 시점',0,150,true);
    check(Object.hasOwn(POSITION_LABELS,r.from)&&Object.hasOwn(POSITION_LABELS,r.to),'변경 포지션');check(typeof r.fromStyle==='string'&&r.fromStyle.length>0&&r.fromStyle.length<=500&&PLAY_STYLES[r.to].includes(r.toStyle),'변경 선수 유형');
-   num(r.ovrBefore,'변경 전 종합 능력',1,130);num(r.ovrAfter,'변경 후 종합 능력',1,130);check(typeof r.afterSeason==='boolean'&&typeof r.date==='string'&&Number.isFinite(Date.parse(r.date)),'포지션 변경 날짜');
+   num(r.ovrBefore,'변경 전 종합 능력',0,130);num(r.ovrAfter,'변경 후 종합 능력',0,130);check(typeof r.afterSeason==='boolean'&&typeof r.date==='string'&&Number.isFinite(Date.parse(r.date)),'포지션 변경 날짜');
   }
  }
  const retiredNumbers=c.awards.filter(a=>a.category==='club-legacy');check(new Set(retiredNumbers.map(a=>a.clubId)).size===retiredNumbers.length,'동일 구단 영구결번 중복');

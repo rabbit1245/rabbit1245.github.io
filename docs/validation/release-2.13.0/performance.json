@@ -1,0 +1,92 @@
+{
+  "matchesPerTrial": 800,
+  "trialsPerVersion": 6,
+  "hashScope": "scores, events, playerStats and all performers; new performer.ovrVersion metadata excluded",
+  "allHashesIdentical": true,
+  "hash": "957ab5958ee1a023f8bbf63197d9a252354685e1e23fead1a94d9ac23299fea7",
+  "beforeMedianMs": 2451.169145,
+  "afterMedianMs": 2314.9394165,
+  "limits": "Shared CPU load changed during the run. These timings are a regression smoke check, not evidence of a speedup. Same valid non-specialized CAM profile, actual 800 paired seeds, unchanged below-100 action execution.",
+  "runs": {
+    "before": [
+      {
+        "root": "/workspace/kball-2130/baseline",
+        "matches": 800,
+        "trials": [
+          {
+            "ms": 2656.4017110000004,
+            "hash": "957ab5958ee1a023f8bbf63197d9a252354685e1e23fead1a94d9ac23299fea7"
+          },
+          {
+            "ms": 2373.3598500000003,
+            "hash": "957ab5958ee1a023f8bbf63197d9a252354685e1e23fead1a94d9ac23299fea7"
+          },
+          {
+            "ms": 2294.058261,
+            "hash": "957ab5958ee1a023f8bbf63197d9a252354685e1e23fead1a94d9ac23299fea7"
+          }
+        ],
+        "medianMs": 2373.3598500000003
+      },
+      {
+        "root": "/workspace/kball-2130/baseline",
+        "matches": 800,
+        "trials": [
+          {
+            "ms": 2759.312693,
+            "hash": "957ab5958ee1a023f8bbf63197d9a252354685e1e23fead1a94d9ac23299fea7"
+          },
+          {
+            "ms": 2510.5131250000004,
+            "hash": "957ab5958ee1a023f8bbf63197d9a252354685e1e23fead1a94d9ac23299fea7"
+          },
+          {
+            "ms": 2391.8251649999993,
+            "hash": "957ab5958ee1a023f8bbf63197d9a252354685e1e23fead1a94d9ac23299fea7"
+          }
+        ],
+        "medianMs": 2510.5131250000004
+      }
+    ],
+    "after": [
+      {
+        "root": "/workspace/rabbit1245.github.io",
+        "matches": 800,
+        "trials": [
+          {
+            "ms": 2734.222898,
+            "hash": "957ab5958ee1a023f8bbf63197d9a252354685e1e23fead1a94d9ac23299fea7"
+          },
+          {
+            "ms": 2449.8898719999997,
+            "hash": "957ab5958ee1a023f8bbf63197d9a252354685e1e23fead1a94d9ac23299fea7"
+          },
+          {
+            "ms": 2429.7283559999996,
+            "hash": "957ab5958ee1a023f8bbf63197d9a252354685e1e23fead1a94d9ac23299fea7"
+          }
+        ],
+        "medianMs": 2449.8898719999997
+      },
+      {
+        "root": "/workspace/rabbit1245.github.io",
+        "matches": 800,
+        "trials": [
+          {
+            "ms": 2200.150477,
+            "hash": "957ab5958ee1a023f8bbf63197d9a252354685e1e23fead1a94d9ac23299fea7"
+          },
+          {
+            "ms": 1907.7564800000005,
+            "hash": "957ab5958ee1a023f8bbf63197d9a252354685e1e23fead1a94d9ac23299fea7"
+          },
+          {
+            "ms": 1706.506907,
+            "hash": "957ab5958ee1a023f8bbf63197d9a252354685e1e23fead1a94d9ac23299fea7"
+          }
+        ],
+        "medianMs": 1907.7564800000005
+      }
+    ]
+  }
+}

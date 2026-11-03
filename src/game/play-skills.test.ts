@@ -47,10 +47,10 @@ test('locks, explicit manual aging, deletion above 100 and a complete export/imp
  assert.equal(c.player.attributes.shooting,120);assert.ok(c.player.ovr>c.season.ovrStart);
  c=setAllAttributeLocks(c,true);const locked=c.player.attributes.shooting;trainRound(c);assert.equal(c.player.attributes.shooting,locked);
  c=manuallyAge(c,1,'shooting');assert.equal(c.player.attributes.shooting,119);assert.ok(c.player.playSkills?.includes('shooting'));
- c=setPlaySkill(c,'shooting',false);assert.equal(c.player.attributes.shooting,119);assert.equal(c.systems!.playSkillChanges!.at(-1)!.before,119);
+ c=setPlaySkill(c,'shooting',false);assert.equal(c.player.attributes.shooting,100);assert.equal(c.systems!.playSkillChanges!.at(-1)!.before,119);
  assert.ok(c.systems!.attributeLocks!.includes('shooting'));validateCareer(c);
  const imported=await verifySaveText(await exportCareer(c));assert.deepEqual(imported.systems!.playSkillChanges,c.systems!.playSkillChanges);
- assert.equal(imported.player.attributes.shooting,119);
+ assert.equal(imported.player.attributes.shooting,100);
 });
 test('110 mental attributes keep derived leadership within its percentage scale and remain saveable after a real round',()=>{
  let c=configureCheats(setPlaySkill(setPlaySkill(fresh(),'teamwork',true),'composure',true),true,false);
@@ -70,9 +70,9 @@ test('every position and tactical style uses raw 120 plus at most 2 per earned s
  for(const position of Object.keys(POSITION_LABELS)as Position[])for(const style of PLAY_STYLES[position]){
   const chosen=core(position,style),allowed=position==='GK'?GK_ATTRIBUTES:FIELD_ATTRIBUTES;
   for(let n=0;n<=5;n++){
-   const skills=chosen.slice(0,n),p={position,style,playSkills:skills,skillMastery:Object.fromEntries(skills.map(k=>[k,20])),attributes:Object.fromEntries(allowed.map(k=>[k,120]))};
-   assert.equal(overall(p),120+2*n,position+' '+style);
-   assert.equal(overall({...p,skillMastery:{}}),120,'selection alone adds zero');
+   const skills=chosen.slice(0,n),p={position,style,playSkills:skills,skillMastery:Object.fromEntries(skills.map(k=>[k,20])),attributes:Object.fromEntries(allowed.map(k=>[k,skills.includes(k)?120:100]))};
+   assert.equal(overall(p),100+6*n,position+' '+style);
+   assert.equal(overall({...p,skillMastery:{}}),100+4*n,'earned raw growth supplies four per skill');
   }
  }
 });
@@ -82,8 +82,9 @@ test('actual training at the raw cap can earn specialty mastery in all positions
   let c=fresh(position);const keys=position==='GK'?GK_ATTRIBUTES:FIELD_ATTRIBUTES;
   // Controlled already-developed raw abilities, not a promise of reaching 130
   // from a teenage novice by training only five of twenty-five attributes.
-  c.player.attributes=Object.fromEntries(keys.map(k=>[k,120]));c.player.potential=120;c.player.ovr=overall(c.player);
+  c.player.attributes=Object.fromEntries(keys.map(k=>[k,100]));c.player.potential=120;c.player.ovr=overall(c.player);
   for(const key of core(position))c=setPlaySkill(c,key,true);
+  for(const key of c.player.playSkills!)c.player.attributes[key]=120;c.player.ovr=overall(c.player);
   const before={...c.player.attributes};c.player.age=20;c.intensity='intense';
   for(let season=0;season<50&&c.player.ovr<130;season++){
    c.season={...c.season,year:2026+season,week:0,attributeStart:{...before},playerStats:emptyStats(),totalWeeks:38};

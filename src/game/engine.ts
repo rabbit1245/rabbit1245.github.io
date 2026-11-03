@@ -1,4 +1,4 @@
-import {upgradeAbilities,needsAbilityUpgrade} from './ability-expansion';
+import {upgradeAbilities,needsAbilityUpgrade,seasonOVRAdjustment} from './ability-expansion';
 import {evaluateRetiredNumbers} from './legacy-honours';
 import {validatePositionChoice} from './position-changes';
 import {isFreeAgent,beginEmployment,changeEmployment} from './employment';
@@ -30,7 +30,7 @@ import { TALENT_PROFILES } from './talent';
 import type { Award, AttributeKey, Attributes, Career, CreateOptions, Fixture, GameProgress, Intensity, MatchRecord, Player, PlayerStats, Position, SeasonState, SeasonSummary, Standing, Talent, TransferOffer } from './types';
 import type { PresentationEvent } from './revision-types';
 
-export const ENGINE_VERSION = '2.12.1';
+export const ENGINE_VERSION = '2.13.0';
 export const overall = calculateOverall;
 export { addStats, emptyStats, hashSeed, seededRandom } from './math';
 const TALENT_ORDER: Talent[] = ['D','C','B','A','S','SS','SSS'];
@@ -122,7 +122,7 @@ function makeSeason(player:Player,year:number,index:number,career?:Career):Seaso
   const teams=career?.systems?getSeasonClubIds(career,leagueId):CLUBS.filter(c=>c.leagueId===leagueId).map(c=>c.id);
   const competition=career?.systems?.world.competitions[leagueId];
   const fixtures=competition&&career?.systems?.world.year===year?competition.fixtures.map(f=>({...f})):makeFixtures(teams,year);
-  return {ovrVersion:2,year,index,week:0,totalWeeks:Math.max(...fixtures.map(f=>f.round)),leagueId,competitionName:league.name+(player.squad==='youth'?' · U19 시뮬레이션':''),fixtures,table:calculateTable(fixtures,teams),matches:[],playerStats:emptyStats(),ovrStart:player.ovr,attributeStart:{...player.attributes},completed:false};
+  return {ovrVersion:3,year,index,week:0,totalWeeks:Math.max(...fixtures.map(f=>f.round)),leagueId,competitionName:league.name+(player.squad==='youth'?' · U19 시뮬레이션':''),fixtures,table:calculateTable(fixtures,teams),matches:[],playerStats:emptyStats(),ovrStart:player.ovr,attributeStart:{...player.attributes},completed:false};
 }
 function validateOptions(options: CreateOptions) {
   if(!options.name.trim()||options.name.trim().length>30) throw new Error('선수 이름은 1~30자로 입력해 주세요.');
@@ -151,7 +151,7 @@ export function previewPlayer(options:CreateOptions):Player {
   const attributes: Attributes={};
   const keys=options.position==='GK'?GK_ATTRIBUTES:FIELD_ATTRIBUTES;
   for(const key of keys) attributes[key]=clamp(Math.round(base+integer(rng,-7,7)+(POSITION_ATTRIBUTES[options.position].slice(0,3).includes(key)?4:0)),25,90);
-  const player: Player={abilityVersion:2,ovrVersion:2,skillMastery:{},id:'player_'+hashSeed(options.seed+'|'+options.name).toString(36),name:options.name.trim(),nationality:options.nationality,age:options.age,height:options.height,weight:options.weight,foot:options.foot,position:options.position,secondaryPositions:[...(options.secondaryPositions??[])],talent:options.talent,style:options.style,attributes,clubId:club.id,squad:options.squad,fitness:100,morale:72,form:65,injuryWeeks:0,ovr:0,potential:0,wage:0,contractYears:3};
+  const player: Player={abilityVersion:2,ovrVersion:3,skillMastery:{},id:'player_'+hashSeed(options.seed+'|'+options.name).toString(36),name:options.name.trim(),nationality:options.nationality,age:options.age,height:options.height,weight:options.weight,foot:options.foot,position:options.position,secondaryPositions:[...(options.secondaryPositions??[])],talent:options.talent,style:options.style,attributes,clubId:club.id,squad:options.squad,fitness:100,morale:72,form:65,injuryWeeks:0,ovr:0,potential:0,wage:0,contractYears:3};
   player.ovr=overall(player);
   const [low,high]=TALENT_PROFILES[player.talent].potential;
   player.potential=Math.max(player.ovr+2,integer(rng,low,high)); player.potential=Math.min(120,player.potential);
@@ -177,7 +177,7 @@ function growthReport(career:Career,half:'first'|'season') {
   if(systems.growthReports.some(r=>r.year===career.season.year&&r.half===half))return;
   const initial=systems.firstHalfSnapshot;
   const prior=career.history.at(-1)?.stats??emptyStats();
-  const u=systems.ovrUpgrade,ovrAdjustment=u?.year===career.season.year?u.ovrAfter-u.ovrBefore:0;
+  const ovrAdjustment=seasonOVRAdjustment(career);
   systems.growthReports.push({...(ovrAdjustment?{ovrAdjustment}:{}),year:career.season.year,half,fromRound:0,toRound:career.season.week,startAttributes:{...career.season.attributeStart},endAttributes:{...career.player.attributes},ovrStart:career.season.ovrStart,ovrEnd:career.player.ovr,stats:{...career.season.playerStats},previousStats:{...prior},valueStart:systems.growthReports.find(r=>r.year===career.season.year&&r.half==='first')?.valueStart??initial?.value??systems.economics.previousValue,valueEnd:systems.economics.marketValue,growth:structuredClone(ensureGrowthTracking(career)),...(systems.agingReport?.year===career.season.year?{offseasonAging:structuredClone(systems.agingReport)}:{}),context:`${career.season.competitionName} · ${career.season.playerStats.minutes}분 출전 · 집중 훈련 ${career.training.map(k=>ATTRIBUTE_LABELS[k]).join(', ')} · 부상은 훈련량과 출전 기회를 줄입니다. 나이에 따른 자동 능력치 감소는 없으며 수동 노화만 따로 기록합니다. 기록 변화에는 상대·출전 시간·팀 전력이 함께 작용합니다.${ovrAdjustment?` OVR 가중치 개편 ${ovrAdjustment>0?'+':''}${ovrAdjustment}은 실제 성장과 구분합니다.`:''}`});
   present(career,'growth',half==='first'?'전반기 성장 리포트':'시즌 성장 리포트',`종합 ${career.season.ovrStart} → ${career.player.ovr} · ${career.season.playerStats.minutes}분 출전`,'milestone');
 }
@@ -312,8 +312,8 @@ function validateTraining(position:Player['position'],keys:AttributeKey[],intens
 }
 export function upgradeAbilityModel(career:Career):Career {
  if(!needsAbilityUpgrade(career.player)||career.stage==='retired')return career;
- const next=editable(career,true),change=next.systems!.ovrUpgrade!;
- present(next,'growth','종합 능력치 가중치 개편',`기존 능력치 수치를 보존하고 공통 역량과 포지션 비중을 조정했습니다. 현재 OVR ${change.ovrBefore} → ${change.ovrAfter} · 과거 시즌 점수와 기록은 보존합니다.`,'milestone');
+ const next=editable(career,true),change=next.systems!.abilityRulesUpgrade!;
+ present(next,'growth','능력치 상한·OVR 체계 개편',`기본 상한 100, 선택 능력치 120, 순수 OVR 120 + 숙련 10으로 전환했습니다. 상한 조정 전 능력치는 별도로 보존합니다. 현재 OVR ${change.ovrBefore} → ${change.ovrAfter} · 과거 시즌 점수와 기록은 보존합니다.`,'milestone');
  touch(next);return next;
 }
 export function changePosition(career:Career,position:Position,style:string):Career {
@@ -345,7 +345,7 @@ export function manuallyAge(career:Career,amount:1|5|10,key:AttributeKey):Career
  if(!(career.player.position==='GK'?GK_ATTRIBUTES:FIELD_ATTRIBUTES).includes(key))throw new Error('감소할 능력치를 선택해 주세요.');
  const next=editable(career,true),before={...next.player.attributes},ovrBefore=next.player.ovr;
  applyManualAging(next,amount,key);
- (next.systems!.manualAging??=[]).push({playerId:next.player.id,playerName:next.player.name,id:`manual-aging:${next.id}:${next.revision}`,year:next.season.year,round:next.season.week,date:currentDate(next),amount,key,ovrVersion:2,before,after:{...next.player.attributes},ovrBefore,ovrAfter:next.player.ovr});
+ (next.systems!.manualAging??=[]).push({playerId:next.player.id,playerName:next.player.name,id:`manual-aging:${next.id}:${next.revision}`,year:next.season.year,round:next.season.week,date:currentDate(next),amount,key,ovrVersion:3,before,after:{...next.player.attributes},ovrBefore,ovrAfter:next.player.ovr});
  updateMarketValue(next,'사용자 수동 노화');touch(next);return next;
 }
 export function configureCheats(career:Career,enabled:boolean,freezeAging:boolean):Career{
@@ -364,9 +364,9 @@ export function setPlaySkill(career:Career,key:AttributeKey,selected:boolean):Ca
  next.player.skillMastery={...next.player.skillMastery};if(selected)next.player.skillMastery[key]=0;else delete next.player.skillMastery[key];
  if(!selected)removeSkillMastery(next,key);
  const year=next.season.year+(next.stage==='offseason'?1:0);
- next.systems!.playSkillChanges=[...(next.systems!.playSkillChanges??[]),{year,round:next.season.week,key,selected,before,after:next.player.attributes[key]??0,position:next.player.position,abilityVersion:2}];
+ next.systems!.playSkillChanges=[...(next.systems!.playSkillChanges??[]),{year,round:next.season.week,key,selected,before,after:next.player.attributes[key]??0,position:next.player.position,abilityVersion:2,ovrVersion:3}];
  next.player.ovr=overall(next.player);
- present(next,'growth',selected?'플레이스킬 선택':'플레이스킬 삭제',`${playSkillNames(next.player.position,[key])[0]} · ${selected?'숙련 훈련 시작 · 현재 능력 유지':'선택 해제 · 숙련 보정 종료 · 능력치 유지'}`);
+ present(next,'growth',selected?'플레이스킬 선택':'플레이스킬 삭제',`${playSkillNames(next.player.position,[key])[0]} · ${selected?'숙련 훈련 시작 · 현재 능력 유지':'선택 해제 · 숙련 보정 종료 · 기본 상한 100 적용'}`);
  if(!selected&&before>100)updateMarketValue(next,'플레이스킬 초과 숙련 종료');
  touch(next);return next;
 }

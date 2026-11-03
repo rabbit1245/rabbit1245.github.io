@@ -1,6 +1,6 @@
 import {comparableLegacyOVR} from './ability-expansion';
 import {getClub,getLeague} from './data';
-import {playingAbility,reweightedOVR,PLAY_STYLES} from './attributes';
+import {playingAbility,reweightedOVR,PLAY_STYLES,overall,expanded2121Overall,expanded2120Overall} from './attributes';
 import {personalityEdge} from './personality';
 import {clamp} from './math';
 import {observedSeasons,careerStanding} from './career-standing';
@@ -9,9 +9,19 @@ import type {MarketAssessment} from './revision-types';
 
 /** Retain the observed pre-decline class across assessments. A single quiet
  * season at unchanged ability has no decline pressure; repeated low ability does. */
-type AbilityEvidence={abilityVersion?:2;ovrVersion?:2;attributes?:Attributes;position?:Position;playSkills?:AttributeKey[]};
+type AbilityEvidence={abilityVersion?:2;ovrVersion?:2|3;attributes?:Attributes;position?:Position;playSkills?:AttributeKey[];skillMastery?:Attributes};
 /** Evaluate old evidence on today's scale without changing its stored score. */
 export function comparableRecordedAbility(c:Career,value:number,evidence:AbilityEvidence={}):number{
+ if(c.player.ovrVersion===3&&evidence.ovrVersion!==3&&c.systems?.abilityRulesUpgrade){
+  const u=c.systems.abilityRulesUpgrade,position=evidence.position??c.player.position,style=PLAY_STYLES[position].includes(c.player.style)?c.player.style:PLAY_STYLES[position][0];
+  if(evidence.attributes){
+   const p={...c.player,position,style,attributes:evidence.attributes,playSkills:evidence.playSkills??[],skillMastery:evidence.skillMastery??{}};
+   const before=evidence.ovrVersion===2?expanded2121Overall(p):evidence.abilityVersion===2?expanded2120Overall(p):null;
+   if(before!==null)return clamp(value+overall(p)-before,0,130);
+  }
+  return clamp(value+u.ovrAfter-u.ovrBefore+(evidence.ovrVersion===2?0:(c.systems.ovrUpgrade?.ovrAfter??0)-(c.systems.ovrUpgrade?.ovrBefore??0)),0,130);
+ }
+ if(evidence.ovrVersion===3)return value;
  if(evidence.ovrVersion===2)return value;
  const u=c.systems?.ovrUpgrade;
  if(evidence.abilityVersion===2){
@@ -25,10 +35,11 @@ export function comparableRecordedAbility(c:Career,value:number,evidence:Ability
 }
 export function marketDeclineEvidence(c:Career){
  const ability=playingAbility(c.player),a=c.systems?.economics.assessment,u=c.systems?.ovrUpgrade;
- const startVersion=c.season.ovrVersion===2?2:u?.year===c.season.year?u.priorAbilityVersion:c.systems?.abilityUpgrade?.year===c.season.year?undefined:2;
- const start=comparableRecordedAbility(c,c.season.ovrStart,{abilityVersion:startVersion,ovrVersion:c.season.ovrVersion,attributes:c.season.attributeStart});
+ const startVersion=c.season.ovrVersion!==undefined?2:u?.year===c.season.year?u.priorAbilityVersion:c.systems?.abilityUpgrade?.year===c.season.year?undefined:2;
+ const rules=c.systems?.abilityRulesUpgrade,startAttributes=rules?.year===c.season.year?rules.attributeStartBefore:c.season.attributeStart;
+ const start=comparableRecordedAbility(c,c.season.ovrStart,{abilityVersion:startVersion,ovrVersion:c.season.ovrVersion,attributes:startAttributes,playSkills:rules?.year===c.season.year?rules.playSkillsBefore:c.player.playSkills,skillMastery:rules?.year===c.season.year?rules.skillMasteryBefore:c.player.skillMastery});
  let reference=Math.max(ability,start,a?comparableRecordedAbility(c,a.ability,a):ability);
- const historical=(h:Career['history'][number],end:boolean)=>comparableRecordedAbility(c,end?h.ovrEnd:h.ovrStart,{...h.details,attributes:end?h.details?.attributes:h.details?.startAttributes,position:h.position});
+ const historical=(h:Career['history'][number],end:boolean)=>comparableRecordedAbility(c,end?h.ovrEnd:h.ovrStart,{...h.details,ovrVersion:end?h.details?.ovrVersion:h.details?.startOvrVersion??(rules?.year===h.year?rules.priorOvrVersion:h.details?.ovrVersion),attributes:end?h.details?.attributes:rules?.year===h.year?rules.attributeStartBefore:h.details?.startAttributes,position:h.position});
  for(const h of c.history)reference=Math.max(reference,historical(h,false),historical(h,true));
  for(const r of c.systems?.manualAging??[])if((!r.playerId||r.playerId===c.player.id)&&Number.isFinite(r.ovrBefore))reference=Math.max(reference,comparableRecordedAbility(c,r.ovrBefore,{abilityVersion:'finishing'in r.before?2:undefined,ovrVersion:r.ovrVersion,attributes:r.before}));
  const severity=clamp((reference-ability-8)/32,0,1),threshold=reference-8;

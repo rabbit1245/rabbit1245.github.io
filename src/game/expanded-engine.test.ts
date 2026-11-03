@@ -25,7 +25,7 @@ test('five new attributes change their own actual match actions while display OV
  for(const [key,position,metric]of [['finishing','ST','goals'],['offTheBall','ST','shots'],['pressing','ST','pressingSuccesses'],['tackling','CB','tackles'],['skillMoves','CAM','dribblesCompleted']] as const){
   const c=fresh(position),{f,options}=setup(c),totals=[0,0];
   for(let variant=0;variant<2;variant++)for(let i=0;i<160;i++){
-   const copy={...c,seed:`individual-${key}-${i}`,player:{...c.player,attributes:{...c.player.attributes,[key]:variant?115:45}}};
+   const copy={...c,seed:`individual-${key}-${i}`,player:{...c.player,attributes:{...c.player.attributes,[key]:variant?100:45}}};
    const m=simulateMatch(copy,f,options);validateActionLedger(m,c.player.id);totals[variant]+=m.playerStats[metric]??0;
   }
   assert.ok(totals[1]>totals[0]*1.1,`${key}: ${totals.join(' → ')}`);
@@ -44,18 +44,19 @@ test('free-kick/penalty subsets, real big chances and unique recoveries reconcil
  }
  for(const [key,value]of Object.entries(seen))assert.ok(value>0,`${key} must occur from real actions`);
 });
-test('the raw 120 + earned mastery 10 model reaches 130 and selecting a skill alone never raises OVR',()=>{
- let c=fresh('ST',120);assert.equal(c.player.ovr,120);c=configureCheats(c,true,true);
+test('five actual 120 specialties above a 100 baseline earn pure 120 and mastered 130',()=>{
+ let c=fresh('ST',100);c=configureCheats(c,true,true);
  const selected=POSITION_ATTRIBUTES.ST.slice(0,5);
  for(const key of selected){const before=c.player.ovr;c=setPlaySkill(c,key,true);assert.equal(c.player.ovr,before);}
- // Training at the raw cap may still earn specialty mastery; no ability point is fabricated.
- c.player.skillMastery=Object.fromEntries(selected.map(k=>[k,20]));c.player.ovr=overall(c.player);assert.equal(c.player.ovr,130);validateCareer(c);
- const raw={...c.player.attributes};c=setPlaySkill(c,selected[0],false);assert.equal(c.player.ovr,128);assert.deepEqual(c.player.attributes,raw);validateCareer(c);
- c=setPlaySkill(c,selected[0],true);assert.equal(c.player.ovr,128);assert.equal(c.player.skillMastery![selected[0]],0);
+ for(const key of selected){c=cheatIncreaseAttribute(c,key,10);c=cheatIncreaseAttribute(c,key,10);}
+ assert.equal(c.player.ovr,130);validateCareer(c);
+ c=setPlaySkill(c,selected[0],false);assert.equal(c.player.ovr,124);assert.equal(c.player.attributes[selected[0]],100);validateCareer(c);
+ c=setPlaySkill(c,selected[0],true);assert.equal(c.player.ovr,124);assert.equal(c.player.skillMastery![selected[0]],0);
 });
-test('unselected raw attributes can reach 120, locks stop increases, and manual selected growth alone earns mastery',()=>{
- let c=fresh('ST',100);c=configureCheats(c,true,false);c=cheatIncreaseAttribute(c,'finishing',10);c=cheatIncreaseAttribute(c,'finishing',10);assert.equal(c.player.attributes.finishing,120);assert.equal(c.player.skillMastery?.finishing,undefined);
- const before=c.player.ovr;c=setPlaySkill(c,'finishing',true);assert.equal(c.player.ovr,before);c=setAllAttributeLocks(c,true);c=cheatIncreaseAttribute(c,'finishing',10);assert.equal(c.player.skillMastery?.finishing,0);assert.equal(c.player.attributes.finishing,120);validateCareer(c);
+test('unselected abilities stop at 100; selected abilities reach 120 and locked gains remain blocked',()=>{
+ let c=configureCheats(fresh('ST',100),true,false);c=cheatIncreaseAttribute(c,'finishing',10);assert.equal(c.player.attributes.finishing,100);assert.equal(c.player.skillMastery?.finishing,undefined);
+ const before=c.player.ovr;c=setPlaySkill(c,'finishing',true);assert.equal(c.player.ovr,before);c=cheatIncreaseAttribute(c,'finishing',10);assert.equal(c.player.attributes.finishing,110);assert.equal(c.player.skillMastery?.finishing,10);
+ c=setAllAttributeLocks(c,true);c=cheatIncreaseAttribute(c,'finishing',10);assert.equal(c.player.skillMastery?.finishing,10);assert.equal(c.player.attributes.finishing,110);validateCareer(c);
 });
 test('an actual 2.11.7 midseason save upgrades once without changing previous abilities, matches or awards',async()=>{
  const text=gunzipSync(await readFile(new URL('../../tests/fixtures/kball-2117-midseason.json.gz',import.meta.url))).toString('utf8'),old=await verifySaveText(text),before=JSON.stringify({history:old.history,matches:old.season.matches,awards:old.awards,stats:old.season.playerStats}),attributes={...old.player.attributes};

@@ -165,9 +165,11 @@ export function leadershipAbility(attributes:Player['attributes'],trait:number):
   return Math.round(Math.max(0,Math.min(100,Math.max(mental*.75+trait*.25,trait*.7+mental*.3)))*10)/10;
 }
 const boundedAbility=(raw:unknown)=>typeof raw==='number'&&Number.isFinite(raw)?Math.max(1,Math.min(120,raw)):1;
+const currentAbility=(raw:unknown)=>typeof raw==='number'&&Number.isFinite(raw)?Math.max(0,Math.min(120,raw)):0;
 /** Earned display OVR is the comparison scale; actions still read actual skills. */
-export function playingAbility(player:Pick<Player,'attributes'|'position'|'style'>&{ovr?:number}):number{
+export function playingAbility(player:Pick<Player,'attributes'|'position'|'style'>&Partial<Pick<Player,'ovr'|'ovrVersion'|'playSkills'|'skillMastery'>>):number{
  if(player.ovr!==undefined)return player.ovr;
+ if(player.ovrVersion===3)return overallParts(player).total;
  return Object.entries(attributeWeights(player.position,player.style)).reduce((n,[k,w])=>n+boundedAbility(player.attributes[k as AttributeKey])*w!,0);
 }
 function weightedOverall(player:Pick<Player,'attributes'|'position'|'style'|'playSkills'|'skillMastery'>,weights:Partial<Record<AttributeKey,number>>):number{
@@ -176,7 +178,28 @@ function weightedOverall(player:Pick<Player,'attributes'|'position'|'style'|'pla
  const bonus=selected.length>5?0:selected.reduce((n,k)=>n+Math.min(20,Math.max(0,player.skillMastery?.[k]??0),Math.max(0,(player.attributes[k]??0)-100))*.1,0);
  return Math.max(1,Math.min(130,Math.round(base+bonus)));
 }
-export const overall=(player:Pick<Player,'attributes'|'position'|'style'|'playSkills'|'skillMastery'>)=>weightedOverall(player,attributeWeights(player.position,player.style));
+type RatedPlayer=Pick<Player,'attributes'|'position'|'style'|'playSkills'|'skillMastery'>;
+/** 0–100 keeps the published absolute scale. Each of five trained specialties
+ * unlocks a further four ability points, then at most two earned mastery points.
+ * Position affects the pace of the extension, never its attainable endpoint.
+ * Choosing an untrained specialty adds exactly zero, including to other slots. */
+export function overallParts(player:RatedPlayer){
+ const weights=attributeWeights(player.position,player.style),allowed=player.position==='GK'?GK_ATTRIBUTES:FIELD_ATTRIBUTES;
+ const selected=[...new Set(player.playSkills??[])].filter(k=>allowed.includes(k));
+ const ordinary=Object.entries(weights).reduce((n,[k,w])=>n+Math.min(100,currentAbility(player.attributes[k as AttributeKey]))*w!,0);
+ let extension=0,mastery=0;
+ if(selected.length<=5)for(const key of selected){
+  const progress=Math.max(0,currentAbility(player.attributes[key])-100)/20;
+  const relevance=Math.max(-.25,Math.min(.25,((weights[key]??0)*allowed.length-1)*.25));
+  extension+=4*progress*(1+relevance*(1-progress));
+  mastery+=Math.min(20,Math.max(0,player.skillMastery?.[key]??0),progress*20)*.1;
+ }
+ const ability=Math.min(120,ordinary+extension),total=Math.min(130,ability+mastery);
+ return {ordinary,extension,ability,mastery,total};
+}
+export const overall=(player:RatedPlayer)=>Math.round(overallParts(player).total);
+/** Frozen 2.12.1 formula is required to authenticate existing saves. */
+export const expanded2121Overall=(player:RatedPlayer)=>weightedOverall(player,attributeWeights(player.position,player.style));
 export const expanded2120Overall=(player:Pick<Player,'attributes'|'position'|'style'|'playSkills'|'skillMastery'>)=>weightedOverall(player,expanded2120Weights(player.position,player.style));
 /** Convert comparison evidence only; the original historical number is never rewritten. */
 export function reweightedOVR(value:number,attributes:Player['attributes'],position:Position,style:string):number{

@@ -114,10 +114,10 @@ test('OVR stays on one global scale across leagues and talent, with bounded miss
         assert.equal(overall(inEliteClub), 73, `${position}/${style}: context changed intrinsic ability`);
       }
       const extremes = (value: number) => Object.fromEntries(keys.map(key => [key, value])) as Attributes;
-      assert.equal(overall({...subject, attributes: extremes(-300)}), 1);
-      assert.equal(overall({...subject, attributes: extremes(500)}), 120);
-      assert.equal(overall({...subject, attributes: extremes(Number.NaN)}), 1);
-      assert.equal(overall({...subject, attributes: {}}), 1);
+      assert.equal(overall({...subject, attributes: extremes(-300)}), 0);
+      assert.equal(overall({...subject, attributes: extremes(500)}), 100);
+      assert.equal(overall({...subject, attributes: extremes(Number.NaN)}), 0);
+      assert.equal(overall({...subject, attributes: {}}), 0);
     }
   }
 });
