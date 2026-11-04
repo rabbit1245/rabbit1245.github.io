@@ -64,3 +64,7 @@ Linux Chromium, localhost에서 동일한 단독 HTML을 실행했습니다. 동
 - 주장 수락 후 재접속에서도 역할·최신 리비전·검사 정보가 유지됐습니다. 이미 저장된 상태의 재저장은 Worker나 전체 저장본 갱신을 만들지 않았습니다.
 
 게임의 능력치·OVR·성장·전술·결과 산식·수상·이적 조건을 바꾼 패치가 아닙니다. 핵심 수정 위치는 `game-delta.ts`, `save-codec.ts`, `storage.ts`, `worker.ts`, `client.ts`, `command-patches.ts`, `checkpoint-scheduler.ts`, `App.tsx`입니다.
+
+## 다운로드 배포 확인
+
+[K볼 2.14.0 다운로드](https://raw.githubusercontent.com/rabbit1245/rabbit1245.github.io/e6cb82153837439a8986ab6f48dd373d7e264e84/Kball.zip) · 21,637,205바이트. 실제 공개 URL에서 HTTP 200으로 다시 내려받아 ZIP·내부 HTML의 SHA-256, 압축 CRC, 안내문의 버전을 확인했습니다. [배포 증거](validation/release-2.14.0/public-download.json). ZIP을 풀어 기존 진행 JSON을 가져오면 됩니다.
