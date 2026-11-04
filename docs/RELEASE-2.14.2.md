@@ -37,3 +37,7 @@
 기존 Edge 프로필과 저장 데이터를 유지하세요. 브라우저 데이터를 지우지 마세요. 게임을 닫고 새 HTML을 기존 게임과 같은 파일 경로/이름으로 놓은 뒤 같은 Edge 프로필에서 열어야 기존 저장소에 접근하기 쉽습니다. 시작 화면의 저장·복구에서 먼저 원본을 보관하고 불러오기를 시도하세요. 실패하면 이전 저장 복원으로 별도 슬롯을 만듭니다. 두 읽기가 모두 실패하면 `.kball-recovery`를 보관해 원본 바이트와 오류 단계를 조사해야 합니다. 정상 백업이나 원본 확인 없이 복구 가능성을 보장하지 않습니다.
 
 복구 아카이브는 `KBALL-RECOVERY-V1\n` UTF-8 헤더, 4바이트 little-endian 매니페스트 길이, JSON 매니페스트, 매니페스트의 parts 순서로 이어지는 원래 Blob들로 구성합니다. 각 참조는 index/bytes/type을 포함하고 기존 저장의 해시·압축 정보·변경 원장을 보존합니다. 데이터나 파일 안의 코드를 실행하는 형식이 아닙니다.
+
+## 배포 확인
+
+[K볼 2.14.2 복구판 다운로드](https://raw.githubusercontent.com/rabbit1245/rabbit1245.github.io/143faaad21052219e70aaa5201ebb6d71866b72e/Kball.zip) · 21,641,481바이트. 실제 공개 URL에서 HTTP 200 다운로드 후 ZIP CRC·SHA-256·내부 HTML·안내문 버전을 확인했습니다. [배포 증거](validation/release-2.14.2/public-download.json).
