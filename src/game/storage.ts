@@ -1,3 +1,5 @@
+import {recoveryArchive} from './recovery-archive';
+import {readJSONBlob} from './json-reader';
 import {certifiedGameDelta,isSealedCareer} from './game-delta';
 import {validateAchievementEvidence} from './achievement-evidence';
 import {validateActionLedger} from './action-metrics';
@@ -1209,6 +1211,21 @@ export async function deleteSlot(id: string): Promise<void> {
   });
 }
 
+/** Read-only rescue export works even when neither snapshot can be decoded. */
+export async function exportRecoveryArchive(id:string):Promise<Blob>{
+ text(id,'슬롯 ID');const snapshot=await readSlot(id);
+ if(!snapshot.current&&!snapshot.backup)throw Error('보관할 저장 원본이 없습니다.');
+ return recoveryArchive(snapshot);
+}
+/** Recovery makes a separate playable slot; the failed current and original
+ * backup are never overwritten, even if recovery or a later save fails. */
+export async function recoverBackupToNewSlot(id:string):Promise<Career>{
+ text(id,'슬롯 ID');const snapshot=await readSlot(id);
+ if(!snapshot.backup||snapshot.metadata?.deleted)throw Error('복원할 이전 저장본이 없습니다. 원본 저장 보관으로 데이터를 남겨 주세요.');
+ const decoded=await decodeSnapshot(snapshot.backup);
+ assert(decoded.career.id===id,'백업 ID와 슬롯이 일치하지 않습니다.');
+ const next={...decoded.career,id:`recovered-${crypto.randomUUID()}`};await saveCareer(next);return next;
+}
 export async function restoreBackup(id: string): Promise<Career> {
   text(id, '슬롯 ID');
   const snapshot = await readSlot(id);
@@ -1245,9 +1262,14 @@ export async function verifySaveText(source:string):Promise<Career>{
   try{parsed=JSON.parse(source);}catch{throw new Error('저장 파일을 읽을 수 없습니다. 올바른 JSON 백업을 선택해 주세요.');}
   ensureSafeJSON(parsed);return (await verifyEnvelope(parsed,true)).career;
 }
+/** Large JSON files use bounded native subtrees rather than one giant string. */
+export async function verifySaveBlob(source:Blob):Promise<Career>{
+ assert(source.size<=MAX_SAVE_BYTES,'저장 파일이 지원하는 1GB 범위를 초과했습니다.');
+ const parsed=await readJSONBlob(source,{maximum:MAX_SAVE_BYTES});ensureSafeJSON(parsed);return (await verifyEnvelope(parsed,true)).career;
+}
 /** Imported saves always become new slots; no existing game or legacy localStorage is overwritten. */
 export async function importCareer(source:string|Blob):Promise<Career>{
   if(source instanceof Blob)assert(source.size<=MAX_SAVE_BYTES,'저장 파일이 지원하는 1GB 범위를 초과했습니다.');
-  const imported=typeof Worker==='undefined'?await verifySaveText(typeof source==='string'?source:await source.text()):await (await import('./save-preparation')).verifyFileOffThread(source);
+  const imported=typeof Worker==='undefined'?(typeof source==='string'?await verifySaveText(source):await verifySaveBlob(source)):await (await import('./save-preparation')).verifyFileOffThread(source);
   imported.id=`career-${globalThis.crypto.randomUUID()}`;return imported;
 }

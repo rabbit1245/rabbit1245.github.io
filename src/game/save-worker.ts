@@ -1,4 +1,4 @@
-import {prepareEnvelope,verifySaveText} from './storage';
+import {prepareEnvelope,verifySaveText,verifySaveBlob} from './storage';
 import {decodeStored,isBlobCareer,packStored,replayJournal,type StoredCareer} from './save-codec';
 import type {Career} from './types';
 import {jsonBlob} from './json-blob';
@@ -17,7 +17,7 @@ self.addEventListener('message',(event:MessageEvent<{id:string;operation:string;
     result=jsonBlob(await prepareEnvelope(payload as Career,true));
    }else if(operation==='verifyFile'){
     resident=undefined;
-    result=await verifySaveText(typeof payload==='string'?payload:await (payload as Blob).text());
+    result=typeof payload==='string'?await verifySaveText(payload):await verifySaveBlob(payload as Blob);
    }else if(operation==='decode'){
     resident=undefined;
     const decoded=await decodeStored(payload as StoredCareer);resident={career:decoded.career,versionHash:decoded.versionHash};result=decoded;

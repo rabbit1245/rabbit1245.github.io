@@ -1,0 +1,22 @@
+{
+  "url": "http://127.0.0.1:4199/Kball.html",
+  "failedLoadRecoveryEntry": true,
+  "archiveWorksWithoutLoading": true,
+  "archiveBytes": 6356860,
+  "originalPreserved": true,
+  "backupPreserved": true,
+  "newPlayableSlot": true,
+  "reload": true,
+  "normalJSONExport": true,
+  "mobileNoOverflow": true,
+  "records": {
+    "count": 2,
+    "originalId": "career-72923e8d-3c81-43f4-8d48-950700cc819d",
+    "originalBytes": "broken original bytes for recovery UI",
+    "backupPresent": true,
+    "recoveredId": "recovered-2733ecc2-bf21-45ae-bcc9-2628d94a0eb2",
+    "name": "스이쿤 복구 검수",
+    "age": 35
+  },
+  "errors": []
+}

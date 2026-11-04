@@ -1,0 +1,9 @@
+{
+  "rawBytes": 572586592,
+  "paddingBytes": 566231040,
+  "oldError": "Error: 저장 스냅샷을 읽을 수 없습니다.",
+  "recoveredNew": true,
+  "allFieldsIdentical": true,
+  "readMs": 3931.3917240000005,
+  "note": "Valid career envelope plus legal JSON whitespace deliberately exceeds the V8 string limit; demonstrates an affected loading path, not the unavailable user save."
+}

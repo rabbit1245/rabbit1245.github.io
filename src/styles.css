@@ -1159,3 +1159,5 @@ input,select { font-size:17px; min-height:38px; padding:7px 10px; border-radius:
 .personality-actions { display:flex; justify-content:flex-end; align-items:center; gap:10px; flex-wrap:wrap; margin-top:16px; }
 .personality-actions > span { margin-right:auto; color:var(--text); font-size:14px; }
 @media(max-width:540px) { .personality-card > summary { padding:14px; align-items:flex-start; } .personality-fold { font-size:13px; } }
+
+.landing-header-actions { display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end; }

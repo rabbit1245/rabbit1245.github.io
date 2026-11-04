@@ -1,3 +1,4 @@
+import {readJSONBlob,SaveReadError} from './json-reader';
 import {replayGameDelta,validatePreparedDelta,sealCareer,type PreparedGameDelta} from './game-delta';
 import type {Career,SaveEnvelope,SaveSlot} from './types';
 import {applyCareerPatches,validatePatches,type CareerPatch} from './command-patches';
@@ -76,16 +77,10 @@ export async function decodeStored(r:StoredCareer):Promise<DecodedSave>{
  }
  if(!(r.blob instanceof Blob)||r.blob.size>MAX_SAVE_BYTES+4096||r.encoding!==undefined&&r.encoding!=='gzip'||!Array.isArray(r.journal)||r.journal.length>512||!/^[a-f0-9]{64}$/.test(r.versionHash))throw Error('저장 스냅샷 형식이 올바르지 않습니다.');
  const usage=journalSize(r.journal);if(usage.rawBytes>768*1024*1024||usage.storedBytes>128*1024*1024)throw Error('저장 변경 기록의 지원 범위를 초과했습니다.');
- let value:unknown;try{
-  let blob=r.blob;
-  if(r.encoding==='gzip'){
-   if(!Number.isSafeInteger(r.rawBytes)||r.rawBytes! > MAX_SAVE_BYTES+4096||r.rawBytes! < 1)throw Error('압축 저장 크기');
-   const reader=blob.stream().pipeThrough(new DecompressionStream('gzip')).getReader(),parts:BlobPart[]=[];let size=0;
-   while(true){const {value:part,done}=await reader.read();if(done)break;size+=part.byteLength;if(size>r.rawBytes!||size>MAX_SAVE_BYTES+4096){await reader.cancel();throw Error('압축 저장 범위');}parts.push(part);}
-   if(size!==r.rawBytes)throw Error('압축 저장 크기 불일치');blob=new Blob(parts);
-  }
-  value=JSON.parse(await blob.text());
- }catch{throw Error('저장 스냅샷을 읽을 수 없습니다.');}
+ let value:unknown;
+ try{value=await readJSONBlob(r.blob,{encoding:r.encoding,rawBytes:r.rawBytes,maximum:MAX_SAVE_BYTES+4096});}
+ catch(e){const stage=e instanceof SaveReadError?({gzip:'압축 해제',size:'크기 검사',json:'JSON 해석',read:'저장소 읽기'} as const)[e.phase]:'저장소 읽기';throw Error(`저장 스냅샷을 읽을 수 없습니다. [${stage}] 원본 저장 보관 또는 이전 저장 복원을 이용해 주세요.`);}
+
  const original=value as {hash?:string};
  const envelope=await verifyEnvelope(value,true);
  if(envelope.career.id!==r.id||envelope.career.revision!==r.revision||original.hash!==r.hash)throw Error('저장 스냅샷의 검사 정보가 일치하지 않습니다.');

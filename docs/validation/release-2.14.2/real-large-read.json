@@ -1,0 +1,13 @@
+{
+  "inputBytes": 429189740,
+  "gzipBytes": 28195962,
+  "readMs": 27214.220684,
+  "id": "career_c5ziue",
+  "player": "김현우",
+  "age": 43,
+  "seasons": 30,
+  "clubMatches": 102,
+  "hash": "131f28a7eabca744eba87d732d8c5737d0b45e50eb1dd5a756d97dc50602b465",
+  "fullCanonicalChecksumVerified": true,
+  "note": "Real existing 30-season retired career, compressed from its original JSON bytes; full schema, event and canonical SHA-256 validation retained."
+}
