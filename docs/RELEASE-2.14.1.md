@@ -34,3 +34,7 @@
 - 최종 단독 HTML에서 PC·모바일 ST/GK의 100/120 상한·130 OVR·스킬 삭제/재선택·치트·재접속, 130 선수의 포지션 변경 후 실제 반시즌·자동 저장, 기존 저장의 과거 기록·경제 보존과 한 번만 이관되는 처리를 확인했습니다. [브라우저 결과](validation/release-2.14.1/browser-ui.json).
 - TypeScript 검사·프로덕션 빌드·단독 HTML 빌드 통과. 검수는 Linux Chromium의 localhost이며 Windows Edge의 file:// 직접 실행 검사는 환경 정책상 수행하지 않았습니다.
 - 800경기×3회 실행의 중앙값은 전 1.480초, 후 1.495초였습니다. 각 실행 구간이 겹치는 작은 차이이며, 속도가 개선되었다거나 다른 기기에서도 같은 시간이 걸린다고 주장하지 않습니다. 기존 2.14.0의 변경분 저장·배경 체크포인트는 유지합니다. [전](validation/release-2.14.1/engine-before.json) · [후](validation/release-2.14.1/engine-after.json).
+
+## 배포 확인
+
+[K볼 2.14.1 다운로드](https://raw.githubusercontent.com/rabbit1245/rabbit1245.github.io/14ca35277afc195ab80cd346a4123d32734a4d59/Kball.zip) · 21,637,338바이트. 공개 URL에서 실제 HTTP 200 다운로드 후 ZIP CRC·SHA-256·내부 HTML·안내문 2.14.1을 확인했습니다. [배포 증거](validation/release-2.14.1/public-download.json).
