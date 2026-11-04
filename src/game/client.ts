@@ -1,6 +1,8 @@
+import {sealCareer,certifyGameDelta,isSealedCareer,type PreparedGameDelta} from './game-delta';
 import {unpackGameResult,type GameResultWire} from './worker-result';
 import type { Career, GameCommand,GameProgress } from './types';
-import {LIGHT_COMMANDS} from './command-patches';
+import {validateEngineResult} from './storage';
+import {LIGHT_COMMANDS,LOCAL_DECISIONS} from './command-patches';
 
 type Pending = { previous:Career;resolve: (value: Career) => void; reject: (reason: Error) => void; timeout: ReturnType<typeof setTimeout>;onProgress?:(p:GameProgress)=>void };
 let worker: Worker | undefined;
@@ -24,20 +26,24 @@ function stopWorker(message: string) {
 
 export async function runGameCommand(career: Career, command: GameCommand,onProgress?:(p:GameProgress)=>void): Promise<Career> {
   const id = crypto.randomUUID();
+  if(typeof Worker!=='undefined')sealCareer(career);
   if (typeof Worker === 'undefined'||LIGHT_COMMANDS.has(command.type)) {
     const { executeCommand } = await import('./commands');
-    return executeCommand(career, command, id,onProgress);
+    const next=executeCommand(career, command, id,onProgress);
+    if(isSealedCareer(career)&&LOCAL_DECISIONS.has(command.type)){validateEngineResult(career,next);sealCareer(next);}
+    return next;
   }
+  sealCareer(career);
   if (!worker) {
     worker = new Worker(new URL('./worker.ts', import.meta.url), { type: 'module' });
-    worker.addEventListener('message', (event: MessageEvent<{ id: string; career?: Career; wire?:GameResultWire;error?: string;progress?:GameProgress }>) => {
+    worker.addEventListener('message', (event: MessageEvent<{ id: string; career?: Career; wire?:GameResultWire;preparedDelta?:PreparedGameDelta;error?: string;progress?:GameProgress }>) => {
       const request = pending.get(event.data.id);
       if (!request) return;
       clearTimeout(request.timeout);
       if(event.data.progress){request.timeout=setTimeout(()=>stopWorker('계산 응답이 오래 멈췄습니다. 저장된 상태는 유지됩니다.'),60_000);request.onProgress?.(event.data.progress);return;}
       pending.delete(event.data.id);
       if (event.data.error || !event.data.career&&!event.data.wire) request.reject(new Error(event.data.error || '경기 결과를 불러오지 못했습니다.'));
-      else {try{resident=event.data.wire?unpackGameResult(request.previous,event.data.wire):event.data.career!;request.resolve(resident);}catch(e){request.reject(e instanceof Error?e:new Error('경기 기록 복구 실패'));releaseIdleGameWorker();return;}if(resident.history.length>=6)releaseIdleGameWorker();}
+      else {try{resident=event.data.wire?(event.data.wire.career.revision===request.previous.revision?request.previous:unpackGameResult(request.previous,event.data.wire)):event.data.career!;sealCareer(resident);if(event.data.preparedDelta)certifyGameDelta(request.previous,resident,event.data.preparedDelta);request.resolve(resident);}catch(e){request.reject(e instanceof Error?e:new Error('경기 기록 복구 실패'));releaseIdleGameWorker();return;}if(resident.history.length>=6)releaseIdleGameWorker();}
     });
     worker.addEventListener('error', () => stopWorker('경기 계산을 완료하지 못했습니다. 다시 진행해 주세요.'));
     worker.addEventListener('messageerror', () => stopWorker('경기 데이터를 읽지 못했습니다. 다시 진행해 주세요.'));

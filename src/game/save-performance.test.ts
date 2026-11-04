@@ -37,7 +37,7 @@ test('compaction retains the previous logical revision as backup and identical a
 });
 test('corrupt write-ahead records fail validation and restore without displacing the good backup',async()=>{
  const initial=fresh('corrupt');await saveCareer(initial);const next=step(initial,{type:'attributeLock',key:'shooting',locked:true});await saveCareerChange(initial,next);
- const record=await stored(next.id);record.journal[0].patches.push({path:['player','ovr'],op:'set',value:99});await replace(record);
+ const record=await stored(next.id),patch=record.journal[0];assert.ok('patches' in patch);patch.patches.push({path:['player','ovr'],op:'set',value:99});await replace(record);
  await assert.rejects(loadCareer(next.id),/손상/);const restored=await restoreBackup(next.id);assert.deepEqual(restored.player.attributes,initial.player.attributes);assert.ok(restored.revision>next.revision);await deleteSlot(next.id);
 });
 test('a changed engine receipt falls back to full validation instead of persisting a malformed delta',async()=>{

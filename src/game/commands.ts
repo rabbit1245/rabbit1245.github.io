@@ -37,6 +37,7 @@ export function executeCommand(career: Career, command: GameCommand, commandId: 
     case 'retire': next = retireCareer(career); break;
     default: throw new Error('지원하지 않는 진행 요청입니다.');
   }
+  if(next===career)return career;
   const result={ ...next, processedCommands: [...next.processedCommands, commandId] };
   recordCommandChange(career,result,command);
   return result;

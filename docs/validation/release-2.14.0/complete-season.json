@@ -1,0 +1,103 @@
+{
+  "label": "after2140complete",
+  "url": "http://127.0.0.1:4198/after/Kball.html",
+  "source": "test-results/coherence/large/career.json",
+  "samples": [
+    {
+      "name": "import",
+      "ms": 23850,
+      "workers": [
+        {
+          "kind": "send",
+          "operation": "verifyFile",
+          "ms": 0
+        },
+        {
+          "kind": "response",
+          "operation": "verifyFile",
+          "ms": 10082.69999999553,
+          "reused": 0
+        },
+        {
+          "kind": "send",
+          "operation": "prepare",
+          "ms": 768.5
+        },
+        {
+          "kind": "response",
+          "operation": "prepare",
+          "ms": 12436.69999999553,
+          "reused": 0
+        }
+      ]
+    },
+    {
+      "name": "training-confirm",
+      "ms": 132,
+      "workers": []
+    },
+    {
+      "name": "contract",
+      "ms": 1618,
+      "workers": []
+    },
+    {
+      "name": "next-season",
+      "ms": 4769,
+      "workers": [
+        {
+          "kind": "send",
+          "operation": "nextSeason",
+          "ms": 787
+        },
+        {
+          "kind": "response",
+          "operation": "nextSeason",
+          "ms": 3929.60000000149,
+          "reused": 3587,
+          "deltaRawBytes": 15533203,
+          "deltaStoredBytes": 2038720
+        }
+      ]
+    },
+    {
+      "name": "first-half-and-autosave",
+      "ms": 18342,
+      "workers": [
+        {
+          "kind": "send",
+          "operation": "advanceHalf",
+          "ms": 705.5
+        },
+        {
+          "kind": "response",
+          "operation": "advanceHalf",
+          "ms": 17506.09999999404,
+          "reused": 3585,
+          "deltaRawBytes": 155465918,
+          "deltaStoredBytes": 10338099
+        }
+      ]
+    },
+    {
+      "name": "second-half-and-season-end",
+      "ms": 15402,
+      "workers": [
+        {
+          "kind": "send",
+          "operation": "continueHalf",
+          "ms": 1182.7999999970198
+        },
+        {
+          "kind": "response",
+          "operation": "continueHalf",
+          "ms": 14624.79999999702,
+          "reused": 4273,
+          "deltaRawBytes": 64749702,
+          "deltaStoredBytes": 5763278
+        }
+      ]
+    }
+  ],
+  "errors": []
+}

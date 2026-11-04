@@ -1,3 +1,4 @@
+import {sealCareer} from './game/game-delta';
 import {needsAbilityUpgrade} from './game/ability-expansion';
 import {currencyText} from './game/currency';
 import {careerMatchLedger} from './game/career-text';
@@ -7,7 +8,6 @@ import type { Career, CreateOptions, GameCommand, GameProgress, MatchRecord, Sav
 import type { PresentationEvent } from './game/revision-types';
 import { CLUBS, DATA_PROVENANCE } from './game/data';
 import { createCareer, ENGINE_VERSION } from './game/engine';
-import {LIGHT_COMMANDS} from './game/command-patches';
 import {cancelCheckpointPreparation} from './game/save-preparation';
 import { runGameCommand,releaseIdleGameWorker } from './game/client';
 import { deleteSlot, exportCareerBlob, importCareer, listSlots, loadCareer, restoreBackup, saveCareer, saveCareerChange,pauseBackgroundCheckpoints,noteCheckpointActivity } from './game/storage';
@@ -100,8 +100,9 @@ export default function App() {
   function openTraining(){openPlayer('training');}
   function openCareer(view:CareerView){navigate('career');setCareerView(view);}
   async function refresh() { setSlots(await listSlots()); }
-  function display(next: Career) { careerRef.current = next; setCareer(next); }
+  function display(next: Career) { sealCareer(next);careerRef.current = next; setCareer(next); }
   async function commit(next: Career, previous?:Career): Promise<boolean> {
+    if(next===previous)return true;
     display(next); setSaveStatus('saving');
     try { if(previous)await saveCareerChange(previous,next);else await saveCareer(next); }
     catch (e) { setSaveStatus('error'); setError(`자동 저장에 실패했습니다. 현재 진행은 화면에 유지됩니다. 파일로 내보내기를 권장합니다. ${errorMessage(e)}`); return false; }
@@ -112,7 +113,7 @@ export default function App() {
   }
   async function command(value: GameCommand) {
     if (locked.current || !careerRef.current) return;
-    locked.current = true; setBusy(true); setError('');const resume=LIGHT_COMMANDS.has(value.type)?undefined:beginFullTask();
+    locked.current = true; setBusy(true); setError('');const resume=beginFullTask();
     try { const previous = careerRef.current; const next = await runGameCommand(previous, value,setProgress); const saved=await commit(next,previous);if(value.type==='training'&&saved)navigate('locker');
       if (['advanceHalf','continueHalf','transfer','nextSeason','retire'].includes(value.type) && !reduced) { const matchIds = new Set([...careerMatchLedger(previous).club,...careerMatchLedger(previous).national].map(m => m.id)), eventIds = new Set(previous.systems?.events.map(e => e.id) || []); const matches = [...careerMatchLedger(next).club,...careerMatchLedger(next).national].filter(m => !matchIds.has(m.id)), events = next.systems?.events.filter(e => !eventIds.has(e.id)) || []; if (matches.length || events.some(e => e.importance === 'milestone')) setPresentation({ matches, events }); } if (value.type === 'nextSeason' || value.type === 'retire') navigate(value.type === 'retire' ? 'career' : 'locker'); if (value.type === 'training') setToast('새로운 훈련 계획을 적용했습니다.'); }
     catch (e) { setError(errorMessage(e)); }
@@ -135,6 +136,7 @@ export default function App() {
   }
   async function saveNow() {
     if (locked.current || !careerRef.current) return;
+    if(saveStatus==='saved'){setToast('최신 진행이 이미 저장되어 있습니다.');return;}
     locked.current = true; setBusy(true); setError('');const resume=beginFullTask();
     try { await commit(careerRef.current); }
     finally { resume?.();locked.current = false; setBusy(false); setProgress(null); }

@@ -1,0 +1,121 @@
+TAP version 13
+# (node:70964) ExperimentalWarning: The MockTimers API is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: durable journals wait for a genuine idle period; pressure batches never compact on every click
+ok 1 - durable journals wait for a genuine idle period; pressure batches never compact on every click
+  ---
+  duration_ms: 5.188499
+  ...
+# Subtest: foreground tasks pause pending checkpoints across slots and resume once without starving canceled jobs
+ok 2 - foreground tasks pause pending checkpoints across slots and resume once without starving canceled jobs
+  ---
+  duration_ms: 4.859817
+  ...
+# (node:70965) ExperimentalWarning: The MockTimers API is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: worker progress keeps a long injury command alive; silence still times out and retains the save
+ok 3 - worker progress keeps a long injury command alive; silence still times out and retains the save
+  ---
+  duration_ms: 61.540968
+  ...
+# Subtest: real round deltas and later light decisions persist without rewriting the base, with exact load and backup recovery
+ok 4 - real round deltas and later light decisions persist without rewriting the base, with exact load and backup recovery
+  ---
+  duration_ms: 20052.924269
+  ...
+# Subtest: new match corruption is rejected before a delta is certified; full external validation still rejects an altered old match
+ok 5 - new match corruption is rejected before a delta is certified; full external validation still rejects an altered old match
+  ---
+  duration_ms: 5276.316961
+  ...
+# Subtest: corrupt immutable payloads, wrong bases and altered hash chains fail and retain the last good backup
+ok 6 - corrupt immutable payloads, wrong bases and altered hash chains fail and retain the last good backup
+  ---
+  duration_ms: 4287.264688
+  ...
+# Subtest: concurrent forks and deleted slots cannot be overwritten by a prepared game delta
+ok 7 - concurrent forks and deleted slots cannot be overwritten by a prepared game delta
+  ---
+  duration_ms: 4927.552429
+  ...
+# Subtest: sealing preserves all source values, mutable callers cannot borrow a trusted receipt, and actual no-ops do not create saves
+ok 8 - sealing preserves all source values, mutable callers cannot borrow a trusted receipt, and actual no-ops do not create saves
+  ---
+  duration_ms: 345.132046
+  ...
+# Subtest: multi-round revision jumps remain one atomic durable command and replay exactly
+ok 9 - multi-round revision jumps remain one atomic durable command and replay exactly
+  ---
+  duration_ms: 4378.218809
+  ...
+# Subtest: actual offseason contracts and voluntary FA use small durable patches with identical world, wage and club records after reload
+ok 10 - actual offseason contracts and voluntary FA use small durable patches with identical world, wage and club records after reload
+  ---
+  duration_ms: 11964.328758
+  ...
+# Subtest: light controls durably replay every field without replacing the large snapshot
+ok 11 - light controls durably replay every field without replacing the large snapshot
+  ---
+  duration_ms: 5665.886582
+  ...
+# Subtest: compaction retains the previous logical revision as backup and identical autosaves keep it
+ok 12 - compaction retains the previous logical revision as backup and identical autosaves keep it
+  ---
+  duration_ms: 3788.220346
+  ...
+# Subtest: corrupt write-ahead records fail validation and restore without displacing the good backup
+ok 13 - corrupt write-ahead records fail validation and restore without displacing the good backup
+  ---
+  duration_ms: 1840.314654
+  ...
+# Subtest: a changed engine receipt falls back to full validation instead of persisting a malformed delta
+ok 14 - a changed engine receipt falls back to full validation instead of persisting a malformed delta
+  ---
+  duration_ms: 1257.367659
+  ...
+# Subtest: parallel forks cannot overwrite the first durable light command
+ok 15 - parallel forks cannot overwrite the first durable light command
+  ---
+  duration_ms: 1120.195328
+  ...
+# Subtest: a checkpoint overlapping a new command preserves the newer head and its backup
+ok 16 - a checkpoint overlapping a new command preserves the newer head and its backup
+  ---
+  duration_ms: 3215.792459
+  ...
+# Subtest: an external tab update blocks a local journal even if metadata is stale
+ok 17 - an external tab update blocks a local journal even if metadata is stale
+  ---
+  duration_ms: 2306.849708
+  ...
+# Subtest: malformed patch paths cannot alter prototypes and deleted slots cannot be revived
+ok 18 - malformed patch paths cannot alter prototypes and deleted slots cannot be revived
+  ---
+  duration_ms: 587.912159
+  ...
+# Subtest: offseason training confirmation uses the same durable change path
+ok 19 - offseason training confirmation uses the same durable change path
+  ---
+  duration_ms: 11162.078635
+  ...
+# Subtest: a modified previous mutable state cannot inherit a trusted incremental receipt
+ok 20 - a modified previous mutable state cannot inherit a trusted incremental receipt
+  ---
+  duration_ms: 642.835009
+  ...
+# (node:71017) ExperimentalWarning: The MockTimers API is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: save Worker cancellation preserves full requests and clears settled request timers
+ok 21 - save Worker cancellation preserves full requests and clears settled request timers
+  ---
+  duration_ms: 18.36476
+  ...
+1..21
+# tests 21
+# suites 0
+# pass 21
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 52012.619595

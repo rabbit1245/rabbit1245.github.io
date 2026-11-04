@@ -1,0 +1,50 @@
+TAP version 13
+# Subtest: real round deltas and later light decisions persist without rewriting the base, with exact load and backup recovery
+ok 1 - real round deltas and later light decisions persist without rewriting the base, with exact load and backup recovery
+  ---
+  duration_ms: 15402.61822
+  ...
+# Subtest: new match corruption is rejected before a delta is certified; full external validation still rejects an altered old match
+ok 2 - new match corruption is rejected before a delta is certified; full external validation still rejects an altered old match
+  ---
+  duration_ms: 3604.745487
+  ...
+# Subtest: corrupt immutable payloads, wrong bases and altered hash chains fail and retain the last good backup
+ok 3 - corrupt immutable payloads, wrong bases and altered hash chains fail and retain the last good backup
+  ---
+  duration_ms: 3329.551333
+  ...
+# Subtest: concurrent forks and deleted slots cannot be overwritten by a prepared game delta
+ok 4 - concurrent forks and deleted slots cannot be overwritten by a prepared game delta
+  ---
+  duration_ms: 4577.95553
+  ...
+# Subtest: sealing preserves all source values, mutable callers cannot borrow a trusted receipt, and actual no-ops do not create saves
+ok 5 - sealing preserves all source values, mutable callers cannot borrow a trusted receipt, and actual no-ops do not create saves
+  ---
+  duration_ms: 353.903565
+  ...
+# Subtest: multi-round revision jumps remain one atomic durable command and replay exactly
+ok 6 - multi-round revision jumps remain one atomic durable command and replay exactly
+  ---
+  duration_ms: 4539.503207
+  ...
+# Subtest: actual offseason contracts and voluntary FA use small durable patches with identical world, wage and club records after reload
+ok 7 - actual offseason contracts and voluntary FA use small durable patches with identical world, wage and club records after reload
+  ---
+  duration_ms: 12603.461617
+  ...
+# Subtest: retirement carries all prior events and annual records through the new durable result path
+ok 8 - retirement carries all prior events and annual records through the new durable result path
+  ---
+  duration_ms: 5930.678465
+  ...
+1..8
+# tests 8
+# suites 0
+# pass 8
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 50839.041017

@@ -1,12 +1,22 @@
+import {isSealedCareer} from './game-delta';
 import type {Career,GameCommand} from './types';
 
 export type CareerPatch = {path:(string|number)[];op:'set';value:unknown}|{path:(string|number)[];op:'delete'}|{path:(string|number)[];op:'length';value:number};
-export const LIGHT_COMMANDS=new Set<GameCommand['type']>(['upgradeAbilities','changePosition','nationalParticipation','personality','personalitySet','refreshOffers','playSkill','manualAging','attributeLock','attributeLockAll','training','cheatSettings','increaseAttribute']);
+export const LIGHT_COMMANDS=new Set<GameCommand['type']>(['transfer','stay','releaseContract','captainDecision','dismissChoice','upgradeAbilities','changePosition','nationalParticipation','personality','personalitySet','refreshOffers','playSkill','manualAging','attributeLock','attributeLockAll','training','cheatSettings','increaseAttribute']);
+export const LOCAL_DECISIONS=new Set<GameCommand['type']>(['transfer','stay','releaseContract']);
 const forbidden=new Set(['__proto__','prototype','constructor']);
-const receipts=new WeakMap<Career,{previous:WeakRef<Career>;patches:CareerPatch[];signature:string}>();
+const receipts=new WeakMap<Career,{previous:WeakRef<Career>;patches:CareerPatch[];signature:string;broad:boolean}>();
 const MAX_PATCH_BYTES=512*1024;
 function sameRows(a:readonly unknown[],b:readonly unknown[]){return a.length===b.length&&a.every((v,i)=>v===b[i]);}
-function eligible(a:Career,b:Career){
+function eligible(a:Career,b:Career,broad=false){
+ if(broad){
+  const x=a.systems,y=b.systems;
+  if(!isSealedCareer(a)||!x||!y||a.season.year!==b.season.year||a.player.ovrVersion!==3||x.world.balanceVersion!==1||x.world.financeVersion!==1)return false;
+  if(a.id!==b.id||a.seed!==b.seed||!Number.isSafeInteger(b.revision)||b.revision>100_000_000||b.processedCommands.length>100_000||b.revision!==a.revision+1||a.stage!==b.stage||!sameRows(a.history,b.history)||!sameRows(a.season.matches,b.season.matches)||!sameRows(x.national.matches,y.national.matches)||!sameRows(x.national.history,y.national.history)||!sameRows(x.national.teamResults??[],y.national.teamResults??[])||!sameRows(x.clubCompetitions?.history??[],y.clubCompetitions?.history??[])||!sameRows(x.rankings,y.rankings)||!sameRows(x.growthReports,y.growthReports))return false;
+  const cups=x.clubCompetitions?.current??[],next=y.clubCompetitions?.current??[];
+  return cups.length===next.length&&cups.every((t,i)=>t.id===next[i].id&&sameRows(t.matches,next[i].matches));
+ }
+
  return a.id===b.id&&a.seed===b.seed&&Number.isSafeInteger(b.revision)&&b.revision<=100_000_000&&b.processedCommands.length<=100_000&&(b.systems?.economics.valueHistory.length??0)<=100_000&&(b.systems?.economics.contractHistory?.length??0)<=1000&&b.revision===a.revision+1&&a.season.year===b.season.year&&a.season.week===b.season.week&&a.stage===b.stage&&a.player.clubId===b.player.clubId&&!!a.systems&&!!b.systems&&a.systems.world===b.systems.world&&a.systems.national===b.systems.national&&a.systems.clubCompetitions===b.systems.clubCompetitions&&a.systems.commercial===b.systems.commercial&&sameRows(a.systems.rankings,b.systems.rankings)&&sameRows(a.systems.growthReports,b.systems.growthReports)&&sameRows(a.history,b.history)&&sameRows(a.season.matches,b.season.matches);
 }
 function difference(a:unknown,b:unknown,path:(string|number)[],out:CareerPatch[]):void{
@@ -23,13 +33,14 @@ function difference(a:unknown,b:unknown,path:(string|number)[],out:CareerPatch[]
 }
 /** Receipt of a bounded, engine-produced change. It never keeps an old career alive. */
 export function recordCommandChange(previous:Career,next:Career,command:GameCommand):void{
- if(!LIGHT_COMMANDS.has(command.type)||!eligible(previous,next))return;
+ const broad=LOCAL_DECISIONS.has(command.type);
+ if(!LIGHT_COMMANDS.has(command.type)||!eligible(previous,next,broad))return;
  const patches:CareerPatch[]=[];difference(previous,next,[],patches);
  const signature=JSON.stringify(patches);
- if(new TextEncoder().encode(signature).length<=MAX_PATCH_BYTES)receipts.set(next,{previous:new WeakRef(previous),patches,signature});
+ if(new TextEncoder().encode(signature).length<=MAX_PATCH_BYTES)receipts.set(next,{previous:new WeakRef(previous),patches,signature,broad});
 }
 export function commandChange(previous:Career,next:Career):CareerPatch[]|undefined{
- const receipt=receipts.get(next);if(!receipt||receipt.previous.deref()!==previous||!eligible(previous,next))return;
+ const receipt=receipts.get(next);if(!receipt||receipt.previous.deref()!==previous||!eligible(previous,next,receipt.broad))return;
  const current:CareerPatch[]=[];difference(previous,next,[],current);
  if(JSON.stringify(current)!==receipt.signature)return;
  return structuredClone(receipt.patches);

@@ -1,3 +1,4 @@
+import {certifiedGameDelta,isSealedCareer} from './game-delta';
 import {validateAchievementEvidence} from './achievement-evidence';
 import {validateActionLedger} from './action-metrics';
 import {internationalRoster} from './international-clubs';
@@ -8,7 +9,7 @@ import {jsonBlob} from './json-blob';
 import {CheckpointScheduler} from './checkpoint-scheduler';
 import {recoverCareerKeeperRoles} from './keeper-recovery';
 import {commandChange,controlFingerprint} from './command-patches';
-import {decodeStored,isBlobCareer,prepareStored,metadataFor,journalEntry,storedHead,recordFingerprint,type StoredCareer,type BlobCareer,type PreparedSave,type DecodedSave} from './save-codec';
+import {decodeStored,isBlobCareer,prepareStored,metadataFor,journalEntry,deltaJournalEntry,journalSize,storedHead,recordFingerprint,type StoredCareer,type BlobCareer,type PreparedSave,type DecodedSave} from './save-codec';
 import {validateCompetitionData} from './competition-validation';
 import { validateCareerExtensions } from './extension-validation';
 import { CLUBS, LEAGUES, INTERNATIONAL_CLUBS, INTERNATIONAL_LEAGUES } from './data';
@@ -97,11 +98,13 @@ function calendarDate(value: unknown, label: string): string {
   return day;
 }
 
+let validationReuse:{safe:WeakSet<object>;club:WeakSet<object>;national:WeakSet<object>}|undefined;
 function ensureSafeJSON(value: unknown): void {
   if(!value||typeof value!=='object')return;
   const stack:object[]=[value],depths=[0];let visited=1;
   while (stack.length) {
     const current=stack.pop()! as Record<string,unknown>,depth=depths.pop()!+1;
+    if(validationReuse?.safe.has(current))continue;
     for (const key of Object.keys(current)) {
       assert(!poisonedKeys.has(key), '허용하지 않는 속성이 포함되어 있습니다.');
       assert(++visited<=64_000_000&&depth<=64,'저장 구조가 지나치게 크거나 깊습니다.');
@@ -269,6 +272,7 @@ function matches(value: unknown, label: string, playerId: string, national = fal
     const match = object(raw, prefix);
     ids.push(text(match.id, `${prefix}.id`));
     fixtureIds.push(text(match.fixtureId, `${prefix}.fixtureId`));
+    if((national?validationReuse?.national:validationReuse?.club)?.has(match))continue;
     text(match.seed, `${prefix}.seed`, 500);
     number(match.round, `${prefix}.round`, 1, 150, true);
     number(match.seasonYear, `${prefix}.seasonYear`, 1900, 2500, true);
@@ -929,6 +933,22 @@ export function validateCareer(value: unknown,ownedJSON=false): Career {
 }
 
 
+/** The simulation Worker receives a previously authenticated immutable state.
+ * Revalidate every changed/new record and all aggregate cross-checks, while
+ * unchanged match event graphs retain their already-established validation. */
+export function validateEngineResult(previous:Career,next:Career):Career{
+ assert(isSealedCareer(previous),'진행 검사의 이전 상태가 불변 상태가 아닙니다.');
+ assert(previous.id===next.id&&previous.player.id===next.player.id&&previous.seed===next.seed,'진행 검사의 기준이 일치하지 않습니다.');
+ const reuse={safe:new WeakSet<object>(),club:new WeakSet<object>(),national:new WeakSet<object>()};
+ const register=(rows:MatchRecord[]|undefined,national=false)=>{if(!rows)return;reuse.safe.add(rows);for(const match of rows){reuse.safe.add(match);(national?reuse.national:reuse.club).add(match);}};
+ reuse.safe.add(previous.history);for(const h of previous.history){reuse.safe.add(h);register(h.matches);}
+ register(previous.season.matches);
+ const n=previous.systems?.national;if(n){register(n.matches,true);register(n.teamResults,true);reuse.safe.add(n.history);for(const h of n.history){reuse.safe.add(h);register(h.matches,true);}}
+ const cups=previous.systems?.clubCompetitions;if(cups){reuse.safe.add(cups.history);for(const h of cups.history){reuse.safe.add(h);register(h.matches);}for(const t of cups.current)register(t.matches);}
+ const prior=validationReuse;validationReuse=reuse;try{return validateCareer(next,true);}finally{validationReuse=prior;}
+}
+
+
 async function checksum(career: Career): Promise<string> {
   if (!globalThis.crypto?.subtle) throw new Error('안전한 저장을 위해 HTTPS 또는 localhost에서 게임을 열어 주세요.');
   const bytes=canonicalBytes(career);assert(bytes.byteLength<=MAX_SAVE_BYTES,'저장 파일이 지원하는 1GB 범위를 초과했습니다.');
@@ -1076,18 +1096,21 @@ export async function saveCareer(career:Career):Promise<void>{return persistCare
 
 /** A durable, checksummed write-ahead record for an authenticated light engine result. */
 export async function saveCareerChange(previous:Career,next:Career):Promise<void>{
- const patches=durableCareers.get(previous)===controlFingerprint(previous)?commandChange(previous,next):undefined;
- if(!patches)return saveCareer(next);
- await enqueue(next.id,async()=>{
+ if(previous===next){if(isSealedCareer(next)&&durableCareers.get(next)===controlFingerprint(next))return;return saveCareer(next);}
+ const trusted=durableCareers.get(previous)===controlFingerprint(previous),delta=trusted?certifiedGameDelta(previous,next):undefined;
+ const patches=!delta&&trusted?commandChange(previous,next):undefined;
+ if(!delta&&!patches)return saveCareer(next);
+ const compact=Symbol('full checkpoint');
+ try{await enqueue(next.id,async()=>{
   const snapshot=await readSlot(next.id);assertKnown(snapshot.current,snapshot.metadata,next.id);
   if(!snapshot.current||!isBlobCareer(snapshot.current))throw Error('저장 스냅샷을 다시 불러온 뒤 변경해 주세요.');
   const head=storedHead(snapshot.current);
   if(head.revision!==previous.revision)throw Error('저장 충돌: 변경 기록의 시작 시점이 다릅니다.');
-  const entry=await journalEntry(next.id,previous.revision,next.revision,head.hash,patches);
+  const entry=delta?await deltaJournalEntry(next.id,previous.revision,next.revision,head.hash,delta):await journalEntry(next.id,previous.revision,next.revision,head.hash,patches!);
   const journal=[...snapshot.current.journal,entry];
-  const journalBytes=new TextEncoder().encode(JSON.stringify(journal)).length;
-  if(journal.length>512||journalBytes>MAX_JOURNAL_BYTES)throw Error('배경 저장이 밀려 있습니다. 잠시 뒤 다시 저장해 주세요.');
-  const record:BlobCareer={...snapshot.current,journal,writeId:crypto.randomUUID()};
+  const size=journalSize(journal),v2=!!delta||snapshot.current.format==='kball-blob-v2';
+  if(journal.length>512||size.rawBytes>(v2?768*1024*1024:MAX_JOURNAL_BYTES)||size.storedBytes>128*1024*1024)throw compact;
+  const record:BlobCareer={...snapshot.current,format:v2?'kball-blob-v2':'kball-blob-v1',journal,writeId:crypto.randomUUID()};
   const metadata=metadataFor(next,entry.hash,new Date().toISOString()),database=await openDatabase();
   await new Promise<void>((resolve,reject)=>{
    const tx=database.transaction(['slots','backups','metadata'],'readwrite'),slots=tx.objectStore('slots'),store=tx.objectStore('metadata'),current=slots.get(next.id),meta=store.get(next.id);let done=false,failure:Error|undefined;
@@ -1100,12 +1123,12 @@ export async function saveCareerChange(previous:Career,next:Career):Promise<void
    };current.onsuccess=write;meta.onsuccess=write;tx.oncomplete=()=>resolve();tx.onabort=()=>reject(failure??storageError(tx.error));tx.onerror=()=>reject(failure??storageError(tx.error));
   });
   knownVersions.set(next.id,{revision:next.revision,hash:entry.hash});durableCareers.set(next,controlFingerprint(next));
-  scheduleCheckpoint(next.id,record,journalBytes);
- });
+  scheduleCheckpoint(next.id,record,size.storedBytes);
+ });}catch(e){if(e===compact)return saveCareer(next);throw e;}
 }
 function scheduleCheckpoint(id:string,record:BlobCareer,journalBytes?:number){
  if(typeof Worker==='undefined')return;
- checkpointScheduler.schedule(id,{bytes:record.rawBytes??record.blob.size,entries:record.journal.length,journalBytes:journalBytes??new TextEncoder().encode(JSON.stringify(record.journal)).length});
+ const size=journalSize(record.journal);checkpointScheduler.schedule(id,{bytes:record.rawBytes??record.blob.size,entries:record.journal.length,journalBytes:journalBytes??size.storedBytes,journalRawBytes:size.rawBytes});
 }
 /** Compaction never changes the logical head or the last-good backup. */
 export function checkpointCareer(id:string):Promise<void>{

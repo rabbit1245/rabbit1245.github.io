@@ -1,0 +1,50 @@
+{
+  "label": "before",
+  "url": "http://127.0.0.1:4198/before/Kball.html",
+  "source": "/workspace/kball-2140/captain-career.json",
+  "version": "K볼 2.13.0 · A FOOTBALL LIFE",
+  "captainMs": 16693,
+  "alreadySavedMs": 15619,
+  "captainWorkers": [
+    {
+      "op": "captainDecision",
+      "time": 29675.09999999404
+    },
+    {
+      "op": "prepare",
+      "time": 32876.59999999404
+    }
+  ],
+  "manualWorkers": [
+    {
+      "op": "prepare",
+      "time": 46597.89999999851
+    }
+  ],
+  "initial": {
+    "format": "kball-blob-v1",
+    "baseRevision": 560,
+    "revision": 560,
+    "hash": "e88211124306c8884d97622a7d104cfbb3db8f7918967c78d18cfba2251c5a25",
+    "writeId": "dfdc5154-a300-4e8f-9a0a-436cf360d75a",
+    "journal": 0
+  },
+  "accepted": {
+    "format": "kball-blob-v1",
+    "baseRevision": 561,
+    "revision": 561,
+    "hash": "3f09c088345f80ae4eabb5b892326ca44711d801ac0e2884281a5f98edcd767b",
+    "writeId": "51ecc61c-f02e-45f2-9e0d-4778753936aa",
+    "journal": 0
+  },
+  "after": {
+    "format": "kball-blob-v1",
+    "baseRevision": 561,
+    "revision": 561,
+    "hash": "3f09c088345f80ae4eabb5b892326ca44711d801ac0e2884281a5f98edcd767b",
+    "writeId": "51ecc61c-f02e-45f2-9e0d-4778753936aa",
+    "journal": 0
+  },
+  "reload": true,
+  "errors": []
+}

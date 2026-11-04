@@ -1,0 +1,14 @@
+{
+  "progress": {
+    "file": "test-results/coherence/large/career.json",
+    "bytes": 272717105,
+    "sha256": "cf23f60c7f42f638ea9fe46e6da99a9728d74b375c68705fb539b03c506e513f",
+    "historySeasons": 14
+  },
+  "captain": {
+    "file": "/workspace/kball-2140/captain-career.json",
+    "bytes": 272718869,
+    "sha256": "895ffb6f55a24c1f51f0e03e86f7376583fe3f6b43c2e8354c2b6e1c211ae29e",
+    "setup": "Same real 14-season record base, controlled current ability 95 and leadership 100, prior captain term closed and a valid new offer generated. No match results or historical stats fabricated."
+  }
+}

@@ -30,7 +30,7 @@ import { TALENT_PROFILES } from './talent';
 import type { Award, AttributeKey, Attributes, Career, CreateOptions, Fixture, GameProgress, Intensity, MatchRecord, Player, PlayerStats, Position, SeasonState, SeasonSummary, Standing, Talent, TransferOffer } from './types';
 import type { PresentationEvent } from './revision-types';
 
-export const ENGINE_VERSION = '2.13.0';
+export const ENGINE_VERSION = '2.14.0';
 export const overall = calculateOverall;
 export { addStats, emptyStats, hashSeed, seededRandom } from './math';
 const TALENT_ORDER: Talent[] = ['D','C','B','A','S','SS','SSS'];
@@ -396,11 +396,11 @@ export function acceptTransfer(career:Career,offerId:string):Career {
 export function respondToCaptainOffer(career:Career,offerId:string,accept:boolean):Career {
   if(career.stage==='retired')throw new Error('은퇴한 선수는 주장 제의에 응답할 수 없습니다.');
   if(typeof offerId!=='string'||!offerId||typeof accept!=='boolean')throw new Error('유효한 주장 제의를 선택해 주세요.');
-  const next=editable(career);answerCaptainOffer(next,offerId,accept);touch(next);return next;
+  const next=editable(career,true);answerCaptainOffer(next,offerId,accept);touch(next);return next;
 }
 export function dismissChoice(career:Career):Career {
   if(!career.systems?.pendingChoice)return career;
-  const next=editable(career);next.systems!.pendingChoice=undefined;next.offers=[];
+  const next=editable(career,true);next.systems!.pendingChoice=undefined;next.offers=[];
   present(next,'renewal','현재 계약 유지','이번 제안을 넘겼습니다. 현재 주급과 계약은 그대로 이어집니다.');touch(next);return next;
 }
 export function stayAtClub(career:Career):Career {

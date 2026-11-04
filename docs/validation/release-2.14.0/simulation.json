@@ -1,0 +1,18 @@
+{
+  "before": {
+    "root": "/workspace/kball-2140/baseline",
+    "round": 6,
+    "userMatches": 6,
+    "worldPlayed": 3515,
+    "hash": "349748b595127482ba183e02b7c09ffb608114900f7ea1ee0cd0aaa7cf06ec08"
+  },
+  "after": {
+    "root": "/workspace/rabbit1245.github.io",
+    "round": 6,
+    "userMatches": 6,
+    "worldPlayed": 3515,
+    "hash": "349748b595127482ba183e02b7c09ffb608114900f7ea1ee0cd0aaa7cf06ec08"
+  },
+  "allCareerDataIdentical": true,
+  "notes": "Fixed commands, IDs and seed; canonical SHA-256 of the complete state including every event, performer, statistic and simulated world fixture."
+}
