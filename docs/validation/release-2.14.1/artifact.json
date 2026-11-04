@@ -1,0 +1,18 @@
+{
+  "Kball.html": {
+    "bytes": 28710629,
+    "sha256": "a525afe5cf363dfed439c12a6ca1f6c68d6f980fdc8aa142afdab7e5a9b5d99a"
+  },
+  "Kball.zip": {
+    "bytes": 21637338,
+    "sha256": "3acf9788bf587535ded9277715efb519847008dea01bf6272f73e4b3848e74c0"
+  },
+  "zipEntries": [
+    "Kball.html",
+    "읽어주세요.txt",
+    "FONT-LICENSE.txt",
+    "CREST-LICENSE.txt"
+  ],
+  "zipCrcValid": true,
+  "innerHtmlMatches": true
+}

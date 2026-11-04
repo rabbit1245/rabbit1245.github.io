@@ -1,0 +1,67 @@
+{
+  "url": "http://127.0.0.1:4199/Kball.html",
+  "checks": [
+    {
+      "position": "CB",
+      "ability": 130,
+      "actualHalfSeason": true,
+      "autosave": true,
+      "noUncheckedGrowth": true
+    },
+    {
+      "position": "ST",
+      "width": 1366,
+      "localHTML": false,
+      "ability120Mastery10Total130": true,
+      "basicCap100": true,
+      "selectionNoFreeOVR": true,
+      "removalApplies100": true,
+      "cheatReaches120": true,
+      "reload": true,
+      "noOverflow": true
+    },
+    {
+      "position": "ST",
+      "width": 390,
+      "localHTML": false,
+      "ability120Mastery10Total130": true,
+      "basicCap100": true,
+      "selectionNoFreeOVR": true,
+      "removalApplies100": true,
+      "cheatReaches120": true,
+      "reload": true,
+      "noOverflow": true
+    },
+    {
+      "position": "GK",
+      "width": 1366,
+      "localHTML": false,
+      "ability120Mastery10Total130": true,
+      "basicCap100": true,
+      "selectionNoFreeOVR": true,
+      "removalApplies100": true,
+      "cheatReaches120": true,
+      "reload": true,
+      "noOverflow": true
+    },
+    {
+      "position": "GK",
+      "width": 390,
+      "localHTML": false,
+      "ability120Mastery10Total130": true,
+      "basicCap100": true,
+      "selectionNoFreeOVR": true,
+      "removalApplies100": true,
+      "cheatReaches120": true,
+      "reload": true,
+      "noOverflow": true
+    },
+    {
+      "actual2121Migration": true,
+      "originalAttributesArchived": true,
+      "eventsAndFinancesPreserved": true,
+      "oneTime": true
+    }
+  ],
+  "errors": []
+}

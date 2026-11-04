@@ -14,6 +14,19 @@ export function openPlaySaveChance(keeping:number,finishing:number):number{
   const edge=Math.tanh((keeping-finishing)/12)*.65;
   return 1/(1+Math.exp(-(Math.log(neutral/(1-neutral))+edge)));
 }
+/** Reading the finish helps execution, but cannot replace the technique needed
+ * to strike the ball. Bound only this complementary contribution, not the raw
+ * mental ability, chance creation, defending or the earned OVR scale. Equal
+ * abilities keep their original value; every component remains monotonic. */
+export function supportedTechnique(technique:number,support:number,weight:number):number{
+ return technique+40*Math.tanh((support-technique)/40)*weight;
+}
+/** Equal scalar opponents keep the original one-on-one baseline. Finishing now
+ * contests the keeper too, instead of a composed but poor finisher bypassing it. */
+export function oneOnOneSaveChance(oneOnOnes:number,reflexes:number,positioning:number,decisions:number,finishing:number):number{
+ const neutral=Math.max(.05,Math.min(.95,.10+oneOnOnes*.0022+reflexes*.0012+positioning*.001+decisions*.001));
+ return skillSuccess(neutral,oneOnOnes,finishing,.024,.024);
+}
 /** Strong sides have a finite supply of chances: finishing roles compete for it.
  * Preserve the original team opportunity budget; no goal or result is rewritten.
  * The rule is identical for the protagonist and NPCs, using real attributes. */

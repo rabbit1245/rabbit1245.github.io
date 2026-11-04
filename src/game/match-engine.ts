@@ -1,7 +1,7 @@
 import {cardRiskMultiplier,expectedDefensiveActivity} from './discipline';
 import {playingAbility,leadershipAbility} from './attributes';
 import {personalityEdge,personality} from './personality';
-import {skillSuccess,openPlaySaveChance,shareShotSupply,cognitiveOpportunity} from './ability-contests';
+import {skillSuccess,openPlaySaveChance,shareShotSupply,cognitiveOpportunity,supportedTechnique,oneOnOneSaveChance} from './ability-contests';
 import {actionAbility as ability,phasePasses,resolvePressing,resolveBallDuels,resolveAirClaims,headerProbability,headerDelivery,aerialQuality,type ActionEmitter} from './match-actions';
 import { CLUBS, ROSTERS } from './data';
 import { clamp, emptyStats, hashSeed, integer, round, seededRandom } from './math';
@@ -379,15 +379,19 @@ export function simulateMatch(career:Career,fixture:Fixture,options:MatchOptions
           if(bigChance){creator.stats.bigChancesCreated=(creator.stats.bigChancesCreated??0)+1;if(shotAction.kind==='shot')shotAction.bigChance=true;if(recordActions)emit('bigChance',creator,minute,'수비를 넘어 동료에게 명확한 득점 기회 공급',shotId,{kind:'bigChance',receiverId:shooter.id,quality:clamp(.3+(q-opposition.power)*.004,.2,.8)});}
         }
         const late=minute>60?Math.min(1,.62+a('stamina')*.0038):1;
-        const shootingQuality=shotType==='header'?a('heading')*.445+a('jumping')*.162+a('positioning')*.182+a('strength')*.101+a('composure')*.11:shotType==='setPiece'||shotType==='penalty'?a('shooting')*.38+a('composure')*.2+a('setPieces')*.42:a('shooting')*.68+a('composure')*.25+a('setPieces')*.07;
+        const shootingQuality=shotType==='header'
+          ?supportedTechnique((a('heading')*.445+a('jumping')*.162+a('strength')*.101)/.708,(a('positioning')*.182+a('composure')*.11)/.292,.292)
+          :shotType==='setPiece'||shotType==='penalty'
+            ?supportedTechnique((a('shooting')*.38+a('setPieces')*.42)/.8,a('composure'),.2)
+            :supportedTechnique((a('shooting')*.68+a('setPieces')*.07)/.75,a('composure'),.25);
         const aim=clamp(skillSuccess(shotType==='header'?.7635:shotType==='setPiece'||shotType==='penalty'?.6855:.51975,shootingQuality,opposition.power,.037,.01)*late*(1+clutch*.018),.07,.98);
         const onTarget=shotRng()<(shotType==='penalty'?Math.max(.78,aim):aim);
         if(!onTarget)continue;
         shooter.stats.shotsOnTarget++;keeper.stats.shotsFaced=(keeper.stats.shotsFaced??0)+1;
         const keeping=k('gkShotStopping')*.455+k('gkReflexes')*.227+k('gkPositioning')*.152+k('concentration')*.106+k('gkHandling')*.06;
-        const finishing=(shotType==='header'?aerialQuality(shooter)*.55+a('finishing')*.45:a('finishing'))*.65+a('composure')*.25+a('decisions')*.1;
+        const finishing=supportedTechnique(shotType==='header'?a('heading')*.55+a('finishing')*.45:a('finishing'),(a('composure')*.25+a('decisions')*.1)/.35,.35);
         let saveChance=openPlaySaveChance(keeping,finishing);
-        if(shotType==='oneOnOne'){keeper.stats.oneOnOneAttempts=(keeper.stats.oneOnOneAttempts??0)+1;saveChance=.10+k('gkOneOnOnes')*.0038+k('gkReflexes')*.0012+k('gkPositioning')*.001+k('decisions')*.001-a('composure')*.0016;}
+        if(shotType==='oneOnOne'){keeper.stats.oneOnOneAttempts=(keeper.stats.oneOnOneAttempts??0)+1;saveChance=oneOnOneSaveChance(k('gkOneOnOnes'),k('gkReflexes'),k('gkPositioning'),k('decisions'),finishing);}
         if(shotType==='penalty'){keeper.stats.penaltiesFaced=(keeper.stats.penaltiesFaced??0)+1;saveChance=.04+k('gkOneOnOnes')*.0023+k('gkReflexes')*.0008+k('gkPositioning')*.0007-a('setPieces')*.0007;}
         if(keeper.user&&bigMatch)saveChance+=personalityEdge(career,'clutch')*.012;
         const saved=shotRng()<clamp(saveChance,.05,.97);

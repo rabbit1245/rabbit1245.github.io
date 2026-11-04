@@ -1,0 +1,194 @@
+{
+  "comparisons": [
+    {
+      "kind": "core",
+      "level": 65,
+      "clubId": null,
+      "ovr": 100,
+      "nonScoringActionsIdentical": true
+    },
+    {
+      "kind": "core-finisher",
+      "level": 65,
+      "clubId": null,
+      "ovr": 103,
+      "nonScoringActionsIdentical": true
+    },
+    {
+      "kind": "core-setpiece",
+      "level": 65,
+      "clubId": null,
+      "ovr": 101,
+      "nonScoringActionsIdentical": true
+    },
+    {
+      "kind": "brain",
+      "level": 65,
+      "clubId": null,
+      "ovr": 100,
+      "nonScoringActionsIdentical": true
+    },
+    {
+      "kind": "brain-finisher",
+      "level": 65,
+      "clubId": null,
+      "ovr": 103,
+      "nonScoringActionsIdentical": true
+    },
+    {
+      "kind": "uniform65",
+      "level": 65,
+      "clubId": null,
+      "ovr": 65,
+      "nonScoringActionsIdentical": true
+    },
+    {
+      "kind": "uniform90",
+      "level": 65,
+      "clubId": null,
+      "ovr": 90,
+      "nonScoringActionsIdentical": true
+    },
+    {
+      "kind": "core",
+      "level": 80,
+      "clubId": null,
+      "ovr": 100,
+      "nonScoringActionsIdentical": true
+    },
+    {
+      "kind": "core-finisher",
+      "level": 80,
+      "clubId": null,
+      "ovr": 103,
+      "nonScoringActionsIdentical": true
+    },
+    {
+      "kind": "core-setpiece",
+      "level": 80,
+      "clubId": null,
+      "ovr": 101,
+      "nonScoringActionsIdentical": true
+    },
+    {
+      "kind": "brain",
+      "level": 80,
+      "clubId": null,
+      "ovr": 100,
+      "nonScoringActionsIdentical": true
+    },
+    {
+      "kind": "brain-finisher",
+      "level": 80,
+      "clubId": null,
+      "ovr": 103,
+      "nonScoringActionsIdentical": true
+    },
+    {
+      "kind": "uniform65",
+      "level": 80,
+      "clubId": null,
+      "ovr": 65,
+      "nonScoringActionsIdentical": true
+    },
+    {
+      "kind": "uniform90",
+      "level": 80,
+      "clubId": null,
+      "ovr": 90,
+      "nonScoringActionsIdentical": true
+    },
+    {
+      "kind": "core",
+      "level": 90,
+      "clubId": null,
+      "ovr": 100,
+      "nonScoringActionsIdentical": true
+    },
+    {
+      "kind": "core-finisher",
+      "level": 90,
+      "clubId": null,
+      "ovr": 103,
+      "nonScoringActionsIdentical": true
+    },
+    {
+      "kind": "core-setpiece",
+      "level": 90,
+      "clubId": null,
+      "ovr": 101,
+      "nonScoringActionsIdentical": true
+    },
+    {
+      "kind": "brain",
+      "level": 90,
+      "clubId": null,
+      "ovr": 100,
+      "nonScoringActionsIdentical": true
+    },
+    {
+      "kind": "brain-finisher",
+      "level": 90,
+      "clubId": null,
+      "ovr": 103,
+      "nonScoringActionsIdentical": true
+    },
+    {
+      "kind": "uniform65",
+      "level": 90,
+      "clubId": null,
+      "ovr": 65,
+      "nonScoringActionsIdentical": true
+    },
+    {
+      "kind": "uniform90",
+      "level": 90,
+      "clubId": null,
+      "ovr": 90,
+      "nonScoringActionsIdentical": true
+    },
+    {
+      "kind": "brain",
+      "level": null,
+      "clubId": "EN1_12",
+      "ovr": 100,
+      "nonScoringActionsIdentical": true
+    },
+    {
+      "kind": "brain-finisher",
+      "level": null,
+      "clubId": "EN1_12",
+      "ovr": 103,
+      "nonScoringActionsIdentical": true
+    },
+    {
+      "kind": "core",
+      "level": null,
+      "clubId": "EN1_12",
+      "ovr": 100,
+      "nonScoringActionsIdentical": true
+    },
+    {
+      "kind": "brain",
+      "level": null,
+      "clubId": "ES1_01",
+      "ovr": 100,
+      "nonScoringActionsIdentical": true
+    },
+    {
+      "kind": "brain-finisher",
+      "level": null,
+      "clubId": "ES1_01",
+      "ovr": 103,
+      "nonScoringActionsIdentical": true
+    },
+    {
+      "kind": "core",
+      "level": null,
+      "clubId": "ES1_01",
+      "ovr": 100,
+      "nonScoringActionsIdentical": true
+    }
+  ],
+  "scope": "SHA-256 of every participant ID/minutes/passes/completed/progressive/tackles/interceptions/pressure recoveries/completed dribbles in the same paired fixtures. Scoring outcomes intentionally differ."
+}
