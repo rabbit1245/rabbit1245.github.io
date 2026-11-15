@@ -39,3 +39,7 @@
 검수는 Linux Chromium 154의 localhost에서 수행했습니다. 브라우저 힙 한도는 기본 실행과 검수 실행 모두 4,395,630,592바이트로 같았습니다. Windows Edge 사용자 환경의 직접 실행을 검수한 결과는 아닙니다.
 
 관리형 Chromium의 `file://` 시작 검사는 브라우저 관리자 정책(`ERR_BLOCKED_BY_ADMINISTRATOR`)에 막혔습니다. 이 제한을 변경하지 않았으며, 실제 단독 HTML의 전체 세이브 검수는 localhost에서 완료했습니다. [시작 검사 기록](validation/release-2.14.3/file-startup.json).
+
+## 배포
+
+[K볼 2.14.3 ZIP 다운로드](https://raw.githubusercontent.com/rabbit1245/rabbit1245.github.io/44459afa8bda13b1c22edbcaa292cd8ae556fb62/Kball.zip) · 21,651,050바이트. 공개 URL에서 HTTP 200으로 다시 내려받아 SHA-256, ZIP CRC, 내부 HTML, 안내문 버전과 MIT 라이선스를 확인했습니다. [공개 다운로드 증거](validation/release-2.14.3/public-download.json).
