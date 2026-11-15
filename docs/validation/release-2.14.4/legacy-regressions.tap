@@ -1,0 +1,45 @@
+✔ buffered canonical bytes preserve every legacy byte across key order and Unicode chunk boundaries (10.441614ms)
+✔ canonical key order is stable for arbitrary schema extension keys (60.749109ms)
+✔ incremental SHA-256 matches legacy canonical bytes and enforces the byte guard (44.066975ms)
+✔ lazy immutable event arrays preserve all fields, array methods, canonical bytes, clones and binary exports (92.49233ms)
+✔ a verified cache round-trips every event, rejects changed source tokens and corrupted cache data, and leaves the source intact (21.167726ms)
+✔ real round deltas and later light decisions persist without rewriting the base, with exact load and backup recovery (21424.64113ms)
+✔ new match corruption is rejected before a delta is certified; full external validation still rejects an altered old match (4170.956497ms)
+✔ corrupt immutable payloads, wrong bases and altered hash chains fail and retain the last good backup (4002.668804ms)
+✔ concurrent forks and deleted slots cannot be overwritten by a prepared game delta (5601.277619ms)
+✔ sealing preserves all source values, mutable callers cannot borrow a trusted receipt, and actual no-ops do not create saves (279.457954ms)
+✔ multi-round revision jumps remain one atomic durable command and replay exactly (5625.930439ms)
+✔ actual offseason contracts and voluntary FA use small durable patches with identical world, wage and club records after reload (14477.174594ms)
+✔ retirement carries all prior events and annual records through the new durable result path (12581.807258ms)
+✔ bounded parsing matches native JSON for large nested objects, Unicode, escaped strings, arrays and primitive roots (2621.244428ms)
+✔ bounded parser rejects malformed syntax at capture boundaries, trailing content, invalid strings, truncated JSON and sizes (317.215297ms)
+✔ compressed parsing validates original bytes, truncation and expanded size for both native and streaming paths (3911.087539ms)
+✔ career-long national team results exceed one-season limits while every score still validates (7022.973188ms)
+✔ original v1 envelopes retain their checksum and all legacy fields through load, export and import (158.614974ms)
+✔ published v2 envelopes preserve their checksum and do not invent new improvement ledgers while loading (3443.14501ms)
+✔ contract snapshots reconcile renewals, transfers and known season-opening values without inventing previous terms (6167.760655ms)
+✔ dated national windows reject malformed cursors, future periods and duplicate callups while keeping old processed keys (2204.674807ms)
+✔ legacy detail fields remain optional while malformed and future detailed records are rejected (92.97601ms)
+✔ v2 saves validate world membership, international scope, references and separate income ledgers (7481.454519ms)
+✔ IndexedDB round trip preserves Korean names, match ledgers and selected training (17.862785ms)
+✔ autosaves atomically retain a previous-good backup and identical saves do not replace it (31.072331ms)
+✔ a damaged current slot can be recovered without displacing its previous-good backup (26.614497ms)
+✔ stale autosaves and equal-revision conflicting branches cannot overwrite a slot (27.893631ms)
+✔ another tab changing a slot is detected even when a local branch has a higher revision (10.865163ms)
+✔ JSON import validates its checksum and creates a separate slot without changing its simulation seed (15.695892ms)
+✔ edited, truncated, future-version and prototype-poisoned save files are rejected (10.319412ms)
+✔ damaged statistics, league tables and shot-to-goal references are rejected before writing (16.481735ms)
+✔ the first editable command upgrades legacy systems without rewriting old match metrics or income (2324.059941ms)
+✔ a continued v1 career retains old match coverage and saves new detailed matches beside it (12438.00639ms)
+✔ only explicitly named club reserve snapshots may lack a persistent world roster entry (1243.601185ms)
+✔ historical award snapshots survive retirement of the ranked NPC without relaxing live references (1962.163044ms)
+✔ actual international goalkeeper matches and their attempt denominators survive export/import (11264.147476ms)
+✔ deleting a slot also deletes its backup and blocks a delayed autosave from reviving it (16.322538ms)
+ℹ tests 37
+ℹ suites 0
+ℹ pass 37
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 134418.62715

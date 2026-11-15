@@ -1,3 +1,6 @@
+import {loadingProgress} from './loading-progress';
+import {compactMatchEvents} from './event-archive';
+import {cacheCareer,cachedCareer,forgetCachedCareer} from './fast-career-cache';
 import {recoveryArchive,readRecoveryArchive,RECOVERY_MAGIC} from './recovery-archive';
 import {readJSONBlob} from './json-reader';
 import {certifiedGameDelta,isSealedCareer} from './game-delta';
@@ -11,7 +14,7 @@ import {jsonBlob} from './json-blob';
 import {CheckpointScheduler} from './checkpoint-scheduler';
 import {recoverCareerKeeperRoles} from './keeper-recovery';
 import {commandChange,controlFingerprint} from './command-patches';
-import {decodeStored,isBlobCareer,prepareStored,metadataFor,journalEntry,deltaJournalEntry,journalSize,storedHead,recordFingerprint,type StoredCareer,type BlobCareer,type PreparedSave,type DecodedSave} from './save-codec';
+import {decodeStored,isBlobCareer,prepareStored,packStored,metadataFor,journalEntry,deltaJournalEntry,journalSize,storedHead,recordFingerprint,type StoredCareer,type BlobCareer,type PreparedSave,type DecodedSave} from './save-codec';
 import {validateCompetitionData} from './competition-validation';
 import { validateCareerExtensions } from './extension-validation';
 import { CLUBS, LEAGUES, INTERNATIONAL_CLUBS, INTERNATIONAL_LEAGUES } from './data';
@@ -1030,9 +1033,17 @@ async function readSlot(id: string): Promise<{ current?: StoredCareer; backup?: 
 }
 
 async function prepareSnapshot(career:Career):Promise<PreparedSave>{
- return typeof Worker==='undefined'?prepareStored(career):(await import('./save-preparation')).prepareSaveOffThread(career);
+ if(typeof Worker==='undefined')return prepareStored(career);
+ if(career.history.length>=6)return packStored(await prepareEnvelope(career,true));
+ return (await import('./save-preparation')).prepareSaveOffThread(career);
 }
 async function decodeSnapshot(record:StoredCareer):Promise<DecodedSave>{
+ const large=isBlobCareer(record)&&(record.rawBytes??record.blob.size)>128*1024*1024;
+ if(large&&typeof Worker!=='undefined'){
+  loadingProgress('빠른 저장 확인');const hit=await cachedCareer(record);if(hit)return {career:hit,versionHash:storedHead(record).hash};
+  await new Promise<void>(resolve=>setTimeout(resolve,0));
+  const decoded=await decodeStored(record,true);loadingProgress('다음 접속용 저장 준비');await cacheCareer(record,decoded.career);return decoded;
+ }
  return typeof Worker==='undefined'?decodeStored(record):(await import('./save-preparation')).decodeSaveOffThread(record);
 }
 function sameMetadata(a:Metadata|undefined,b:Metadata|undefined){return JSON.stringify(a)===JSON.stringify(b);}
@@ -1070,6 +1081,7 @@ async function replaceSnapshot(career:Career,prepared:PreparedSave,expected:Awai
   tx.oncomplete=()=>resolve();tx.onabort=()=>reject(failure??storageError(tx.error));tx.onerror=()=>reject(failure??storageError(tx.error));
  });
  knownVersions.set(career.id,committedVersion);durableCareers.set(career,controlFingerprint(career));checkpointScheduler.fullSaved(career.id);
+ if(typeof Worker!=='undefined'&&career.history.length>=6)await cacheCareer(prepared.record,career);
 }
 function stopCheckpointTimer(id:string){checkpointScheduler.cancelTimer(id);}
 export const pauseBackgroundCheckpoints=()=>checkpointScheduler.pause();
@@ -1123,11 +1135,12 @@ export async function saveCareerChange(previous:Career,next:Career):Promise<void
    };current.onsuccess=write;meta.onsuccess=write;tx.oncomplete=()=>resolve();tx.onabort=()=>reject(failure??storageError(tx.error));tx.onerror=()=>reject(failure??storageError(tx.error));
   });
   knownVersions.set(next.id,{revision:next.revision,hash:entry.hash});durableCareers.set(next,controlFingerprint(next));
+  if(typeof Worker!=='undefined'&&next.history.length>=6)await cacheCareer(record,next);
   scheduleCheckpoint(next.id,record,size.storedBytes);
  });}catch(e){if(e===compact)return saveCareer(next);throw e;}
 }
 function scheduleCheckpoint(id:string,record:BlobCareer,journalBytes?:number){
- if(typeof Worker==='undefined')return;
+ if(typeof Worker==='undefined'||(record.rawBytes??record.blob.size)>128*1024*1024)return;
  const size=journalSize(record.journal);checkpointScheduler.schedule(id,{bytes:record.rawBytes??record.blob.size,entries:record.journal.length,journalBytes:journalBytes??size.storedBytes,journalRawBytes:size.rawBytes});
 }
 /** Compaction never changes the logical head or the last-good backup. */
@@ -1190,6 +1203,7 @@ export async function deleteSlot(id: string): Promise<void> {
   text(id, '슬롯 ID');
   stopCheckpointTimer(id);
   checkpointScheduler.forget(id);
+  await forgetCachedCareer(id);
   return enqueue(id, async () => {
     const database = await openDatabase();
     await new Promise<void>((resolve, reject) => {
@@ -1250,7 +1264,7 @@ export async function exportCareer(career: Career): Promise<string> {
 /** Browser downloads use the fully validated Worker Blob directly. Converting a
  * long career to another main-thread JSON string/clone caused large memory spikes. */
 export async function exportCareerBlob(career:Career):Promise<Blob>{
- return typeof Worker==='undefined'?jsonBlob(await prepareEnvelope(career)):(await import('./save-preparation')).exportJSONOffThread(career);
+ return typeof Worker==='undefined'?jsonBlob(await prepareEnvelope(career)):career.history.length>=6?jsonBlob(await prepareEnvelope(career,true)):(await import('./save-preparation')).exportJSONOffThread(career);
 }
 
 /** Untrusted files always receive the original complete checks, including poison-key checks. */
@@ -1269,6 +1283,7 @@ export async function verifySaveBlob(source:Blob):Promise<Career>{
 /** Imported saves always become new slots; no existing game or legacy localStorage is overwritten. */
 export async function importCareer(source:string|Blob):Promise<Career>{
   if(source instanceof Blob)assert(source.size<=MAX_SAVE_BYTES,'저장 파일이 지원하는 2GiB 범위를 초과했습니다.');
-  const imported=typeof Worker==='undefined'?(typeof source==='string'?await verifySaveText(source):await verifySaveBlob(source)):await (await import('./save-preparation')).verifyFileOffThread(source);
+  const archived=source instanceof Blob&&await source.slice(0,RECOVERY_MAGIC.length).text()===RECOVERY_MAGIC;
+ const imported=archived&&typeof Worker!=='undefined'?(await decodeStored(await readRecoveryArchive(source as Blob),true)).career:typeof Worker==='undefined'?(typeof source==='string'?await verifySaveText(source):await verifySaveBlob(source)):await (await import('./save-preparation')).verifyFileOffThread(source);
   imported.id=`career-${globalThis.crypto.randomUUID()}`;return imported;
 }

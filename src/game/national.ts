@@ -1,3 +1,4 @@
+import {cloneWithEventArchives} from './event-archive';
 import {captureNationalPower} from './achievement-evidence';
 import {playingAbility} from './attributes';
 import {personalityEdge} from './personality';
@@ -570,7 +571,7 @@ export function archiveNationalSeason(career: Career,year=career.season.year): v
     const [squad,id]=key.split('|') as [Squad,string];
     const matches=current.filter(match=>nationalMatchSquad(match)===squad&&match.competitionId===id);
     const existing=state.history.findIndex(row=>row.year===year&&row.squad===squad&&row.competitionId===id);
-    const entry:NationalSeason={year,squad,competitionId:id,competitionName:competitionName(id),stats:sumStats(matches.map(match=>match.playerStats)),matches:structuredClone(matches),result:state.competitionId===id&&state.phase==='eliminated'&&!matches.some(match=>/\|(group|round32|round16|quarterfinal|semifinal|final|thirdPlace)\|/.test(match.fixtureId))?'예선 탈락':resultFor(matches,state.country,squad),qualified:matches.some(match=>/\|(group|round32|round16|quarterfinal|semifinal|final|thirdPlace)\|/.test(match.fixtureId))||(!id.startsWith('FRIENDLIES:')&&state.competitionId===id&&state.qualified)};
+    const entry:NationalSeason={year,squad,competitionId:id,competitionName:competitionName(id),stats:sumStats(matches.map(match=>match.playerStats)),matches:cloneWithEventArchives(matches),result:state.competitionId===id&&state.phase==='eliminated'&&!matches.some(match=>/\|(group|round32|round16|quarterfinal|semifinal|final|thirdPlace)\|/.test(match.fixtureId))?'예선 탈락':resultFor(matches,state.country,squad),qualified:matches.some(match=>/\|(group|round32|round16|quarterfinal|semifinal|final|thirdPlace)\|/.test(match.fixtureId))||(!id.startsWith('FRIENDLIES:')&&state.competitionId===id&&state.qualified)};
     if(existing>=0)state.history[existing]=entry;else state.history.push(entry);
   }
 }

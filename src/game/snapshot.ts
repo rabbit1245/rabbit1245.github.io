@@ -1,8 +1,9 @@
+import {cloneWithEventArchives} from './event-archive';
 import type {CareerSystems} from './revision-types';
 import {ROSTER_CALIBRATION} from './data';
 /** Archived games are immutable. Copy mutable containers rather than re-copying decades of matches. */
 export function copySystems(s:CareerSystems,light=false):CareerSystems{
- if((s.world.rosterVersion??1)<ROSTER_CALIBRATION.version||s.world.balanceVersion!==1)return structuredClone(s);
+ if((s.world.rosterVersion??1)<ROSTER_CALIBRATION.version||s.world.balanceVersion!==1)return cloneWithEventArchives(s);
  const next:CareerSystems={...s,economics:structuredClone(s.economics),leadership:structuredClone(s.leadership),events:[...s.events],growthReports:[...s.growthReports],rankings:[...s.rankings],manualAging:[...(s.manualAging??[])],attributeLocks:[...(s.attributeLocks??[])],...(s.growthLedger?{growthLedger:structuredClone(s.growthLedger)}:{}),...(s.cheats?{cheats:{...s.cheats}}:{})};
  if(light){if(s.world.financeVersion!==1)next.world=structuredClone(s.world);return next;}
  if(s.commercial)next.commercial={...s.commercial,clubs:{...s.commercial.clubs},reputation:{...s.commercial.reputation},seasons:[...s.commercial.seasons]};

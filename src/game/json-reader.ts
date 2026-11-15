@@ -8,20 +8,20 @@ const CHUNK_VALUE=4*1024*1024;
 class Source {
  text='';pos=0;hold=false;done=false;bytes=0;
  private decoder=new TextDecoder();
- constructor(private reader:ReadableStreamDefaultReader<Uint8Array>,private maximum:number,private expected:number|undefined,private compressed:boolean){}
+ constructor(private reader:ReadableStreamDefaultReader<Uint8Array>,private maximum:number,private expected:number|undefined,private compressed:boolean,public transform?:(v:unknown)=>unknown,private progress?:(bytes:number)=>void){}
  async more(){
   if(this.done)return false;
   if(!this.hold&&this.pos){this.text=this.text.slice(this.pos);this.pos=0;}
   let r:ReadableStreamReadResult<Uint8Array>;
   try{r=await this.reader.read();}catch(e){throw new SaveReadError(this.compressed?'gzip':'read',e);}
   if(r.done){this.done=true;if(this.expected!==undefined&&this.bytes!==this.expected)throw new SaveReadError('size');this.text+=this.decoder.decode();return this.pos<this.text.length;}
-  this.bytes+=r.value.byteLength;if(this.bytes>this.maximum||this.expected!==undefined&&this.bytes>this.expected){await this.reader.cancel();throw new SaveReadError('size');}
+  this.bytes+=r.value.byteLength;this.progress?.(this.bytes);if(this.bytes>this.maximum||this.expected!==undefined&&this.bytes>this.expected){await this.reader.cancel();throw new SaveReadError('size');}
   this.text+=this.decoder.decode(r.value,{stream:true});return true;
  }
  async space(){while(true){while(this.pos<this.text.length&&whitespace(this.text.charCodeAt(this.pos)))this.pos++;if(this.pos<this.text.length||this.done)return;await this.more();}}
  async close(){try{await this.reader.cancel();}catch{/* Preserve the first decoding error. */}this.reader.releaseLock();}
 }
-function native(text:string):unknown{try{return JSON.parse(text);}catch(e){throw new SaveReadError('json',e);}}
+function native(text:string,transform?:(v:unknown)=>unknown):unknown{try{const v=JSON.parse(text);return transform?transform(v):v;}catch(e){throw new SaveReadError('json',e);}}
 /** Capture small values for native parsing. Expand only containers exceeding the
  * bounded capture, then parse their children through the same native fast path. */
 async function value(s:Source,depth=0):Promise<unknown>{
@@ -33,17 +33,17 @@ async function value(s:Source,depth=0):Promise<unknown>{
   while(s.pos<s.text.length){
    const c=s.text.charCodeAt(s.pos);
    if(!container&&!string&&(whitespace(c)||c===44||c===93||c===125)){
-    const text=s.text.slice(start,s.pos);s.hold=false;return native(text);
+    const text=s.text.slice(start,s.pos);s.hold=false;return native(text,s.transform);
    }
    s.pos++;
-   if(quoted){if(escaped)escaped=false;else if(c===92)escaped=true;else if(c===34){quoted=false;if(string){const text=s.text.slice(start,s.pos);s.hold=false;return native(text);}}}
+   if(quoted){if(escaped)escaped=false;else if(c===92)escaped=true;else if(c===34){quoted=false;if(string){const text=s.text.slice(start,s.pos);s.hold=false;return native(text,s.transform);}}}
    else if(c===34)quoted=true;
-   else if(container){if(c===123||c===91)nesting++;else if(c===125||c===93){nesting--;if(!nesting){const text=s.text.slice(start,s.pos);s.hold=false;return native(text);}}}
+   else if(container){if(c===123||c===91)nesting++;else if(c===125||c===93){nesting--;if(!nesting){const text=s.text.slice(start,s.pos);s.hold=false;return native(text,s.transform);}}}
    if(s.pos-start>CHUNK_VALUE){
     s.hold=false;s.pos=start;if(!container)throw new SaveReadError('json');return expanded(s,first,depth);
    }
   }
-  if(s.done){const text=s.text.slice(start,s.pos);s.hold=false;return native(text);}
+  if(s.done){const text=s.text.slice(start,s.pos);s.hold=false;return native(text,s.transform);}
   await s.more();
  }
 }
@@ -59,20 +59,20 @@ async function expanded(s:Source,first:number,depth:number):Promise<unknown>{
   await s.space();if(s.text.charCodeAt(s.pos)===end)throw new SaveReadError('json');
  }
 }
-export async function readJSONBlob(blob:Blob,options:{encoding?:'gzip';rawBytes?:number;maximum:number;stream?:boolean}):Promise<unknown>{
+export async function readJSONBlob(blob:Blob,options:{encoding?:'gzip';rawBytes?:number;maximum:number;stream?:boolean;transform?:(v:unknown)=>unknown;onProgress?:(bytes:number)=>void}):Promise<unknown>{
  const {encoding,rawBytes,maximum}=options,expected=encoding?rawBytes:blob.size;
  if(!Number.isSafeInteger(expected)||expected!<0||expected!>maximum)throw new SaveReadError('size');
- if(!encoding&&!options.stream&&expected!<384*1024*1024){try{return native(await blob.text());}catch(e){if(e instanceof SaveReadError)throw e;throw new SaveReadError('read',e);}}
+ if(!encoding&&!options.stream&&expected!<384*1024*1024){try{return native(await blob.text(),options.transform);}catch(e){if(e instanceof SaveReadError)throw e;throw new SaveReadError('read',e);}}
  let input=blob.stream();
  if(encoding){if(typeof DecompressionStream==='undefined')throw new SaveReadError('gzip');input=input.pipeThrough(new DecompressionStream('gzip'));}
  const reader=input.getReader();
  if(options.stream||expected!>=384*1024*1024){
-  const source=new Source(reader,maximum,expected,!!encoding);
+  const source=new Source(reader,maximum,expected,!!encoding,options.transform,options.onProgress);
   try{const result=await value(source);await source.space();if(source.pos!==source.text.length||!source.done)throw new SaveReadError('json');return result;}finally{await source.close();}
  }
  const parts:BlobPart[]=[];let size=0;
  try{
   while(true){let r:ReadableStreamReadResult<Uint8Array>;try{r=await reader.read();}catch(e){throw new SaveReadError(encoding?'gzip':'read',e);}if(r.done)break;size+=r.value.byteLength;if(size>expected!||size>maximum)throw new SaveReadError('size');parts.push(r.value as Uint8Array<ArrayBuffer>);}
-  if(size!==expected)throw new SaveReadError('size');return native(await new Blob(parts).text());
+  if(size!==expected)throw new SaveReadError('size');return native(await new Blob(parts).text(),options.transform);
  }finally{try{await reader.cancel();}catch{/* Preserve the original error. */}reader.releaseLock();}
 }

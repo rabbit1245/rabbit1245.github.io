@@ -1,3 +1,6 @@
+import {compactMatchEvents} from './event-archive';
+import {prepareGameDelta} from './game-delta';
+import {packGameResult} from './worker-result';
 import {packCareerTransfer} from './career-transfer';
 import {sealCareer,certifyGameDelta,isSealedCareer,type PreparedGameDelta} from './game-delta';
 import {unpackGameResult,type GameResultWire} from './worker-result';
@@ -35,6 +38,18 @@ export async function runGameCommand(career: Career, command: GameCommand,onProg
     return next;
   }
   sealCareer(career);
+  if(career.history.length>=6){
+    // The compact state stays in one realm. No GB-sized worker round trips.
+    await new Promise<void>(resolve=>setTimeout(resolve,0));
+    performance.mark('long-command-start');const {executeCommand}=await import('./commands');
+    const next=executeCommand(career,command,id,onProgress);if(next===career)return career;
+    performance.mark('long-command-executed');validateEngineResult(career,next);performance.mark('long-command-validated');
+    compactMatchEvents(next);
+    performance.mark('long-command-compacted');const prepared=await prepareGameDelta(packGameResult(career,next),true);performance.mark('long-command-encoded');
+    sealCareer(next);
+    if(prepared)certifyGameDelta(career,next,prepared);
+    performance.mark('long-command-finished');return next;
+  }
   if (!worker) {
     worker = new Worker(new URL('./worker.ts', import.meta.url), { type: 'module' });
     worker.addEventListener('message', (event: MessageEvent<{ id: string; career?: Career; wire?:GameResultWire;preparedDelta?:PreparedGameDelta;error?: string;progress?:GameProgress }>) => {

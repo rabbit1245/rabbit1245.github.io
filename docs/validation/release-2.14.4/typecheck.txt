@@ -1,0 +1,2 @@
+> kball-career@2.14.4 typecheck
+> tsc --noEmit

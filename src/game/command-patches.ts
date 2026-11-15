@@ -1,3 +1,4 @@
+import {cloneWithEventArchives} from './event-archive';
 import {isSealedCareer} from './game-delta';
 import type {Career,GameCommand} from './types';
 
@@ -29,7 +30,7 @@ function difference(a:unknown,b:unknown,path:(string|number)[],out:CareerPatch[]
   }else{
    for(const k of new Set([...Object.keys(a),...Object.keys(b)]))difference((a as Record<string,unknown>)[k],(b as Record<string,unknown>)[k],[...path,k],out);
   }
- }else out.push({path,op:'set',value:structuredClone(b)});
+ }else out.push({path,op:'set',value:cloneWithEventArchives(b)});
 }
 /** Receipt of a bounded, engine-produced change. It never keeps an old career alive. */
 export function recordCommandChange(previous:Career,next:Career,command:GameCommand):void{
@@ -43,7 +44,7 @@ export function commandChange(previous:Career,next:Career):CareerPatch[]|undefin
  const receipt=receipts.get(next);if(!receipt||receipt.previous.deref()!==previous||!eligible(previous,next,receipt.broad))return;
  const current:CareerPatch[]=[];difference(previous,next,[],current);
  if(JSON.stringify(current)!==receipt.signature)return;
- return structuredClone(receipt.patches);
+ return cloneWithEventArchives(receipt.patches);
 }
 export function validatePatches(value:unknown):asserts value is CareerPatch[]{
  if(!Array.isArray(value)||value.length>8192||new TextEncoder().encode(JSON.stringify(value)).length>MAX_PATCH_BYTES)throw Error('변경 기록 크기가 올바르지 않습니다.');
@@ -58,7 +59,7 @@ export function applyCareerPatches(career:Career,patches:CareerPatch[]):Career{
  validatePatches(patches);let root:unknown=career;
  for(const patch of patches){
   const change=(node:unknown,depth:number):unknown=>{
-   if(depth===patch.path.length){if(patch.op==='set')return structuredClone(patch.value);if(patch.op==='length'){if(!Array.isArray(node))throw Error('변경 대상이 배열이 아닙니다.');return node.slice(0,patch.value);}return undefined;}
+   if(depth===patch.path.length){if(patch.op==='set')return cloneWithEventArchives(patch.value);if(patch.op==='length'){if(!Array.isArray(node))throw Error('변경 대상이 배열이 아닙니다.');return node.slice(0,patch.value);}return undefined;}
    const key=patch.path[depth];if(!node||typeof node!=='object')throw Error('변경 기록의 상위 경로가 없습니다.');
    const copy:any=Array.isArray(node)?[...node]:{...node};
    if(depth===patch.path.length-1&&patch.op==='delete')delete copy[key];else copy[key]=change(copy[key],depth+1);

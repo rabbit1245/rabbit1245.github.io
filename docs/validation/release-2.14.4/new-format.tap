@@ -1,0 +1,18 @@
+✔ compact change records authenticate and replay every event with bounded compressed metadata (4136.910658ms)
+✔ buffered canonical bytes preserve every legacy byte across key order and Unicode chunk boundaries (12.678ms)
+✔ canonical key order is stable for arbitrary schema extension keys (116.607008ms)
+✔ incremental SHA-256 matches legacy canonical bytes and enforces the byte guard (35.97086ms)
+✔ lazy immutable event arrays preserve all fields, array methods, canonical bytes, clones and binary exports (72.430557ms)
+✔ a verified cache round-trips every event, rejects changed source tokens and corrupted cache data, and leaves the source intact (18.120764ms)
+✔ fast scalar/key tokens retain exact JSON text and legacy checksum bytes across numbers, missing values and Unicode (18.276378ms)
+✔ chunked UTF-8 output preserves long values, unusual extension keys and all event records (76.792037ms)
+✔ save Worker cancellation preserves full requests and clears settled request timers (47.446036ms)
+✔ short-career workers reuse the matching resident revision and release on demand (245.504575ms)
+ℹ tests 10
+ℹ suites 0
+ℹ pass 10
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 7124.735422

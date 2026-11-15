@@ -1,3 +1,4 @@
+import {canonicalEventBytes} from './event-archive';
 import {sha256} from '@noble/hashes/sha256';
 
 /** The legacy canonical JSON bytes, buffered without one enormous recursive rope. */
@@ -12,6 +13,7 @@ function visitCanonical(value:unknown,emit:(bytes:Uint8Array<ArrayBuffer>)=>void
   if(token.length>=limit){const bytes=encoder.encode(token);emit(bytes);size+=bytes.length;}else buffer+=token;
  };
  const visit=(node:unknown)=>{
+  if(node&&typeof node==='object'){const raw=canonicalEventBytes(node);if(raw){flush();emit(raw);size+=raw.length;return;}}
   if(node===null){write('null');return;}
   if(typeof node==='number'){write(Number.isFinite(node)?String(node):'null');return;}
   if(typeof node==='boolean'){write(node?'true':'false');return;}
