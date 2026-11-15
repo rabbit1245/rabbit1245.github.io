@@ -34,3 +34,7 @@ Linux Chromium 154, 최종 단독 HTML localhost, 기본 브라우저 힙 설정
 기존 저장·변경 원장·JSON 검사 37개와 추가 압축 배열·캐시 손상 거부·새 진행 기록 재생·해시/Worker 검사 10개가 통과했습니다. [기존 회귀](validation/release-2.14.4/legacy-regressions.tap), [추가 검사](validation/release-2.14.4/new-format.tap). 웹/단독 HTML 빌드와 TypeScript 검사도 통과했습니다. 실제 사용자 저장은 공개 저장소에 포함하지 않습니다.
 
 진행 후 복구 파일을 전체 코어로 다시 검증했고, 원래 18시즌·602경기 및 대표팀 과거 기록 47개의 전체 필드 SHA-256이 일치했습니다. [원본 대조](validation/release-2.14.4/history-audit.json).
+
+## 배포
+
+[2.14.4 ZIP 다운로드](https://raw.githubusercontent.com/rabbit1245/rabbit1245.github.io/295aa5d08268a525d78e4c433d0895e34d7e6520/Kball.zip). 공개 URL에서 다시 내려받아 HTTP 200, ZIP CRC, SHA-256, 검수 HTML 일치 및 버전·라이선스를 확인했습니다. [배포 증거](validation/release-2.14.4/public-download.json).
