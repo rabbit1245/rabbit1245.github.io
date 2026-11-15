@@ -1,0 +1,63 @@
+{
+  "base": "http://127.0.0.1:8189/Kball.html",
+  "steps": [
+    {
+      "revision": 967,
+      "hash": "0a656a4db83e06f1984d730471736df553c049b57afaba83a8f4320e5bfffdee",
+      "checkpoint": 840,
+      "journal": 26,
+      "age": 35,
+      "year": 2044,
+      "metadataMatchesHash": true
+    },
+    {
+      "revision": 968,
+      "hash": "8b231c4487cbff15bf2d9dd34414d563a7693b10227f94e50eef5851aba35dd8",
+      "checkpoint": 840,
+      "journal": 27,
+      "age": 36,
+      "year": 2045,
+      "metadataMatchesHash": true
+    },
+    {
+      "revision": 985,
+      "hash": "0ed228b49d214f947760ffa13ac37bc1a32e5829e2a014e363e8ef7de4498e46",
+      "checkpoint": 840,
+      "journal": 28,
+      "age": 36,
+      "year": 2045,
+      "metadataMatchesHash": true
+    },
+    {
+      "revision": 1002,
+      "hash": "cee15f2f569483f5c1d3f0e2a9acb6b9f25470c1f280d082c76cec5724710300",
+      "checkpoint": 840,
+      "journal": 29,
+      "age": 36,
+      "year": 2045,
+      "metadataMatchesHash": true
+    }
+  ],
+  "initial": {
+    "revision": 950,
+    "hash": "2694358fefc0cc67076a8eb4fc1b518924ddb1400f5f6bfaaee4df5aec4e5493",
+    "checkpoint": 840,
+    "journal": 25,
+    "age": 35,
+    "year": 2044,
+    "metadataMatchesHash": true
+  },
+  "reconnect": {
+    "revision": 1002,
+    "hash": "cee15f2f569483f5c1d3f0e2a9acb6b9f25470c1f280d082c76cec5724710300",
+    "checkpoint": 840,
+    "journal": 29,
+    "age": 36,
+    "year": 2045,
+    "metadataMatchesHash": true
+  },
+  "passed": true,
+  "environment": "Linux Chromium 154, standalone portable HTML, localhost",
+  "browserHeapLimit": 4395630592,
+  "defaultBrowserHeapLimit": 4395630592
+}

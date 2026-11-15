@@ -1,3 +1,4 @@
+import {packCareerTransfer,unpackCareerTransfer} from './career-transfer';
 import {prepareEnvelope,verifySaveText,verifySaveBlob} from './storage';
 import {decodeStored,isBlobCareer,packStored,replayJournal,type StoredCareer} from './save-codec';
 import type {Career} from './types';
@@ -5,10 +6,11 @@ import {jsonBlob} from './json-blob';
 let resident:{career:Career;versionHash:string}|undefined;
 let queue=Promise.resolve();
 self.addEventListener('message',(event:MessageEvent<{id:string;operation:string;payload:any}>)=>{
- const {id,operation,payload}=event.data;
+ const {id,operation}=event.data;let payload=event.data.payload;
  queue=queue.catch(()=>undefined).then(async()=>{
   try{
-   let result:unknown;
+   let result:any;
+   if((operation==='prepare'||operation==='export')&&payload?.careerTransfer)payload=await unpackCareerTransfer(payload.careerTransfer);
    if(operation==='prepare'){
     resident=undefined;
     const envelope=await prepareEnvelope(payload as Career,true);resident={career:envelope.career,versionHash:envelope.hash};result=await packStored(envelope);
@@ -33,6 +35,8 @@ self.addEventListener('message',(event:MessageEvent<{id:string;operation:string;
     if(state.career.revision!==targetRevision||state.versionHash!==targetHash)throw Error('배경 스냅샷의 변경 기록이 일치하지 않습니다.');
     const envelope=await prepareEnvelope(state.career,true);resident={career:envelope.career,versionHash:targetHash};result=await packStored(envelope,targetHash);
    }else throw Error('지원하지 않는 저장 요청입니다.');
+   if(result?.career?.history.length>=6){const {career,...rest}=result;result={...rest,careerTransfer:await packCareerTransfer(career)};}
+   else if(operation==='verifyFile'&&result?.history.length>=6)result={careerTransfer:await packCareerTransfer(result),careerOnly:true};
    self.postMessage({id,result});
   }catch(e){self.postMessage({id,error:e instanceof Error?e.message:'저장 검사 실패'});}
  });

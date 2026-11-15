@@ -1,0 +1,6 @@
+{
+  "attempted": true,
+  "passed": false,
+  "environmentBlock": "net::ERR_BLOCKED_BY_ADMINISTRATOR for file:// navigation",
+  "fallbackVerified": "standalone HTML on localhost; full actual-save continuity and reconnect tests passed"
+}

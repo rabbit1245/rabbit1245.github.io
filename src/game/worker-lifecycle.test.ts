@@ -1,5 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import {setImmediate} from 'node:timers/promises';
+import {unpackCareerTransfer} from './career-transfer';
 import type {Career} from './types';
 
 test('game workers keep short-career caching and release long-career copies after complete results',async()=>{
@@ -19,7 +21,7 @@ test('game workers keep short-career caching and release long-career copies afte
   const first=api.runGameCommand(short,{type:'advanceHalf'}),worker=FakeWorker.instances.at(-1)!;api.releaseIdleGameWorker();assert.equal(worker.terminated,false,'an in-flight command must survive');worker.reply(0,short);assert.equal(await first,short);assert.equal(worker.terminated,false);
   const second=api.runGameCommand(short,{type:'advanceHalf'});assert.equal(worker.sent[1].career,undefined);assert.equal(worker.sent[1].careerId,'short');worker.reply(1,short);await second;api.releaseIdleGameWorker();assert.ok(worker.terminated);
   const large={id:'large',revision:3,history:Array(6).fill({})} as unknown as Career;
-  const third=api.runGameCommand(large,{type:'advanceHalf'}),largeWorker=FakeWorker.instances.at(-1)!;largeWorker.reply(0,large);assert.equal(await third,large);assert.ok(largeWorker.terminated);
-  const fourth=api.runGameCommand(large,{type:'advanceHalf'}),freshWorker=FakeWorker.instances.at(-1)!;assert.notEqual(freshWorker,largeWorker);assert.equal(freshWorker.sent[0].career,large);freshWorker.reply(0,large);assert.equal(await fourth,large);assert.ok(freshWorker.terminated);
+  const third=api.runGameCommand(large,{type:'advanceHalf'}),largeWorker=FakeWorker.instances.at(-1)!;while(!largeWorker.sent.length)await setImmediate();largeWorker.reply(0,large);assert.equal(await third,large);assert.ok(largeWorker.terminated);
+  const fourth=api.runGameCommand(large,{type:'advanceHalf'}),freshWorker=FakeWorker.instances.at(-1)!;assert.notEqual(freshWorker,largeWorker);while(!freshWorker.sent.length)await setImmediate();assert.equal(freshWorker.sent[0].career,undefined);assert.ok(freshWorker.sent[0].careerTransfer.blob instanceof Blob);assert.deepEqual(await unpackCareerTransfer(freshWorker.sent[0].careerTransfer),large);freshWorker.reply(0,large);assert.equal(await fourth,large);assert.ok(freshWorker.terminated);
  }finally{api.releaseIdleGameWorker();globalThis.Worker=original;}
 });

@@ -1,0 +1,10 @@
+✔ streamed long snapshot encoding retains the complete envelope bytes and metadata token (1136.162563ms)
+✔ save Worker cancellation preserves full requests and clears settled request timers (42.723291ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 2
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2159.701263

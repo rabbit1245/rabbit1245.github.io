@@ -1,11 +1,11 @@
-import {recoveryArchive} from './recovery-archive';
+import {recoveryArchive,readRecoveryArchive,RECOVERY_MAGIC} from './recovery-archive';
 import {readJSONBlob} from './json-reader';
 import {certifiedGameDelta,isSealedCareer} from './game-delta';
 import {validateAchievementEvidence} from './achievement-evidence';
 import {validateActionLedger} from './action-metrics';
 import {internationalRoster} from './international-clubs';
 import {validatePlaySkills} from './play-skill-validation';
-import {canonicalBytes} from './canonical-bytes';
+import {canonicalHash} from './canonical-bytes';
 import {MAX_SAVE_BYTES,utf8Size} from './save-limits';
 import {jsonBlob} from './json-blob';
 import {CheckpointScheduler} from './checkpoint-scheduler';
@@ -120,7 +120,7 @@ function stringify(value: unknown): string {
   try { serialized = JSON.stringify(value); }
   catch { throw new Error('저장 데이터를 JSON으로 변환할 수 없습니다.'); }
   assert(typeof serialized === 'string', '저장할 내용이 없습니다.');
-  assert(utf8Size(serialized) <= MAX_SAVE_BYTES, '저장 파일이 지원하는 1GB 범위를 초과했습니다.');
+  assert(utf8Size(serialized) <= MAX_SAVE_BYTES, '저장 파일이 지원하는 2GiB 범위를 초과했습니다.');
   return serialized;
 }
 
@@ -953,9 +953,7 @@ export function validateEngineResult(previous:Career,next:Career):Career{
 
 async function checksum(career: Career): Promise<string> {
   if (!globalThis.crypto?.subtle) throw new Error('안전한 저장을 위해 HTTPS 또는 localhost에서 게임을 열어 주세요.');
-  const bytes=canonicalBytes(career);assert(bytes.byteLength<=MAX_SAVE_BYTES,'저장 파일이 지원하는 1GB 범위를 초과했습니다.');
-  const digest = await globalThis.crypto.subtle.digest('SHA-256', bytes);
-  return [...new Uint8Array(digest)].map(byte => byte.toString(16).padStart(2, '0')).join('');
+  return canonicalHash(career,MAX_SAVE_BYTES);
 }
 
 export async function prepareEnvelope(career: Career,ownedJSON=false): Promise<SaveEnvelope> {
@@ -1257,19 +1255,20 @@ export async function exportCareerBlob(career:Career):Promise<Blob>{
 
 /** Untrusted files always receive the original complete checks, including poison-key checks. */
 export async function verifySaveText(source:string):Promise<Career>{
-  assert(typeof source === 'string' && utf8Size(source) <= MAX_SAVE_BYTES, '저장 파일이 지원하는 1GB 범위를 초과했습니다.');
+  assert(typeof source === 'string' && utf8Size(source) <= MAX_SAVE_BYTES, '저장 파일이 지원하는 2GiB 범위를 초과했습니다.');
   let parsed:unknown;
   try{parsed=JSON.parse(source);}catch{throw new Error('저장 파일을 읽을 수 없습니다. 올바른 JSON 백업을 선택해 주세요.');}
   ensureSafeJSON(parsed);return (await verifyEnvelope(parsed,true)).career;
 }
 /** Large JSON files use bounded native subtrees rather than one giant string. */
 export async function verifySaveBlob(source:Blob):Promise<Career>{
- assert(source.size<=MAX_SAVE_BYTES,'저장 파일이 지원하는 1GB 범위를 초과했습니다.');
+ assert(source.size<=MAX_SAVE_BYTES,'저장 파일이 지원하는 2GiB 범위를 초과했습니다.');
+ if(await source.slice(0,RECOVERY_MAGIC.length).text()===RECOVERY_MAGIC)return (await decodeStored(await readRecoveryArchive(source))).career;
  const parsed=await readJSONBlob(source,{maximum:MAX_SAVE_BYTES});ensureSafeJSON(parsed);return (await verifyEnvelope(parsed,true)).career;
 }
 /** Imported saves always become new slots; no existing game or legacy localStorage is overwritten. */
 export async function importCareer(source:string|Blob):Promise<Career>{
-  if(source instanceof Blob)assert(source.size<=MAX_SAVE_BYTES,'저장 파일이 지원하는 1GB 범위를 초과했습니다.');
+  if(source instanceof Blob)assert(source.size<=MAX_SAVE_BYTES,'저장 파일이 지원하는 2GiB 범위를 초과했습니다.');
   const imported=typeof Worker==='undefined'?(typeof source==='string'?await verifySaveText(source):await verifySaveBlob(source)):await (await import('./save-preparation')).verifyFileOffThread(source);
   imported.id=`career-${globalThis.crypto.randomUUID()}`;return imported;
 }

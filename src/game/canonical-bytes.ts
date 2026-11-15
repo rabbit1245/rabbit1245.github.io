@@ -1,13 +1,15 @@
+import {sha256} from '@noble/hashes/sha256';
+
 /** The legacy canonical JSON bytes, buffered without one enormous recursive rope. */
-export function canonicalBytes(value:unknown):Uint8Array<ArrayBuffer>{
+function visitCanonical(value:unknown,emit:(bytes:Uint8Array<ArrayBuffer>)=>void):number{
  // Cache only encoded property names, never values or subtrees. Every field is
  // still visited and sorted, with the legacy undefined-array bytes preserved.
- const encoder=new TextEncoder(),chunks:Uint8Array<ArrayBuffer>[]=[],limit=32*1024,keyTokens=new Map<string,{first:string;next:string}>();let buffer='',size=0;
- const flush=()=>{if(!buffer)return;const bytes=encoder.encode(buffer);chunks.push(bytes);size+=bytes.length;buffer='';};
+ const encoder=new TextEncoder(),limit=32*1024,keyTokens=new Map<string,{first:string;next:string}>();let buffer='',size=0;
+ const flush=()=>{if(!buffer)return;const bytes=encoder.encode(buffer);emit(bytes);size+=bytes.length;buffer='';};
  const write=(token:string|undefined)=>{
   if(!token)return;
   if(buffer.length+token.length>limit)flush();
-  if(token.length>=limit){const bytes=encoder.encode(token);chunks.push(bytes);size+=bytes.length;}else buffer+=token;
+  if(token.length>=limit){const bytes=encoder.encode(token);emit(bytes);size+=bytes.length;}else buffer+=token;
  };
  const visit=(node:unknown)=>{
   if(node===null){write('null');return;}
@@ -18,5 +20,17 @@ export function canonicalBytes(value:unknown):Uint8Array<ArrayBuffer>{
   const object=node as Record<string,unknown>,keys=Object.keys(object).filter(k=>object[k]!==undefined).sort();
   write('{');for(let i=0;i<keys.length;i++){const key=keys[i];let token=keyTokens.get(key);if(token===undefined){const text=JSON.stringify(key)+':';token={first:text,next:','+text};if(key.length<=256&&keyTokens.size<4096)keyTokens.set(key,token);}write(i?token.next:token.first);visit(object[key]);}write('}');
  };
- visit(value);flush();const bytes=new Uint8Array(size);let offset=0;for(const chunk of chunks){bytes.set(chunk,offset);offset+=chunk.length;}return bytes;
+ visit(value);flush();return size;
+}
+
+/** The same canonical wire bytes, retained only by callers that need them. */
+export function canonicalBytes(value:unknown):Uint8Array<ArrayBuffer>{
+ const chunks:Uint8Array<ArrayBuffer>[]=[];const size=visitCanonical(value,b=>chunks.push(b));
+ const bytes=new Uint8Array(size);let offset=0;for(const chunk of chunks){bytes.set(chunk,offset);offset+=chunk.length;}return bytes;
+}
+/** Incremental SHA-256 keeps the legacy digest without career-sized buffers. */
+export function canonicalHash(value:unknown,maximum:number):string{
+ const hash=sha256.create();let size=0;
+ visitCanonical(value,bytes=>{size+=bytes.length;if(size>maximum)throw new Error('저장 파일이 지원하는 크기 범위를 초과했습니다.');hash.update(bytes);});
+ return Array.from(hash.digest(),b=>b.toString(16).padStart(2,'0')).join('');
 }

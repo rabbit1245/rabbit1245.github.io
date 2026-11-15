@@ -18,3 +18,26 @@ test('failed loads can export exact corrupt bytes and recover the verified backu
  const original=await slot(c.id);assert.equal(await original.blob.text(),'intentionally broken gzip');assert.equal(original.writeId,broken.writeId);await assert.rejects(loadCareer(c.id),/압축 해제/);
  assert.equal((await listSlots()).filter(s=>s.playerName===c.player.name).length,2);await deleteSlot(c.id);await deleteSlot(recovered.id);
 });
+
+test('exported archives round-trip exact records; malformed framing is rejected before decoding',async()=>{
+ const {recoveryArchive,readRecoveryArchive}=await import('./recovery-archive');
+ const raw=new Blob(['original bytes'],{type:'application/json'});
+ const record:BlobCareer={id:'archive-fixture',format:'kball-blob-v2',revision:1,hash:'a'.repeat(64),versionHash:'a'.repeat(64),writeId:'original',blob:raw,journal:[]};
+ const archive=recoveryArchive({current:record});const restored=await readRecoveryArchive(archive) as BlobCareer;
+ assert.equal(restored.id,record.id);assert.equal(restored.writeId,record.writeId);assert.equal(await restored.blob.text(),await raw.text());
+ await assert.rejects(readRecoveryArchive(archive,'backup'),/없습니다/);
+ await assert.rejects(readRecoveryArchive(archive.slice(0,archive.size-1)),/구조/);
+ await assert.rejects(readRecoveryArchive(new Blob([archive,'extra'])),/구조/);
+ await assert.rejects(readRecoveryArchive(new Blob(['not an archive'])),/구조/);
+ const oversized=new Uint8Array(4);new DataView(oversized.buffer).setUint32(0,0xffffffff,true);
+ await assert.rejects(readRecoveryArchive(new Blob([RECOVERY_MAGIC,oversized])),/구조/);
+});
+
+test('archive import validates the current save and creates a separate slot without changing the source',async()=>{
+ const {importCareer}=await import('./storage');
+ const c=createCareer({name:'원본 보존 검수',nationality:'대한민국',age:35,height:180,weight:77,foot:'right',position:'CDM',talent:'S',style:'앵커맨',clubId:'DE1_03',squad:'senior',difficulty:'realistic',seed:'archive-import-safety'});await saveCareer(c);
+ const before=await slot(c.id),archive=await exportRecoveryArchive(c.id),imported=await importCareer(archive);
+ assert.notEqual(imported.id,c.id);assert.deepEqual({...imported,id:c.id},c);await saveCareer(imported);
+ assert.deepEqual(await loadCareer(c.id),c);assert.equal((await slot(c.id)).writeId,before.writeId);
+ assert.deepEqual(await loadCareer(imported.id),imported);await deleteSlot(c.id);await deleteSlot(imported.id);
+});

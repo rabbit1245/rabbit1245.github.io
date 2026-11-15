@@ -1,0 +1,16 @@
+{
+  "originalCheckpointAndJournalPrefixUnchanged": true,
+  "originalJournalEntries": 25,
+  "originalBlobPartsUnchanged": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+  ],
+  "finalRevision": 1002,
+  "archiveBytes": 215534899
+}

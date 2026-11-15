@@ -1,5 +1,5 @@
 /** A transport/resource guard, not a career-length rule. Detailed sources are retained. */
-export const MAX_SAVE_BYTES = 1024 * 1024 * 1024;
+export const MAX_SAVE_BYTES = 2 * 1024 * 1024 * 1024;
 export function utf8Size(text:string):number {
  let bytes=0;
  for(let i=0;i<text.length;i++){

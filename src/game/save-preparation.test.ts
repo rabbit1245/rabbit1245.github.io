@@ -1,3 +1,5 @@
+import {setImmediate} from 'node:timers/promises';
+import {packCareerTransfer} from './career-transfer';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {webcrypto} from 'node:crypto';
@@ -34,9 +36,15 @@ test('save Worker cancellation preserves full requests and clears settled reques
   t.mock.timers.tick(60_001);await timeout;assert.equal(worker.terminated,true);
   const large={history:Array(6).fill({})} as unknown as Career;
   const heavy=api.prepareSaveOffThread(large),active=FakeWorker.instances.at(-1)!;
-  const queued=api.verifyFileOffThread('another source');active.reply(0,result);assert.equal(await heavy,result);assert.equal(active.terminated,false,'a large result must not terminate another queued job');
+  while(!active.sent.length)await setImmediate();const queued=api.verifyFileOffThread('another source');active.reply(0,result);assert.equal(await heavy,result);assert.equal(active.terminated,false,'a large result must not terminate another queued job');
   active.reply(1,career);assert.equal(await queued,career);assert.equal(active.terminated,true,'the long-career graph is released after all work completes');
-  const exported=api.exportJSONOffThread(large),exporter=FakeWorker.instances.at(-1)!,blob=new Blob(['{}']);exporter.reply(0,blob);assert.equal(await exported,blob);assert.ok(exporter.terminated);
+  const exported=api.exportJSONOffThread(large),exporter=FakeWorker.instances.at(-1)!,blob=new Blob(['{}']);while(!exporter.sent.length)await setImmediate();exporter.reply(0,blob);assert.equal(await exported,blob);assert.ok(exporter.terminated);
+  const decoded=api.decodeSaveOffThread({rawBytes:256*1024*1024,blob:new Blob()} as BlobCareer),decoder=FakeWorker.instances.at(-1)!;
+  decoder.reply(0,{careerTransfer:await packCareerTransfer(large),versionHash:'verified'});
+  assert.ok(decoder.terminated,'release the source graph before parsing the receiving graph');
+  assert.deepEqual(await decoded,{career:large,versionHash:'verified'});
+  const bad=api.verifyFileOffThread(new Blob(['archive'])),badWorker=FakeWorker.instances.at(-1)!;
+  badWorker.reply(0,{careerTransfer:{blob:new Blob(['broken gzip']),encoding:'gzip',rawBytes:10},careerOnly:true});await assert.rejects(bad);
   t.mock.timers.tick(180_001);
  }finally{t.mock.timers.reset();globalThis.Worker=original;}
 });

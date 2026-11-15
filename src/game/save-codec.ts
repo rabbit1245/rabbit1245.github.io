@@ -1,3 +1,4 @@
+import {packJSONTransfer} from './career-transfer';
 import {readJSONBlob,SaveReadError} from './json-reader';
 import {replayGameDelta,validatePreparedDelta,sealCareer,type PreparedGameDelta} from './game-delta';
 import type {Career,SaveEnvelope,SaveSlot} from './types';
@@ -34,6 +35,10 @@ export function packEnvelope(envelope:SaveEnvelope,versionHash=envelope.hash):Pr
  return {record:{id:c.id,format:'kball-blob-v1',revision:c.revision,hash:envelope.hash,versionHash,writeId:crypto.randomUUID(),blob:jsonBlob(envelope),journal:[]},metadata:metadataFor(c,versionHash,envelope.savedAt)};
 }
 export async function packStored(envelope:SaveEnvelope,versionHash=envelope.hash):Promise<PreparedSave>{
+ if(envelope.career.history.length>=6&&typeof CompressionStream!=='undefined'){
+  const c=envelope.career,packed=await packJSONTransfer(envelope);
+  return {record:{id:c.id,format:'kball-blob-v1',revision:c.revision,hash:envelope.hash,versionHash,writeId:crypto.randomUUID(),journal:[],...packed},metadata:metadataFor(c,versionHash,envelope.savedAt)};
+ }
  const prepared=packEnvelope(envelope,versionHash),record=prepared.record;
  if(record.blob.size>32*1024*1024&&typeof CompressionStream!=='undefined'){
   const rawBytes=record.blob.size,blob=await new Response(record.blob.stream().pipeThrough(new CompressionStream('gzip'))).blob();

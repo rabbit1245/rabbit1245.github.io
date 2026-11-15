@@ -1,0 +1,10 @@
+{
+  "version": "2.14.3",
+  "zipBytes": 21651050,
+  "zipSHA256": "263c56b8f16b77c4beeace52093a3352b30cdaf6f73894d4c4762afa01f7751d",
+  "htmlBytes": 28727756,
+  "htmlSHA256": "bd0f13f9e03f9c2b6d14f88e4f98bc08cbee04e01fe15aac142c0a791d8c79e0",
+  "zipCRC": "passed",
+  "testedHTMLSHA256": "35ef9f87ef73d10bd7d208e75cc519cefcf651035425a87a1243fcb0ee18bc87",
+  "onlyNonExecutableLicenseAddedAfterBrowserTest": true
+}
