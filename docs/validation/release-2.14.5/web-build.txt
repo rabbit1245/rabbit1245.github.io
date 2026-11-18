@@ -1,0 +1,28 @@
+> kball-career@2.14.5 build
+> tsc --noEmit && vite build && node scripts/copy-static.mjs
+
+vite v6.4.4 building for production...
+transforming...
+✓ 1701 modules transformed.
+rendering chunks...
+[plugin vite:reporter]
+(!) /workspace/work/kball-save-fix/src/game/json-reader.ts is dynamically imported by /workspace/work/kball-save-fix/src/game/recovery-archive.ts but also statically imported by /workspace/work/kball-save-fix/src/game/archive-wire.ts, /workspace/work/kball-save-fix/src/game/career-transfer.ts, /workspace/work/kball-save-fix/src/game/game-delta.ts, /workspace/work/kball-save-fix/src/game/save-codec.ts, /workspace/work/kball-save-fix/src/game/storage.ts, dynamic import will not move module into another chunk.
+
+[plugin vite:reporter]
+(!) /workspace/work/kball-save-fix/src/game/save-preparation.ts is dynamically imported by /workspace/work/kball-save-fix/src/game/storage.ts, /workspace/work/kball-save-fix/src/game/storage.ts, /workspace/work/kball-save-fix/src/game/storage.ts, /workspace/work/kball-save-fix/src/game/storage.ts, /workspace/work/kball-save-fix/src/game/storage.ts, /workspace/work/kball-save-fix/src/game/storage.ts but also statically imported by /workspace/work/kball-save-fix/src/App.tsx, dynamic import will not move module into another chunk.
+
+computing gzip size...
+dist/index.html                                     0.72 kB │ gzip:   0.49 kB
+dist/assets/Pretendard-Regular-BhrLQoBv.woff2     765.89 kB
+dist/assets/Pretendard-SemiBold-ClEDdoZU.woff2    785.86 kB
+dist/assets/save-worker-C6_T8l5d.js             1,137.93 kB
+dist/assets/worker-U5FnSI0a.js                  1,531.87 kB
+dist/assets/index-c1-nIkJV.css                    109.97 kB │ gzip:  19.13 kB
+dist/assets/commands-CN8LJTb-.js                    1.65 kB │ gzip:   0.84 kB
+dist/assets/index-D5YWKXQo.js                   1,926.08 kB │ gzip: 551.13 kB
+
+(!) Some chunks are larger than 1600 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 9.39s

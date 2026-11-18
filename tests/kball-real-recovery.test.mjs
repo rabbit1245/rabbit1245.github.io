@@ -1,23 +1,167 @@
 import {chromium} from 'playwright';
-import {mkdir,writeFile} from 'node:fs/promises';
+import {mkdir,mkdtemp,rm,writeFile} from 'node:fs/promises';
 import path from 'node:path';
 import assert from 'node:assert/strict';
-// Serve the private archive as user-recovery.bin beside the tested HTML.
-const base=process.env.KBALL_TEST_URL||'http://localhost:8189/Kball.html',out=path.resolve(process.env.KBALL_TEST_RESULTS_DIR||'test-results/real-recovery');await mkdir(out,{recursive:true});const report={base,steps:[]};
-let b;try{b=await chromium.launch({headless:true,executablePath:'/usr/bin/chromium',args:['--no-sandbox','--remote-debugging-port=9223']});const context=await b.newContext({reducedMotion:'reduce'});let p=await context.newPage();p.on('crash',()=>console.log('CRASH'));p.on('pageerror',e=>console.log('PAGEERROR',String(e)));p.on('console',m=>console.log(m.type(),m.text().slice(0,300)));await p.addInitScript(()=>{const W=window.Worker;window.Worker=class extends W{constructor(...a){super(...a);this.addEventListener('message',e=>{if(e.data?.result?.careerBlob)console.log('CAREER BLOB BYTES',e.data.result.careerBlob.size);});}};});await p.goto(base);
-console.log(await p.evaluate(async()=>{const blob=await(await fetch(new URL('user-recovery.bin',location.href))).blob(),header=22,length=new DataView(await blob.slice(18,22).arrayBuffer()).getUint32(0,true);const m=JSON.parse(await blob.slice(header,header+length).text());let offset=header+length;const parts=m.parts.map(p=>{const b=blob.slice(offset,offset+p.bytes,p.type);offset+=p.bytes;return b;});const d=m.current.data;const r={...d,blob:parts[d.blob.index],journal:d.journal.map(e=>e.kind==='game-delta'?{...e,payload:{...e.payload,blob:parts[e.payload.blob.index]}}:e)};await new Promise((resolve,reject)=>{const q=indexedDB.open('kball-careers',1);q.onupgradeneeded=()=>{for(const n of ['slots','metadata','backups'])if(!q.result.objectStoreNames.contains(n))q.result.createObjectStore(n,{keyPath:'id'});};q.onsuccess=()=>{const db=q.result,t=db.transaction(['slots','metadata'],'readwrite');t.objectStore('slots').put(r);t.objectStore('metadata').put(m.metadata);t.oncomplete=()=>{db.close();resolve();};t.onerror=()=>reject(t.error);};});return {seeded:true};}));await p.reload();const firstStart=Date.now();await p.getByRole('button',{name:'이어서 플레이',exact:true}).click();
-await p.getByTestId('advance-half').waitFor({timeout:360000});assert.deepEqual(await p.getByRole('alert').allTextContents(),[]);
-report.initialLoadMs=Date.now()-firstStart;console.log('LOADED',report.initialLoadMs);
-async function head(){return p.evaluate(()=>new Promise((resolve,reject)=>{const r=indexedDB.open('kball-careers');r.onerror=()=>reject(r.error);r.onsuccess=()=>{const db=r.result,t=db.transaction(['slots','metadata']),q=t.objectStore('slots').getAll(),m=t.objectStore('metadata').getAll();t.oncomplete=()=>{db.close();const s=q.result[0],meta=m.result[0];resolve({id:s.id,revision:s.journal.at(-1)?.revision??s.revision,hash:s.journal.at(-1)?.hash??s.versionHash,checkpoint:s.revision,journal:s.journal.length,age:meta.age,year:meta.year,metadataMatchesHash:meta.hash===(s.journal.at(-1)?.hash??s.versionHash)});};};}));}
-report.initial=await head();
-for(let n=0;n<4;n++){
- const advance=p.getByTestId('advance-half');await advance.waitFor({timeout:360000});
- if(await advance.isDisabled())throw new Error('advance disabled: '+await p.locator('body').innerText());
- const stepStart=Date.now();console.log('STEP',n,await advance.innerText());await advance.click({timeout:360000});
- await p.locator('.processing').waitFor({state:'hidden',timeout:360000});
- console.log('AFTER',n,await p.getByRole('alert').allTextContents(),await p.getByTestId('save-status').innerText());
- assert.deepEqual(await p.getByRole('alert').allTextContents(),[]);const state=await head();assert.ok(state.metadataMatchesHash);assert.ok(state.revision>(report.steps.at(-1)?.revision??report.initial.revision));report.steps.push({...state,ms:Date.now()-stepStart});console.log('STATE',JSON.stringify(state));await writeFile(out+'/results.json',JSON.stringify(report,null,2));
+
+const url=process.env.KBALL_TEST_URL||'http://localhost:8189/Kball.html';
+const recoveryFile=process.env.KBALL_RECOVERY_FILE;
+const results=path.resolve(process.env.KBALL_TEST_RESULTS_DIR||'test-results/real-recovery');
+const commands=Number(process.env.KBALL_TEST_COMMANDS??4);
+const executablePath=process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE||
+ (process.env.PLAYWRIGHT_BROWSERS_PATH?undefined:'/usr/bin/chromium');
+const timeout=360_000;
+const report={url,steps:[]};
+await mkdir(results,{recursive:true});
+const profile=await mkdtemp(path.join(results,'browser-'));
+let context;
+
+async function open(){
+ context=await chromium.launchPersistentContext(profile,{executablePath,headless:true,reducedMotion:'reduce'});
+ const page=context.pages()[0]??await context.newPage();
+ page.on('pageerror',error=>{report.pageErrors??=[];report.pageErrors.push(String(error));});
+ page.on('crash',()=>{report.crashed=true;});
+ await page.goto(url);
+ await page.getByTestId('new-career').waitFor();
+ return page;
 }
-await p.screenshot({path:out+'/finished.png'});const durable=await head();assert.ok(durable.age>report.initial.age);assert.ok(durable.year>report.initial.year);
-await p.getByTestId('common-menu').click();const download=p.waitForEvent('download');await p.getByRole('button',{name:'원본 저장 보관',exact:true}).click();await (await download).saveAs(out+'/progress.kball-recovery');
-await p.close();const reconnectStart=Date.now();p=await context.newPage();await p.goto(base);await p.getByRole('button',{name:'이어서 플레이',exact:true}).click();await p.getByTestId('advance-half').waitFor({timeout:360000});assert.deepEqual(await head(),durable);assert.deepEqual(await p.getByRole('alert').allTextContents(),[]);report.reconnect=await head();report.reconnectMs=Date.now()-reconnectStart;report.passed=true;await writeFile(out+'/results.json',JSON.stringify(report,null,2));console.log('RECONNECT OK',JSON.stringify(report));}catch(error){report.error=String(error);await writeFile(out+'/results.json',JSON.stringify(report,null,2));throw error;}finally{await b?.close();}
+
+async function seed(page){
+ if(recoveryFile){
+  await page.evaluate(()=>{
+   const input=document.createElement('input');
+   input.type='file';
+   input.id='private-fixture';
+   document.body.append(input);
+  });
+  await page.locator('#private-fixture').setInputFiles(recoveryFile);
+ }
+ await page.evaluate(async useFile=>{
+  // Prefer a File from Playwright so the user's archive never needs to be served.
+  const blob=useFile?document.querySelector('#private-fixture').files[0]
+   :await(await fetch(new URL('user-recovery.bin',location.href))).blob();
+  const magic='KBALL-RECOVERY-V1\n';
+  if(await blob.slice(0,magic.length).text()!==magic)throw Error('Unexpected recovery file');
+  const header=magic.length+4;
+  const length=new DataView(await blob.slice(magic.length,header).arrayBuffer()).getUint32(0,true);
+  const manifest=JSON.parse(await blob.slice(header,header+length).text());
+  let offset=header+length;
+  const parts=manifest.parts.map(part=>{
+   const slice=blob.slice(offset,offset+part.bytes,part.type);
+   offset+=part.bytes;
+   return slice;
+  });
+  const restore=source=>{
+   const row=source.data;
+   return {...row,blob:parts[row.blob.index],journal:row.journal.map(entry=>entry.kind==='game-delta'
+    ?{...entry,payload:{...entry.payload,blob:parts[entry.payload.blob.index]}}:entry)};
+  };
+  await new Promise((resolve,reject)=>{
+   const request=indexedDB.open('kball-careers',1);
+   request.onupgradeneeded=()=>{
+    for(const name of ['slots','metadata','backups'])if(!request.result.objectStoreNames.contains(name))
+     request.result.createObjectStore(name,{keyPath:'id'});
+   };
+   request.onerror=()=>reject(request.error);
+   request.onsuccess=()=>{
+    const db=request.result,tx=db.transaction(['slots','metadata','backups'],'readwrite');
+    tx.objectStore('slots').put(restore(manifest.current));
+    tx.objectStore('metadata').put(manifest.metadata);
+    if(manifest.backup)tx.objectStore('backups').put(restore(manifest.backup));
+    tx.oncomplete=()=>{db.close();resolve();};
+    tx.onabort=()=>{db.close();reject(tx.error);};
+   };
+  });
+ },!!recoveryFile);
+}
+
+function head(page){
+ return page.evaluate(()=>new Promise((resolve,reject)=>{
+  const request=indexedDB.open('kball-careers');
+  request.onerror=()=>reject(request.error);
+  request.onsuccess=()=>{
+   const db=request.result,tx=db.transaction(['slots','metadata']);
+   const slots=tx.objectStore('slots').getAll(),meta=tx.objectStore('metadata').getAll();
+   tx.oncomplete=()=>{
+    db.close();
+    const stored=slots.result[0],metadata=meta.result[0],tail=stored.journal.at(-1);
+    const hash=tail?.hash??stored.versionHash;
+    resolve({revision:tail?.revision??stored.revision,hash,checkpoint:stored.revision,journal:stored.journal.length,
+     age:metadata.age,year:metadata.year,metadataMatchesHash:metadata.hash===hash});
+   };
+   tx.onabort=()=>{db.close();reject(tx.error);};
+  };
+ }));
+}
+async function resume(page){
+ const start=Date.now();
+ await page.getByRole('button',{name:'이어서 플레이',exact:true}).click();
+ await page.getByTestId('advance-half').waitFor({timeout});
+ assert.deepEqual(await page.getByRole('alert').allTextContents(),[]);
+ return Date.now()-start;
+}
+const writeReport=()=>writeFile(path.join(results,'results.json'),JSON.stringify(report,null,2));
+
+try{
+ let page=await open();
+ report.browser=context.browser()?.version()??await page.evaluate(()=>navigator.userAgent);
+ report.protocol=await page.evaluate(()=>location.protocol);
+ await seed(page);
+ await page.reload();
+ await page.evaluate(()=>{
+  window.measuredLoadPhases=[];
+  window.addEventListener('kball-loading',event=>{
+   const phase=event.detail.phase;
+   if(window.measuredLoadPhases.at(-1)?.phase!==phase)
+    window.measuredLoadPhases.push({phase,ms:Math.round(performance.now())});
+  });
+ });
+ report.initialLoadMs=await resume(page);
+ report.loadPhases=await page.evaluate(()=>window.measuredLoadPhases);
+ report.initial=await head(page);
+ assert.ok(report.initial.metadataMatchesHash);
+ console.log('INITIAL',JSON.stringify({ms:report.initialLoadMs,...report.initial}));
+ await writeReport();
+ for(let step=0;step<commands;step++){
+  const advance=page.getByTestId('advance-half');
+  const action=await advance.innerText();
+  const start=Date.now();
+  await advance.click({timeout});
+  await page.locator('.processing').waitFor({state:'hidden',timeout});
+  assert.deepEqual(await page.getByRole('alert').allTextContents(),[]);
+  assert.match(await page.getByTestId('save-status').innerText(),/자동 저장됨/);
+  const saved=await head(page);
+  assert.ok(saved.metadataMatchesHash);
+  assert.ok(saved.revision>(report.steps.at(-1)?.revision??report.initial.revision));
+  const result={action,ms:Date.now()-start,...saved};
+  report.steps.push(result);
+  console.log('SAVED',JSON.stringify(result));
+  await writeReport();
+ }
+ const beforeClose=await head(page);
+ if(commands){
+  assert.equal(beforeClose.age,report.initial.age+1);
+  assert.equal(beforeClose.year,report.initial.year+1);
+  await page.getByTestId('common-menu').click();
+  const download=page.waitForEvent('download');
+  await page.getByRole('button',{name:'원본 저장 보관',exact:true}).click();
+  await (await download).saveAs(path.join(results,'progress.kball-recovery'));
+ }
+ await context.close();
+ context=undefined;
+ page=await open();
+ report.reconnectMs=await resume(page);
+ report.reconnect=await head(page);
+ assert.deepEqual(report.reconnect,beforeClose);
+ assert.deepEqual(report.pageErrors??[],[]);
+ assert.ok(!report.crashed);
+ report.passed=true;
+ console.log('RECONNECTED',JSON.stringify({ms:report.reconnectMs,...report.reconnect}));
+ await writeReport();
+}catch(error){
+ report.error=String(error);
+ await writeReport();
+ throw error;
+}finally{
+ await context?.close();
+ await rm(profile,{recursive:true,force:true});
+}

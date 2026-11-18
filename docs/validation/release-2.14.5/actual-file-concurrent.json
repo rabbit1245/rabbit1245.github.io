@@ -1,0 +1,98 @@
+{
+  "steps": [
+    {
+      "action": "후반기 진행",
+      "ms": 28336,
+      "revision": 967,
+      "hash": "07afd5b4a3177f283f088b6420dc4c793e5a57ca23f73109684a9a51380e674b",
+      "checkpoint": 840,
+      "journal": 26,
+      "age": 35,
+      "year": 2044,
+      "metadataMatchesHash": true
+    },
+    {
+      "action": "다음 시즌 시작",
+      "ms": 4658,
+      "revision": 968,
+      "hash": "1131b2b5b2a5c12dcf14cee83e2e2efab9defdb64fb8a8d42bf084cc2a1aa289",
+      "checkpoint": 840,
+      "journal": 27,
+      "age": 36,
+      "year": 2045,
+      "metadataMatchesHash": true
+    },
+    {
+      "action": "전반기 진행",
+      "ms": 22787,
+      "revision": 985,
+      "hash": "4f080ee0ace4b9a58a1509d598e734048b553178f3c9df18a9c69301a779b48e",
+      "checkpoint": 840,
+      "journal": 28,
+      "age": 36,
+      "year": 2045,
+      "metadataMatchesHash": true
+    },
+    {
+      "action": "후반기 진행",
+      "ms": 25827,
+      "revision": 1002,
+      "hash": "8566ea380d619ef32c46020fe75ae1fc84f99c88efe42eb3289e28cc202144a2",
+      "checkpoint": 840,
+      "journal": 29,
+      "age": 36,
+      "year": 2045,
+      "metadataMatchesHash": true
+    }
+  ],
+  "browser": "140.0.7339.16",
+  "protocol": "file:",
+  "initialLoadMs": 103115,
+  "loadPhases": [
+    {
+      "phase": "빠른 저장 확인",
+      "ms": 2834
+    },
+    {
+      "phase": "원본 기록 변환",
+      "ms": 2910
+    },
+    {
+      "phase": "원본 기록 무결성 검사",
+      "ms": 38657
+    },
+    {
+      "phase": "최근 진행 적용",
+      "ms": 63439
+    },
+    {
+      "phase": "검증한 저장 준비",
+      "ms": 89631
+    },
+    {
+      "phase": "빠른 저장 구성",
+      "ms": 103508
+    }
+  ],
+  "initial": {
+    "revision": 950,
+    "hash": "2694358fefc0cc67076a8eb4fc1b518924ddb1400f5f6bfaaee4df5aec4e5493",
+    "checkpoint": 840,
+    "journal": 25,
+    "age": 35,
+    "year": 2044,
+    "metadataMatchesHash": true
+  },
+  "reconnectMs": 17003,
+  "reconnect": {
+    "revision": 1002,
+    "hash": "8566ea380d619ef32c46020fe75ae1fc84f99c88efe42eb3289e28cc202144a2",
+    "checkpoint": 840,
+    "journal": 29,
+    "age": 36,
+    "year": 2045,
+    "metadataMatchesHash": true
+  },
+  "passed": true,
+  "otherChecksRanConcurrently": true
+}

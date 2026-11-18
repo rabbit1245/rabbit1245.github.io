@@ -1,9 +1,7 @@
 import {compactMatchEvents} from './event-archive';
-import {prepareGameDelta} from './game-delta';
-import {packGameResult} from './worker-result';
-import {packCareerTransfer} from './career-transfer';
-import {sealCareer,certifyGameDelta,isSealedCareer,type PreparedGameDelta} from './game-delta';
-import {unpackGameResult,type GameResultWire} from './worker-result';
+import {usesCompactCareer,markCompactCareer} from './career-size';
+import {prepareGameDelta,sealCareer,certifyGameDelta,isSealedCareer,type PreparedGameDelta} from './game-delta';
+import {packGameResult,unpackGameResult,type GameResultWire} from './worker-result';
 import type { Career, GameCommand,GameProgress } from './types';
 import {validateEngineResult} from './storage';
 import {LIGHT_COMMANDS,LOCAL_DECISIONS} from './command-patches';
@@ -35,20 +33,22 @@ export async function runGameCommand(career: Career, command: GameCommand,onProg
     const { executeCommand } = await import('./commands');
     const next=executeCommand(career, command, id,onProgress);
     if(isSealedCareer(career)&&LOCAL_DECISIONS.has(command.type)){validateEngineResult(career,next);sealCareer(next);}
-    return next;
+    return usesCompactCareer(career)?markCompactCareer(next):next;
   }
-  sealCareer(career);
-  if(career.history.length>=6){
-    // The compact state stays in one realm. No GB-sized worker round trips.
+  if(usesCompactCareer(career)){
+    releaseIdleGameWorker();
+    // Work on the validated in-memory state. Shared previous matches stay
+    // immutable, even for the first command after crossing six seasons.
     await new Promise<void>(resolve=>setTimeout(resolve,0));
-    performance.mark('long-command-start');const {executeCommand}=await import('./commands');
-    const next=executeCommand(career,command,id,onProgress);if(next===career)return career;
-    performance.mark('long-command-executed');validateEngineResult(career,next);performance.mark('long-command-validated');
+    const {executeCommand}=await import('./commands');
+    const next=executeCommand(career,command,id,onProgress);
+    if(next===career)return career;
+    validateEngineResult(career,next);
     compactMatchEvents(next);
-    performance.mark('long-command-compacted');const prepared=await prepareGameDelta(packGameResult(career,next),true);performance.mark('long-command-encoded');
+    const prepared=await prepareGameDelta(packGameResult(career,next),true);
     sealCareer(next);
     if(prepared)certifyGameDelta(career,next,prepared);
-    performance.mark('long-command-finished');return next;
+    return markCompactCareer(next);
   }
   if (!worker) {
     worker = new Worker(new URL('./worker.ts', import.meta.url), { type: 'module' });
@@ -56,7 +56,7 @@ export async function runGameCommand(career: Career, command: GameCommand,onProg
       const request = pending.get(event.data.id);
       if (!request) return;
       clearTimeout(request.timeout);
-      if(event.data.progress){request.timeout=setTimeout(()=>stopWorker('계산 응답이 오래 멈췄습니다. 저장된 상태는 유지됩니다.'),request.previous.history.length>=6?180_000:60_000);request.onProgress?.(event.data.progress);return;}
+      if(event.data.progress){request.timeout=setTimeout(()=>stopWorker('계산 응답이 오래 멈췄습니다. 저장된 상태는 유지됩니다.'),60_000);request.onProgress?.(event.data.progress);return;}
       pending.delete(event.data.id);
       if (event.data.error || !event.data.career&&!event.data.wire) request.reject(new Error(event.data.error || '경기 결과를 불러오지 못했습니다.'));
       else {try{resident=event.data.wire?(event.data.wire.career.revision===request.previous.revision?request.previous:unpackGameResult(request.previous,event.data.wire)):event.data.career!;sealCareer(resident);if(event.data.preparedDelta)certifyGameDelta(request.previous,resident,event.data.preparedDelta);request.resolve(resident);}catch(e){request.reject(e instanceof Error?e:new Error('경기 기록 복구 실패'));releaseIdleGameWorker();return;}if(resident.history.length>=6)releaseIdleGameWorker();}
@@ -64,11 +64,10 @@ export async function runGameCommand(career: Career, command: GameCommand,onProg
     worker.addEventListener('error', () => stopWorker('경기 계산을 완료하지 못했습니다. 다시 진행해 주세요.'));
     worker.addEventListener('messageerror', () => stopWorker('경기 데이터를 읽지 못했습니다. 다시 진행해 주세요.'));
   }
-  const careerTransfer=resident!==career&&career.history.length>=6?await packCareerTransfer(career):undefined;
   return new Promise<Career>((resolve, reject) => {
-    const timeout = setTimeout(() => stopWorker('계산 시간이 초과되었습니다. 저장된 상태는 유지됩니다.'), career.history.length>=6?180_000:60_000);
+    const timeout = setTimeout(() => stopWorker('계산 시간이 초과되었습니다. 저장된 상태는 유지됩니다.'),60_000);
     pending.set(id, { previous:career,resolve, reject, timeout,onProgress });
-    try { worker!.postMessage({id,...(resident===career?{careerId:career.id,revision:career.revision}:careerTransfer?{careerTransfer}:{career}),command}); }
+    try { worker!.postMessage({id,...(resident===career?{careerId:career.id,revision:career.revision}:{career}),command}); }
     catch { stopWorker('진행 요청을 전달하지 못했습니다.'); }
   });
 }

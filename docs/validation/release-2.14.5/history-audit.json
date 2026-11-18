@@ -1,0 +1,17 @@
+{
+  "archiveSHA256": "2933ed59a440c2870f7ad2e38e33260bb21db2ac42f60a93e1908f33b45e59f3",
+  "archiveBytes": 216563488,
+  "revision": 1002,
+  "age": 36,
+  "year": 2045,
+  "week": 34,
+  "stage": "offseason",
+  "historyCount": 20,
+  "preservedHistoryCount": 18,
+  "preservedHistoryHash": "e061d73d93f78af7dd4bfdd0cd9f367a3b761644b261cc16089760aeed5c3677",
+  "clubMatches": 602,
+  "nationalHistoryCount": 52,
+  "preservedNationalHistoryCount": 47,
+  "preservedNationalHistoryHash": "90484c7a6ac1acda9ce667d1c59a0f260c772a31b40154ac42e2e76b63be1ec3",
+  "allPreservedRecordFieldsMatch": true
+}

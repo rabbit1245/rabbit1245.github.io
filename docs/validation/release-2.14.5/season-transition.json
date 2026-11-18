@@ -1,0 +1,10 @@
+{
+  "baseline": "2.14.4",
+  "baselineError": "Cannot assign to read only property 'events' of object '#<Object>'",
+  "fixed": "2.14.5",
+  "ageBefore": 22,
+  "ageAfter": 23,
+  "yearAfter": 2032,
+  "previousRecordsUnchanged": true,
+  "changeRecordReplay": true
+}

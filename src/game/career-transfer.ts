@@ -1,5 +1,6 @@
 import {readJSONBlob} from './json-reader';
 import {MAX_SAVE_BYTES} from './save-limits';
+import {canonicalEventBytes,compactMatchEvents} from './event-archive';
 import type {Career} from './types';
 export interface CareerTransfer {blob:Blob;rawBytes:number;encoding:'gzip'}
 /** Emit bounded UTF-8 chunks with backpressure; never retain an uncompressed
@@ -7,6 +8,14 @@ export interface CareerTransfer {blob:Blob;rawBytes:number;encoding:'gzip'}
 function* chunks(value:unknown):Generator<Uint8Array<ArrayBuffer>>{
  const encoder=new TextEncoder();let buffer='';
  function* visit(v:any,array=false):Generator<Uint8Array<ArrayBuffer>>{
+  if(v&&typeof v==='object'){
+   const events=canonicalEventBytes(v);
+   if(events){
+    if(buffer){yield encoder.encode(buffer);buffer='';}
+    yield events;
+    return;
+   }
+  }
   const token=v===null?'null':typeof v==='object'?undefined:JSON.stringify(v)??(array?'null':'');
   if(token!==undefined){buffer+=token;}
   else if(Array.isArray(v)){
@@ -25,4 +34,7 @@ export async function packJSONTransfer(career:unknown):Promise<CareerTransfer>{
  return {blob,rawBytes,encoding:'gzip'};
 }
 export const packCareerTransfer=(career:Career)=>packJSONTransfer(career);
-export const unpackCareerTransfer=(p:CareerTransfer)=>readJSONBlob(p.blob,{encoding:p.encoding,rawBytes:p.rawBytes,maximum:MAX_SAVE_BYTES}) as Promise<Career>;
+export const unpackCareerTransfer=(p:CareerTransfer,compact=false)=>readJSONBlob(p.blob,{
+ encoding:p.encoding,rawBytes:p.rawBytes,maximum:MAX_SAVE_BYTES,
+ ...(compact?{stream:true,transform:compactMatchEvents}:{}),
+}) as Promise<Career>;

@@ -4,10 +4,12 @@ import {isEventArchive,compactMatchEvents} from './event-archive';
 import type {Career} from './types';
 import {unpackGameResult,type GameResultWire} from './worker-result';
 import {jsonBlob} from './json-blob';
+import {sha256} from '@noble/hashes/sha256';
 
 export const MAX_GAME_DELTA_BYTES=256*1024*1024;
 export interface PreparedGameDelta {format:'kball-game-delta-v1'|'kball-game-delta-v2';baseId:string;baseRevision:number;revision:number;rawBytes:number;dataHash:string;blob:Blob;encoding?:'gzip'}
-const digest=async(blob:Blob)=>[...new Uint8Array(await crypto.subtle.digest('SHA-256',await blob.arrayBuffer()))].map(x=>x.toString(16).padStart(2,'0')).join('');
+const toHex=(bytes:Uint8Array)=>Array.from(bytes,byte=>byte.toString(16).padStart(2,'0')).join('');
+const digest=async(buffer:ArrayBuffer)=>toHex(new Uint8Array(await crypto.subtle.digest('SHA-256',buffer)));
 const sealed=new WeakSet<object>();
 /** Browser game states are immutable. Shared archived records are sealed once,
  * so later decisions only visit their new objects, never decades of old events. */
@@ -32,9 +34,9 @@ export function validatePreparedDelta(p:PreparedGameDelta):void{
  * entire career to another Worker for a second full serialization and checksum. */
 export async function prepareGameDelta(wire:GameResultWire,archive=false):Promise<PreparedGameDelta|undefined>{
  if(wire.career.revision<=wire.baseRevision)return undefined;
- if(archive){const blob=await encodeArchiveWire(wire);if(blob.size>MAX_GAME_DELTA_BYTES)return undefined;return {format:'kball-game-delta-v2',baseId:wire.baseId,baseRevision:wire.baseRevision,revision:wire.career.revision,rawBytes:blob.size,dataHash:await digest(blob),blob};}
+ if(archive){const blob=await encodeArchiveWire(wire);if(blob.size>MAX_GAME_DELTA_BYTES)return undefined;return {format:'kball-game-delta-v2',baseId:wire.baseId,baseRevision:wire.baseRevision,revision:wire.career.revision,rawBytes:blob.size,dataHash:await digest(await blob.arrayBuffer()),blob};}
  const raw=jsonBlob(wire);if(raw.size>MAX_GAME_DELTA_BYTES)return undefined;
- const dataHash=await digest(raw);let blob=raw,encoding:'gzip'|undefined;
+ const dataHash=await digest(await raw.arrayBuffer());let blob=raw,encoding:'gzip'|undefined;
  if(raw.size>256*1024&&typeof CompressionStream!=='undefined'){
   const compressed=await new Response(raw.stream().pipeThrough(new CompressionStream('gzip'))).blob();
   if(compressed.size<raw.size){blob=compressed;encoding='gzip';}
@@ -44,18 +46,36 @@ export async function prepareGameDelta(wire:GameResultWire,archive=false):Promis
 export async function replayGameDelta(previous:Career,p:PreparedGameDelta,compact=false):Promise<Career>{
  validatePreparedDelta(p);
  if(previous.id!==p.baseId||previous.revision!==p.baseRevision)throw Error('진행 변경 기록의 순서가 일치하지 않습니다.');
- if(p.format==='kball-game-delta-v2'){if(p.encoding!==undefined||p.blob.size!==p.rawBytes||await digest(p.blob)!==p.dataHash)throw Error('진행 변경 기록이 손상되었습니다.');const wire=await decodeArchiveWire(p.blob);if(wire.baseId!==p.baseId||wire.baseRevision!==p.baseRevision||wire.career?.revision!==p.revision)throw Error('진행 변경 기록의 검사 정보가 일치하지 않습니다.');return unpackGameResult(previous,wire);}
- let blob=p.blob;
- if(p.encoding==='gzip'){
-  if(typeof DecompressionStream==='undefined')throw Error('이 브라우저는 압축 저장을 지원하지 않습니다. 최신 브라우저를 사용해 주세요.');
-  const reader=blob.stream().pipeThrough(new DecompressionStream('gzip')).getReader(),parts:BlobPart[]=[];let size=0;
-  while(true){const r=await reader.read();if(r.done)break;size+=r.value.byteLength;if(size>p.rawBytes){await reader.cancel();throw Error('진행 변경 기록의 압축 크기가 일치하지 않습니다.');}parts.push(r.value);}
-  blob=new Blob(parts);
+ let wire:GameResultWire;
+ if(p.format==='kball-game-delta-v2'){
+  if(p.encoding!==undefined||p.blob.size!==p.rawBytes)throw Error('진행 변경 기록이 손상되었습니다.');
+  const bytes=await p.blob.arrayBuffer();
+  if(await digest(bytes)!==p.dataHash)throw Error('진행 변경 기록이 손상되었습니다.');
+  wire=await decodeArchiveWire<GameResultWire>(p.blob,bytes);
+ }else{
+  const hash=sha256.create();
+  if(!p.encoding&&p.blob.size!==p.rawBytes)throw Error('진행 변경 기록의 크기가 일치하지 않습니다.');
+  const forbidden=new Set(['__proto__','prototype','constructor']);
+  try{
+   wire=await readJSONBlob(p.blob,{
+    encoding:p.encoding,rawBytes:p.rawBytes,maximum:MAX_GAME_DELTA_BYTES,
+    // Large deltas are compacted as their subtrees are parsed.
+    stream:compact&&p.rawBytes>=96*1024*1024,onChunk:chunk=>{hash.update(chunk);},
+    transform(value){
+     const visit=(node:unknown)=>{
+      if(!node||typeof node!=='object')return;
+      for(const [key,child] of Object.entries(node)){
+       if(forbidden.has(key))throw Error('허용하지 않는 속성이 포함되어 있습니다.');
+       visit(child);
+      }
+     };
+     visit(value);
+     return compact?compactMatchEvents(value):value;
+    },
+   }) as GameResultWire;
+  }catch{throw Error('진행 변경 기록을 읽을 수 없습니다.');}
+  if(toHex(hash.digest())!==p.dataHash)throw Error('진행 변경 기록이 손상되었습니다. 이전 저장본을 복구해 주세요.');
  }
- if(blob.size!==p.rawBytes||await digest(blob)!==p.dataHash)throw Error('진행 변경 기록이 손상되었습니다. 이전 저장본을 복구해 주세요.');
- const forbidden=new Set(['__proto__','prototype','constructor']);
- let wire:GameResultWire;try{wire=compact?await readJSONBlob(blob,{maximum:MAX_GAME_DELTA_BYTES,stream:true,transform:compactMatchEvents}) as GameResultWire:JSON.parse(await blob.text(),(key,v)=>{if(forbidden.has(key))throw Error('unsafe');return v;});}catch{throw Error('진행 변경 기록을 읽을 수 없습니다.');}
- if(wire.baseId!==p.baseId||wire.baseRevision!==p.baseRevision||wire.career?.revision!==p.revision)throw Error('진행 변경 기록의 검사 정보가 일치하지 않습니다.');
- if(compact)compactMatchEvents(wire);
+ if(wire?.baseId!==p.baseId||wire.baseRevision!==p.baseRevision||wire.career?.revision!==p.revision)throw Error('진행 변경 기록의 검사 정보가 일치하지 않습니다.');
  return unpackGameResult(previous,wire);
 }

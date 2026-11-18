@@ -3,6 +3,8 @@ import {prepareEnvelope,verifySaveText,verifySaveBlob} from './storage';
 import {decodeStored,isBlobCareer,packStored,replayJournal,type StoredCareer} from './save-codec';
 import type {Career} from './types';
 import {jsonBlob} from './json-blob';
+import {ArchiveMetadataLimitError,encodeArchiveWire} from './archive-wire';
+import {MAX_CAREER_CACHE_BYTES} from './fast-career-cache';
 let resident:{career:Career;versionHash:string}|undefined;
 let queue=Promise.resolve();
 self.addEventListener('message',(event:MessageEvent<{id:string;operation:string;payload:any}>)=>{
@@ -20,6 +22,23 @@ self.addEventListener('message',(event:MessageEvent<{id:string;operation:string;
    }else if(operation==='verifyFile'){
     resident=undefined;
     result=typeof payload==='string'?await verifySaveText(payload):await verifySaveBlob(payload as Blob);
+   }else if(operation==='decodeCompact'){
+    resident=undefined;
+    let lastProgress='';
+    const progress=(phase:string,percent?:number)=>{
+     const key=phase+percent;
+     if(key===lastProgress)return;
+     lastProgress=key;
+     self.postMessage({id,progress:{phase,percent}});
+    };
+    const {career,...decoded}=await decodeStored(payload as StoredCareer,true,progress);
+    progress('검증한 저장 준비');
+    try{
+     const archive=await encodeArchiveWire(career,MAX_CAREER_CACHE_BYTES);
+     if(archive.size<=MAX_CAREER_CACHE_BYTES)result={...decoded,archive};
+    }catch(error){if(!(error instanceof ArchiveMetadataLimitError))throw error;}
+    // Exceptionally wide saves can still use the bounded gzip transport.
+    result??={...decoded,careerTransfer:await packCareerTransfer(career)};
    }else if(operation==='decode'){
     resident=undefined;
     const decoded=await decodeStored(payload as StoredCareer);resident={career:decoded.career,versionHash:decoded.versionHash};result=decoded;

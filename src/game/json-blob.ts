@@ -1,3 +1,5 @@
+import {canonicalEventBytes} from './event-archive';
+
 /** JSON.stringify-compatible JSON data, without a single enormous JS string.
  * No events, counters or historical fields are discarded. */
 export function jsonBlob(value:unknown):Blob {
@@ -7,6 +9,10 @@ export function jsonBlob(value:unknown):Blob {
  const flush=()=>{if(!buffer)return;parts.push(encoder.encode(buffer));buffer='';};
  const write=(token:string)=>{if(buffer.length+token.length>limit)flush();if(token.length>=limit)parts.push(encoder.encode(token));else buffer+=token;};
  const visit=(node:unknown,array=false):void=>{
+  if(node&&typeof node==='object'){
+   const events=canonicalEventBytes(node);
+   if(events){flush();parts.push(events);return;}
+  }
   if(node===null){write('null');return;}
   if(typeof node==='number'){write(Number.isFinite(node)?String(node):'null');return;}
   if(typeof node==='boolean'){write(node?'true':'false');return;}

@@ -61,8 +61,9 @@ export async function deltaJournalEntry(id:string,previousRevision:number,revisi
 export function journalSize(entries:SaveJournalEntry[]):{storedBytes:number;rawBytes:number}{
  let storedBytes=0,rawBytes=0;for(const entry of entries){if(!entry||typeof entry!=='object')throw Error('저장 변경 기록의 형식이 올바르지 않습니다.');if('kind' in entry){if(entry.kind!=='game-delta')throw Error('지원하지 않는 변경 기록입니다.');validatePreparedDelta(entry.payload);storedBytes+=entry.payload.blob.size;rawBytes+=entry.payload.rawBytes;}else{const size=new TextEncoder().encode(JSON.stringify(entry)).length;storedBytes+=size;rawBytes+=size;}}return {storedBytes,rawBytes};
 }
-export async function replayJournal(c:Career,versionHash:string,entries:SaveJournalEntry[],compact=false):Promise<DecodedSave>{
+export async function replayJournal(c:Career,versionHash:string,entries:SaveJournalEntry[],compact=false,onEntry?: (complete:number,total:number)=>void):Promise<DecodedSave>{
  let next=c,hash=versionHash;
+ let complete=0;
  for(const entry of entries){
   if(entry.id!==next.id||entry.previousRevision!==next.revision||(entry.revision<=next.revision||!('kind' in entry&&entry.kind==='game-delta')&&entry.revision!==next.revision+1)||entry.previousHash!==hash)throw Error('저장 변경 기록의 순서가 일치하지 않습니다.');
   if('kind' in entry&&entry.kind==='game-delta'){
@@ -74,10 +75,11 @@ export async function replayJournal(c:Career,versionHash:string,entries:SaveJour
    if(checked.hash!==entry.hash)throw Error('저장 변경 기록이 손상되었습니다. 이전 저장본을 복구해 주세요.');
    next=applyCareerPatches(next,patch.patches);
   }if(next.id!==entry.id||next.revision!==entry.revision)throw Error('저장 변경 기록의 리비전이 올바르지 않습니다.');hash=entry.hash;
+  onEntry?.(++complete,entries.length);
  }
  return {career:next,versionHash:hash};
 }
-export async function decodeStored(r:StoredCareer,compact=false):Promise<DecodedSave>{
+export async function decodeStored(r:StoredCareer,compact=false,progress=loadingProgress):Promise<DecodedSave>{
  if(!isBlobCareer(r)){
   const envelope=await verifyEnvelope(r?.envelope);if(envelope.career.id!==r.id)throw Error('슬롯 ID와 저장 내용이 일치하지 않습니다.');
   return {career:envelope.career,versionHash:r.envelope.hash,normalized:(await packStored(envelope,r.envelope.hash)).record};
@@ -85,16 +87,17 @@ export async function decodeStored(r:StoredCareer,compact=false):Promise<Decoded
  if(!(r.blob instanceof Blob)||r.blob.size>MAX_SAVE_BYTES+4096||r.encoding!==undefined&&r.encoding!=='gzip'||!Array.isArray(r.journal)||r.journal.length>512||!/^[a-f0-9]{64}$/.test(r.versionHash))throw Error('저장 스냅샷 형식이 올바르지 않습니다.');
  const usage=journalSize(r.journal);if(usage.rawBytes>768*1024*1024||usage.storedBytes>128*1024*1024)throw Error('저장 변경 기록의 지원 범위를 초과했습니다.');
  let value:unknown;
- try{value=await readJSONBlob(r.blob,{encoding:r.encoding,rawBytes:r.rawBytes,maximum:MAX_SAVE_BYTES+4096,...(compact?{transform:compactMatchEvents,onProgress:(bytes:number)=>loadingProgress('원본 기록 변환',Math.floor(bytes/(r.rawBytes??r.blob.size)*100))}: {})});}
+ try{value=await readJSONBlob(r.blob,{encoding:r.encoding,rawBytes:r.rawBytes,maximum:MAX_SAVE_BYTES+4096,...(compact?{stream:true,transform:compactMatchEvents,onProgress:(bytes:number)=>progress('원본 기록 변환',Math.floor(bytes/(r.rawBytes??r.blob.size)*100))}: {})});}
  catch(e){const stage=e instanceof SaveReadError?({gzip:'압축 해제',size:'크기 검사',json:'JSON 해석',read:'저장소 읽기'} as const)[e.phase]:'저장소 읽기';throw Error(`저장 스냅샷을 읽을 수 없습니다. [${stage}] 원본 저장 보관 또는 이전 저장 복원을 이용해 주세요.`);}
 
- if(compact){loadingProgress('원본 기록 무결성 검사');await new Promise<void>(resolve=>setTimeout(resolve,0));}
+ if(compact)progress('원본 기록 무결성 검사');
  const original=value as {hash?:string};
  const envelope=await verifyEnvelope(value,true);
  if(envelope.career.id!==r.id||envelope.career.revision!==r.revision||original.hash!==r.hash)throw Error('저장 스냅샷의 검사 정보가 일치하지 않습니다.');
  const incremental=r.journal.length>0&&(compact||'importScripts' in globalThis);
  if(incremental)sealCareer(envelope.career);
- const replayed=await replayJournal(envelope.career,r.versionHash,r.journal,compact);
+ if(compact&&r.journal.length)progress('최근 진행 적용',0);
+ const replayed=await replayJournal(envelope.career,r.versionHash,r.journal,compact,compact?(done,total)=>progress('최근 진행 적용',Math.floor(done/total*100)):undefined);
  const career=r.journal.length?(incremental?validateEngineResult(envelope.career,replayed.career):validateCareer(replayed.career,true)):replayed.career;
  return {...replayed,career,...(envelope.hash!==original.hash?{normalized:(await packStored(await prepareEnvelope(career,true),replayed.versionHash)).record}:{})};
 }

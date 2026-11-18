@@ -1,3 +1,7 @@
+## K볼 2.14.5 · 시즌 전환 오류와 불러오기 개선
+
+읽기 전용 경기 기록 예외를 고치고 원본 검사와 재접속 읽기를 개선했습니다. [변경·측정·기록 보존 검수](docs/RELEASE-2.14.5.md).
+
 ## K볼 2.14.4 · 장기 이어하기·저장 속도 개선
 
 [K볼 2.14.4 다운로드](https://raw.githubusercontent.com/rabbit1245/rabbit1245.github.io/295aa5d08268a525d78e4c433d0895e34d7e6520/Kball.zip)

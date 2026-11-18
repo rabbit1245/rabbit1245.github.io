@@ -1,0 +1,60 @@
+{
+  "steps": [
+    {
+      "action": "다음 시즌 시작",
+      "ms": 4042,
+      "revision": 236,
+      "hash": "14e6183c6e4c91e64b579bd0863dcf105b1420376a5dc719a595f4f339e8ec44",
+      "checkpoint": 235,
+      "journal": 1,
+      "age": 23,
+      "year": 2032,
+      "metadataMatchesHash": true
+    }
+  ],
+  "browser": "140.0.7339.16",
+  "protocol": "file:",
+  "initialLoadMs": 71227,
+  "loadPhases": [
+    {
+      "phase": "빠른 저장 확인",
+      "ms": 4712
+    },
+    {
+      "phase": "원본 기록 변환",
+      "ms": 4914
+    },
+    {
+      "phase": "원본 기록 무결성 검사",
+      "ms": 39909
+    },
+    {
+      "phase": "검증한 저장 준비",
+      "ms": 65534
+    },
+    {
+      "phase": "빠른 저장 구성",
+      "ms": 74104
+    }
+  ],
+  "initial": {
+    "revision": 235,
+    "hash": "36732231b0cb479e47496cb9caa71415509c30da7ece240a565623a9e572a0ab",
+    "checkpoint": 235,
+    "journal": 0,
+    "age": 22,
+    "year": 2031,
+    "metadataMatchesHash": true
+  },
+  "reconnectMs": 7223,
+  "reconnect": {
+    "revision": 236,
+    "hash": "14e6183c6e4c91e64b579bd0863dcf105b1420376a5dc719a595f4f339e8ec44",
+    "checkpoint": 235,
+    "journal": 1,
+    "age": 23,
+    "year": 2032,
+    "metadataMatchesHash": true
+  },
+  "passed": true
+}
