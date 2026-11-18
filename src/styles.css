@@ -796,11 +796,20 @@ input,select { font-size:17px; min-height:38px; padding:7px 10px; border-radius:
 .locker-core { display:grid; grid-template-columns:minmax(0,1.1fr) minmax(0,1fr); gap:10px; align-items:start; }
 .locker-records { display:grid; gap:10px; }
 .season-summary { width:100%; border-collapse:collapse; table-layout:fixed; font-variant-numeric:tabular-nums; }
+.season-summary-scope { width:38%; }
 .season-summary th,.season-summary td { padding:6px 12px; text-align:right; font-size:17px; line-height:1.3; border-bottom:1px solid var(--border); }
 .season-summary thead th { font-size:15px; color:var(--muted); font-weight:500; background:var(--warm); }
 .season-summary th:first-child { text-align:left; }
-.season-summary tbody tr:first-child { background:var(--warm); }
-.season-summary tbody tr:last-child > * { border:0; }
+.season-summary td { white-space:nowrap; }
+.season-summary-total { background:var(--warm); }
+.season-summary-group { display:flex; flex-wrap:wrap; align-items:center; gap:2px 10px; }
+.season-summary-group > span { white-space:nowrap; }
+.season-summary .season-summary-toggle { justify-content:flex-start; gap:3px; padding:4px; font-size:14px; color:var(--teal-dark); border-radius:4px; }
+.season-summary-toggle:hover,.season-summary-toggle:focus-visible { background:var(--teal-soft); }
+.season-summary-toggle[aria-expanded="true"] svg { transform:rotate(180deg); }
+.season-summary .season-competition-record { background:var(--warm); }
+.season-summary .season-competition-record th { padding-inline-start:22px; font-size:15px; font-weight:500; word-break:keep-all; overflow-wrap:anywhere; }
+.season-summary .season-competition-empty td { padding-inline-start:22px; text-align:left; font-size:14px; color:var(--muted); white-space:normal; }
 .match-list { padding:0 12px; }
 .match-row { grid-template-columns:32px 26px 26px minmax(0,1fr) 65px 40px 15px; gap:8px; padding:8px 0; min-height:57px; }
 .round { font-size:15px; }
@@ -1038,7 +1047,13 @@ input,select { font-size:17px; min-height:38px; padding:7px 10px; border-radius:
   .stat-detail,.stats-nine.compact .stat-detail { grid-template-columns:minmax(0,1fr); gap:4px; }
   .stat-detail > strong,.stats-nine.compact .stat-detail > strong { white-space:normal; }
   .stat-detail > div { grid-column:auto; }
-  .season-summary th,.season-summary td { padding:7px 6px; }
+  .season-summary-scope { width:35%; }
+  .season-summary-minutes,.season-summary-rating { width:15%; }
+  .season-summary th,.season-summary td { padding:7px 3px; font-size:14px; }
+  .season-summary thead th { font-size:13px; }
+  .season-summary-group { gap:1px 3px; }
+  .season-summary .season-competition-record th { padding-inline-start:12px; font-size:14px; }
+  .season-summary .season-competition-empty td { padding-inline-start:12px; }
   .match-row { grid-template-columns:30px 25px minmax(0,1fr) 62px 33px; gap:6px; }
   .match-row > svg { display:none; }
   .match-row { grid-template-columns:30px 25px 22px minmax(0,1fr) 52px 30px; gap:5px; }

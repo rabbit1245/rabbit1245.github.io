@@ -17,6 +17,7 @@ import './LockerRoom.css';
 import LeagueLeaders from './LeagueLeaders';
 import ClubDevelopment from './ClubDevelopment';
 import SeasonHonours from './SeasonHonours';
+import SeasonRecordTable from './SeasonRecordTable';
 import type { GrowthCause,GrowthReport } from '../game/revision-types';
 
 type Props = {career:Career;busy:boolean;command:(command:GameCommand)=>void};
@@ -77,8 +78,8 @@ export default function LockerRoom({career,busy,command,onMatch,onTraining,onCar
   const [transfers,setTransfers]=useState(false),[matchPage,setMatchPage]=useState(0),[allMatches,setAllMatches]=useState(false),[injuryOpen,setInjuryOpen]=useState(false);
   const p=career.player,s=career.season,phase=career.systems?.phase||'preseason';
   useEffect(()=>{setTransfers(false);setMatchPage(0);setAllMatches(false);},[career.id,s.year,career.stage]);
-  const recent=useMemo(()=>[...s.matches].reverse(),[career]),{national,club,combined,detailed}=useMemo(()=>seasonOverview(career),[career]);
-  const summaries=[['통합',combined],['클럽',club],['국대',national]] as const;
+  const recent=useMemo(()=>[...s.matches].reverse(),[career]);
+  const { national, club, combined, detailed, nationalCompetitions, clubCompetitions } = useMemo(() => seasonOverview(career), [career]);
   const next=career.stage==='offseason'?{label:'다음 시즌 시작',command:{type:'nextSeason'} as GameCommand}:phase==='midseason'?{label:'후반기 진행',command:{type:'continueHalf'} as GameCommand}:{label:phase==='second'?'후반기 계속 진행':'전반기 진행',command:{type:'advanceHalf'} as GameCommand};
   const trainingConfirmed=career.systems?.trainingPlan?.forYear===s.year+1&&career.systems.trainingPlan.confirmed;
   const nextBlocked=false;
@@ -95,7 +96,10 @@ export default function LockerRoom({career,busy,command,onMatch,onTraining,onCar
       {career.stage==='offseason'&&<>{!trainingConfirmed&&onTraining&&<button className="button secondary" data-testid="training-plan" disabled={busy} onClick={onTraining}><Dumbbell size={17}/>훈련 선택</button>}</>}
     </div></div>
     <div className="locker-core" data-testid="locker-core"><div className="locker-records">
-      <Panel title="이번 시즌 기록" action={<LeagueLeaders career={career}/>} className="season-summary-panel"><table className="season-summary"><thead><tr><th>범위</th><th>출전</th><th>분</th><th>{p.position==='GK'?'선방':'골'}</th><th>{p.position==='GK'?'무실점':'도움'}</th><th>평점</th></tr></thead><tbody>{summaries.map(([label,stats])=><tr key={label}><th>{label}</th><td>{stats.apps}</td><td>{stats.minutes}</td><td>{p.position==='GK'?stats.saves:stats.goals}</td><td>{p.position==='GK'?stats.cleanSheets:stats.assists}</td><td>{average(stats)}</td></tr>)}</tbody></table></Panel>
+      <Panel title="이번 시즌 기록" action={<LeagueLeaders career={career}/>} className="season-summary-panel">
+        <SeasonRecordTable key={`${career.id}:${s.year}`} combined={combined} national={national} club={club}
+          nationalCompetitions={nationalCompetitions} clubCompetitions={clubCompetitions} keeper={p.position==='GK'} />
+      </Panel>
       <SeasonHonours career={career} compact/>
       <Panel title={allMatches?'시즌 경기':'최근 경기'} action={recent.length>3?<button className="text-button" onClick={()=>{setAllMatches(v=>!v);setMatchPage(0);}}>{allMatches?'최근 경기':'전체 경기'}</button>:undefined} className="recent-panel">
         {recent.length?<><div className="match-list">{recent.slice(allMatches?matchPage*3:0,allMatches?matchPage*3+3:3).map(m=><MatchRow key={m.id} match={m} onClick={()=>onMatch(m)}/>)}</div>{allMatches&&<div className="pagination"><button aria-label="라커룸 경기 이전 페이지" disabled={matchPage===0} onClick={()=>setMatchPage(page=>page-1)}><ChevronLeft size={18}/></button><span>{matchPage+1} / {Math.ceil(recent.length/3)}</span><button aria-label="라커룸 경기 다음 페이지" disabled={(matchPage+1)*3>=recent.length} onClick={()=>setMatchPage(page=>page+1)}><ChevronRight size={18}/></button></div>}</>:<p className="first-match-note">첫 경기 전입니다. 전반기를 진행하면 결과가 여기에 표시됩니다.</p>}

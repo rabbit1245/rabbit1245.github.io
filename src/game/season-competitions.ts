@@ -24,7 +24,10 @@ export interface CompetitionParticipation {
 }
 
 const names:Record<string,string>={WC:'FIFA 월드컵',U20WC:'FIFA U-20 월드컵',AFC:'AFC 아시안컵',UEFA:'UEFA 유로',CONMEBOL:'코파 아메리카',CONCACAF:'CONCACAF 골드컵',CAF:'아프리카 네이션스컵',OFC:'OFC 네이션스컵',FRIENDLIES:'국제친선'};
-const nationalName=(id:string)=>{const [kind,year]=id.split(':');return names[kind]?`${year} ${names[kind]}`:'국가대표 경기 · 대회 미집계';};
+export function nationalCompetitionName(id?:string):string {
+  const [kind,year] = id?.split(':') ?? [];
+  return year && Object.hasOwn(names,kind) ? `${year} ${names[kind]}` : '국가대표 경기 · 대회 미집계';
+}
 const nationalTeamName=(id:string)=>{const [,country,squad]=id.split(':');return `${country} ${squad==='U20'?'U20':'성인 대표팀'}`;};
 const squadOf=(match:MatchRecord):'U20'|'senior'=>match.playerClubId.endsWith(':U20')?'U20':'senior';
 const played=(match:MatchRecord)=>match.playerPlayed&&match.playerStats.apps>0;
@@ -103,7 +106,7 @@ export function getSeasonCompetitions(career:Career):CompetitionParticipation[] 
   }
   for(const group of groups.values()){
     const id=group.competitionId,known=national.history.find(row=>row.competitionId===id&&row.squad===group.squad&&row.year===career.season.year);
-    let name=known?.competitionName||(id===national.competitionId?national.competitionName:id?nationalName(id):'국가대표 경기 · 대회 미집계');
+    let name=known?.competitionName||(id===national.competitionId?national.competitionName:nationalCompetitionName(id));
     const qualifying=group.matches.some(match=>match.fixtureId.includes('|qualifying|'));
     const finals=group.matches.some(match=>/\|(group|round32|round16|quarterfinal|semifinal|final|thirdPlace)\|/.test(match.fixtureId));
     if(!id?.startsWith('FRIENDLIES:')){
