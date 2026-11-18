@@ -1,3 +1,9 @@
+## K볼 2.14.7 · 발롱도르·슈퍼 발롱도르 심사 개선
+
+[K볼 2.14.7 다운로드](https://raw.githubusercontent.com/rabbit1245/rabbit1245.github.io/32aeb9dfbf07d32cc49aeef01a80464908989207/Kball.zip)
+
+발롱도르에서 OVR·스타성의 직접 가산점을 없애고, 포지션별 경기력과 실제 출전한 팀의 성과를 평가합니다. 커리어의 수상 평가 근거에서 개인 기여·팀 성과·시즌 성취 점수를 볼 수 있습니다. 슈퍼 발롱도르는 최근 5개 확정 시즌에서 10위 이내 3회 이상과 3위 이내 2회 이상이 필요합니다. 이후 시즌 결산부터 적용하며 기존 수상을 보존합니다. [변경 내용과 시즌 검수](https://github.com/rabbit1245/rabbit1245.github.io/blob/32aeb9dfbf07d32cc49aeef01a80464908989207/PLAY-KBALL.md)
+
 ## K볼 2.14.6 · 라커룸 대회별 시즌 기록
 
 [K볼 2.14.6 다운로드](https://raw.githubusercontent.com/rabbit1245/rabbit1245.github.io/4e744caa4f94ad845239401de81bfaa2be3c693a/Kball.zip)
