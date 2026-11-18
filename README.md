@@ -1,3 +1,9 @@
+## K볼 2.14.6 · 라커룸 대회별 시즌 기록
+
+[K볼 2.14.6 다운로드](https://raw.githubusercontent.com/rabbit1245/rabbit1245.github.io/4e744caa4f94ad845239401de81bfaa2be3c693a/Kball.zip)
+
+라커룸의 이번 시즌 기록에서 국대 통합과 클럽 통합 옆 **대회별**을 누르면 실제 출전한 대회 기록이 펼쳐집니다. 대표팀 예선·본선·친선과 U20 출전, 클럽 리그·국내 컵·대륙 대회를 구분합니다. 2.7.2 시즌 저장으로 대회별 합계, 모바일 표시, 이어하기를 확인했습니다.
+
 ## K볼 2.14.5 · 시즌 전환 오류와 불러오기 개선
 
 [K볼 2.14.5 다운로드](https://raw.githubusercontent.com/rabbit1245/rabbit1245.github.io/3101f33a22abbbcf7f7d06f6b6b12936f0d29eac/Kball.zip)
