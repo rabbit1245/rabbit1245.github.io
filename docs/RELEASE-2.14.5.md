@@ -26,3 +26,5 @@
 22세 재현용 커리어는 23세·2032년 시즌으로 진행하고 저장했으며, 같은 파일로 재접속했습니다. Node ESM으로 재현한 기존 오류와 동일 조건의 수정 결과도 기록했습니다. [시즌 전환 재현](validation/release-2.14.5/season-transition.json) · [파일 실행 및 재접속](validation/release-2.14.5/age22-file.json).
 
 저장·복구·원장·Worker 관련 회귀 검사 83개, TypeScript, 웹 및 단독 HTML/ZIP 빌드를 통과했습니다. 배포 ZIP의 CRC와 내부 HTML, 안내문 버전을 확인했습니다. [회귀 검사](validation/release-2.14.5/regressions.tap) · [검수 파일 해시](validation/release-2.14.5/artifact.json).
+
+[2.14.5 ZIP 다운로드](https://raw.githubusercontent.com/rabbit1245/rabbit1245.github.io/3101f33a22abbbcf7f7d06f6b6b12936f0d29eac/Kball.zip). 공개 ZIP을 내려받아 CRC와 SHA-256을 확인했고, 내부 HTML은 파일 실행 검수본과 일치했습니다. [공개 배포 확인](validation/release-2.14.5/public-download.json).
