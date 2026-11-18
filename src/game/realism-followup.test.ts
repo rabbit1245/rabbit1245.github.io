@@ -46,6 +46,8 @@ function treble(position:Position='ST',rating=7.4,titles=true):Career{
  const table=comp.table.map(r=>r.clubId===inter?{...r,played:38,won:29,drawn:6,lost:3,points:93}:r).sort((a,b)=>b.points-a.points);
  c.systems!.world.competitions.IT1={...comp,round:comp.totalRounds,table};c.season.table=table;
  const own:CompetitorSeason={playerId:c.player.id,name:c.player.name,clubId:inter,leagueId:'IT1',position,nationality:c.player.nationality,ovr:90,stats:c.season.playerStats};c.systems!.world.playerStats[c.player.id]=own;
+ c.season.matches=Array.from({length:34},(_,i)=>({...old.season.matches[i%old.season.matches.length],fixtureId:`IT1:treble:${i}`,
+  competitionId:'IT1',playerClubId:inter,playerStats:stat({apps:1,minutes:i<24?85:86,goals:Number(i<17),assists:Number(i>=17&&i<27)})}));
  for(const [code,name,kind,apps,goals,assists]of [['UCL','UEFA 챔피언스리그','continental',12,4,3],['COPPA','코파 이탈리아','cup',5,2,2]] as const){
   const id=`${code}:${year}`,matches:MatchRecord[]=Array.from({length:apps},(_,i)=>({id:`${id}:m${i}`,fixtureId:`${id}:m${i}`,seasonYear:year,playerClubId:inter,homeId:inter,awayId:'IT1_02',playerPlayed:true,playerStarted:true,playerMinutes:90,round:i+1,homeGoals:2,awayGoals:0,playerRating:rating,seed:'declared-fixture',events:[],playerStats:stat({apps:1,starts:1,minutes:90,ratingCount:1,ratingSum:rating,goals:i<goals?1:0,assists:i<assists?1:0})}) as MatchRecord);
   const cup:ClubTournament={id,name,year,kind,phase:'completed',entrants:[inter,'IT1_02'],winnerId:titles?inter:'IT1_02',matches,playerStats:{[c.player.id]:{...own,stats:sumStats(matches.map(m=>m.playerStats))}},active:[],byes:[],fixtures:[],table:[],stage:'우승 확정',step:1,leagueRounds:0,basis:'Explicit regression scenario, not the user save',rules:'regression fixture',startedAtRound:0};
@@ -61,7 +63,7 @@ test('17 league goals and 10 assists by a major contributor to an Inter treble c
  assert.ok(ranking.diagnostics?.some(d=>d.name==='세리에 A 시즌 MVP'));
  assert.ok(ranking.diagnostics?.find(d=>d.name==='발롱도르')?.detail.includes('우승/대회 기여'));
  const lower=treble('RW',7.4,false);evaluateAwards(lower);const score=(x:Career)=>Number(x.systems!.rankings[0].diagnostics!.find(d=>d.name==='발롱도르')!.detail.match(/경기력 점수 ([\d.]+)/)![1]);assert.ok(score(c)>score(lower));
- const weaker=treble('RW');weaker.player.ovr=30;evaluateAwards(weaker);assert.ok(score(c)>score(weaker),'the new subjective award model includes ability while still requiring real performance');
+ const weaker=treble('RW');weaker.player.ovr=88;evaluateAwards(weaker);assert.equal(score(c),score(weaker),'the same season earns the same Ballon vote regardless of the displayed ability');
  const previous=JSON.stringify(c.systems!.rankings);evaluateAwards(c);assert.equal(JSON.stringify(c.systems!.rankings),previous,'old adjudicated seasons remain idempotent');
 });
 

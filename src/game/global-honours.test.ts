@@ -29,11 +29,40 @@ test('European Golden Shoe uses league goals and coefficients alone, excludes se
  const result=additionalGlobalHonours(c,[a,b],[higher,{...b,playerId:'competitor'}],v,r=>r);assert.ok(result.awards.some(a=>a.name==='유러피언 골든슈'));
  const losing=additionalGlobalHonours(c,[a,b],[{...higher,stats:{...higher.stats,goals:20}},{...b,playerId:'competitor'}],v,r=>r);assert.ok(!losing.awards.some(a=>a.name==='유러피언 골든슈'));
 });
-test('ability participates in subjective votes but cannot replace performance, appearances or eligibility',()=>{
- const c=fresh(),r=row(c),other={...r,playerId:'other',ovr:80},ctx=context();c.player.ovr=120;
+test('Ballon voting can favour an 88 OVR performer and ignores changes to ability on a fixed record',()=>{
+ const c=fresh(),r=row(c),other={...r,playerId:'other',ovr:120},ctx=context();
+ c.player.ovr=88;
+ const before=globalVoting(c,[r,other],p=>p.playerId===c.player.id?110:80,ctx);
+ const ballon=before.score(r),fifa=before.score(r,'fifa');
+ assert.ok(ballon>before.score(other));
+ c.player.ovr=120;
+ const after=globalVoting(c,[r,other],p=>p.playerId===c.player.id?110:80,ctx);
+ assert.equal(after.score(r),ballon);
+ assert.ok(after.score(r,'fifa')>fifa);
  const v=globalVoting(c,[r,other],p=>p.playerId===c.player.id?10:110,ctx);assert.ok(v.score(other)>v.score(r));
  const empty={...r,stats:emptyStats()},awards=additionalGlobalHonours(c,[empty],[empty],globalVoting(c,[empty],()=>0,ctx),r=>r).awards;
  assert.equal(awards.length,0);
+});
+test('Ballon credits senior finals from the tournament ledger and league results in proportion to actual minutes',()=>{
+ const c=fresh(),r=row(c),ctx=context(),nat=c.systems!.national;
+ const international={...emptyStats(),apps:5,minutes:450,goals:4,assists:3,ratingCount:5,ratingSum:44};
+ const friendly={...r,nationalStats:international},grade=(candidate:CompetitorSeason)=>globalVoting(c,[candidate],()=>100,ctx).ballonBreakdown(candidate);
+ assert.deepEqual(grade(r),grade(friendly),'friendlies or youth caps in the combined total have no senior finals points');
+ const final=(id:string,year:number)=>({id,fixtureId:`NAT|senior|${id}|final|1`,competitionId:id,seasonYear:year,
+  homeId:'NAT:일본:senior',awayId:'NAT:대한민국:senior',homeGoals:2,awayGoals:1} as MatchRecord);
+ nat.tournamentStats={'WC:2026':{[r.playerId]:{id:r.playerId,name:r.name,position:r.position,stats:international}}};
+ nat.teamResults=[final('WC:2026',c.season.year-1)];
+ assert.equal(grade(r).nationalApps,0);
+ const seniorFinal=final('WC:2026',c.season.year);
+ nat.teamResults=[seniorFinal,seniorFinal];
+ const senior=grade(r);
+ assert.equal(senior.nationalApps,5);
+ assert.ok(senior.individual>60&&senior.individual>grade({...r,playerId:'other'}).individual);
+ assert.equal(senior.team,0,'a losing finalist gets no winner credit');
+ ctx.leagueTitles.set(r.clubId,8);
+ assert.equal(grade(r).team,0,'cup and national minutes do not earn league title points');
+ c.season.matches=[{...seniorFinal,scope:'club',competitionId:r.leagueId,playerClubId:r.clubId,playerStats:{...emptyStats(),apps:1,minutes:90}}];
+ assert.ok(grade(r).team>0&&grade(r).team<1,'limited league appearances earn partial title points');
 });
 test('narrative achievements require evidence, diminish overlapping titles, cap at ten, and do not invent a drought',()=>{
  const c=fresh(),r=row(c),ctx=context(),e=c.systems!.achievementEvidence!;c.season.playerStats=r.stats;

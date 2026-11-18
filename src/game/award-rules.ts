@@ -35,7 +35,7 @@ export const LEAGUE_AWARD_RULES: Record<string, AwardRule[]> = {
   JP1: [scorers('top-scorer', 'J1리그 득점왕', 'J.LEAGUE', 'https://www.jleague.jp/awards/')],
 };
 export const GLOBAL_AWARD_RULES = {
-  ballonDor: { id: 'ballon-dor', name: '발롱도르', organiser: 'France Football', sourceUrl: 'https://ballondor.com/', criterion: '개인 활약과 결정력, 팀 성적과 업적, 품위와 페어플레이가 실제 심사 기준입니다. 게임에서는 동일 연도 클럽·국가대표 기록으로 이 기준을 모형화해 30인을 선정합니다.' },
+  ballonDor: { id: 'ballon-dor', name: '발롱도르', organiser: 'France Football', sourceUrl: 'https://ballondor.com/', criterion: '개인 활약과 결정력, 팀 성적과 업적, 품위와 페어플레이가 실제 심사 기준입니다. 게임에서는 포지션별 경기력과 페어플레이, 클럽·성인 대표팀 본선 기여를 평가합니다. 실제 출전한 리그·컵·대표팀의 성과를 반영합니다.' },
   world11: { id: 'fifpro-world11', name: 'FIFPRO 월드 11', organiser: 'FIFPRO', sourceUrl: 'https://fifpro.org/en/supporting-players/player-influence/world11', criterion: '실제 상은 선수 투표입니다. 게임에서는 시즌 기록으로 GK 1·DF 3·MF 3·FW 3과 남은 필드 선수 중 최고 1명을 선정합니다.' },
 };
 

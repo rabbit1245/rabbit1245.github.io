@@ -86,3 +86,29 @@ test('five-year evaluation rewards sustained results over one annual spike and r
  const result=superBallonResult(c)!;assert.equal(result.rows[0].playerId,'rival');assert.deepEqual(evaluateSuperBallon(c),[]);assert.notEqual(JSON.stringify(c.systems!.rankings),prior);
  const text=buildCareerText({...c,awards:[{id:'2030:super-ballon:x',name:'슈퍼 발롱도르',year:2030,clubId:c.player.clubId,category:'world',description:'검수'}]});assert.match(text,/슈퍼 발롱도르\(최근 5년 내 성적으로 집계 수상\)/);
 });
+test('five repeated 12th places cannot win the Super Ballon, and multiple podiums can qualify without an annual win',()=>{
+ const c=fresh();rankings(c);
+ const years=c.systems!.rankings;
+ const setPlaces=(places:number[])=>years.forEach((r,i)=>{
+  const original=r.candidates.find(candidate=>candidate.playerId===c.player.id)!;
+  r.candidates=Array.from({length:12},(_,j)=>({...original,rank:j+1,score:100-j,
+   playerId:j+1===places[i]?c.player.id:j===0&&i<2?'twice-first':`rival-${i}-${j}`}));
+  r.playerRank=places[i];r.winnerId=r.candidates[0].playerId;
+  r.diagnostics=[];
+ });
+ setPlaces([12,12,12,12,12]);
+ const below=superBallonResult(c)!;
+ assert.equal(below.complete,true);
+ assert.deepEqual(below.rows,[]);
+ assert.deepEqual(evaluateSuperBallon(c),[]);
+ assert.equal(years[4].diagnostics?.[0].eligible,false);
+ setPlaces([2,12,3,8,12]);
+ const before=JSON.stringify(years);
+ const qualified=superBallonResult(c)!;
+ assert.equal(qualified.rows[0].wins,0);
+ assert.equal(qualified.rows[0].podiums,2);
+ assert.equal(qualified.rows[0].topTen,3);
+ assert.equal(JSON.stringify(years),before);
+ assert.equal(evaluateSuperBallon(c)[0].ruleVersion,'super-ballon-2');
+ assert.match(years[4].diagnostics![0].detail,/2026년 2위.*2028년 3위/);
+});

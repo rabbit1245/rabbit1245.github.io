@@ -10,7 +10,7 @@ import {marketEstimate,marketQuote,assessmentNow,marketDeclineEvidence} from './
 export {marketEstimate} from './market-value';
 import {careerStanding,productionEvidence} from './career-standing';
 import {getClubRatingOffset} from './world';
-import {globalVoting,additionalGlobalHonours} from './global-honours';
+import {globalVoting,additionalGlobalHonours,BALLON_MIN_CLUB_MINUTES} from './global-honours';
 import {isFreeAgent,expiryReturnClub,changeEmployment,careerLeagueEntries} from './employment';
 import {evaluateExtraHonours} from './extra-honours';
 import {moneyText} from './currency';
@@ -476,21 +476,33 @@ export function evaluateAwards(career: Career): Award[] {
   const voting=globalVoting(career,globalRows,row=>performanceScore(row,career,false,context),globalContext);
   const extraGlobal=additionalGlobalHonours(career,globalRows.filter(r=>career.player.squad==='senior'||r.playerId!==career.player.id),rows,voting,selectEleven);
   won.push(...extraGlobal.awards);
-  const fullRanking = rankRows(globalRows.filter(r => (career.player.squad === 'senior' || r.playerId !== career.player.id) && r.stats.apps >= Math.min(10, minApps) && r.stats.minutes >= 450), career, true, context,r=>voting.score(r));
+  const fullRanking = rankRows(globalRows.filter(r => (career.player.squad === 'senior' || r.playerId !== career.player.id) &&
+    r.stats.apps >= Math.min(10, minApps) && r.stats.minutes >= BALLON_MIN_CLUB_MINUTES), career, true, context,r=>voting.score(r));
   const candidates = fullRanking.slice(0,30);
   const playerRank = candidates.find(r => r.playerId === career.player.id)?.rank ?? null;
+  const rankedOwn = fullRanking.find(r => r.playerId === career.player.id);
+  const ballot = globalOwn && rankedOwn ? voting.ballonBreakdown(globalOwn) : undefined;
+  const points = ballot ? `개인 기여 ${ballot.individual.toFixed(2)}점 · 우승/대회 기여 ${ballot.team.toFixed(2)}점 · 확인된 시즌 성취 ${ballot.achievement.toFixed(2)}점` : '';
   const fifproRanking=rankRows(globalRows.filter(r=>(career.player.squad==='senior'||r.playerId!==career.player.id)&&r.stats.apps+r.nationalStats.apps>=30),career,true,context,r=>voting.score(r,'fifpro'));
   const world11 = selectEleven(fifproRanking, 3,3,3,true);
-  if (candidates[0]?.playerId === career.player.id) won.push({ ...award(career, GLOBAL_AWARD_RULES.ballonDor, 'world', `30인 후보 중 1위 · 포지션 보정 경기력·팀 성적·대표팀 활약·페어플레이를 반영한 게임 내 투표`), rank: 1 });
-  if (world11.length === 11 && world11.some(r => r.playerId === career.player.id)) won.push({ ...award(career, GLOBAL_AWARD_RULES.world11, 'world', `GK 1·DF 3·MF 3·FW 3 + 남은 필드 선수 1명 · 실제 세계 시즌 기록 기반 게임 내 선수 투표`), position: career.player.position });
+  const fifproSelected = world11.length === 11 && world11.some(r => r.playerId === career.player.id);
+  if (playerRank === 1 && rankedOwn) won.push({ ...award(career, GLOBAL_AWARD_RULES.ballonDor, 'world', `30인 후보 중 1위 · ${rankedOwn.score.toFixed(2)}점 · 클럽 ${rankedOwn.stats.apps}경기 ${rankedOwn.stats.minutes}분 · ${points}`), rank: 1 });
+  if (fifproSelected) won.push({ ...award(career, GLOBAL_AWARD_RULES.world11, 'world', `GK 1·DF 3·MF 3·FW 3 + 남은 필드 선수 1명 · 실제 세계 시즌 기록 기반 게임 내 선수 투표`), position: career.player.position });
   for(const item of won){
-    item.ruleVersion=AWARD_MODEL_VERSION;item.verification='game-model';
+    item.ruleVersion=item.name===GLOBAL_AWARD_RULES.ballonDor.name?'ballon-dor-2':AWARD_MODEL_VERSION;item.verification='game-model';
     if(!item.evaluationPeriod)item.evaluationPeriod=`게임 시즌 ${seasonDate(career.season,0).slice(0,10)} ~ ${seasonDate(career.season,career.season.totalWeeks).slice(0,10)}의 기록${item.category==='world'?' · 각 리그의 같은 게임 시즌을 비교':''}`;
   }
   const diagnostics=(leagueAwardRules(career.season.leagueId,getLeague(career.season.leagueId).name)).map(rule=>({name:rule.name,scope:'리그만',eligible:!!own&&(rule.metric!=='cleanSheets'||own.position==='GK')&&(rule.metric==='performance'||rule.metric==='eleven'?own.stats.apps>=minApps:true),result:won.some(a=>a.id.includes(`:${rule.id}:`))?'수상':'미선정',detail:!own?'성인 리그 실제 출전이 필요합니다.':`${own.stats.apps}경기 · ${own.stats.goals}골 · ${own.stats.assists}도움 · 평점 ${avgRating(own.stats).toFixed(2)}${['performance','eleven'].includes(rule.metric)?` · 최소 ${minApps}경기 · 같은 포지션군 ${leagueRanking.filter(r=>awardPositionGroup(r.position)===awardPositionGroup(own.position)).findIndex(r=>r.playerId===own.playerId)+1}위`:''} · 같은 리그 실제 출전 선수 ${leagueRows.length}명 비교` }));
   diagnostics.push(...extraGlobal.diagnostics);
-  const rankedOwn=fullRanking.find(r=>r.playerId===career.player.id);
-  for(const [name,selected] of [['발롱도르',playerRank===1],['FIFPRO 월드 11',world11.some(r=>r.playerId===career.player.id)]] as const)diagnostics.push({name,scope:'리그·클럽 컵·국가대표',eligible:!!rankedOwn&&(name==='발롱도르'||rankedOwn.stats.apps+rankedOwn.nationalStats.apps>=30),result:selected?'수상':name==='발롱도르'&&playerRank?`${playerRank}위 · 미선정`:'미선정',detail:rankedOwn?`경기력 점수 ${rankedOwn.score.toFixed(2)} · 전체 ${rankedOwn.rank}위 · 주요 평가 ${({GK:'골키핑',DEF:'수비·압박',MID:'창조·전진',FWD:'마무리'} as const)[context.performanceRoles.get(career.player.id)??awardPositionGroup(career.player.position)]} · 우승/대회 기여 ${(context.cupTitles.get(career.player.id)??0).toFixed(1)}점 · 전체 비교 ${fullRanking.length}명 · 클럽 ${rankedOwn.stats.apps}경기 · 국대 ${rankedOwn.nationalStats.apps}경기. 발롱도르는 30인 후보 중 1위, 월드 11은 포지션별 비교와 총 30경기 이상.`:'성인 클럽 최소 출전·450분 기준 미충족 또는 실제 성적 미확인'});
+  const role = ({GK:'골키핑',DEF:'수비·압박',MID:'창조·전진',FWD:'마무리'} as const)[context.performanceRoles.get(career.player.id)??awardPositionGroup(career.player.position)];
+  const reference = fullRanking[rankedOwn?.rank === 1 ? 1 : 0];
+  diagnostics.push({name:'발롱도르',scope:'리그·클럽 컵·성인 대표팀 본선',eligible:!!rankedOwn,result:playerRank===1?'수상':playerRank?`${playerRank}위 · 미선정`:'미선정',
+    detail:rankedOwn&&ballot
+      ? `경기력 점수 ${rankedOwn.score.toFixed(2)} · 전체 ${rankedOwn.rank}위${reference?` (${reference.rank}위 ${reference.score.toFixed(2)}점)`:''} · 주요 평가 ${role} · ${points} · 클럽 ${rankedOwn.stats.apps}경기 ${rankedOwn.stats.minutes}분 · 성인 국대 본선 ${ballot.nationalApps}경기 · 전체 비교 ${fullRanking.length}명.`
+      : `성인 클럽 실제 출전 ${Math.min(10, minApps)}경기·${BALLON_MIN_CLUB_MINUTES}분 이상이 필요합니다.`});
+  const fifproOwn = fifproRanking.find(r => r.playerId === career.player.id);
+  diagnostics.push({name:'FIFPRO 월드 11',scope:'리그·클럽 컵·국가대표',eligible:!!fifproOwn,result:fifproSelected?'수상':'미선정',
+    detail:fifproOwn?`포지션별 평가 점수 ${fifproOwn.score.toFixed(2)} · 주요 평가 ${role} · 클럽 ${fifproOwn.stats.apps}경기 · 국대 ${fifproOwn.nationalStats.apps}경기.`:'클럽과 대표팀 합계 30경기 이상이 필요합니다.'});
   diagnostics.push({name:'경기 최우수 선수',scope:'실제 경기별',eligible:!!globalOwn?.stats.apps,result:`${(globalOwn?.stats.mom??0)+(globalOwn?.nationalStats.mom??0)}회`,detail:'각 경기에서 실제로 뛰고 받은 평점과 기여를 비교합니다. 출전하지 않은 경기는 제외합니다.'});
   for(const t of cupLedger(career,career.season.year).filter(t=>t.entrants.includes(career.player.clubId)||!!t.playerStats?.[career.player.id]))diagnostics.push(...evaluateClubAwards(career,t).diagnostics);
   const result: BallonDorYear = {diagnostics, year: career.season.year, candidates, playerRank, winnerId: candidates[0]?.playerId ?? '', world11, awards: won };
