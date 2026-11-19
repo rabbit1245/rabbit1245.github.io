@@ -1,3 +1,9 @@
+## K볼 2.14.8 · 발롱도르 주요 대회 활약
+
+[K볼 2.14.8 다운로드](https://raw.githubusercontent.com/rabbit1245/rabbit1245.github.io/de9dd0d82696099bfa125d71da01aa82e019bfa9/Kball.zip)
+
+챔피언스리그 등 국제 클럽 대회와 성인 대표팀 본선의 포지션별 상위권 활약에 발롱도르 점수를 합계 최대 4점 더합니다. 대회 수준과 실제 출전 시간을 반영하며, 준우승·탈락 팀 선수도 활약에 따라 점수를 받습니다. 새 점수는 이후 시즌 결산의 수상 평가 근거에서 확인할 수 있습니다. [변경 내용과 시즌 검수](https://github.com/rabbit1245/rabbit1245.github.io/blob/de9dd0d82696099bfa125d71da01aa82e019bfa9/PLAY-KBALL.md)
+
 ## K볼 2.14.7 · 발롱도르·슈퍼 발롱도르 심사 개선
 
 [K볼 2.14.7 다운로드](https://raw.githubusercontent.com/rabbit1245/rabbit1245.github.io/32aeb9dfbf07d32cc49aeef01a80464908989207/Kball.zip)
