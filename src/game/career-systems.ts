@@ -482,14 +482,14 @@ export function evaluateAwards(career: Career): Award[] {
   const playerRank = candidates.find(r => r.playerId === career.player.id)?.rank ?? null;
   const rankedOwn = fullRanking.find(r => r.playerId === career.player.id);
   const ballot = globalOwn && rankedOwn ? voting.ballonBreakdown(globalOwn) : undefined;
-  const points = ballot ? `개인 기여 ${ballot.individual.toFixed(2)}점 · 우승/대회 기여 ${ballot.team.toFixed(2)}점 · 확인된 시즌 성취 ${ballot.achievement.toFixed(2)}점` : '';
+  const points = ballot ? `개인 기여 ${ballot.individual.toFixed(2)}점 · 우승/대회 기여 ${ballot.team.toFixed(2)}점 · 주요 대회 활약 ${ballot.major.toFixed(2)}점 · 확인된 시즌 성취 ${ballot.achievement.toFixed(2)}점` : '';
   const fifproRanking=rankRows(globalRows.filter(r=>(career.player.squad==='senior'||r.playerId!==career.player.id)&&r.stats.apps+r.nationalStats.apps>=30),career,true,context,r=>voting.score(r,'fifpro'));
   const world11 = selectEleven(fifproRanking, 3,3,3,true);
   const fifproSelected = world11.length === 11 && world11.some(r => r.playerId === career.player.id);
   if (playerRank === 1 && rankedOwn) won.push({ ...award(career, GLOBAL_AWARD_RULES.ballonDor, 'world', `30인 후보 중 1위 · ${rankedOwn.score.toFixed(2)}점 · 클럽 ${rankedOwn.stats.apps}경기 ${rankedOwn.stats.minutes}분 · ${points}`), rank: 1 });
   if (fifproSelected) won.push({ ...award(career, GLOBAL_AWARD_RULES.world11, 'world', `GK 1·DF 3·MF 3·FW 3 + 남은 필드 선수 1명 · 실제 세계 시즌 기록 기반 게임 내 선수 투표`), position: career.player.position });
   for(const item of won){
-    item.ruleVersion=item.name===GLOBAL_AWARD_RULES.ballonDor.name?'ballon-dor-2':AWARD_MODEL_VERSION;item.verification='game-model';
+    item.ruleVersion=item.name===GLOBAL_AWARD_RULES.ballonDor.name?'ballon-dor-3':AWARD_MODEL_VERSION;item.verification='game-model';
     if(!item.evaluationPeriod)item.evaluationPeriod=`게임 시즌 ${seasonDate(career.season,0).slice(0,10)} ~ ${seasonDate(career.season,career.season.totalWeeks).slice(0,10)}의 기록${item.category==='world'?' · 각 리그의 같은 게임 시즌을 비교':''}`;
   }
   const diagnostics=(leagueAwardRules(career.season.leagueId,getLeague(career.season.leagueId).name)).map(rule=>({name:rule.name,scope:'리그만',eligible:!!own&&(rule.metric!=='cleanSheets'||own.position==='GK')&&(rule.metric==='performance'||rule.metric==='eleven'?own.stats.apps>=minApps:true),result:won.some(a=>a.id.includes(`:${rule.id}:`))?'수상':'미선정',detail:!own?'성인 리그 실제 출전이 필요합니다.':`${own.stats.apps}경기 · ${own.stats.goals}골 · ${own.stats.assists}도움 · 평점 ${avgRating(own.stats).toFixed(2)}${['performance','eleven'].includes(rule.metric)?` · 최소 ${minApps}경기 · 같은 포지션군 ${leagueRanking.filter(r=>awardPositionGroup(r.position)===awardPositionGroup(own.position)).findIndex(r=>r.playerId===own.playerId)+1}위`:''} · 같은 리그 실제 출전 선수 ${leagueRows.length}명 비교` }));

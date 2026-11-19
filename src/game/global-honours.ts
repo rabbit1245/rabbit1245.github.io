@@ -6,6 +6,9 @@ import {EUROPEAN_COUNTRIES} from './cup-rules';
 import {currentNationality,normalizeNationality} from './national-data';
 import {awardPositionGroup} from './award-selection';
 import {achievementBonus,finishAchievementSeason,type AchievementContext} from './achievement-evidence';
+import {cupLedger} from './club-competitions';
+import {performanceBaselines} from './performance-profile';
+import {tournamentPerformance} from './tournament-awards';
 import type {Award,Career,PlayerStats} from './types';
 import type {CompetitorSeason,RankingCandidate} from './revision-types';
 
@@ -14,10 +17,48 @@ export interface VotingTeamContext extends AchievementContext {leagueTitles:Map<
 export const BALLON_MIN_CLUB_MINUTES = 900;
 const weights:Record<VoteKind,[number,number,number]>={ballon:[75,25,0],fifa:[65,20,15],fifa11:[70,15,15],fifpro:[75,10,15],yashin:[65,20,15],'fifa-gk':[70,15,15],kopa:[65,20,15]};
 const avg=(r:CompetitorSeason)=>r.stats.ratingCount?r.stats.ratingSum/r.stats.ratingCount:0;
+
+const MAJOR_COMPETITION_CAP = 4;
+const clubCompetitionWeight = new Map([
+ ['UCL',1],['LIBERTADORES',.75],['CLUB_WORLD_CUP',.75],['UEL',.5],['UECL',.3],
+ ['AFC_ELITE',.55],['CAF_CL',.55],['CONCACAF_CL',.55],['OFC_CL',.4],['AFC_TWO',.3],['SUDAMERICANA',.45],
+]);
+
+/** Compare observed tournament performances within their position groups. */
+function addMajorCompetitionMerit(merit:Map<string,number>,table:Record<string,Pick<RankingCandidate,'name'|'position'|'stats'>>,weight:number):void{
+ const played=Object.entries(table).filter(([,r])=>r.stats.apps>0&&r.stats.minutes>=180&&r.stats.ratingCount>0);
+ const baselines=performanceBaselines(played.map(([,r])=>r),180);
+ const roles=new Map<ReturnType<typeof awardPositionGroup>,{id:string;minutes:number;score:number}[]>();
+ for(const [id,row] of played){
+  const role=awardPositionGroup(row.position),peers=roles.get(role)??[];
+  peers.push({id,minutes:row.stats.minutes,score:tournamentPerformance({id,...row},baselines)});
+  roles.set(role,peers);
+ }
+ for(const peers of roles.values()){
+  if(peers.length<5)continue;
+  peers.sort((a,b)=>a.score-b.score);
+  const upperQuartile=peers[Math.floor((peers.length-1)*.75)].score;
+  const topLevel=peers[Math.floor((peers.length-1)*.95)].score;
+  const range=Math.max(15,topLevel-upperQuartile);
+  for(const player of peers){
+   if(player.score<=upperQuartile)continue;
+   const quality=clamp((player.score-upperQuartile)/range,0,1);
+   const minutes=clamp(player.minutes/540,0,1);
+   const points=MAJOR_COMPETITION_CAP*weight*quality*minutes;
+   merit.set(player.id,Math.min(MAJOR_COMPETITION_CAP,(merit.get(player.id)??0)+points));
+  }
+ }
+}
+
 export function globalVoting(c:Career,rows:CompetitorSeason[],performance:(r:CompetitorSeason)=>number,context:VotingTeamContext){
  const offsets=new Map<string,number>(),raw=new Map(rows.map(r=>[r.playerId,Math.max(0,performance(r)-(context.teamScore.get(r.clubId)??0))*(context.prestige?.get(r.leagueId)??1/Math.sqrt(getLeague(r.leagueId).tier))]));
  const {national,world}=c.systems!,nationalTitles=new Map<string,number>();
  const seniorFinals=new Map<string,PlayerStats>();
+ const majorMerit=new Map<string,number>();
+ for(const cup of cupLedger(c,c.season.year)){
+  const weight=clubCompetitionWeight.get(cup.id.split(':')[0]);
+  if(weight&&cup.playerStats)addMajorCompetitionMerit(majorMerit,cup.playerStats,weight);
+ }
  const finals=[...new Map([...(national.teamResults??[]),...national.matches,...national.history.flatMap(h=>h.matches)].filter(m=>m.seasonYear===c.season.year&&m.fixtureId.includes('|final|')&&/^(WC|UEFA|AFC|CAF|CONCACAF|CONMEBOL|OFC):/.test(m.competitionId??'')).map(m=>[m.fixtureId,m])).values()];
  for(const final of finals){
   const competitionId=final.competitionId!,tournament=national.tournamentStats?.[competitionId];
@@ -25,6 +66,7 @@ export function globalVoting(c:Career,rows:CompetitorSeason[],performance:(r:Com
   const win=final.shootout?.winnerId??(final.homeGoals>final.awayGoals?final.homeId:final.awayGoals>final.homeGoals?final.awayId:undefined);
   const country=win?.split(':')[1],maxMinutes=Math.max(90,...Object.values(tournament).map(r=>r.stats.minutes));
   const titlePoints=competitionId.startsWith('WC:')?12:/^(UEFA|CONMEBOL):/.test(competitionId)?8:5;
+  addMajorCompetitionMerit(majorMerit,tournament,titlePoints/12);
   for(const r of rows){
    const stats=tournament[r.playerId]?.stats;
    if(!stats?.minutes)continue;
@@ -84,11 +126,12 @@ export function globalVoting(c:Career,rows:CompetitorSeason[],performance:(r:Com
   score:(r:CompetitorSeason,kind:VoteKind='ballon')=>{
    const points=base(r,kind);
    const star=kind!=='ballon'&&r.playerId===c.player.id?personalityEdge(c,'stardom')*.02:0;
-   return round((points+bonus(r,kind,points))*(1+star),4);
+   const major=kind==='ballon'?majorMerit.get(r.playerId)??0:0;
+   return round((points+bonus(r,kind,points)+major)*(1+star),4);
   },
   ballonBreakdown:(r:CompetitorSeason)=>{
    const individual=performanceVote(r,'ballon'),team=teamVote(r,'ballon');
-   return {individual,team,achievement:bonus(r,'ballon',individual+team),nationalApps:seniorFinals.get(r.playerId)?.apps??0};
+   return {individual,team,major:majorMerit.get(r.playerId)??0,achievement:bonus(r,'ballon',individual+team),nationalApps:seniorFinals.get(r.playerId)?.apps??0};
   },
   finish:()=>finishAchievementSeason(c,rows,context),
  };

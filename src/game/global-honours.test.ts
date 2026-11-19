@@ -50,7 +50,11 @@ test('Ballon credits senior finals from the tournament ledger and league results
  assert.deepEqual(grade(r),grade(friendly),'friendlies or youth caps in the combined total have no senior finals points');
  const final=(id:string,year:number)=>({id,fixtureId:`NAT|senior|${id}|final|1`,competitionId:id,seasonYear:year,
   homeId:'NAT:일본:senior',awayId:'NAT:대한민국:senior',homeGoals:2,awayGoals:1} as MatchRecord);
- nat.tournamentStats={'WC:2026':{[r.playerId]:{id:r.playerId,name:r.name,position:r.position,stats:international}}};
+ const peers=Object.fromEntries(Array.from({length:10},(_,i)=>{
+  const id=`finals-peer-${i}`;
+  return [id,{id,name:id,position:r.position,stats:{...emptyStats(),apps:5,minutes:450,ratingCount:5,ratingSum:35}}];
+ }));
+ nat.tournamentStats={'WC:2026':{...peers,[r.playerId]:{id:r.playerId,name:r.name,position:r.position,stats:international}}};
  nat.teamResults=[final('WC:2026',c.season.year-1)];
  assert.equal(grade(r).nationalApps,0);
  const seniorFinal=final('WC:2026',c.season.year);
@@ -58,11 +62,54 @@ test('Ballon credits senior finals from the tournament ledger and league results
  const senior=grade(r);
  assert.equal(senior.nationalApps,5);
  assert.ok(senior.individual>60&&senior.individual>grade({...r,playerId:'other'}).individual);
+ assert.ok(senior.major>0&&senior.major<=4*450/540);
+ nat.teamResults=[seniorFinal];
+ assert.equal(grade(r).major,senior.major,'the same final does not earn points twice');
  assert.equal(senior.team,0,'a losing finalist gets no winner credit');
  ctx.leagueTitles.set(r.clubId,8);
  assert.equal(grade(r).team,0,'cup and national minutes do not earn league title points');
  c.season.matches=[{...seniorFinal,scope:'club',competitionId:r.leagueId,playerClubId:r.clubId,playerStats:{...emptyStats(),apps:1,minutes:90}}];
  assert.ok(grade(r).team>0&&grade(r).team<1,'limited league appearances earn partial title points');
+});
+test('An outstanding Champions League campaign can swing a close Ballon vote without overriding a stronger season',()=>{
+ const c=fresh(),domestic=row(c),ctx=context(),cups=c.systems!.clubCompetitions!.current;
+ const rival={...domestic,playerId:'ucl-rival',clubId:'ES1_01',leagueId:'ES1'};
+ const ordinary={...rival,playerId:'ucl-team-winner',clubId:'ES1_02'};
+ const bench={...ordinary,playerId:'ucl-bench'};
+ const keeper={...ordinary,playerId:'ucl-keeper',position:'GK' as const};
+ const candidates=[domestic,rival,ordinary,bench,keeper];
+ const cup=cups.find(t=>t.id.startsWith('UCL:'))!;
+ const domesticCup=cups.find(t=>t.kind==='cup')!;
+ const regular={...emptyStats(),apps:6,minutes:540,ratingCount:6,ratingSum:42};
+ const strong={...regular,goals:8,assists:3,mom:4,ratingSum:53.4};
+ const peers=Object.fromEntries(Array.from({length:10},(_,i)=>{
+  const playerId=`ucl-peer-${i}`;
+  return [playerId,{...ordinary,playerId,stats:regular}];
+ }));
+ const keeperPeers=Object.fromEntries(Array.from({length:7},(_,i)=>{
+  const playerId=`ucl-keeper-${i}`;
+  return [playerId,{...keeper,playerId,stats:{...regular,saves:18,goalsConceded:8,cleanSheets:2}}];
+ }));
+ cup.winnerId=ordinary.clubId;
+ cup.playerStats={...peers,...keeperPeers,
+  [rival.playerId]:{...rival,stats:strong},[ordinary.playerId]:{...ordinary,stats:regular},
+  [bench.playerId]:{...bench,stats:emptyStats()},
+  [keeper.playerId]:{...keeper,stats:{...regular,ratingSum:51,saves:36,goalsConceded:3,cleanSheets:4}},
+ };
+ domesticCup.playerStats={...peers,[domestic.playerId]:{...domestic,stats:strong}};
+ const worldPerformance=(r:CompetitorSeason)=>r.playerId===domestic.playerId?102:100;
+ const before=globalVoting({...c,systems:{...c.systems!,clubCompetitions:undefined}},candidates,worldPerformance,ctx);
+ const after=globalVoting(c,candidates,worldPerformance,ctx);
+ assert.ok(before.score(domestic)>before.score(rival));
+ assert.ok(after.score(rival)>after.score(domestic));
+ assert.equal(after.ballonBreakdown(domestic).major,0);
+ assert.equal(after.ballonBreakdown(ordinary).major,0);
+ assert.equal(after.ballonBreakdown(bench).major,0);
+ assert.ok(after.ballonBreakdown(keeper).major>0);
+ assert.ok(after.score(rival)-before.score(rival)<=4);
+ for(const candidate of candidates)assert.equal(after.score(candidate,'fifa'),before.score(candidate,'fifa'));
+ const clear=globalVoting(c,candidates,r=>r.playerId===domestic.playerId?110:100,ctx);
+ assert.ok(clear.score(domestic)>clear.score(rival));
 });
 test('narrative achievements require evidence, diminish overlapping titles, cap at ten, and do not invent a drought',()=>{
  const c=fresh(),r=row(c),ctx=context(),e=c.systems!.achievementEvidence!;c.season.playerStats=r.stats;
