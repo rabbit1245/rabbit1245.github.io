@@ -1,3 +1,9 @@
+## K볼 2.14.9 · 시즌 중 계약 및 장기 저장 개선
+
+[K볼 2.14.9 다운로드](https://raw.githubusercontent.com/rabbit1245/rabbit1245.github.io/3d933d60e257af2a9b1c4dbe33b555e0f9c2c5f8/Kball.zip)
+
+시즌 중 유소년 FA 계약 오류와 이적 전 월간 기록 누락을 수정했습니다. 대형 복구 파일의 검사 단계를 표시하고 반 시즌 진행 중에는 라운드 사이에 화면을 갱신합니다. 실제 록 카발란 세이브에서 35세부터 36세까지 연속 진행, 자동 저장, 재접속과 기존 기록 보존을 확인했습니다. [변경 내용과 실제 원본 검수](https://github.com/rabbit1245/rabbit1245.github.io/blob/3d933d60e257af2a9b1c4dbe33b555e0f9c2c5f8/PLAY-KBALL.md)
+
 ## K볼 2.14.8 · 발롱도르 주요 대회 활약
 
 [K볼 2.14.8 다운로드](https://raw.githubusercontent.com/rabbit1245/rabbit1245.github.io/de9dd0d82696099bfa125d71da01aa82e019bfa9/Kball.zip)
