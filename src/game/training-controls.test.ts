@@ -29,10 +29,11 @@ test('only checked field/GK attributes can gain training, experience or maturati
  const mental=fresh('ST',['decisions']);round(mental,12);assert.ok(mental.systems!.growthLedger!.byCause.development.decisions!>0);
 });
 
-test('an empty offseason plan is valid and an unconfirmed plan starts the next season without carrying old selections',()=>{
- const c=fresh('ST',['shooting']);c.stage='offseason';c.season.week=c.season.totalWeeks;c.season.completed=true;c.transferDecision='stay';
+test('an empty confirmed plan retains its recovery choice while skipping the plan starts at balanced intensity',()=>{
+ const c=fresh('ST',['shooting']);c.stage='offseason';c.season.week=c.season.totalWeeks;c.season.completed=true;c.transferDecision='stay';c.intensity='intense';
  c.systems!.trainingPlan={forYear:c.season.year+1,confirmed:false,confirmedAtRound:c.season.week,source:'offseason'};
- const before={...c.player.attributes},confirmed=setTraining(c,[],'balanced'),a=startNextSeason(confirmed),b=startNextSeason(c);
+ const before={...c.player.attributes},confirmed=setTraining(c,[],'rest'),a=startNextSeason(confirmed),b=startNextSeason(c);
+ assert.equal(a.intensity,'rest');assert.equal(b.intensity,'balanced');
  for(const next of [a,b]){assert.equal(next.stage,'season');assert.deepEqual(next.training,[]);assert.equal(next.systems!.trainingPlan!.confirmed,true);assert.deepEqual(next.player.attributes,before);round(next,10);assert.deepEqual(next.player.attributes,before);}
  assert.deepEqual(c.training,['shooting']);assert.equal(c.systems!.trainingPlan.confirmed,false);
  const legacy=structuredClone(c);delete legacy.systems!.trainingPlan;assert.deepEqual(startNextSeason(legacy).training,[]);

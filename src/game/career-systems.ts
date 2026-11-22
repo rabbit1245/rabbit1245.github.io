@@ -213,9 +213,12 @@ export function makeContractOffers(career:Career,timing:'midseason'|'offseason')
 export function applyContract(career: Career, offer: TransferOffer): void {
   if (!career.systems) throw new Error('계약 시스템이 초기화되지 않았습니다.');
   const { economics: e, world, leadership: l } = career.systems;
-  const historyId=`contract:${offer.id}`;
-  if(e.contractHistory?.some(entry=>entry.id===historyId))return;
   const fromClubId = career.player.clubId;
+  const firstHistoryId = `contract:${offer.id}`;
+  const repeat = e.contractHistory?.some(entry => entry.id === firstHistoryId);
+  if (repeat && fromClubId !== 'FA') return;
+  // A club can offer the same contract ID again after the player becomes FA.
+  const historyId = repeat ? `${firstHistoryId}:r${career.revision}` : firstHistoryId;
   const effectiveYear = career.season.year + (offer.effective === 'nextSeason' ? 1 : 0);
   const target = world.clubs[offer.clubId];
   if (!target || offer.wage <= 0 || !Number.isFinite(offer.wage) || !Number.isInteger(offer.years) || offer.years < 1 || offer.years > 5 || offer.fee < 0 || !Number.isFinite(offer.fee)) throw new Error('올바르지 않은 계약입니다.');

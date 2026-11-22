@@ -77,7 +77,7 @@ export interface SeasonSummary {
 }
 export interface SeasonDetails {
   startOvrVersion?:2|3;
-  employmentStandings?:{clubId:string;leagueId:string;rank:number;played:number;won:number;drawn:number;lost:number;points:number}[];
+  employmentStandings?:{clubId:string;leagueId:string;rank:number;played:number;won:number;drawn:number;lost:number;points:number;atDeparture?:true}[];
   abilityVersion?:2;ovrVersion?:2|3;skillMastery?:Attributes;playSkills?:AttributeKey[];
   version:1; clubDevelopment?:ClubSeasonDevelopment; table:Standing[]; attributes:Attributes; startAttributes:Attributes;
   marketValue:number; seasonStartValue?:number; contract:{clubId:string;wage:number;years:number;signedYear:number;expiresYear:number;role:string};

@@ -227,10 +227,11 @@ export function getWorldClubPlayers(career: Career, clubId: string): MatchPartic
 }
 
 /** Academy games use their own squad and ledger. Missing depth is explicitly fictional. */
-export function getYouthClubPlayers(career: Career, clubId: string): MatchParticipant[] {
+export function getYouthClubPlayers(career: Career, clubId: string, includeUser = true): MatchParticipant[] {
   const world=career.systems?.world, club=world?.clubs[clubId];
   const country=getClub(clubId).country;
   const players:MatchParticipant[]=club&&world?club.rosterIds.flatMap(id=>{
+    if(!includeUser&&id===career.player.id)return [];
     const row=id===career.player.id?userWorldPlayer(career):world.players[id];
     if(!row||row.injuryWeeks>0||row.age>20||id===career.player.id&&career.player.squad!=='youth')return [];
     return [{id:row.id,name:row.name,clubId,position:row.position,ovr:row.ovr,nationality:row.nationality,

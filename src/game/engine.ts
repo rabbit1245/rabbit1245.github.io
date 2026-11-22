@@ -8,7 +8,7 @@ import {copySystems} from './snapshot';
 import {nationalParticipation,type NationalParticipationKey} from './national-participation';
 import {playSkillDefinitions,playSkillNames} from './play-skills';
 import {removeSkillMastery} from './growth';
-import {trackMonthlyLeague} from './extra-honours';
+import {switchMonthlyLeague,trackMonthlyLeague} from './extra-honours';
 import {settleShirtMarket} from './commercial';
 import {ensureEconomicMarket} from './career-systems';
 import {moneyText} from './currency';
@@ -27,10 +27,11 @@ import { fixtureDate, nextCalendarYear, seasonDate, seasonHalfEndDate } from './
 import { captureSeasonDetails } from './season-details';
 import { applyMatchExperience, beginGrowthSeason, ensureGrowthTracking, trainRound,increaseAttribute,applyManualAging } from './growth';
 import { TALENT_PROFILES } from './talent';
+import { finishGameSteps, type GameSteps } from './game-steps';
 import type { Award, AttributeKey, Attributes, Career, CreateOptions, Fixture, GameProgress, Intensity, MatchRecord, Player, PlayerStats, Position, SeasonState, SeasonSummary, Standing, Talent, TransferOffer } from './types';
 import type { PresentationEvent } from './revision-types';
 
-export const ENGINE_VERSION = '2.14.8';
+export const ENGINE_VERSION = '2.14.9';
 export const overall = calculateOverall;
 export { addStats, emptyStats, hashSeed, seededRandom } from './math';
 const TALENT_ORDER: Talent[] = ['D','C','B','A','S','SS','SSS'];
@@ -246,7 +247,22 @@ function applyEffects(career:Career,match:MatchRecord) {
   career.player.fitness=effect.fitnessAfter;career.player.morale=effect.moraleAfter;career.player.form=effect.formAfter;
   career.player.injuryWeeks=effect.injuryWeeksAfter;career.managerTrust=effect.trustAfter;
 }
-function playRound(next:Career) {
+function simulateLeagueFixture(career:Career,fixture:Fixture,userParticipates:boolean,elapsed=false):MatchRecord {
+  const youth=career.player.squad==='youth';
+  const players=(id:string)=>youth?getYouthClubPlayers(career,id,!elapsed):getWorldClubPlayers(career,id);
+  const homePlayers=players(fixture.homeId),awayPlayers=players(fixture.awayId);
+  const club=(id:string,roster:typeof homePlayers)=>{
+    const base=getClub(id);
+    const power=youth?roster.slice(0,11).reduce((sum,p)=>sum+p.ovr,0)/Math.max(1,Math.min(11,roster.length)):getClubWorldPower(career,id);
+    return {...base,name:base.name+(youth?' U19':''),power};
+  };
+  return simulateMatch(career,fixture,{
+    home:club(fixture.homeId,homePlayers),away:club(fixture.awayId,awayPlayers),homePlayers,awayPlayers,
+    scope:'club',competitionId:career.season.leagueId,date:fixtureDate(career.season,fixture.round),
+    userParticipates,detailed:userParticipates,...(elapsed?{recordActionEvents:false}:{}),
+  });
+}
+function* playRound(next:Career):GameSteps<void> {
   const systems=next.systems!;
   next.season.week++;systems.trainingLocked=true;
   systems.phase=next.season.week<=systems.halfRound?'first':'second';
@@ -256,17 +272,14 @@ function playRound(next:Career) {
   if(next.season.week%4===0)news(next,'training','훈련 리포트',`선택 훈련과 경기 경험을 나누어 기록합니다. 종합 ${next.player.ovr}.`);
   const cupGames=processClubCompetitions(next,match=>{applyEffects(next,match);applyMatchExperience(next,match.playerStats);next.lastMatchId=match.id;},date=>processInternationalThrough(next,date));
   processInternationalThrough(next,fixtureDate(next.season,next.season.week));
+  yield;
   const lastCup=cupGames.at(-1);if(lastCup?.date)next.player.fitness=clamp(next.player.fitness+Math.min(18,Math.max(0,(Date.parse(fixtureDate(next.season,next.season.week))-Date.parse(lastCup.date))/86400000)*5),0,100);
   const results:MatchRecord[]=[];
   for(const fixture of next.season.fixtures.filter(f=>f.round===next.season.week&&!f.played)) {
     const isUser=fixture.homeId===next.player.clubId||fixture.awayId===next.player.clubId;
     const date=fixtureDate(next.season,next.season.week);
     syncManualInjury(next,date);
-    const youth=next.player.squad==='youth';
-    const homePlayers=(youth?getYouthClubPlayers:getWorldClubPlayers)(next,fixture.homeId);
-    const awayPlayers=(youth?getYouthClubPlayers:getWorldClubPlayers)(next,fixture.awayId);
-    const power=(id:string,players:typeof homePlayers)=>youth?players.slice(0,11).reduce((n,p)=>n+p.ovr,0)/Math.max(1,Math.min(11,players.length)):getClubWorldPower(next,id);
-    const match=simulateMatch(next,fixture,{home:{...getClub(fixture.homeId),name:getClub(fixture.homeId).name+(youth?' U19':''),power:power(fixture.homeId,homePlayers)},away:{...getClub(fixture.awayId),name:getClub(fixture.awayId).name+(youth?' U19':''),power:power(fixture.awayId,awayPlayers)},homePlayers,awayPlayers,scope:'club',competitionId:next.season.leagueId,date,userParticipates:isUser,detailed:isUser});
+    const match=simulateLeagueFixture(next,fixture,isUser);
     results.push(match);fixture.homeGoals=match.homeGoals;fixture.awayGoals=match.awayGoals;fixture.played=true;
     if(isUser) {
       applyEffects(next,match);applyMatchExperience(next,match.playerStats);next.season.matches.push(match);addStats(next.season.playerStats,match.playerStats);next.lastMatchId=match.id;
@@ -279,7 +292,9 @@ function playRound(next:Career) {
   }
   next.season.table=calculateTable(next.season.fixtures,next.season.table.map(r=>r.clubId));
   trackMonthlyLeague(next,results);
+  yield;
   processWorldRound(next,results);
+  yield;
   updateLeadership(next,'club');
   syncManualInjury(next,fixtureDate(next.season,next.season.week));
   if(wasInjured&&!next.systems!.manualInjuries?.some(r=>r.selectionVersion===2&&!r.returned))next.player.injuryWeeks=Math.max(0,next.player.injuryWeeks-1);
@@ -290,20 +305,27 @@ function playRound(next:Career) {
   touch(next);
 }
 export function advanceCareer(career:Career,weeks=1,onProgress?:(p:GameProgress)=>void):Career {
+  return finishGameSteps(advanceCareerSteps(career,weeks),onProgress);
+}
+export function* advanceCareerSteps(career:Career,weeks=1):GameSteps<Career> {
   if(career.stage!=='season')return career;
   if(!Number.isInteger(weeks)||weeks<1||weeks>156)throw new Error('진행할 기간은 1~156주입니다.');
   const next=editable(career);
+  yield;
   for(let i=0;i<weeks&&next.stage==='season';i++) {
-    playRound(next);
-    onProgress?.({year:next.season.year,round:next.season.week,total:next.season.totalWeeks});
+    yield* playRound(next);
+    yield {year:next.season.year,round:next.season.week,total:next.season.totalWeeks};
   }
   return next;
 }
 export function advanceHalf(career:Career,onProgress?:(p:GameProgress)=>void):Career {
+  return finishGameSteps(advanceHalfSteps(career),onProgress);
+}
+export function* advanceHalfSteps(career:Career):GameSteps<Career> {
   if(career.stage!=='season')return career;
   const half=career.systems?.halfRound??Math.ceil(career.season.totalWeeks/2);
   const target=career.season.week<half?half:career.season.totalWeeks;
-  return advanceCareer(career,Math.max(1,target-career.season.week),onProgress);
+  return yield* advanceCareerSteps(career,Math.max(1,target-career.season.week));
 }
 function validateTraining(position:Player['position'],keys:AttributeKey[],intensity:Intensity) {
   if(!['balanced','intense','rest'].includes(intensity))throw new Error('올바른 훈련 강도를 선택해 주세요.');
@@ -328,12 +350,17 @@ export function changePosition(career:Career,position:Position,style:string):Car
  present(next,'growth','포지션 변경',`${from} → ${position} · ${style} · OVR ${ovrBefore} → ${p.ovr}. 현재 능력치를 새 포지션·유형의 가중치로 평가했습니다.`);
  touch(next);return next;
 }
+export function hasConfirmedNextSeasonTraining(career:Career):boolean{
+  const plan=career.systems?.trainingPlan;
+  return plan?.forYear===career.season.year+1&&plan.confirmed&&plan.source==='offseason';
+}
+
 export function setTraining(career:Career,keys:AttributeKey[],intensity:Intensity):Career {
   if(career.stage==='retired')throw new Error('은퇴한 선수는 훈련할 수 없습니다.');
   if(career.stage!=='offseason')throw new Error('시즌 중에는 훈련 계획을 바꿀 수 없습니다. 다음 오프시즌에 설정해 주세요.');
   validateTraining(career.player.position,keys,intensity);
-  const next=editable(career,true),plan=next.systems!.trainingPlan;
-  if(plan?.forYear===career.season.year+1&&plan.confirmed&&plan.source!=='legacy')throw new Error('다음 시즌 훈련 계획은 이미 확정했습니다.');
+  if(hasConfirmedNextSeasonTraining(career))throw new Error('다음 시즌 훈련 계획은 이미 확정했습니다.');
+  const next=editable(career,true);
   next.training=[...keys];next.intensity=intensity;
   next.systems!.trainingPlan={forYear:career.season.year+1,confirmed:true,confirmedAtRound:career.season.week,source:'offseason'};
   next.systems!.trainingLocked=true;
@@ -414,14 +441,18 @@ export function stayAtClub(career:Career):Career {
   present(next,'transfer','소속 팀 잔류',`${getClub(next.player.clubId).name}에서 현재 계약을 이어갑니다.`);touch(next);return next;
 }
 export function startNextSeason(career:Career,onProgress?:(p:GameProgress)=>void):Career {
+  return finishGameSteps(startNextSeasonSteps(career),onProgress);
+}
+export function* startNextSeasonSteps(career:Career):GameSteps<Career> {
   if(career.stage!=='offseason')throw new Error('현재 시즌을 먼저 마무리해 주세요.');
   const decided=career.transferDecision?career:stayAtClub(career),next=editable(decided);
-  // An unconfirmed plan is optional: do not silently carry last season's selection forward.
-  const trainingPlan=career.systems?.trainingPlan;
-  if(trainingPlan?.forYear!==career.season.year+1||!trainingPlan.confirmed||trainingPlan.source!=='offseason')next.training=[];
+  // Skipping the next plan starts with no selected training and balanced recovery.
+  if(!hasConfirmedNextSeasonTraining(career)){next.training=[];next.intensity='balanced';}
   const previousSeason=next.season,lastYear=next.season.year,previousOvr=next.player.ovr;
   const entries=europeanEntries(next);
+  yield;
   transitionWorldSeason(next);
+  yield;
   for(const h of next.history){const report=next.systems!.world.clubs[h.clubId]?.development?.history.find(r=>r.year===h.year);if(h.details&&report){const i=next.history.indexOf(h);next.history[i]={...h,details:{...h.details,clubDevelopment:structuredClone(report)}};}}
   if(next.systems?.cheats?.enabled&&next.systems.cheats.freezeAging)next.systems.cheats.used=true;
   else {next.player.age++;}
@@ -438,6 +469,8 @@ export function startNextSeason(career:Career,onProgress?:(p:GameProgress)=>void
   const systems=next.systems!;
   systems.national.formatVersion=2;
   delete systems.monthlyLeague;
+  delete systems.monthlyLeagueArchive;
+  delete systems.youthLeagueSchedules;
   systems.phase='preseason';systems.halfRound=Math.ceil(next.season.totalWeeks/2);systems.trainingLocked=true;systems.pendingChoice=undefined;
   delete systems.agingReport;
   systems.trainingPlan={forYear:next.season.year,confirmed:true,confirmedAtRound:0,source:systems.trainingPlan?.source??'legacy'};
@@ -451,7 +484,7 @@ export function startNextSeason(career:Career,onProgress?:(p:GameProgress)=>void
   syncManualInjury(next,seasonDate(next.season,0));
   touch(next);
   const injury=next.systems?.manualInjuries?.find(r=>!r.returned);
-  if(injury&&injury.selectionVersion!==2)skipInjuryPeriod(next,injury.end,onProgress);
+  if(injury&&injury.selectionVersion!==2)yield* skipInjuryPeriod(next,injury.end);
   if(isFreeAgent(next))next.offers=makeContractOffers(next,'midseason');
   return next;
 }
@@ -490,6 +523,9 @@ export function setAllAttributeLocks(career:Career,locked:boolean):Career{
  touch(next);return next;
 }
 export function manuallyInjure(career:Career,duration:'half'|'season'|5|10|20,onProgress?:(p:GameProgress)=>void):Career{
+ return finishGameSteps(manuallyInjureSteps(career,duration),onProgress);
+}
+export function* manuallyInjureSteps(career:Career,duration:'half'|'season'|5|10|20):GameSteps<Career>{
  if(career.stage==='retired'||!['half','season',5,10,20].includes(duration))throw new Error('현역 선수의 부상 기간을 선택해 주세요.');
  if(career.systems?.manualInjuries?.some(r=>!r.returned))throw new Error('현재 수동 부상이 끝난 뒤 다시 적용해 주세요.');
  if(duration!=='half'){
@@ -509,11 +545,14 @@ export function manuallyInjure(career:Career,duration:'half'|'season'|5|10|20,on
  if(pending){present(next,'injury','다음 시즌 부상 예약',`다음 시즌 실제 소속 리그의 시작일부터 ${duration==='half'?182:365}일 동안 결장합니다. 능력치 잠금은 유지되며 계약·훈련 선택 후 적용됩니다.`);touch(next);return next;}
  present(next,'injury',`${duration==='half'?'반 시즌':'한 시즌'} 부상`,`${start.slice(0,10)} ~ ${end.slice(0,10)}. 부상 중 팀 경기는 정상 진행하며 시즌 종료 시 계약·훈련을 결정한 뒤 남은 기간을 이어갑니다.`,'milestone');
  syncManualInjury(next,start);
- skipInjuryPeriod(next,end,onProgress);touch(next);return next;
+ yield* skipInjuryPeriod(next,end);touch(next);return next;
 }
 
-function skipInjuryPeriod(c:Career,end:string,onProgress?:(p:GameProgress)=>void):void{
- while(c.stage==='season'&&fixtureDate(c.season,c.season.week+1)<end){playRound(c);onProgress?.({year:c.season.year,round:c.season.week,total:c.season.totalWeeks});}
+function* skipInjuryPeriod(c:Career,end:string):GameSteps<void>{
+ while(c.stage==='season'&&fixtureDate(c.season,c.season.week+1)<end){
+  yield* playRound(c);
+  yield {year:c.season.year,round:c.season.week,total:c.season.totalWeeks};
+ }
  if(c.stage==='season'&&end<=seasonHalfEndDate(c.season,'second')){
   processClubCompetitions(c,m=>{applyEffects(c,m);applyMatchExperience(c,m.playerStats);c.lastMatchId=m.id;},date=>processInternationalThrough(c,date),end);
   processInternationalThrough(c,end);syncManualInjury(c,end);c.systems!.manualClock=end;
@@ -543,11 +582,32 @@ export function releaseContract(career:Career):Career{
  present(next,'transfer','FA · 무소속 전환','클럽 명단과 급여에서 제외됩니다. 반 시즌씩 진행하면서 새 계약을 검토할 수 있습니다.','milestone');touch(next);return next;
 }
 function adoptDestinationSchedule(next:Career):void{
- const old=next.season,league=next.systems!.world.clubs[next.player.clubId].leagueId,state=next.systems!.world.competitions[league];
- // Other leagues have already simulated exactly to their own current round.
- next.season={...old,leagueId:league,competitionName:getLeague(league).name,week:state.round,totalWeeks:state.totalRounds,fixtures:state.fixtures.map(f=>({...f})),table:state.table.map(t=>({...t})),completed:state.round===state.totalRounds};
- next.systems!.halfRound=Math.ceil(state.totalRounds/2);delete next.systems!.monthlyLeague;
- const period=next.systems!.employment?.at(-1);if(period)period.fromRound=state.round;
- if(next.systems!.growthLedger)next.systems!.growthLedger.trackedFromRound=Math.min(next.systems!.growthLedger.trackedFromRound,state.round);
- next.systems!.phase=state.round===0?'preseason':state.round===next.systems!.halfRound?'midseason':state.round<next.systems!.halfRound?'first':'second';
+ const old=next.season,systems=next.systems!,league=systems.world.clubs[next.player.clubId].leagueId;
+ if(old.leagueId===league)return;
+ const senior=systems.world.competitions[league],youth=next.player.squad==='youth';
+ const name=getLeague(league).name+(youth?' · U19 시뮬레이션':'');
+ if(youth){
+  const archives={...systems.youthLeagueSchedules,[old.leagueId]:{leagueId:old.leagueId,round:old.week,totalRounds:old.totalWeeks,fixtures:old.fixtures,table:old.table}};
+  const previous=archives[league];
+  delete archives[league];
+  systems.youthLeagueSchedules=archives;
+  const fixtures:Fixture[]=previous?previous.fixtures.map(f=>({...f})):senior.fixtures.map(({id,round,homeId,awayId})=>({id,round,homeId,awayId,played:false}));
+  const week=Math.max(previous?.round??0,senior.round);
+  next.season={...old,leagueId:league,competitionName:name,week,totalWeeks:senior.totalRounds,fixtures,completed:false};
+  // Play the elapsed academy fixtures independently before the user joins.
+  for(const f of fixtures)if(!f.played&&f.round<=week){
+   const match=simulateLeagueFixture(next,f,false,true);
+   f.played=true;f.homeGoals=match.homeGoals;f.awayGoals=match.awayGoals;
+  }
+  next.season.table=calculateTable(fixtures,senior.table.map(t=>t.clubId));
+ }else{
+  // The senior world has already simulated the destination league.
+  next.season={...old,leagueId:league,competitionName:name,week:senior.round,totalWeeks:senior.totalRounds,fixtures:senior.fixtures.map(f=>({...f})),table:senior.table.map(t=>({...t})),completed:senior.round===senior.totalRounds};
+ }
+ switchMonthlyLeague(next,league);
+ const {week,totalWeeks}=next.season;
+ systems.halfRound=Math.ceil(totalWeeks/2);
+ const period=systems.employment?.at(-1);if(period)period.fromRound=week;
+ if(systems.growthLedger)systems.growthLedger.trackedFromRound=Math.min(systems.growthLedger.trackedFromRound,week);
+ systems.phase=week===0?'preseason':week===systems.halfRound?'midseason':week<systems.halfRound?'first':'second';
 }

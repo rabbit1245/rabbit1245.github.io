@@ -5,6 +5,7 @@ import {packGameResult,unpackGameResult,type GameResultWire} from './worker-resu
 import type { Career, GameCommand,GameProgress } from './types';
 import {validateEngineResult} from './storage';
 import {LIGHT_COMMANDS,LOCAL_DECISIONS} from './command-patches';
+import {finishGameStepsInBrowser,yieldToBrowser} from './game-steps';
 
 type Pending = { previous:Career;resolve: (value: Career) => void; reject: (reason: Error) => void; timeout: ReturnType<typeof setTimeout>;onProgress?:(p:GameProgress)=>void };
 let worker: Worker | undefined;
@@ -39,12 +40,13 @@ export async function runGameCommand(career: Career, command: GameCommand,onProg
     releaseIdleGameWorker();
     // Work on the validated in-memory state. Shared previous matches stay
     // immutable, even for the first command after crossing six seasons.
-    await new Promise<void>(resolve=>setTimeout(resolve,0));
-    const {executeCommand}=await import('./commands');
-    const next=executeCommand(career,command,id,onProgress);
+    const {commandSteps}=await import('./commands');
+    const next=await finishGameStepsInBrowser(commandSteps(career,command,id),onProgress);
     if(next===career)return career;
     validateEngineResult(career,next);
+    await yieldToBrowser();
     compactMatchEvents(next);
+    await yieldToBrowser();
     const prepared=await prepareGameDelta(packGameResult(career,next),true);
     sealCareer(next);
     if(prepared)certifyGameDelta(career,next,prepared);

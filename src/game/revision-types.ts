@@ -62,6 +62,9 @@ export interface CareerSystems {
   employment?:EmploymentPeriod[];
   achievementEvidence?:import('./achievement-evidence').AchievementEvidence;
   playSkillChanges?:import('./play-skills').PlaySkillChange[];
+  /** Inactive academy schedules from earlier clubs in this season. */
+  youthLeagueSchedules?:Record<string,CompetitionState>;
+  monthlyLeagueArchive?:Record<string,import('./extra-honours').MonthlyLedger>;
   manualClock?:string; monthlyLeague?:import('./extra-honours').MonthlyLedger; clubCompetitions?:ClubCompetitions; manualAging?:ManualAging[]; attributeLocks?:AttributeKey[]; manualInjuries?:ManualInjury[];
   version: 2; growthModelVersion?:2; cheats?:{enabled:boolean;freezeAging:boolean;used:boolean}; growthLedger?:GrowthLedger; agingReport?:AgingReport; trainingPlan?:TrainingPlan; world: WorldState; national: NationalState; economics: Economics; leadership: Leadership;
   phase: 'preseason'|'first'|'midseason'|'second'|'review'|'retired'; halfRound: number; trainingLocked: boolean;

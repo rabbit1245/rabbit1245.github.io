@@ -1,14 +1,31 @@
-import {getClub} from './data';
+import {getClub,getLeague} from './data';
 import {sumStats,ALL_STATS} from './math';
 import type {Career,MatchRecord} from './types';
+import type {MonthlyLedger} from './extra-honours';
 const check=(v:unknown,label:string)=>{if(!v)throw new Error(`저장 데이터 오류: ${label}`);};
 const num=(v:unknown,min=0,max=1e9)=>check(typeof v==='number'&&Number.isFinite(v)&&v>=min&&v<=max,'대회/수동 노화 수치');
 export function validateCompetitionData(c:Career,validateMatches:(rows:MatchRecord[])=>void,validateStats:(value:unknown)=>void=()=>{}){
  const locks=c.systems?.attributeLocks;if(locks!==undefined)check(Array.isArray(locks)&&new Set(locks).size===locks.length&&locks.every(k=>c.player.attributes[k]!==undefined),'고정 능력치');
  const injuries=c.systems?.manualInjuries;if(injuries!==undefined){check(Array.isArray(injuries),'수동 부상 이력');const ids=new Set<string>();for(const r of injuries){check(typeof r.id==='string'&&!ids.has(r.id)&&['half','season',5,10,20].includes(r.duration),'수동 부상 종류');ids.add(r.id);getClub(r.clubId);num(r.year,1900,2500);check(Number.isFinite(Date.parse(r.start))&&Number.isFinite(Date.parse(r.end))&&(r.selectionVersion===2?Date.parse(r.end)>=Date.parse(r.start):Date.parse(r.end)-Date.parse(r.start)===(r.duration==='half'?182:365)*86400000),'수동 부상 기간');if(r.selectionVersion!==undefined){check(r.selectionVersion===2,'부상 처리 버전');if(typeof r.duration==='number'){check(r.targetMatches===r.duration&&Number.isInteger(r.remainingMatches)&&(r.remainingMatches??-1)>=0&&(r.remainingMatches??999)<=r.duration,'부상 경기수');check(r.duration-(r.remainingMatches??0)===r.missed.filter(m=>m.scope==='club').length,'부상 경기수 원장');}}check(!r.returned||r.returned===r.end,'수동 부상 복귀');check(Array.isArray(r.missed)&&new Set(r.missed.map(m=>m.fixtureId)).size===r.missed.length&&r.missed.every(m=>typeof m.fixtureId==='string'&&['club','national'].includes(m.scope)&&Number.isInteger(m.year)),'수동 부상 결장 원장');if(r.pendingNextSeason!==undefined)check(typeof r.pendingNextSeason==='boolean','다음 시즌 부상 예약');if(r.pendingNextSeason)check(c.stage!=='season'&&r.year===c.season.year+1&&!r.returned&&r.missed.length===0,'다음 시즌 부상 예약 시점');}}
  if(c.systems?.manualClock!==undefined)check(typeof c.systems.manualClock==='string'&&Number.isFinite(Date.parse(c.systems.manualClock)),'부상 스킵 시점');
- const monthly=c.systems?.monthlyLeague;
- if(monthly){num(monthly.year,1900,2500);check(monthly.leagueId===c.season.leagueId&&monthly.year===c.season.year,'월간 리그 범위');check(monthly.months&&typeof monthly.months==='object'&&Object.keys(monthly.months).length<=24,'월간 기록');for(const [month,map] of Object.entries(monthly.months)){check(/^\d{4}-\d{2}$/.test(month)&&Object.keys(map).length<=5000,'월간 기록 범위');for(const [id,r] of Object.entries(map)){check(r.id===id&&typeof r.name==='string','월간 선수');getClub(r.clubId);num(r.age,14,100);validateStats(r.stats);}}}
+ const validateMonthly=(ledger:MonthlyLedger,leagueId:string)=>{
+  getLeague(leagueId);
+  check(ledger&&ledger.leagueId===leagueId&&ledger.year===c.season.year,'월간 리그 범위');
+  check(ledger.months&&typeof ledger.months==='object'&&!Array.isArray(ledger.months)&&Object.keys(ledger.months).length<=24,'월간 기록');
+  for(const [month,map] of Object.entries(ledger.months)){
+   check(/^\d{4}-\d{2}$/.test(month)&&map&&typeof map==='object'&&!Array.isArray(map)&&Object.keys(map).length<=5000,'월간 기록 범위');
+   for(const [id,r] of Object.entries(map)){check(r.id===id&&typeof r.name==='string','월간 선수');getClub(r.clubId);num(r.age,14,100);validateStats(r.stats);}
+  }
+ };
+ const monthly=c.systems?.monthlyLeague,monthlyArchive=c.systems?.monthlyLeagueArchive;
+ if(monthly!==undefined)validateMonthly(monthly,c.season.leagueId);
+ if(monthlyArchive!==undefined){
+  check(monthlyArchive&&typeof monthlyArchive==='object'&&!Array.isArray(monthlyArchive)&&Object.keys(monthlyArchive).length<=128,'이전 월간 리그 기록');
+  for(const [leagueId,ledger] of Object.entries(monthlyArchive)){
+   check(leagueId!==c.season.leagueId,'중복 월간 리그 기록');
+   validateMonthly(ledger,leagueId);
+  }
+ }
  for(const e of c.systems?.world.koreanLicenseEditions??[]){num(e.year,2026,2500);check(Array.isArray(e.approvedClubIds)&&[1,2].includes(e.legs)&&/^https:\/\//.test(e.sourceUrl)&&Number.isFinite(Date.parse(e.verifiedAt)),'K2 라이선스 승인 자료');e.approvedClubIds.forEach(getClub);}
  for(const r of c.systems?.world.promotionReviews??[]){getClub(r.clubId);num(r.year,1900,2500);check(['unverified','ineligible','played','unsupported'].includes(r.status)&&typeof r.reason==='string'&&Array.isArray(r.matches),'승강 검토 기록');if(r.status==='played'){check(r.matches.length>=1&&typeof r.promoted==='boolean','실제 승강 결정전');validateMatches(r.matches);}}
  const pending=c.systems?.world.pendingMovements??[];check(new Set(pending.map(m=>m.clubId)).size===pending.length,'중복 승강 계획');for(const m of pending){getClub(m.clubId);check(m.year===c.season.year+1&&m.fromLeagueId!==m.toLeagueId&&['promotion','relegation'].includes(m.kind),'다음 시즌 승강 계획');}

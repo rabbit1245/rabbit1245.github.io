@@ -1,10 +1,10 @@
 import {loadingProgress} from './loading-progress';
 import {markCompactCareer,usesCompactCareer} from './career-size';
-import {archivedJSONShape} from './event-archive';
+import {archivedJSONShape,compactMatchEvents} from './event-archive';
 import {cacheCareer,readCachedCareer,forgetCachedCareer} from './fast-career-cache';
 import {recoveryArchive,readRecoveryArchive,RECOVERY_MAGIC} from './recovery-archive';
 import {readJSONBlob} from './json-reader';
-import {certifiedGameDelta,isSealedCareer} from './game-delta';
+import {certifiedGameDelta,isSealedCareer,sealCareer} from './game-delta';
 import {validateAchievementEvidence} from './achievement-evidence';
 import {validateActionLedger} from './action-metrics';
 import {internationalRoster} from './international-clubs';
@@ -24,6 +24,7 @@ import type { Career, MatchRecord, PlayerStats, SaveEnvelope, SaveSlot } from '.
 
 const DATABASE = 'kball-careers';
 const DATABASE_VERSION = 1;
+const importedSnapshots=new WeakMap<Career,{prepared:PreparedSave;archive?:Blob}>();
 const clubs = new Map([...CLUBS,...INTERNATIONAL_CLUBS].map(club => [club.id, club]));
 const leagues = new Set([...LEAGUES,...INTERNATIONAL_LEAGUES].map(league => league.id));
 const positions = new Set(['GK', 'CB', 'LB', 'RB', 'LWB', 'RWB', 'CDM', 'CM', 'CAM', 'LM', 'RM', 'LW', 'RW', 'CF', 'SS', 'ST']);
@@ -841,10 +842,25 @@ export function validateCareer(value: unknown,ownedJSON=false): Career {
   const leagueClubs = [...activeMembership].filter(([, league]) => league === currentLeague).map(([id]) => id);
   assert(fixtures.length === leagueClubs.length * (leagueClubs.length - 1), '리그의 홈·원정 경기 일정이 누락되었습니다.');
   const fixtureIndex = new Map(fixtures.map(fixture => [fixture.id, fixture]));
+  const systems = career.systems as Career['systems'];
+  const academyFixtures = new Map<string, Map<string, Record<string, unknown>>>();
+  if (systems?.youthLeagueSchedules !== undefined) {
+    assert(player.squad === 'youth', '유소년 이전 리그는 유소년 시즌에만 기록할 수 있습니다.');
+    for (const [id, schedule] of dictionary(systems.youthLeagueSchedules, '이전 유소년 리그', leagues.size)) {
+      assert(leagueId(id, '이전 유소년 리그 ID') === schedule.leagueId && id !== currentLeague, '이전 유소년 리그의 범위가 올바르지 않습니다.');
+      const participants = [...activeMembership].filter(([, membership]) => membership === id).map(([club]) => club);
+      assert(participants.length >= 2, '이전 유소년 리그의 참가 구단이 누락되었습니다.');
+      competition(schedule, `이전 유소년 리그 ${id}`, participants);
+      const archived = schedule.fixtures as Record<string, unknown>[];
+      academyFixtures.set(id, new Map(archived.map(fixture => [String(fixture.id), fixture])));
+    }
+  }
   const records = matches(season.matches, 'season.matches', playerId);
   for (const record of records) {
-    const foreign=(career.systems as Career['systems'])?.employment?((career.systems as Career['systems'])!.world.competitions[record.competitionId!]?.fixtures.find(f=>f.id===record.fixtureId)):undefined;
-    const fixture = fixtureIndex.get(record.fixtureId)??foreign;
+    const league = record.competitionId ?? activeMembership.get(record.playerClubId) ?? currentLeague;
+    const academy = academyFixtures.get(league);
+    const fixture = academy ? academy.get(record.fixtureId) : fixtureIndex.get(record.fixtureId) ??
+      (systems?.employment ? systems.world.competitions[league]?.fixtures.find(f => f.id === record.fixtureId) : undefined);
     assert(fixture?.played && fixture.homeId === record.homeId && fixture.awayId === record.awayId && fixture.homeGoals === record.homeGoals && fixture.awayGoals === record.awayGoals, '경기 원장과 일정의 결과가 일치하지 않습니다.');
   }
   reconciledStats(season.playerStats, records, 'season.playerStats');
@@ -1044,10 +1060,10 @@ function largeStoredCareer(record:BlobCareer):boolean{
   record.journal.some(entry=>'kind' in entry&&entry.payload.format==='kball-game-delta-v2');
 }
 
-function refreshReadCache(record:BlobCareer,career:Career):void{
+function refreshReadCache(record:BlobCareer,career:Career,archive?:Blob):void{
  // Give the locker room its first paint before encoding the optional cache.
  setTimeout(()=>{
-  if(knownVersions.has(career.id))void cacheCareer(record,career).then(()=>{
+  if(knownVersions.has(career.id))void cacheCareer(record,career,archive).then(()=>{
    if(!knownVersions.has(career.id))void forgetCachedCareer(career.id);
   });
  },1000);
@@ -1083,7 +1099,7 @@ function assertKnown(existing:StoredCareer|undefined,metadata:Metadata|undefined
  const known=knownVersions.get(id),head=storedHead(existing);
  if(known&&(known.revision!==head.revision||known.hash!==head.hash))throw Error('저장 충돌: 다른 탭에서 커리어가 변경되었습니다. 슬롯을 다시 불러와 주세요.');
 }
-async function replaceSnapshot(career:Career,prepared:PreparedSave,expected:Awaited<ReturnType<typeof readSlot>>,recovery?:RecoverySnapshot,logicalHash?:string):Promise<void>{
+async function replaceSnapshot(career:Career,prepared:PreparedSave,expected:Awaited<ReturnType<typeof readSlot>>,recovery?:RecoverySnapshot,logicalHash?:string,archive?:Blob):Promise<void>{
  const database=await openDatabase();let committedVersion={revision:prepared.record.revision,hash:prepared.record.versionHash};
  await new Promise<void>((resolve,reject)=>{
   const tx=database.transaction(['slots','backups','metadata'],'readwrite'),slots=tx.objectStore('slots'),metadata=tx.objectStore('metadata'),current=slots.get(career.id),meta=metadata.get(career.id);let failure:Error|undefined,done=false;
@@ -1111,7 +1127,7 @@ async function replaceSnapshot(career:Career,prepared:PreparedSave,expected:Awai
   tx.oncomplete=()=>resolve();tx.onabort=()=>reject(failure??storageError(tx.error));tx.onerror=()=>reject(failure??storageError(tx.error));
  });
  knownVersions.set(career.id,committedVersion);durableCareers.set(career,controlFingerprint(career));checkpointScheduler.fullSaved(career.id);
- if(typeof Worker!=='undefined'&&largeStoredCareer(prepared.record))refreshReadCache(prepared.record,career);
+ if(typeof Worker!=='undefined'&&largeStoredCareer(prepared.record))refreshReadCache(prepared.record,career,archive);
 }
 function stopCheckpointTimer(id:string){checkpointScheduler.cancelTimer(id);}
 export const pauseBackgroundCheckpoints=()=>checkpointScheduler.pause();
@@ -1131,7 +1147,10 @@ async function persistCareer(career:Career,recovery?:RecoverySnapshot):Promise<v
   if(snapshot.current&&isBlobCareer(snapshot.current)&&snapshot.current.journal.length&&storedHead(snapshot.current).revision===career.revision){
    const decoded=await decodeSnapshot(snapshot.current);logicalHash=(await prepareSnapshot(decoded.career)).record.hash;
   }
-  const prepared=await prepareSnapshot(career);await replaceSnapshot(career,prepared,snapshot,recovery,logicalHash);
+  const imported=!recovery&&!snapshot.current&&!snapshot.metadata&&isSealedCareer(career)?importedSnapshots.get(career):undefined;
+  const prepared=imported?.prepared??await prepareSnapshot(career);
+  await replaceSnapshot(career,prepared,snapshot,recovery,logicalHash,imported?.archive);
+  importedSnapshots.delete(career);
  });
 }
 export async function saveCareer(career:Career):Promise<void>{return persistCareer(career);}
@@ -1198,16 +1217,20 @@ export function checkpointCareer(id:string):Promise<void>{
  void job.finally(()=>{if(checkpointJobs.get(id)===job)checkpointJobs.delete(id);}).catch(()=>undefined);return job;
 }
 
-export async function listSlots(): Promise<SaveSlot[]> {
+export type ListedSaveSlot = SaveSlot & { hasBackup: boolean };
+export async function listSlots(): Promise<ListedSaveSlot[]> {
   const database = await openDatabase();
-  const rows = await new Promise<Metadata[]>((resolve, reject) => {
-    const transaction = database.transaction('metadata', 'readonly');
+  const { rows, backupIds } = await new Promise<{ rows: Metadata[]; backupIds: Set<IDBValidKey> }>((resolve, reject) => {
+    const transaction = database.transaction(['metadata', 'backups'], 'readonly');
     const request = transaction.objectStore('metadata').getAll();
-    transaction.oncomplete = () => resolve(request.result);
+    const backups = transaction.objectStore('backups').getAllKeys();
+    transaction.oncomplete = () => resolve({ rows: request.result, backupIds: new Set(backups.result) });
     transaction.onabort = () => reject(storageError(transaction.error));
     transaction.onerror = () => reject(storageError(transaction.error));
   });
-  return rows.filter((row): row is SlotMetadata => !row.deleted).map(({ hash: _hash, deleted: _deleted, ...slot }) => slot).sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+  return rows.filter((row): row is SlotMetadata => !row.deleted)
+    .map(({ hash: _hash, deleted: _deleted, ...slot }) => ({ ...slot, hasBackup: backupIds.has(slot.id) }))
+    .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
 }
 
 export async function loadCareer(id:string):Promise<Career>{
@@ -1306,15 +1329,56 @@ export async function verifySaveText(source:string):Promise<Career>{
   ensureSafeJSON(parsed);return (await verifyEnvelope(parsed,true)).career;
 }
 /** Large JSON files use bounded native subtrees rather than one giant string. */
-export async function verifySaveBlob(source:Blob):Promise<Career>{
+export async function verifySaveBlob(source:Blob,progress=loadingProgress,compact=false):Promise<Career>{
  assert(source.size<=MAX_SAVE_BYTES,'저장 파일이 지원하는 2GiB 범위를 초과했습니다.');
- if(await source.slice(0,RECOVERY_MAGIC.length).text()===RECOVERY_MAGIC)return (await decodeStored(await readRecoveryArchive(source))).career;
- const parsed=await readJSONBlob(source,{maximum:MAX_SAVE_BYTES});ensureSafeJSON(parsed);return (await verifyEnvelope(parsed,true)).career;
+ if(await source.slice(0,RECOVERY_MAGIC.length).text()===RECOVERY_MAGIC)return (await decodeStored(await readRecoveryArchive(source),compact,progress)).career;
+ progress('저장 파일 읽기',0);
+ const parsed=await readJSONBlob(source,{maximum:MAX_SAVE_BYTES,...(compact?{
+  stream:true,transform:compactMatchEvents,onProgress:(bytes:number)=>progress('저장 파일 읽기',Math.floor(bytes/source.size*100)),
+ }: {})});
+ progress('원본 기록 무결성 검사');ensureSafeJSON(parsed);return (await verifyEnvelope(parsed,true)).career;
 }
+
+export interface PreparedImport {career:Career;prepared:PreparedSave;compact:boolean;archive?:Blob}
+
+/** Called inside the save worker. The original is verified before assigning a
+ * new slot ID. Its verified contents are reused to prepare that exact snapshot. */
+export async function prepareImportedSnapshot(source:string|Blob,progress=loadingProgress):Promise<PreparedImport>{
+ let career:Career,compact=false;
+ if(typeof source==='string'){
+  progress('원본 기록 무결성 검사');
+  career=await verifySaveText(source);
+ }else{
+  assert(source.size<=MAX_SAVE_BYTES,'저장 파일이 지원하는 2GiB 범위를 초과했습니다.');
+  if(await source.slice(0,RECOVERY_MAGIC.length).text()===RECOVERY_MAGIC){
+   progress('복구 원본 읽기');
+   const record=await readRecoveryArchive(source);
+   compact=isBlobCareer(record)&&largeStoredCareer(record);
+   career=(await decodeStored(record,compact,progress)).career;
+  }else{
+   compact=source.size>128*1024*1024;
+   career=await verifySaveBlob(source,progress,compact);
+  }
+ }
+ compact ||= usesCompactCareer(career);
+ career.id=`career-${globalThis.crypto.randomUUID()}`;
+ progress('새 슬롯 검사 정보 준비');
+ const envelope:SaveEnvelope={format:'kball-save',schemaVersion:1,hash:await checksum(career),savedAt:new Date().toISOString(),career};
+ progress('새 슬롯 압축');
+ const prepared=await packStored(envelope);
+ return {career,prepared,compact};
+}
+
 /** Imported saves always become new slots; no existing game or legacy localStorage is overwritten. */
 export async function importCareer(source:string|Blob):Promise<Career>{
   if(source instanceof Blob)assert(source.size<=MAX_SAVE_BYTES,'저장 파일이 지원하는 2GiB 범위를 초과했습니다.');
-  const archived=source instanceof Blob&&await source.slice(0,RECOVERY_MAGIC.length).text()===RECOVERY_MAGIC;
- const imported=archived&&typeof Worker!=='undefined'?(await decodeStored(await readRecoveryArchive(source as Blob),true)).career:typeof Worker==='undefined'?(typeof source==='string'?await verifySaveText(source):await verifySaveBlob(source)):await (await import('./save-preparation')).verifyFileOffThread(source);
+  if(typeof Worker!=='undefined'){
+   const {career,prepared,compact,archive}=await (await import('./save-preparation')).prepareImportOffThread(source);
+   if(compact)markCompactCareer(career);
+   sealCareer(career);
+   importedSnapshots.set(career,{prepared,archive});
+   return career;
+  }
+  const imported=typeof source==='string'?await verifySaveText(source):await verifySaveBlob(source);
   imported.id=`career-${globalThis.crypto.randomUUID()}`;return imported;
 }

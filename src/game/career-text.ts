@@ -175,7 +175,7 @@ export function careerSeasonRecords(c:Career){
   const rank=h?.rank??(c.season.table.findIndex(t=>t.clubId===clubId)+1),leagueName=h?.competitionName??c.season.competitionName;
   const row=h?.details?.table.find(t=>t.clubId===clubId)??(!h?c.season.table.find(t=>t.clubId===clubId):undefined);
   const leagueResult=`${leagueName} · ${rank>0?`${rank}위`:'순위 미보존'}${completed?' (최종)':retired?' (은퇴 시점)':' (진행 중)'}${row?` · ${row.won}승 ${row.drawn}무 ${row.lost}패 · 승점 ${row.points}점`:''}`;
-  const employmentResults=h?.details?.employmentStandings?.map(r=>`${name(r.clubId)} · ${getLeague(r.leagueId).name} · ${r.rank}위${completed?' (최종)':''} · ${r.won}승 ${r.drawn}무 ${r.lost}패 · 승점 ${r.points}점`);
+  const employmentResults=h?.details?.employmentStandings?.map(r=>`${name(r.clubId)} · ${getLeague(r.leagueId).name} · ${r.rank}위${r.atDeparture?' (이적 당시)':completed?' (최종)':''} · ${r.won}승 ${r.drawn}무 ${r.lost}패 · 승점 ${r.points}점`);
   const own=seasonClubIds(c,year),honours=seasonHonours(c,year),finals=careerFinals(c,year,ledger);
   const cups=cupLedger(c,year).flatMap(t=>[...own].filter(id=>t.entrants.includes(id)).map(id=>`${t.name} · ${name(id)} · ${tournamentResult(t,id)==='결승 탈락'?'준우승 (결승 탈락)':tournamentResult(t,id)}`));
   const judging=c.systems?.rankings.find(r=>r.year===year),globalNames=/발롱도르|FIFPRO|The Best FIFA|야신 트로피|코파 트로피|유러피언 골든슈/;

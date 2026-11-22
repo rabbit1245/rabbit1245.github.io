@@ -2,7 +2,7 @@ import {sealCareer} from './game/game-delta';
 import {needsAbilityUpgrade} from './game/ability-expansion';
 import {currencyText} from './game/currency';
 import {careerMatchLedger} from './game/career-text';
-import { useEffect, useMemo, useRef, useState, type ChangeEvent } from 'react';
+import { useEffect, useMemo, useRef, useState, type ChangeEvent, type ReactNode } from 'react';
 import { AlertCircle, ArrowRight, ArrowUpRight, CheckCircle2, Download, FolderOpen, LayoutDashboard, Loader2, Menu, Plus, RotateCcw, Save, Settings2, Shield, SkipForward, Trash2, Trophy, Upload, UserRound, X } from 'lucide-react';
 import type { Career, CreateOptions, GameCommand, GameProgress, MatchRecord, SaveSlot } from './game/types';
 import type { PresentationEvent } from './game/revision-types';
@@ -10,7 +10,8 @@ import { CLUBS, DATA_PROVENANCE } from './game/data';
 import { createCareer, ENGINE_VERSION } from './game/engine';
 import {cancelCheckpointPreparation} from './game/save-preparation';
 import { runGameCommand,releaseIdleGameWorker } from './game/client';
-import { deleteSlot, exportCareerBlob, importCareer, listSlots, loadCareer, recoverBackupToNewSlot,exportRecoveryArchive, saveCareer, saveCareerChange,pauseBackgroundCheckpoints,noteCheckpointActivity } from './game/storage';
+import { deleteSlot, exportCareerBlob, importCareer, listSlots, loadCareer, recoverBackupToNewSlot,exportRecoveryArchive, saveCareer, saveCareerChange,pauseBackgroundCheckpoints,noteCheckpointActivity,type ListedSaveSlot } from './game/storage';
+import { loadingProgress, resetLoadingProgress, type LoadingProgress } from './game/loading-progress';
 import { sumStats } from './game/math';
 import { careerTextChunks,careerTextFilename } from './game/career-text';
 import Creation from './components/Creation';
@@ -27,13 +28,15 @@ type Page = 'locker'|'player'|'career';
 const NAVIGATION = [{id:'locker',label:'라커룸',icon:LayoutDashboard},{id:'player',label:'선수',icon:UserRound},{id:'career',label:'커리어',icon:Trophy}] as const;
 const errorMessage = (error:unknown) => error instanceof Error ? error.message : '처리하지 못했습니다. 잠시 후 다시 시도해 주세요.';
 
-function LoadingNotice(){
- const [progress,setProgress]=useState({phase:'저장 기록을 확인하고 있습니다',percent:undefined as number|undefined});const [seconds,setSeconds]=useState(0);
- useEffect(()=>{const listener=(e:Event)=>setProgress((e as CustomEvent).detail);window.addEventListener('kball-loading',listener);const timer=setInterval(()=>setSeconds(s=>s+1),1000);return()=>{window.removeEventListener('kball-loading',listener);clearInterval(timer);};},[]);
- return <p role="status" data-testid="loading-save" className="muted">{progress.phase}{progress.percent!==undefined?` · ${progress.percent}%`:''} · {seconds}초{progress.phase.includes('원본')?' · 최초 변환 후 다음 접속부터 빠르게 불러옵니다.':''}</p>;
+type StorageProgress = LoadingProgress & { startedAt: number };
+function LoadingNotice({ progress }: { progress: StorageProgress }){
+ const [now,setNow]=useState(Date.now);
+ useEffect(()=>{const timer=window.setInterval(()=>setNow(Date.now()),1000);return()=>window.clearInterval(timer);},[]);
+ const seconds=Math.max(0,Math.floor((now-progress.startedAt)/1000));
+ return <p role="status" data-testid="loading-save" className="processing"><Loader2 className="spinner" size={17}/><span>{progress.phase}{progress.percent!==undefined?` · ${progress.percent}%`:''}<span aria-hidden="true"> · {seconds}초</span></span></p>;
 }
-function Landing({slots,loading,busy,onNew,onLoad,onImport,onManage}:{slots:SaveSlot[];loading:boolean;busy:boolean;onNew:()=>void;onLoad:(id:string)=>void;onImport:()=>void;onManage:()=>void}) {
-  return <div className="landing"><header className="landing-header"><Brand/><div className="landing-header-actions"><button className="button secondary" data-testid="landing-storage" onClick={onManage} disabled={busy}><RotateCcw size={16}/>저장·복구</button><button className="button secondary" onClick={onImport} disabled={busy}><Upload size={16}/>저장 가져오기</button></div></header><main>{busy&&<LoadingNotice/>}<section className="landing-hero"><div><span className="eyebrow">선수 커리어 시뮬레이션</span><h1>한 선수의 인생.<br/><em>당신의 다음 시즌.</em></h1><p>이름 없는 유소년의 첫 훈련부터<br/>마지막 휘슬까지, 경기는 당신의 기록이 됩니다.</p><div className="hero-actions"><button className="button primary" data-testid="new-career" disabled={busy} onClick={onNew}>새 커리어 시작<ArrowUpRight size={18}/></button>{slots[0]&&<button className="button secondary" disabled={busy} onClick={()=>onLoad(slots[0].id)}>이어서 플레이<ArrowRight size={17}/></button>}</div><span className="landing-assurance"><Shield size={14}/>가입 없이 시작 · 이 브라우저에 자동 저장</span></div><div className="landing-pitch" aria-hidden="true"><div className="pitch-outline"><span className="pitch-center"/><span className="pitch-box top"/><span className="pitch-box bottom"/></div><span className="pitch-caption">A FOOTBALL LIFE</span><div className="jersey"><span>YOUR NAME</span><strong>10</strong><small>THE FIRST CHAPTER</small></div><div className="pitch-ticket"><span>FIRST SEASON</span><strong>모든 기록은<br/>첫 경기에서 시작된다.</strong></div></div></section><div className="landing-facts"><span><b>16</b> 포지션</span><span><b>{CLUBS.length}</b> 구단</span><span><b>하나</b>의 축구 인생</span></div><section className="landing-continue"><div className="section-title"><div><span className="eyebrow">CONTINUE</span><h2>진행 중인 커리어</h2></div></div>{loading?<p className="muted">저장된 커리어를 확인하고 있습니다…</p>:slots.length?<div className="slot-grid">{slots.map(s=><button className="slot" disabled={busy} key={s.id} onClick={()=>onLoad(s.id)}><span className="slot-ovr">{s.ovr}<small>OVR</small></span><span className="slot-copy"><strong>{s.playerName}</strong><span>{s.clubName} · {s.age}세</span><small>{seasonLabel(s.year)} · {shortDate(s.updatedAt)}</small></span><ArrowUpRight size={18}/></button>)}</div>:<div className="landing-empty">아직 쓰이지 않은 첫 페이지.<span>새 커리어를 시작해 당신의 이름을 남겨보세요.</span></div>}</section></main><footer className="site-footer"><Brand/><p>{DATA_PROVENANCE}</p></footer></div>;
+function Landing({slots,loading,busy,notice,onNew,onLoad,onImport,onManage}:{slots:SaveSlot[];loading:boolean;busy:boolean;notice:ReactNode;onNew:()=>void;onLoad:(id:string)=>void;onImport:()=>void;onManage:()=>void}) {
+  return <div className="landing"><header className="landing-header"><Brand/><div className="landing-header-actions"><button className="button secondary" data-testid="landing-storage" onClick={onManage} disabled={busy}><RotateCcw size={16}/>저장·복구</button><button className="button secondary" onClick={onImport} disabled={busy}><Upload size={16}/>저장 가져오기</button></div></header><main>{notice}<section className="landing-hero"><div><span className="eyebrow">선수 커리어 시뮬레이션</span><h1>한 선수의 인생.<br/><em>당신의 다음 시즌.</em></h1><p>이름 없는 유소년의 첫 훈련부터<br/>마지막 휘슬까지, 경기는 당신의 기록이 됩니다.</p><div className="hero-actions"><button className="button primary" data-testid="new-career" disabled={busy} onClick={onNew}>새 커리어 시작<ArrowUpRight size={18}/></button>{slots[0]&&<button className="button secondary" disabled={busy} onClick={()=>onLoad(slots[0].id)}>이어서 플레이<ArrowRight size={17}/></button>}</div><span className="landing-assurance"><Shield size={14}/>가입 없이 시작 · 이 브라우저에 자동 저장</span></div><div className="landing-pitch" aria-hidden="true"><div className="pitch-outline"><span className="pitch-center"/><span className="pitch-box top"/><span className="pitch-box bottom"/></div><span className="pitch-caption">A FOOTBALL LIFE</span><div className="jersey"><span>YOUR NAME</span><strong>10</strong><small>THE FIRST CHAPTER</small></div><div className="pitch-ticket"><span>FIRST SEASON</span><strong>모든 기록은<br/>첫 경기에서 시작된다.</strong></div></div></section><div className="landing-facts"><span><b>16</b> 포지션</span><span><b>{CLUBS.length}</b> 구단</span><span><b>하나</b>의 축구 인생</span></div><section className="landing-continue"><div className="section-title"><div><span className="eyebrow">CONTINUE</span><h2>진행 중인 커리어</h2></div></div>{loading?<p className="muted">저장된 커리어를 확인하고 있습니다…</p>:slots.length?<div className="slot-grid">{slots.map(s=><button className="slot" disabled={busy} key={s.id} onClick={()=>onLoad(s.id)}><span className="slot-ovr">{s.ovr}<small>OVR</small></span><span className="slot-copy"><strong>{s.playerName}</strong><span>{s.clubName} · {s.age}세</span><small>{seasonLabel(s.year)} · {shortDate(s.updatedAt)}</small></span><ArrowUpRight size={18}/></button>)}</div>:<div className="landing-empty">아직 쓰이지 않은 첫 페이지.<span>새 커리어를 시작해 당신의 이름을 남겨보세요.</span></div>}</section></main><footer className="site-footer"><Brand/><p>{DATA_PROVENANCE}</p></footer></div>;
 }
 function MatchDialog({match,career,onClose}:{match:MatchRecord;career:Career;onClose:()=>void}) {
   const labels:Record<string,string>={goal:'골',assist:'도움',shot:'슈팅',save:'선방',yellow:'경고',red:'퇴장',injury:'부상',substitution:'교체',pass:'패스',keyPass:'키패스',dribble:'돌파',tackle:'태클',interception:'차단',aerial:'공중볼',handling:'공 처리',sweep:'스위핑',longKick:'롱킥'};
@@ -53,10 +56,11 @@ export default function App() {
   const [playerView,setPlayerView]=useState<PlayerView>('attributes');
   const [playerViewRequest,setPlayerViewRequest]=useState(0);
   const [careerView,setCareerView]=useState<CareerView>('records');
-  const [slots, setSlots] = useState<SaveSlot[]>([]);
+  const [slots, setSlots] = useState<ListedSaveSlot[]>([]);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [progress,setProgress]=useState<GameProgress|null>(null);
+  const [storageProgress,setStorageProgress]=useState<StorageProgress|null>(null);
   const [creation, setCreation] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [selectedMatch, setSelectedMatch] = useState<MatchRecord | null>(null);
@@ -65,11 +69,24 @@ export default function App() {
   const [saveStatus, setSaveStatus] = useState<'saved'|'saving'|'error'>('saved');
   const [common, setCommon] = useState(false);
   const [presentation, setPresentation] = useState<{matches:MatchRecord[];events:PresentationEvent[]}|null>(null);
-  const [reduced, setReduced] = useState(() => { try { return localStorage.getItem('kball-reduced-motion') === 'true' || window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch { return true; } });
+  const [reduced, setReduced] = useState(() => {
+    try {
+      const saved=localStorage.getItem('kball-reduced-motion');
+      return saved==='true'||(saved!=='false'&&window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+    } catch { return true; }
+  });
   const careerRef = useRef<Career | null>(null);
   const locked = useRef(false);
   const fileRef = useRef<HTMLInputElement>(null);
   useEffect(() => { listSlots().then(setSlots).catch(e => setError(errorMessage(e))).finally(() => setLoading(false)); }, []);
+  useEffect(() => {
+    const listener=(event:Event) => {
+      const detail=(event as CustomEvent<LoadingProgress>).detail;
+      setStorageProgress(current=>current&&{...detail,startedAt:current.startedAt});
+    };
+    window.addEventListener('kball-loading',listener);
+    return ()=>window.removeEventListener('kball-loading',listener);
+  }, []);
   useEffect(() => { if (!toast) return; const timer = window.setTimeout(() => setToast(''), 3500); return () => window.clearTimeout(timer); }, [toast]);
   useEffect(() => {
     function protectProgress(event: BeforeUnloadEvent) {
@@ -105,6 +122,25 @@ export default function App() {
   function openTraining(){openPlayer('training');}
   function openCareer(view:CareerView){navigate('career');setCareerView(view);}
   async function refresh() { setSlots(await listSlots()); }
+  function openStorageMenu(){
+    setCommon(true);
+    if(!locked.current)void refresh().catch(e=>setError(errorMessage(e)));
+  }
+  function startStorageTask(phase:string){
+    locked.current=true;
+    setBusy(true);
+    setError('');
+    resetLoadingProgress();
+    setStorageProgress({phase,startedAt:Date.now()});
+    const resume=beginFullTask();
+    return () => {
+      resume();
+      locked.current=false;
+      setBusy(false);
+      setProgress(null);
+      setStorageProgress(null);
+    };
+  }
   function display(next: Career) { sealCareer(next);careerRef.current = next; setCareer(next); }
   async function commit(next: Career, previous?:Career): Promise<boolean> {
     if(next===previous)return true;
@@ -134,53 +170,54 @@ export default function App() {
   async function load(id: string) {
     if (locked.current) return;
     if (!confirmReplace('다른 저장을 불러올까요')) return;
-    locked.current = true; setBusy(true); setError('');const resume=beginFullTask();releaseIdleGameWorker();
-    try { let next = await loadCareer(id),saved=true;if(needsAbilityUpgrade(next.player)&&next.stage!=='retired'){const previous=next;next=await runGameCommand(next,{type:'upgradeAbilities'});saved=await commit(next,previous);}else{display(next);setSaveStatus('saved');}setSelectedMatch(null);setCommon(false);navigate('locker');if(saved)setToast('커리어를 불러왔습니다.'); }
+    const finish=startStorageTask('저장 기록 불러오는 중');releaseIdleGameWorker();
+    try { let next = await loadCareer(id),saved=true;if(needsAbilityUpgrade(next.player)&&next.stage!=='retired'){const previous=next;loadingProgress('능력치 형식 변환');next=await runGameCommand(next,{type:'upgradeAbilities'});saved=await commit(next,previous);}else{display(next);setSaveStatus('saved');}setSelectedMatch(null);setCommon(false);navigate('locker');if(saved)setToast('커리어를 불러왔습니다.'); }
     catch (e) { setError(errorMessage(e));setCommon(true); }
-    finally { resume?.();locked.current = false; setBusy(false); setProgress(null); }
+    finally { finish(); }
   }
   async function saveNow() {
     if (locked.current || !careerRef.current) return;
     if(saveStatus==='saved'){setToast('최신 진행이 이미 저장되어 있습니다.');return;}
-    locked.current = true; setBusy(true); setError('');const resume=beginFullTask();
+    const finish=startStorageTask('커리어 저장 중');
     try { await commit(careerRef.current); }
-    finally { resume?.();locked.current = false; setBusy(false); setProgress(null); }
+    finally { finish(); }
   }
   async function exportFile() {
     if(locked.current)return;
     const exporting = careerRef.current;
     if (!exporting) return;
-    locked.current=true;setBusy(true);releaseIdleGameWorker();const resume=beginFullTask();
+    const finish=startStorageTask('내보낼 JSON 준비 중');releaseIdleGameWorker();
     try { const blob = await exportCareerBlob(exporting); const url = URL.createObjectURL(blob); const link = document.createElement('a'); link.href = url; link.download = `K볼_${exporting.player.name}_${exporting.season.year}.json`; link.click(); window.setTimeout(() => URL.revokeObjectURL(url), 1000); setToast('커리어를 JSON 파일로 내보냈습니다.'); }
     catch (e) { setError(errorMessage(e)); }
-    finally {resume();locked.current=false;setBusy(false);}
+    finally { finish(); }
   }
   async function importFile(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0]; event.target.value = '';
     if (!file || locked.current || !confirmReplace('가져온 커리어를 열까요')) return;
-    locked.current = true; setBusy(true); setError('');const resume=beginFullTask();
-    try { let next = await importCareer(file);if(needsAbilityUpgrade(next.player)&&next.stage!=='retired')next=await runGameCommand(next,{type:'upgradeAbilities'});const saved = await commit(next); setSelectedMatch(null); setCommon(false); navigate('locker'); if (saved) setToast('별도 슬롯으로 커리어를 가져왔습니다.'); }
+    const finish=startStorageTask('가져온 파일 확인 중');
+    try { let next = await importCareer(file);if(needsAbilityUpgrade(next.player)&&next.stage!=='retired'){loadingProgress('능력치 형식 변환');next=await runGameCommand(next,{type:'upgradeAbilities'});}loadingProgress('새 슬롯에 저장 중');const saved = await commit(next); setSelectedMatch(null); setCommon(false); navigate('locker'); if (saved) setToast('별도 슬롯으로 커리어를 가져왔습니다.'); }
     catch (e) { setError(errorMessage(e)); }
-    finally { resume?.();locked.current = false; setBusy(false); setProgress(null); }
+    finally { finish(); }
   }
   async function remove(id: string) {
     if (locked.current || !window.confirm('이 커리어의 저장 파일과 백업을 삭제할까요? 삭제 후에는 되돌릴 수 없습니다.')) return;
-    locked.current = true; setBusy(true); setError('');const resume=beginFullTask();
+    const finish=startStorageTask('저장 슬롯 삭제 중');
     try { await deleteSlot(id); if (careerRef.current?.id === id) { careerRef.current = null; setCareer(null); } await refresh(); setToast('커리어를 삭제했습니다.'); }
     catch (e) { setError(errorMessage(e)); }
-    finally { resume?.();locked.current = false; setBusy(false); setProgress(null); }
+    finally { finish(); }
   }
   async function restore(id: string) {
-    if (locked.current || !window.confirm('이전 저장본을 별도 슬롯으로 복구할까요? 현재 원본과 기존 백업은 그대로 남습니다.')) return;
-    locked.current = true; setBusy(true); setError('');const resume=beginFullTask();
+    if (locked.current || !slots.some(slot=>slot.id===id&&slot.hasBackup) || !window.confirm('이전 저장본을 별도 슬롯으로 복구할까요? 현재 원본과 기존 백업은 그대로 남습니다.')) return;
+    const finish=startStorageTask('이전 저장본 확인 중');
     try { const next = await recoverBackupToNewSlot(id); display(next); setSaveStatus('saved'); await refresh(); setCommon(false); navigate('locker'); setToast('이전 저장본을 별도 슬롯으로 복구했습니다. 원본은 유지됩니다.'); }
     catch (e) { setError(errorMessage(e)); }
-    finally { resume?.();locked.current = false; setBusy(false); setProgress(null); }
+    finally { finish(); }
   }
   async function preserveSave(id:string){
-    if(locked.current)return;locked.current=true;setBusy(true);setError('');const resume=beginFullTask();
-    try{const blob=await exportRecoveryArchive(id),url=URL.createObjectURL(blob),a=document.createElement('a'),slot=slots.find(s=>s.id===id);a.href=url;a.download=`K볼_${slot?.playerName??'저장'}_복구원본.kball-recovery`;a.click();setTimeout(()=>URL.revokeObjectURL(url),30_000);setToast('현재 저장과 이전 백업을 복구용 원본 파일로 보관했습니다.');}
-    catch(e){setError(errorMessage(e));}finally{resume();locked.current=false;setBusy(false);}
+    if(locked.current)return;
+    const finish=startStorageTask('복구용 원본 파일 준비 중');
+    try{const blob=await exportRecoveryArchive(id),url=URL.createObjectURL(blob),a=document.createElement('a'),slot=slots.find(s=>s.id===id);a.href=url;a.download=`K볼_${slot?.playerName??'저장'}_복구원본.kball-recovery`;a.click();setTimeout(()=>URL.revokeObjectURL(url),30_000);setToast('저장 데이터를 복구용 원본 파일로 보관했습니다.');}
+    catch(e){setError(errorMessage(e));}finally{finish();}
   }
   function copyCareer() {
     const career=careerRef.current;if(!career)return;
@@ -193,20 +230,21 @@ export default function App() {
   function changeReduced(value:boolean){setReduced(value);try{localStorage.setItem('kball-reduced-motion',String(value));}catch{/* Active for this session. */}}
   const strip=useMemo(()=>career?<PlayerStrip career={career}/>:null,[career]);
   const competitions=useMemo(()=>career?<SeasonCompetitions career={career} onMatch={setSelectedMatch}/>:null,[career]);
+  const storageNotice=storageProgress?<LoadingNotice key={storageProgress.startedAt} progress={storageProgress}/>:null;
   return <div className={reduced?'reduce-motion':''}>
     <input ref={fileRef} type="file" hidden accept=".json,.kball-recovery,application/json,application/octet-stream" aria-label="K볼 저장 파일 가져오기" onChange={importFile}/>
-    {!career?<Landing slots={slots} loading={loading} busy={busy} onNew={requestNewCareer} onLoad={load} onImport={()=>fileRef.current?.click()} onManage={()=>setCommon(true)}/>: <div className="app-shell">
-      <header className="app-header"><div className="header-inner"><Brand/><nav className="main-nav" aria-label="주요 화면">{NAVIGATION.map(n=><button key={n.id} data-testid={`${n.id}-tab`} aria-current={page===n.id?'page':undefined} className={page===n.id?'active':''} onClick={()=>navigate(n.id)}><n.icon size={17}/><span>{n.label}{n.id==='player'&&career.systems?.leadership.offers?.some(o=>o.status==='pending')&&<small className="nav-captain-offer">주장 제의</small>}</span></button>)}</nav><div className="header-tools"><span className={`save-status ${saveStatus}`} data-testid="save-status" aria-live="polite">{saveStatus==='saving'?<Loader2 size={13} className="spinner"/>:saveStatus==='error'?<AlertCircle size={13}/>:<CheckCircle2 size={13}/>}<span>{saveStatus==='saved'?'자동 저장됨':saveStatus==='saving'?'저장 중':'저장 실패'}</span></span><button className="icon-button" data-testid="common-menu" aria-label="저장 및 설정 메뉴" onClick={()=>setCommon(true)}><Menu size={21}/></button></div>{toast&&<div className="toast" role="status"><CheckCircle2 size={17}/>{toast}</div>}</div></header>
+    {!career?<Landing slots={slots} loading={loading} busy={busy} notice={common?null:storageNotice} onNew={requestNewCareer} onLoad={load} onImport={()=>fileRef.current?.click()} onManage={openStorageMenu}/>: <div className="app-shell">
+      <header className="app-header"><div className="header-inner"><Brand/><nav className="main-nav" aria-label="주요 화면">{NAVIGATION.map(n=><button key={n.id} data-testid={`${n.id}-tab`} aria-current={page===n.id?'page':undefined} className={page===n.id?'active':''} onClick={()=>navigate(n.id)}><n.icon size={17}/><span>{n.label}{n.id==='player'&&career.systems?.leadership.offers?.some(o=>o.status==='pending')&&<small className="nav-captain-offer">주장 제의</small>}</span></button>)}</nav><div className="header-tools"><span className={`save-status ${saveStatus}`} data-testid="save-status" aria-live="polite">{saveStatus==='saving'?<Loader2 size={13} className="spinner"/>:saveStatus==='error'?<AlertCircle size={13}/>:<CheckCircle2 size={13}/>}<span>{saveStatus==='saved'?'자동 저장됨':saveStatus==='saving'?'저장 중':'저장 실패'}</span></span><button className="icon-button" data-testid="common-menu" aria-label="저장 및 설정 메뉴" onClick={openStorageMenu}><Menu size={21}/></button></div>{toast&&<div className="toast" role="status"><CheckCircle2 size={17}/>{toast}</div>}</div></header>
       <main className="game-main">{strip}{competitions}{page!=='player'&&<div className="page-title"><h1>{page==='locker'?'라커룸':'커리어'}</h1><span className="page-context">{calendarLabel(career)} · {phaseLabel(career)} · {career.season.competitionName}</span></div>}
         {error&&!common&&<div className="error-banner" role="alert"><AlertCircle size={18}/><span>{error}</span><button className="icon-button" aria-label="오류 알림 닫기" onClick={()=>setError('')}><X size={16}/></button></div>}
-        {busy&&<div className="processing" role="status"><Loader2 className="spinner" size={17}/>{progress?`${progress.year}시즌 · ${progress.round}/${progress.total}라운드 계산 중`:'경기와 성장 기록을 계산하고 있습니다.'}</div>}
+        {busy&&(storageProgress?(common?null:storageNotice):<div className="processing" role="status"><Loader2 className="spinner" size={17}/>{progress?`${progress.year}시즌 · ${progress.round}/${progress.total}라운드 계산 중`:'경기와 성장 기록을 계산하고 있습니다.'}</div>)}
         {page==='locker'&&<LockerRoom career={career} busy={busy} command={command} onMatch={setSelectedMatch} presenting={Boolean(presentation)} onTraining={openTraining} onCareer={openCareer}/>}{page==='player'&&<PlayerPanel career={career} busy={busy} command={command} requestedView={playerView} viewRequest={playerViewRequest}/>} {page==='career'&&<CareerPanel career={career} busy={busy} command={command} onExport={exportFile} onCopy={copyCareer} onMatch={setSelectedMatch} requestedView={careerView}/>}
         <footer className="game-footer"><span data-testid="game-version">K볼 {ENGINE_VERSION} · A FOOTBALL LIFE</span><span>이 브라우저에 자동 저장</span></footer>
       </main></div>}
     {!career&&error&&!common&&<div className="landing-error error-banner" role="alert"><AlertCircle size={17}/>{error}<button className="icon-button" aria-label="오류 알림 닫기" onClick={()=>setError('')}><X size={15}/></button></div>}
     {creation&&<Creation busy={busy} onCreate={newCareer} onClose={closeCreation}/>}
     {selectedMatch&&career&&<MatchDialog match={selectedMatch} career={career} onClose={closeMatch}/>}
-    {common&&<Modal title="커리어 보관함과 설정" onClose={()=>setCommon(false)} wide>{error&&<div className="error-banner" role="alert"><AlertCircle size={17}/>{error}</div>}<p className="muted">이 브라우저에 자동 저장됩니다. 기기를 바꾸거나 브라우저 데이터를 지우기 전에 JSON으로 보관하세요.</p><div className="common-actions">{career&&<><button className="button primary" disabled={busy} onClick={saveNow}><Save size={16}/>지금 저장</button><button className="button secondary" disabled={busy} onClick={exportFile}><Download size={16}/>JSON 내보내기</button></>}<button className="button secondary" disabled={busy} onClick={()=>fileRef.current?.click()}><Upload size={16}/>파일 가져오기</button><button className="button secondary" disabled={busy} onClick={requestNewCareer}><Plus size={16}/>새 커리어</button></div><p className="fine-print">불러오기에 실패해도 원본 저장 보관으로 현재 저장과 백업을 다운로드할 수 있습니다. 복구용 원본은 일반 JSON과 다른 형식입니다. 이전 저장 복원은 별도 슬롯을 만들어 원본을 보존합니다.</p><h3 className="form-section">저장된 커리어</h3><div className="save-list">{slots.map(s=><div className="save-item" key={s.id}><div className="save-item-info"><span className="slot-ovr">{s.ovr}<small>OVR</small></span><div><strong>{s.playerName}{s.id.startsWith('recovered-')&&<span className="pill">복구본</span>}{s.id===career?.id&&<span className="pill">현재</span>}</strong><span>{s.clubName} · {seasonLabel(s.year)} · {shortDate(s.updatedAt)}</span></div></div><div className="save-item-actions"><button className="button secondary small" disabled={busy} onClick={()=>load(s.id)}><FolderOpen size={14}/>불러오기</button><button className="text-button" disabled={busy} onClick={()=>preserveSave(s.id)}><Download size={14}/>원본 저장 보관</button><button className="text-button" disabled={busy} onClick={()=>restore(s.id)}><RotateCcw size={14}/>이전 저장 복원</button><button className="icon-button danger-text" aria-label={`${s.playerName} 커리어 삭제`} disabled={busy} onClick={()=>remove(s.id)}><Trash2 size={16}/></button></div></div>)}</div>{career&&<CheatSettings career={career} busy={busy} command={command} onEdit={()=>{setCommon(false);openPlayer('training');}}/>}<h3 className="form-section"><Settings2 size={17}/>화면 설정</h3><label className="setting-row"><span><strong>연출 줄이기</strong><small>경기 결과와 성장 수치는 동일하며, 결과 장면을 바로 넘깁니다.</small></span><input type="checkbox" checked={reduced} onChange={e=>changeReduced(e.target.checked)}/></label><p className="fine-print">자동 저장은 이전 정상 저장본을 백업합니다. 가져온 파일은 새 슬롯에 보관합니다.</p><details className="data-provenance"><summary>데이터와 규정 안내</summary><p className="muted">{DATA_PROVENANCE}</p></details>{career&&<div className="modal-actions"><button className="button secondary" disabled={busy} onClick={mainMenu}>시작 화면으로</button></div>}</Modal>}
+    {common&&<Modal title="커리어 보관함과 설정" onClose={()=>setCommon(false)} wide notice={storageNotice}>{error&&<div className="error-banner" role="alert"><AlertCircle size={17}/>{error}</div>}<p className="muted">이 브라우저에 자동 저장됩니다. 기기를 바꾸거나 브라우저 데이터를 지우기 전에 JSON으로 보관하세요.</p><div className="common-actions">{career&&<><button className="button primary" disabled={busy} onClick={saveNow}><Save size={16}/>지금 저장</button><button className="button secondary" disabled={busy} onClick={exportFile}><Download size={16}/>JSON 내보내기</button></>}<button className="button secondary" disabled={busy} onClick={()=>fileRef.current?.click()}><Upload size={16}/>파일 가져오기</button><button className="button secondary" disabled={busy} onClick={requestNewCareer}><Plus size={16}/>새 커리어</button></div><p className="fine-print">불러오기에 실패해도 원본 저장 보관으로 현재 저장과 백업을 다운로드할 수 있습니다. 복구용 원본은 일반 JSON과 다른 형식입니다. 이전 저장 복원은 별도 슬롯을 만들어 원본을 보존합니다.</p><h3 className="form-section">저장된 커리어</h3><div className="save-list">{slots.map(s=><div className="save-item" key={s.id}><div className="save-item-info"><span className="slot-ovr">{s.ovr}<small>OVR</small></span><div><strong>{s.playerName}{s.id.startsWith('recovered-')&&<span className="pill">복구본</span>}{s.id===career?.id&&<span className="pill">현재</span>}</strong><span>{s.clubName} · {seasonLabel(s.year)} · {shortDate(s.updatedAt)}</span></div></div><div className="save-item-actions"><button className="button secondary small" disabled={busy} onClick={()=>load(s.id)}><FolderOpen size={14}/>불러오기</button><button className="text-button" disabled={busy} onClick={()=>preserveSave(s.id)}><Download size={14}/>원본 저장 보관</button>{s.hasBackup?<button className="text-button" disabled={busy} onClick={()=>restore(s.id)}><RotateCcw size={14}/>이전 저장 복원</button>:<span className="fine-print">이전 저장본 없음</span>}<button className="icon-button danger-text" aria-label={`${s.playerName} 커리어 삭제`} disabled={busy} onClick={()=>remove(s.id)}><Trash2 size={16}/></button></div></div>)}</div>{career&&<CheatSettings career={career} busy={busy} command={command} onEdit={()=>{setCommon(false);openPlayer('training');}}/>}<h3 className="form-section"><Settings2 size={17}/>화면 설정</h3><label className="setting-row"><span><strong>연출 줄이기</strong><small>경기 결과와 성장 수치는 동일하며, 결과 장면을 바로 넘깁니다.</small></span><input type="checkbox" checked={reduced} onChange={e=>changeReduced(e.target.checked)}/></label><p className="fine-print">자동 저장은 이전 정상 저장본을 백업합니다. 가져온 파일은 새 슬롯에 보관합니다.</p><details className="data-provenance"><summary>데이터와 규정 안내</summary><p className="muted">{DATA_PROVENANCE}</p></details>{career&&<div className="modal-actions"><button className="button secondary" disabled={busy} onClick={mainMenu}>시작 화면으로</button></div>}</Modal>}
     {presentation&&<Presentation {...presentation} reduced={reduced} onClose={()=>setPresentation(null)}/>}{!career&&toast&&<div className="toast" role="status"><CheckCircle2 size={17}/>{toast}</div>}
   </div>;
 }

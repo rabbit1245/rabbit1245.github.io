@@ -27,10 +27,32 @@ export function Empty({ title, children }: { title: string; children?: ReactNode
 export function Panel({ title, eyebrow, action, children, className = '' }: { title: string; eyebrow?: string; action?: ReactNode; children: ReactNode; className?: string }) { return <section className={`panel ${className}`}><div className="panel-head"><div>{eyebrow && <span className="eyebrow">{eyebrow}</span>}<h2>{title}</h2></div>{action}</div>{children}</section>; }
 export function Metric({ label, value, note }: { label: string; value: ReactNode; note?: ReactNode }) { return <div className="metric"><span>{label}</span><strong>{value}</strong>{note && <small>{note}</small>}</div>; }
 export function Delta({ value }: { value: number }) { return <span className={`delta ${value > 0 ? 'positive' : value < 0 ? 'negative' : ''}`}>{value > 0 ? '+' : ''}{Math.round(value * 100) / 100}</span>; }
-export function Modal({ title, children, onClose, wide = false }: { title: string; children: ReactNode; onClose: () => void; wide?: boolean }) {
+export function Modal({ title, children, onClose, wide = false, notice }: { title: string; children: ReactNode; onClose: () => void; wide?: boolean; notice?: ReactNode }) {
   const ref = useRef<HTMLDivElement>(null), close = useRef(onClose); close.current = onClose;
-  useEffect(() => { const previous = document.activeElement as HTMLElement | null, old = document.body.style.overflow; document.body.style.overflow = 'hidden'; const items = () => [...ref.current?.querySelectorAll<HTMLElement>('button:not([disabled]), input:not([disabled]), select:not([disabled]), a[href], [tabindex="0"]') || []]; const timer = window.setTimeout(() => items()[0]?.focus(), 0); const key = (event: KeyboardEvent) => { if (event.key === 'Escape') close.current(); if (event.key === 'Tab') { const all = items(), first = all[0], last = all.at(-1); if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus(); } else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); } } }; document.addEventListener('keydown', key); return () => { clearTimeout(timer); document.body.style.overflow = old; document.removeEventListener('keydown', key); previous?.focus(); }; }, []);
-  return createPortal(<div className="modal-backdrop" onMouseDown={e => { if (e.currentTarget === e.target) onClose(); }}><div ref={ref} className={`modal ${wide ? 'wide' : ''}`} role="dialog" aria-modal="true" aria-label={title}><div className="modal-head"><div><span className="eyebrow">K-BALL</span><h2>{title}</h2></div><button className="icon-button" aria-label="닫기" onClick={onClose}><X size={21} /></button></div><div className="modal-content">{children}</div></div></div>,document.body);
+  useEffect(() => {
+    const previous=document.activeElement as HTMLElement|null;
+    const overflow=document.body.style.overflow;
+    document.body.style.overflow='hidden';
+    const items=()=>Array.from(ref.current?.querySelectorAll<HTMLElement>(
+      'button, input, select, textarea, a[href], summary, [tabindex]'
+    )??[]).filter(item=>item.tabIndex>=0&&!item.matches(':disabled')&&item.getClientRects().length>0);
+    const timer=window.setTimeout(()=>items()[0]?.focus(),0);
+    const key=(event:KeyboardEvent)=>{
+      if(event.key==='Escape')close.current();
+      if(event.key!=='Tab')return;
+      const all=items(),first=all[0],last=all.at(-1);
+      if(event.shiftKey&&document.activeElement===first){event.preventDefault();last?.focus();}
+      else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first?.focus();}
+    };
+    document.addEventListener('keydown',key);
+    return ()=>{
+      clearTimeout(timer);
+      document.body.style.overflow=overflow;
+      document.removeEventListener('keydown',key);
+      previous?.focus();
+    };
+  },[]);
+  return createPortal(<div className="modal-backdrop" onMouseDown={e => { if (e.currentTarget === e.target) onClose(); }}><div ref={ref} className={`modal ${wide ? 'wide' : ''}`} role="dialog" aria-modal="true" aria-label={title}><div className="modal-head"><div><span className="eyebrow">K-BALL</span><h2>{title}</h2></div><button className="icon-button" aria-label="닫기" onClick={onClose}><X size={21} /></button></div>{notice}<div className="modal-content">{children}</div></div></div>,document.body);
 }
 export function MatchRow({ match, onClick }: { match: MatchRecord; onClick: () => void }) {
   const home = match.homeId === match.playerClubId, a = home ? match.homeGoals : match.awayGoals, b = home ? match.awayGoals : match.homeGoals, opponent = home ? match.awayId : match.homeId, result=match.shootout?(match.shootout.winnerId===match.playerClubId?'win':'loss'):a>b?'win':a<b?'loss':'draw';

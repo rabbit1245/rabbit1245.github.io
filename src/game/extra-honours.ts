@@ -11,6 +11,19 @@ const role=(p:Position)=>p==='GK'?'GK':/^(CB|LB|RB|LWB|RWB)$/.test(p)?'DEF':/^(C
 export interface MonthlyPlayer {id:string;name:string;position:Position;age:number;clubId:string;stats:PlayerStats;}
 export interface MonthlyLedger {year:number;leagueId:string;months:Record<string,Record<string,MonthlyPlayer>>;}
 export const EXTRA_HONOUR_KINDS=['구단 올해의 선수','구단 팬 선정 올해의 선수','구단 선수단 선정 올해의 선수','구단 올해의 유망주','구단 올해의 영입','구단 올해의 공격수','구단 올해의 미드필더','구단 올해의 수비수','구단 올해의 골키퍼','구단 올해의 해결사','리그 이달의 선수','리그 이달의 유망주','리그 올해의 유망주','리그 올해의 신인','리그 올해의 영입','국내 컵대회 최우수 선수','대륙 클럽대회 최우수 선수','FIFA 클럽 월드컵 최우수 선수','국가대표 올해의 선수','K볼 유니폼 판매 1위','K볼 유니폼 판매 2위','K볼 유니폼 판매 3위'] as const;
+export function switchMonthlyLeague(c:Career,leagueId:string):void{
+ const systems=c.systems!;
+ const ledger=systems.monthlyLeague;
+ if(ledger?.leagueId===leagueId)return;
+ const archive={...systems.monthlyLeagueArchive};
+ if(ledger?.year===c.season.year)archive[ledger.leagueId]=ledger;
+ const destination=archive[leagueId];
+ delete archive[leagueId];
+ if(destination)systems.monthlyLeague=destination;
+ else delete systems.monthlyLeague;
+ if(Object.keys(archive).length)systems.monthlyLeagueArchive=archive;
+ else delete systems.monthlyLeagueArchive;
+}
 export function trackMonthlyLeague(c:Career,matches:MatchRecord[]):void{
  if(!c.systems||c.player.squad!=='senior')return;
  const ledger=c.systems.monthlyLeague;
@@ -58,9 +71,14 @@ export function evaluateExtraHonours(c:Career,scoreSeason:(r:CompetitorSeason)=>
  const ownFirst=!c.history.some(h=>h.year<year&&h.leagueId===c.season.leagueId&&h.squad==='senior'&&h.stats.apps>0);
  add('league-rookie',`${getLeague(c.season.leagueId).name} 올해의 신인`,'league',league.filter(r=>r.playerId===p.id?ownFirst:w.players[r.playerId]?.leagueDebutYear===year),performance,'이 게임에서 참가 이력이 확인되는 리그 첫 시즌 · NPC 과거 이력이 불명확하면 후보에서 제외');
  add('league-signing',`${getLeague(c.season.leagueId).name} 올해의 영입`,'league',league.filter(firstSigning),valueReturn,'확인된 이적 첫 시즌 · 출전 기여와 이적료 대비 활약');
- for(const [month,map] of Object.entries(c.systems.monthlyLeague?.year===year?c.systems.monthlyLeague.months:{}))for(const young of [false,true]){
-  const eligible=Object.values(map).filter(r=>r.stats.apps>=2&&r.stats.minutes>=120&&avg(r.stats)>=6.8&&(!young||r.age<=23)),baselines=performanceBaselines(eligible,120),scores=new Map(eligible.map(r=>[r.id,tournamentPerformance(r,baselines)])),candidates=eligible.sort((a,b)=>scores.get(b.id)!-scores.get(a.id)!||a.id.localeCompare(b.id));
-  if(candidates[0]?.id===p.id){const r=candidates[0];awards.push({id:`${year}:extra:month:${month}:${young?'young':'player'}:${p.id}`,year,clubId:r.clubId,name:`언론 선정 · ${getLeague(c.season.leagueId).name} ${month} 이달의 ${young?'유망주':'선수'}`,category:'league-monthly',official:false,organiser:'언론 평가 모형',verification:'game-model',description:`${month} 리그만 ${r.stats.apps}경기 · ${r.stats.goals}골 ${r.stats.assists}도움 · 평점 ${avg(r.stats).toFixed(2)}. 최소 2경기·120분·평점 6.8${young?'·23세 이하':''}; ${candidates.length}명 비교. 공식 월간 시상과 구별하는 언론 선정.`});}
+ const monthlyLeagues=[...Object.values(c.systems.monthlyLeagueArchive??{}),c.systems.monthlyLeague];
+ for(const ledger of monthlyLeagues){
+  if(ledger?.year!==year)continue;
+  const leagueName=getLeague(ledger.leagueId).name;
+  for(const [month,map] of Object.entries(ledger.months))for(const young of [false,true]){
+   const eligible=Object.values(map).filter(r=>r.stats.apps>=2&&r.stats.minutes>=120&&avg(r.stats)>=6.8&&(!young||r.age<=23)),baselines=performanceBaselines(eligible,120),scores=new Map(eligible.map(r=>[r.id,tournamentPerformance(r,baselines)])),candidates=eligible.sort((a,b)=>scores.get(b.id)!-scores.get(a.id)!||a.id.localeCompare(b.id));
+   if(candidates[0]?.id===p.id){const r=candidates[0];awards.push({id:`${year}:extra:month:${month}:${young?'young':'player'}:${p.id}:${ledger.leagueId}`,year,clubId:r.clubId,name:`언론 선정 · ${leagueName} ${month} 이달의 ${young?'유망주':'선수'}`,category:'league-monthly',official:false,organiser:'언론 평가 모형',verification:'game-model',description:`${month} 리그만 ${r.stats.apps}경기 · ${r.stats.goals}골 ${r.stats.assists}도움 · 평점 ${avg(r.stats).toFixed(2)}. 최소 2경기·120분·평점 6.8${young?'·23세 이하':''}; ${candidates.length}명 비교. 공식 월간 시상과 구별하는 언론 선정.`});}
+  }
  }
  // Domestic cups use their own ledger. Existing continental MVP is reused, never awarded twice.
  for(const t of cupLedger(c,year).filter(t=>t.phase==='completed'&&(t.kind==='cup'||t.kind==='leagueCup'))){

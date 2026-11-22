@@ -1,5 +1,6 @@
 import ShirtSales from './ShirtSales';
 import {getClub,getLeague} from '../game/data';
+import {hasConfirmedNextSeasonTraining} from '../game/engine';
 import {needsContractOfferRefresh} from '../game/career-systems';
 import {expiryReturnClub} from '../game/employment';
 import {InjuryControl} from './ManualAging';
@@ -81,13 +82,13 @@ export default function LockerRoom({career,busy,command,onMatch,onTraining,onCar
   const recent=useMemo(()=>[...s.matches].reverse(),[career]);
   const { national, club, combined, detailed, nationalCompetitions, clubCompetitions } = useMemo(() => seasonOverview(career), [career]);
   const next=career.stage==='offseason'?{label:'다음 시즌 시작',command:{type:'nextSeason'} as GameCommand}:phase==='midseason'?{label:'후반기 진행',command:{type:'continueHalf'} as GameCommand}:{label:phase==='second'?'후반기 계속 진행':'전반기 진행',command:{type:'advanceHalf'} as GameCommand};
-  const trainingConfirmed=career.systems?.trainingPlan?.forYear===s.year+1&&career.systems.trainingPlan.confirmed;
+  const trainingConfirmed=hasConfirmedNextSeasonTraining(career);
   const nextBlocked=false;
   return <section className="locker-workspace" aria-label="시즌 현황" data-testid="locker-season-overview">
     <div className="locker-overview-heading"><h2>시즌 현황</h2><nav className="locker-shortcuts" aria-label="시즌 빠른 이동">
       {onTraining&&(career.stage!=='offseason'||trainingConfirmed)&&<button className="text-button" data-testid="quick-training" onClick={onTraining}>훈련 계획</button>}
       {onCareer&&<><button className="text-button" data-testid="quick-national" onClick={()=>onCareer('national')}>국가대표</button><button className="text-button" data-testid="quick-awards" onClick={()=>onCareer('awards')}>수상 · 우승</button><button className="text-button" data-testid="quick-seasons" onClick={()=>onCareer('seasons')}>시즌 이력</button></>}
-    </nav>{career.stage==='offseason'&&<span className="preparation-status">계약 {p.clubId==='FA'?'FA':career.transferDecision?'✓':'현재 계약 유지 · 만료 시 FA'} · 훈련 {trainingConfirmed?(career.training.length?'✓':'선택 없음'):'미확정 · 성장 없이 시작'}</span>}</div>
+    </nav>{career.stage==='offseason'&&<span className="preparation-status">계약 {p.clubId==='FA'?'FA':career.transferDecision?'✓':'현재 계약 유지 · 만료 시 FA'} · 훈련 {trainingConfirmed?(career.training.length?'✓':'선택 없음'):'미확정 · 선택 없음 · 균형 강도로 시작'}</span>}</div>
     <div className="locker-controls"><div className="season-progress"><div><strong>{phaseLabel(career)}</strong><span>{s.week} / {s.totalWeeks}라운드</span></div><div className="season-track"><span style={{width:`${Math.min(100,s.week/Math.max(1,s.totalWeeks)*100)}%`}}/></div></div><div className="action-inline">
       {career.stage!=='retired'&&<button data-testid="advance-half" className="button primary" disabled={busy||nextBlocked} onClick={()=>command(next.command)}><Play size={18}/>{next.label}<ArrowRight size={18}/></button>}
       {career.stage!=='retired'&&<InjuryControl career={career} busy={busy} open={injuryOpen} onToggle={()=>setInjuryOpen(v=>!v)} command={command}/>}

@@ -75,6 +75,6 @@ export function controlFingerprint(c:Career):string{
  const {history,systems,season,...root}=c;
  const {matches,...current}=season;
  if(!systems)return JSON.stringify([root,current]);
- const {world,national,clubCompetitions,rankings,growthReports,monthlyLeague,commercial,...control}=systems;
+ const {world,national,clubCompetitions,rankings,growthReports,monthlyLeague,monthlyLeagueArchive,youthLeagueSchedules,commercial,...control}=systems;
  return JSON.stringify([root,current,control]);
 }
