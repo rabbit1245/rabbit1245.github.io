@@ -1,3 +1,9 @@
+## K볼 2.14.11 · 결승 선발과 부상 복귀
+
+[K볼 2.14.11 다운로드](https://raw.githubusercontent.com/rabbit1245/rabbit1245.github.io/aa258f329683c46c55cbec7b2196387be9f26667/Kball.zip)
+
+결승과 주요 토너먼트에서 정상 체력의 주전 후보를 우선합니다. 구단과 대표팀의 경기 중 부상은 기록된 회복 기간과 실제 경기 날짜로 복귀를 판단합니다. 같은 OVR 95 검수 저장에서 구단 결승 0분이 선발 90분으로 바뀌었고, 재접속 후 출전과 기존 수상 기록이 일치했습니다. [변경 내용과 검수 결과](https://github.com/rabbit1245/rabbit1245.github.io/blob/aa258f329683c46c55cbec7b2196387be9f26667/PLAY-KBALL.md)
+
 ## K볼 2.14.10 · 득점, 수상, 몸값 조정
 
 [K볼 2.14.10 다운로드](https://raw.githubusercontent.com/rabbit1245/rabbit1245.github.io/63b50ccc7e537abc6d4c50953e4ac9c147b120d8/Kball.zip)
