@@ -1,3 +1,9 @@
+## K볼 2.14.12 · 이적시장 역제안과 치트 +3
+
+[K볼 2.14.12 다운로드](https://raw.githubusercontent.com/rabbit1245/rabbit1245.github.io/a6c87bf9755e4a524516b6713e86939765452d06/Kball.zip)
+
+이적시장 상단의 **역제안**에서 구단을 검색하고 선수의 몸값과 잔여 계약, 구단 예산을 반영한 연봉·이적료를 확인한 뒤 수락할 수 있습니다. 훈련과 능력치 화면의 치트에 **+3**을 추가했습니다. 새 커리어와 치트 설정이 없는 기존 저장은 기본으로 켜집니다. [변경 내용과 검수 결과](https://github.com/rabbit1245/rabbit1245.github.io/blob/a6c87bf9755e4a524516b6713e86939765452d06/PLAY-KBALL.md)
+
 ## K볼 2.14.11 · 결승 선발과 부상 복귀
 
 [K볼 2.14.11 다운로드](https://raw.githubusercontent.com/rabbit1245/rabbit1245.github.io/aa258f329683c46c55cbec7b2196387be9f26667/Kball.zip)
