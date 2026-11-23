@@ -1,3 +1,9 @@
+## K볼 2.14.10 · 득점, 수상, 몸값 조정
+
+[K볼 2.14.10 다운로드](https://raw.githubusercontent.com/rabbit1245/rabbit1245.github.io/63b50ccc7e537abc6d4c50953e4ac9c147b120d8/Kball.zip)
+
+공격수의 슈팅 기회와 일대일 득점 편차를 조정했습니다. 정규리그에서 충분한 출전 시간 동안 보여 준 시즌 활약을 발롱도르와 몸값에 반영하며, 슈퍼 발롱도르는 최근 5시즌 안에 연간 발롱도르 수상이 필요합니다. OVR 93 스트라이커의 득점 분포, 바르셀로나 이적 후 시즌 결산, 기존 저장에서 다음 시즌 진행과 재접속을 검수했습니다. [변경 내용과 검수 결과](https://github.com/rabbit1245/rabbit1245.github.io/blob/63b50ccc7e537abc6d4c50953e4ac9c147b120d8/PLAY-KBALL.md)
+
 ## K볼 2.14.9 · 시즌 중 계약 및 장기 저장 개선
 
 [K볼 2.14.9 다운로드](https://raw.githubusercontent.com/rabbit1245/rabbit1245.github.io/3d933d60e257af2a9b1c4dbe33b555e0f9c2c5f8/Kball.zip)
