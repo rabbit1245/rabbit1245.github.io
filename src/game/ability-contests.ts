@@ -25,7 +25,11 @@ export function supportedTechnique(technique:number,support:number,weight:number
  * contests the keeper too, instead of a composed but poor finisher bypassing it. */
 export function oneOnOneSaveChance(oneOnOnes:number,reflexes:number,positioning:number,decisions:number,finishing:number):number{
  const neutral=Math.max(.05,Math.min(.95,.10+oneOnOnes*.0022+reflexes*.0012+positioning*.001+decisions*.001));
- return skillSuccess(neutral,oneOnOnes,finishing,.024,.024);
+ const gap=finishing-oneOnOnes;
+ // Once the striker has a clear technical edge, each extra point has less
+ // influence on the duel. A strong keeper still keeps the full advantage.
+ const edge=gap<=16?gap:16-20*Math.expm1(-(gap-16)/20);
+ return skillSuccess(neutral,oneOnOnes,oneOnOnes+edge,.024,.024);
 }
 /** Strong sides have a finite supply of chances: finishing roles compete for it.
  * Preserve the original team opportunity budget; no goal or result is rewritten.

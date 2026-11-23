@@ -1,6 +1,7 @@
 import {awardPositionGroup} from './award-selection';
+import {getLeague} from './data';
 import {clamp} from './math';
-import type {PlayerStats,Position} from './types';
+import type {League,PlayerStats,Position} from './types';
 
 export type PerformanceRole='DEF'|'MID'|'FWD';
 type Channels=Record<PerformanceRole,number>;
@@ -14,6 +15,36 @@ const defaults:Record<PerformanceRole,Baseline>={
  FWD:{rating:7.1,goalImpact:Math.tanh(.65),channels:{DEF:18,MID:25,FWD:30}},
 };
 const average=(s:PlayerStats)=>s.ratingCount?s.ratingSum/s.ratingCount:0;
+const majorLeagueCountries=new Set(['영국','스페인','독일','이탈리아','프랑스']);
+export const majorSeniorLeague=(league:League)=>league.tier===1&&majorLeagueCountries.has(league.country);
+
+/** Full-season evidence used by voting and valuation. Each stint keeps the
+ * strength of the league in which its minutes were actually played. */
+export function leagueSeasonImpact(position:Position,leagueId:string,s:PlayerStats):number{
+ const sample=clamp((s.minutes-900)/1800,0,1)*clamp(s.apps/24,0,1);
+ if(!sample||!s.ratingCount)return 0;
+ const league=getLeague(leagueId);
+ if(league.tier!==1)return 0;
+ const games=s.minutes/90,per90=(value:number)=>value/games;
+ const ramp=(value:number,start:number,range:number)=>clamp((value-start)/range,0,1);
+ const role=awardPositionGroup(position),rating=ramp(average(s),7,1.25);
+ let form:number;
+ if(role==='GK'){
+  const faced=s.shotsFaced??s.saves+s.goalsConceded;
+  const stopping=ramp(s.saves/Math.max(1,faced),.68,.14)*clamp(per90(faced)/2.2,0,1);
+  form=.7*stopping+.3*ramp(s.cleanSheets/Math.max(1,s.apps),.32,.33);
+ }else if(role==='DEF'){
+  const defensive=per90(s.tackles+s.interceptions+(s.aerialWon??0)*.4+(s.pressureRecoveries??0)*.35);
+  form=.8*ramp(defensive,4.7,3.2)+.2*ramp(s.cleanSheets/Math.max(1,s.apps),.30,.30);
+ }else if(role==='MID'){
+  const creation=per90(s.goals+.9*s.assists+.14*Math.max(0,(s.keyPasses??0)-s.assists)+.025*(s.progressivePasses??0));
+  form=ramp(creation,.52,.72);
+ }else{
+  const production=per90(s.goals-.45*(s.penaltyGoals??0)+s.assists*.75);
+  form=ramp(production,position==='ST'||position==='CF'?.66:.60,.60);
+ }
+ return sample*form*(.7+.3*rating)*(majorSeniorLeague(league)?1:.48);
+}
 // Match ratings are bounded at ten. Subtracting an unlimited linear production
 // component penalised prolific seasons after the observed rating had saturated.
 // Compress only this background comparison; actual production stays explicit.

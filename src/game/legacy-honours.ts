@@ -4,14 +4,14 @@ import {cupLedger} from './club-competitions';
 import {clamp} from './math';
 import type {Award,Career} from './types';
 
-const SUPER_BALLON_CRITERION='5개 확정 시즌 중 발롱도르 10위 이내 3회 이상과 3위 이내 2회 이상이 필요합니다. 10위 이내 시즌의 1위 대비 평가점수 65%와 순위 35%를 합산합니다.';
+const SUPER_BALLON_CRITERION='5개 확정 시즌 중 발롱도르 수상 1회 이상, 3위 이내 2회 이상, 10위 이내 3회 이상이 필요합니다. 10위 이내 시즌의 1위 대비 평가점수 65%와 순위 35%를 합산합니다.';
 
 /** The five-season award reads finalized annual rankings, including older models. */
 export function superBallonResult(c:Career){
  const year=c.season.year,start=year-4;
  if(year%5!==0)return;
  const years=(c.systems?.rankings??[]).filter(r=>r.year>=start&&r.year<=year&&r.candidates.length).sort((a,b)=>a.year-b.year);
- if(years.length!==5)return {year,start,complete:false as const,rows:[]};
+ if(years.length!==5||years.some((row,index)=>row.year!==start+index))return {year,start,complete:false as const,rows:[]};
  const points=new Map<string,{playerId:string;name:string;points:number;wins:number;podiums:number;topTen:number}>();
  for(const r of years){
   const top=Math.max(1,r.candidates[0].score);
@@ -24,7 +24,7 @@ export function superBallonResult(c:Career){
    points.set(p.playerId,row);
   }
  }
- const rows=[...points.values()].filter(r=>r.topTen>=3&&r.podiums>=2)
+ const rows=[...points.values()].filter(r=>r.wins>=1&&r.topTen>=3&&r.podiums>=2)
   .sort((a,b)=>b.points-a.points||b.wins-a.wins||b.podiums-a.podiums||b.topTen-a.topTen||a.playerId.localeCompare(b.playerId));
  const player=points.get(c.player.id);
  const annualRanks=years.map(r=>({year:r.year,rank:r.candidates.find(p=>p.playerId===c.player.id)?.rank}));
@@ -34,14 +34,14 @@ export function evaluateSuperBallon(c:Career):Award[]{
  const result=superBallonResult(c);if(!result)return[];
  const current=c.systems?.rankings.find(r=>r.year===result.year),own=result.rows.findIndex(r=>r.playerId===c.player.id);
  const period=`${result.start}~${result.year} · 최근 5시즌`;
- const standings=result.complete?`내 발롱도르 순위 ${result.annualRanks.map(r=>`${r.year}년 ${r.rank?`${r.rank}위`:'후보권 밖'}`).join(' · ')}. 10위 이내 ${result.player?.topTen??0}회 · 3위 이내 ${result.player?.podiums??0}회`:'';
+ const standings=result.complete?`내 발롱도르 순위 ${result.annualRanks.map(r=>`${r.year}년 ${r.rank?`${r.rank}위`:'후보권 밖'}`).join(' · ')}. 수상 ${result.player?.wins??0}회 · 3위 이내 ${result.player?.podiums??0}회 · 10위 이내 ${result.player?.topTen??0}회`:'';
  if(!current?.diagnostics?.some(d=>d.name==='슈퍼 발롱도르')){
   current?.diagnostics?.push({name:'슈퍼 발롱도르',scope:period,eligible:result.complete&&own>=0,
    result:!result.complete?'평가 자료 부족':own===0?'수상':own>=0?`${own+1}위 · 미선정`:'자격 미충족',
    detail:result.complete?`${SUPER_BALLON_CRITERION} ${standings}. ${own>=0?`내 누적 ${result.rows[own].points.toFixed(2)}점. `:''}${result.rows.length?`수상자 ${result.rows[0].name}.`:'수상 기준을 충족한 선수가 없습니다.'}`:'5개 연도의 확정 발롱도르 후보와 점수가 모두 있어야 평가합니다.'});
  }
  if(!result.complete||own!==0||c.awards.some(a=>a.id===`${result.year}:super-ballon:${c.player.id}`))return[];
- return [{id:`${result.year}:super-ballon:${c.player.id}`,name:'슈퍼 발롱도르',year:result.year,clubId:c.player.clubId,category:'world',rank:1,official:false,organiser:'K볼 5년 통합 평가',verification:'game-model',ruleVersion:'super-ballon-2',evaluationPeriod:period,criterion:SUPER_BALLON_CRITERION,description:`최근 5년 내 성적으로 집계 수상 · ${result.start}~${result.year} 누적 ${result.rows[0].points.toFixed(2)}점 · 자격 충족 ${result.rows.length}명 비교. ${standings}.`}];
+ return [{id:`${result.year}:super-ballon:${c.player.id}`,name:'슈퍼 발롱도르',year:result.year,clubId:c.player.clubId,category:'world',rank:1,official:false,organiser:'K볼 5년 통합 평가',verification:'game-model',ruleVersion:'super-ballon-3',evaluationPeriod:period,criterion:SUPER_BALLON_CRITERION,description:`최근 5년 내 성적으로 집계 수상 · ${result.start}~${result.year} 누적 ${result.rows[0].points.toFixed(2)}점 · 자격 충족 ${result.rows.length}명 비교. ${standings}.`}];
 }
 
 export function retiredNumberStandard(clubId:string){

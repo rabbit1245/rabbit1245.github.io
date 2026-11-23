@@ -7,7 +7,7 @@ import {currentNationality,normalizeNationality} from './national-data';
 import {awardPositionGroup} from './award-selection';
 import {achievementBonus,finishAchievementSeason,type AchievementContext} from './achievement-evidence';
 import {cupLedger} from './club-competitions';
-import {performanceBaselines} from './performance-profile';
+import {leagueSeasonImpact,majorSeniorLeague,performanceBaselines} from './performance-profile';
 import {tournamentPerformance} from './tournament-awards';
 import type {Award,Career,PlayerStats} from './types';
 import type {CompetitorSeason,RankingCandidate} from './revision-types';
@@ -19,6 +19,7 @@ const weights:Record<VoteKind,[number,number,number]>={ballon:[75,25,0],fifa:[65
 const avg=(r:CompetitorSeason)=>r.stats.ratingCount?r.stats.ratingSum/r.stats.ratingCount:0;
 
 const MAJOR_COMPETITION_CAP = 4;
+const LEAGUE_PERFORMANCE_CAP = 14;
 const clubCompetitionWeight = new Map([
  ['UCL',1],['LIBERTADORES',.75],['CLUB_WORLD_CUP',.75],['UEL',.5],['UECL',.3],
  ['AFC_ELITE',.55],['CAF_CL',.55],['CONCACAF_CL',.55],['OFC_CL',.4],['AFC_TWO',.3],['SUDAMERICANA',.45],
@@ -55,6 +56,15 @@ export function globalVoting(c:Career,rows:CompetitorSeason[],performance:(r:Com
  const {national,world}=c.systems!,nationalTitles=new Map<string,number>();
  const seniorFinals=new Map<string,PlayerStats>();
  const majorMerit=new Map<string,number>();
+ const leagueMerit=new Map<string,number>();
+ for(const row of rows){
+  const own=row.playerId===c.player.id;
+  const leagueRow=own?{leagueId:row.leagueId,stats:c.season.playerStats}:world.playerStats[row.playerId];
+  if(!leagueRow||own&&c.player.squad!=='senior')continue;
+  const splits=row.leagueSplits?.length?row.leagueSplits:[leagueRow];
+  const impact=splits.reduce((sum,split)=>sum+leagueSeasonImpact(row.position,split.leagueId,split.stats),0);
+  if(impact)leagueMerit.set(row.playerId,LEAGUE_PERFORMANCE_CAP*clamp(impact,0,1));
+ }
  for(const cup of cupLedger(c,c.season.year)){
   const weight=clubCompetitionWeight.get(cup.id.split(':')[0]);
   if(weight&&cup.playerStats)addMajorCompetitionMerit(majorMerit,cup.playerStats,weight);
@@ -127,11 +137,12 @@ export function globalVoting(c:Career,rows:CompetitorSeason[],performance:(r:Com
    const points=base(r,kind);
    const star=kind!=='ballon'&&r.playerId===c.player.id?personalityEdge(c,'stardom')*.02:0;
    const major=kind==='ballon'?majorMerit.get(r.playerId)??0:0;
-   return round((points+bonus(r,kind,points)+major)*(1+star),4);
+   const league=kind==='ballon'?leagueMerit.get(r.playerId)??0:0;
+   return round((points+bonus(r,kind,points)+major+league)*(1+star),4);
   },
   ballonBreakdown:(r:CompetitorSeason)=>{
    const individual=performanceVote(r,'ballon'),team=teamVote(r,'ballon');
-   return {individual,team,major:majorMerit.get(r.playerId)??0,achievement:bonus(r,'ballon',individual+team),nationalApps:seniorFinals.get(r.playerId)?.apps??0};
+   return {individual,league:leagueMerit.get(r.playerId)??0,team,major:majorMerit.get(r.playerId)??0,achievement:bonus(r,'ballon',individual+team),nationalApps:seniorFinals.get(r.playerId)?.apps??0};
   },
   finish:()=>finishAchievementSeason(c,rows,context),
  };
@@ -149,7 +160,7 @@ export const ADDITIONAL_GLOBAL_AWARDS={
 export function europeanShoePoints(r:CompetitorSeason):number{
  if(r.leagueSplits)return r.leagueSplits.reduce((n,s)=>n+europeanShoePoints({...r,...s,leagueSplits:undefined}),0);
  const l=getLeague(r.leagueId);if(l.tier!==1||!EUROPEAN_COUNTRIES.includes(l.country))return 0;
- return r.stats.goals*(['영국','스페인','독일','이탈리아','프랑스'].includes(l.country)?2:1.5);
+ return r.stats.goals*(majorSeniorLeague(l)?2:1.5);
 }
 /** Separate winners/IDs for each organiser. Only the user's outcome is added to the UI/history. */
 export function additionalGlobalHonours(c:Career,rows:CompetitorSeason[],leagueRows:CompetitorSeason[],voting:ReturnType<typeof globalVoting>,eleven:(rows:RankingCandidate[],d:number,m:number,f:number)=>RankingCandidate[]){

@@ -1,11 +1,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {createCareer,overall} from './engine';
+import {createCareer,makeFixtures,overall} from './engine';
 import {FIELD_ATTRIBUTES,overallParts,PLAY_STYLES} from './attributes';
 import {oneOnOneSaveChance,supportedTechnique} from './ability-contests';
 import {simulateMatch} from './match-engine';
 import {emptyStats,addStats} from './math';
-import {getClub} from './data';
+import {CLUBS,getClub} from './data';
+import {getClubWorldPower,getWorldClubPlayers} from './world';
 import {validateActionLedger} from './action-metrics';
 import type {AttributeKey,PlayerStats,Position} from './types';
 
@@ -55,4 +56,42 @@ test('an OVR 100 defensive midfielder with weak finishing retains chances and de
  assert.ok(totals[0].shots>480,'an intelligent player still finds shooting opportunities');
  assert.ok(totals[0].passesCompleted>480*25&&totals[0].interceptions>480*2,'passing and defensive contribution remain active');
  t.diagnostic(JSON.stringify({samples:480,low:{goals:totals[0].goals,shots:totals[0].shots},high:{goals:totals[1].goals,shots:totals[1].shots},oneOnOnes}));
+});
+
+test('elite striker production stays calibrated against real schedules and a poacher still takes more shots than a deep forward',t=>{
+ function sample(clubId:string,level:number,style:string,specialized=false){
+  const c=createCareer({name:'공격수 득점 검수',nationality:'포르투갈',age:25,height:183,weight:78,foot:'right',position:'ST',talent:'SSS',style,clubId,squad:'senior',difficulty:'realistic',seed:'21410-audit-rosters',training:[]});
+  c.player.attributes=Object.fromEntries(FIELD_ATTRIBUTES.map(key=>[key,specialized?71.5:level]));
+  if(specialized){
+   Object.assign(c.player.attributes,{shooting:113,finishing:118,offTheBall:111,positioning:98,composure:97,speed:95});
+   c.player.playSkills=['shooting','finishing','offTheBall'];
+   c.player.skillMastery={shooting:13,finishing:18,offTheBall:11};
+   c.systems!.world.clubs[clubId].power+=5;
+  }
+  c.player.ovr=overall(c.player);
+  assert.equal(c.player.ovr,level);
+  const ids=CLUBS.filter(club=>club.leagueId===c.season.leagueId).map(club=>club.id);
+  const teams=new Map(ids.map(id=>[id,{club:{...getClub(id),power:getClubWorldPower(c,id)},players:getWorldClubPlayers(c,id)}]));
+  const fixtures=makeFixtures(ids,c.season.year).filter(f=>f.homeId===clubId||f.awayId===clubId);
+  const totals=emptyStats();
+  for(let run=0;run<6;run++)for(const fixture of fixtures){
+   const home=teams.get(fixture.homeId)!,away=teams.get(fixture.awayId)!;
+   const record=simulateMatch({...c,seed:'21410-elite-'+run},fixture,{home:home.club,away:away.club,homePlayers:home.players,awayPlayers:away.players,forceSelection:{from:0,to:90,started:true},detailed:false});
+   addStats(totals,record.playerStats);
+   if(run===0)validateActionLedger(record,c.player.id);
+  }
+  return {goals:totals.goals/totals.apps,shots:totals.shots/totals.apps};
+ }
+ const lower=sample('KR1_03',93,'완성형 스트라이커');
+ const complete=sample('ES1_02',93,'완성형 스트라이커');
+ const deep=sample('ES1_02',93,'딥라잉 포워드');
+ const poacher=sample('ES1_02',93,'포처');
+ const peak=sample('ES1_02',100,'포처');
+ const specialist=sample('ES1_02',93,'완성형 스트라이커',true);
+ assert.ok(lower.goals>=.70&&lower.goals<1.18,JSON.stringify(lower));
+ assert.ok(complete.goals>=.55&&complete.goals<=1.06,JSON.stringify(complete));
+ assert.ok(deep.shots<complete.shots*.95&&poacher.shots>complete.shots*1.07,JSON.stringify({deep,complete,poacher}));
+ assert.ok(peak.goals>poacher.goals+.15&&peak.goals<1.45,JSON.stringify(peak));
+ assert.ok(specialist.goals>complete.goals&&specialist.goals<=1.15,JSON.stringify(specialist));
+ t.diagnostic(JSON.stringify({lower,complete,deep,poacher,peak,specialist}));
 });

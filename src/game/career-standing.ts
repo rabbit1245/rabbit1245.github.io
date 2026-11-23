@@ -4,8 +4,8 @@ import {clamp} from './math';
 import type {Career,PlayerStats,Position} from './types';
 
 export function observedSeasons(c:Career){
- const rows=c.history.filter(h=>h.completed&&h.year<=c.season.year&&h.year>=c.season.year-2).map(h=>({year:h.year,age:h.age,clubId:h.clubId,leagueId:h.leagueId,position:h.position,stats:h.stats,youth:h.squad==='youth',complete:true,rounds:Math.max(1,h.matches.length)}));
- if(!rows.some(h=>h.year===c.season.year))rows.push({year:c.season.year,age:c.player.age,clubId:c.player.clubId,leagueId:c.season.leagueId,position:c.player.position,stats:c.season.playerStats,youth:c.player.squad==='youth',complete:c.season.completed,rounds:c.season.totalWeeks});
+ const rows=c.history.filter(h=>h.completed&&h.year<=c.season.year&&h.year>=c.season.year-2).map(h=>({year:h.year,age:h.age,clubId:h.clubId,leagueId:h.leagueId,position:h.position,stats:h.stats,matches:h.matches,youth:h.squad==='youth',complete:true,rounds:Math.max(1,h.matches.length)}));
+ if(!rows.some(h=>h.year===c.season.year))rows.push({year:c.season.year,age:c.player.age,clubId:c.player.clubId,leagueId:c.season.leagueId,position:c.player.position,stats:c.season.playerStats,matches:c.season.matches,youth:c.player.squad==='youth',complete:c.season.completed,rounds:c.season.totalWeeks});
  return rows.sort((a,b)=>b.year-a.year);
 }
 /** Position-aware observed production; never writes ability, award votes or team power. */

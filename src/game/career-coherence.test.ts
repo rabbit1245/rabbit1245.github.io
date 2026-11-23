@@ -10,7 +10,7 @@ import {jsonBlob} from './json-blob';
 import {utf8Size} from './save-limits';
 import {prepareEnvelope} from './storage';
 import {packEnvelope,decodeStored} from './save-codec';
-import type {Career,SeasonSummary} from './types';
+import type {Career,MatchRecord,SeasonSummary} from './types';
 
 function fresh(){const c=createCareer({name:'위상 연결 검수',nationality:'프랑스',age:21,height:181,weight:76,foot:'left',position:'RW',talent:'SS',style:'인사이드 포워드',clubId:'ES1_01',squad:'senior',difficulty:'realistic',seed:'career-coherence-2111',training:[]});for(const k of FIELD_ATTRIBUTES)c.player.attributes[k]=80;c.player.ovr=overall(c.player);c.player.potential=95;c.season.ovrStart=80;c.season.attributeStart={...c.player.attributes};c.systems!.economics.marketValue=133333000;c.systems!.economics.peakValue=133333000;c.systems!.economics.assessment=assessmentNow(c);return c;}
 function season(c:Career,goals=30,assists=10){c.season.week=c.season.totalWeeks;c.season.completed=true;c.stage='offseason';c.season.playerStats={...emptyStats(),apps:36,starts:34,minutes:3000,goals,assists,ratingCount:36,ratingSum:36*7.6};}
@@ -28,6 +28,21 @@ test('lower-division production alone does not give the same proven top-flight r
 test('a young 30→20 goal season retains a market reputation instead of losing half its value',()=>{
  const c=fresh();season(c);updateMarketValue(c,'30골');archive(c);const before=c.systems!.economics.marketValue;c.season.year++;c.player.age++;c.season.week=0;c.season.completed=false;c.season.playerStats=emptyStats();c.stage='season';updateMarketValue(c,'새 시즌');assert.equal(c.systems!.economics.marketValue,before);
  season(c,20,10);updateMarketValue(c,'20골');const after=c.systems!.economics.marketValue;assert.ok(after>=before*.88,`${before} → ${after}`);assert.equal(c.player.ovr,80);
+});
+test('a proven prime-age scorer commands a premium for repeat top-flight production, with actual league and sample size respected',()=>{
+ const c=fresh();c.player.age=25;c.player.position='ST';c.player.style='완성형 스트라이커';
+ for(const key of FIELD_ATTRIBUTES)c.player.attributes[key]=93;
+ c.player.ovr=overall(c.player);c.season.ovrStart=c.player.ovr;c.season.attributeStart={...c.player.attributes};
+ season(c,44,10);c.season.playerStats.ratingSum=36*8.5;
+ const first=marketEstimate(c);
+ const brief={...c,season:{...c.season,playerStats:{...c.season.playerStats,apps:5,minutes:450,goals:8,assists:2,ratingCount:5,ratingSum:5*8.5}}};
+ assert.ok(first>marketEstimate(brief)*1.5);
+ const secondDivision={...c,season:{...c.season,matches:[{competitionId:'ES2',playerStats:c.season.playerStats} as MatchRecord]}};
+ assert.ok(first>marketEstimate(secondDivision)*1.5,'old second-division output is kept in its own league after joining a top-flight club');
+ archive(c);c.season.year++;c.player.age++;
+ season(c,44,10);c.season.playerStats.ratingSum=36*8.5;
+ const sustained=marketEstimate(c);
+ assert.ok(sustained>first*1.18&&sustained>=160000000&&sustained<=270000000,JSON.stringify({first,sustained}));
 });
 test('manual ability changes and birthdays before new matches do not immediately mark down the market quote',()=>{
  const c=fresh(),e=c.systems!.economics,initial=e.marketValue;c.player.age++;c.player.attributes.speed=70;c.player.ovr=overall(c.player);updateMarketValue(c,'수동 능력 변화');assert.equal(e.marketValue,initial);for(let i=0;i<10;i++)updateMarketValue(c,'같은 시점 재평가');assert.equal(e.marketValue,initial);

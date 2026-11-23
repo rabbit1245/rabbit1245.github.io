@@ -23,8 +23,12 @@ const roundedCount=(mean:number,rng:()=>number)=>Math.max(0,Math.floor(mean+rng(
 const group=(p:Position)=>p==='GK'?0:DEFENCE.has(p)?1:MIDFIELD.has(p)?2:3;
 const styleFactor=(p:Actor,kind:'shot'|'pass'|'dribble'|'tackle'|'aerial'|'sweep')=>{
   if(!p.style)return 1;
-  if(kind==='shot'&&/포처|골 사냥|침투|쉐도우|인사이드/.test(p.style))return 1.25;
-  if(kind==='pass'&&/플레이메이커|레지스타|연계|템포|빌드업|배급|펄스/.test(p.style))return 1.2;
+  if(kind==='shot'){
+    if(/포처|골 사냥|침투|쉐도우|인사이드/.test(p.style))return 1.14;
+    if(FORWARD.has(p.position)&&/연계|딥라잉|펄스|찬스/.test(p.style))return .88;
+    if(FORWARD.has(p.position)&&/프레싱|압박/.test(p.style))return .94;
+  }
+  if(kind==='pass'&&/플레이메이커|레지스타|연계|딥라잉|템포|빌드업|배급|펄스/.test(p.style))return 1.2;
   if(kind==='dribble'&&/드리블|돌파|볼 운반|테크니컬/.test(p.style))return 1.35;
   if(kind==='tackle'&&/스토퍼|수비형|볼 위닝|압박|프레싱/.test(p.style))return 1.3;
   if(kind==='aerial'&&/타깃|공중/.test(p.style))return 1.4;
@@ -334,7 +338,12 @@ export function simulateMatch(career:Career,fixture:Fixture,options:MatchOptions
       const onBall=shooter.attributes?a('dribbling')*.25+a('skillMoves')*.25+a('speed')*.2+a('ballControl')*.2+a('decisions')*.1:shooter.ovr;
       const threat=Math.max(offBall,onBall);
       const selfCreation=shooter.position==='GK'?1:clamp(1+(threat-opposition.power)*.012,.65,1.65);
-      const opportunities=SHOTS[shooter.position]*minutes*styleFactor(shooter,'shot')*powerFactor*actionFactor*tactics[side].supply*tactics[1-side].coverage*selfCreation*(.43+a('offTheBall')*.004+a('positioning')*.002+a('speed')*.002+a('decisions')*.001)*organizationFactor*(1+clutch*.03);
+      const movement=.43+a('offTheBall')*.004+a('positioning')*.002+a('speed')*.002+a('decisions')*.001;
+      // Finding space and creating a shot often describe the same action. A
+      // strong player keeps gaining chances with less overlap at the high end.
+      const attackingEdge=selfCreation*movement;
+      const personal=attackingEdge<=1.12?attackingEdge:1.12-.34*Math.expm1(-(attackingEdge-1.12)/.34);
+      const opportunities=SHOTS[shooter.position]*minutes*styleFactor(shooter,'shot')*powerFactor*actionFactor*tactics[side].supply*tactics[1-side].coverage*personal*organizationFactor*(1+clutch*.03);
       const headerChance=headerProbability(shooter,team),finishing=(a('finishing')*.7+a('shooting')*.3)*(1-headerChance)+aerialQuality(shooter)*headerChance;
       const reading=shooter.attributes?a('vision')*.35+a('decisions')*.3+a('anticipation')*.2+a('positioning')*.15:shooter.ovr;
       return {opportunities,headerChance,clearSpace:cognitiveOpportunity(reading,opposition.power,team.referencePower),contest:FORWARD.has(shooter.position),quality:finishing*.45+a('positioning')*.2+a('composure')*.15+a('anticipation')*.1+a('decisions')*.1};
@@ -352,7 +361,7 @@ export function simulateMatch(career:Career,fixture:Fixture,options:MatchOptions
         const keeper=keeperAt(minute);if(!keeper)continue;
         const k=(key:AttributeKey)=>ability(keeper,key);
         const typeRoll=shotRng();
-        const shotType=typeRoll<.02?'penalty':typeRoll<.11?'setPiece':typeRoll<.11+headerChance?'header':typeRoll<.29+headerChance+shotSupply[actorIndex].clearSpace*.08?'oneOnOne':'open';
+        const shotType=typeRoll<.02?'penalty':typeRoll<.11?'setPiece':typeRoll<.11+headerChance?'header':typeRoll<.26+headerChance+shotSupply[actorIndex].clearSpace*.06?'oneOnOne':'open';
         const header=shotType==='header'?headerDelivery(team,opposition,shooter,keeper,minute,headerRng,emit,recordActions):undefined;
         if(shotType==='header'&&!header?.won)continue;
         const shotAction:import('./types').MatchAction=header?{kind:'headerShot',phase:header.phase,duelId:header.duelId}:{kind:'shot',shotType:shotType==='setPiece'?'freeKick':shotType==='header'?'open':shotType,bigChance:false};
@@ -384,7 +393,9 @@ export function simulateMatch(career:Career,fixture:Fixture,options:MatchOptions
           :shotType==='setPiece'||shotType==='penalty'
             ?supportedTechnique((a('shooting')*.38+a('setPieces')*.42)/.8,a('composure'),.2)
             :supportedTechnique((a('shooting')*.68+a('setPieces')*.07)/.75,a('composure'),.25);
-        const aim=clamp(skillSuccess(shotType==='header'?.7635:shotType==='setPiece'||shotType==='penalty'?.6855:.51975,shootingQuality,opposition.power,.037,.01)*late*(1+clutch*.018),.07,.98);
+        const accuracy=skillSuccess(shotType==='header'?.7635:shotType==='setPiece'||shotType==='penalty'?.6855:.51975,shootingQuality,opposition.power,.037,.01);
+        const aimingPoint=shotType==='open'&&accuracy>.55?.55+.21*Math.tanh((accuracy-.55)/.21):accuracy;
+        const aim=clamp(aimingPoint*late*(1+clutch*.018),.07,.98);
         const onTarget=shotRng()<(shotType==='penalty'?Math.max(.78,aim):aim);
         if(!onTarget)continue;
         shooter.stats.shotsOnTarget++;keeper.stats.shotsFaced=(keeper.stats.shotsFaced??0)+1;

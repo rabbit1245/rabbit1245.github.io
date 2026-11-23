@@ -135,6 +135,25 @@ test('historical league records exclude cup goals and old award IDs/data survive
 test('equal output in a lower division is weighted below top-flight output in global awards',()=>{
  const c=fresh(),a=row(c),b={...a,playerId:'second-division',leagueId:'EN2'},v=globalVoting(c,[a,b],()=>100,context());c.player.ovr=a.ovr;assert.ok(v.score(a)>v.score(b));
 });
+test('a dominant full top-flight season can outweigh a title advantage without reusing cup or lower-division goals',()=>{
+ const c=fresh(),ctx=context();
+ const ordinary=row(c,'ST',{apps:35,minutes:3080,goals:24,assists:7,ratingCount:35,ratingSum:35*7.6});
+ const dominant=row(c,'ST',{apps:36,minutes:3150,goals:46,assists:8,ratingCount:36,ratingSum:36*8.7});
+ const rival={...ordinary,playerId:'championship-rival',clubId:'EN1_12'};
+ c.systems!.world.playerStats[rival.playerId]=rival;
+ ctx.cupTitles.set(rival.playerId,10);
+ const judge=(own:CompetitorSeason)=>globalVoting(c,[own,rival],()=>100,ctx);
+ c.season.playerStats=ordinary.stats;
+ const cupOnly=judge(dominant);
+ assert.ok(cupOnly.score(rival)>cupOnly.score(dominant));
+ c.season.playerStats=dominant.stats;
+ const full=judge(dominant);
+ assert.equal(full.ballonBreakdown(dominant).league,14);
+ assert.ok(full.score(dominant)>full.score(rival));
+ const split={...dominant,leagueSplits:[{leagueId:'EN2',stats:dominant.stats},{leagueId:'EN1',stats:{...ordinary.stats,apps:2,minutes:160,goals:1}}]};
+ assert.equal(judge(split).ballonBreakdown(split).league,0);
+ assert.deepEqual(full.ballonBreakdown(rival),cupOnly.ballonBreakdown(rival));
+});
 test('real simulated international guests can be saved as award candidates; forged guest identities remain invalid',()=>{
  const c=fresh(),guest=internationalRoster('INT_SA_AHLI')[14];
  c.systems!.rankings=[{year:c.season.year,candidates:[{playerId:guest.id,name:guest.name,position:guest.position,clubId:guest.clubId,score:1,rank:1,stats:emptyStats(),nationalStats:emptyStats()}],playerRank:null,winnerId:guest.id,world11:[],awards:[]}];
