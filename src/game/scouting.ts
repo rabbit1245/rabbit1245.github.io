@@ -20,10 +20,11 @@ export function scoutingProfile(c:Career){
  const proof=clamp(consistency-1,0,2),projected=round(p.ovr+upside+actual+proof,1);
  return {current:p.ovr,projected,performance:actual,upside,consistency,minutes};
 }
-export function scoutingReports(c:Career):ScoutReport[]{
+export function scoutingReports(c:Career,clubId?:string):ScoutReport[]{
  const w=c.systems?.world;if(!w||c.stage==='retired')return [];
  const p=c.player,a=scoutingProfile(c),source=getLeague(c.season.leagueId),own=w.clubs[p.clubId];
- return Object.values(w.clubs).filter(club=>club.id!==p.clubId).map(club=>{
+ const clubs=clubId===undefined?Object.values(w.clubs):Object.hasOwn(w.clubs,clubId)?[w.clubs[clubId]]:[];
+ return clubs.filter(club=>club.id!==p.clubId).map(club=>{
   const offset=getClubRatingOffset(c,club.id);
   const candidates=club.rosterIds.map(id=>w.players[id]).filter(row=>row&&group(row.position)===group(p.position)).map(row=>({...row,ovr:clamp(row.ovr+offset,25,99)})).sort((a,b)=>b.ovr-a.ovr);
   const positionLevel=candidates.slice(0,p.position==='GK'?1:3).reduce((sum,row)=>sum+row.ovr,0)/Math.max(1,Math.min(candidates.length,p.position==='GK'?1:3));

@@ -1,27 +1,25 @@
 import ShirtSales from './ShirtSales';
-import {getClub,getLeague} from '../game/data';
 import {hasConfirmedNextSeasonTraining} from '../game/engine';
 import {needsContractOfferRefresh} from '../game/career-systems';
-import {expiryReturnClub} from '../game/employment';
 import {InjuryControl} from './ManualAging';
 import {NationalParticipationControls,NationalParticipationHistory} from './NationalParticipation';
-import {currencyText} from '../game/currency';
 import { useEffect, useMemo, useState } from 'react';
 import { ArrowLeftRight, ArrowRight, Check, ChevronLeft, ChevronRight, Dumbbell, Play } from 'lucide-react';
 import type { AttributeKey, Career, GameCommand, MatchRecord, Standing } from '../game/types';
 import { ATTRIBUTE_LABELS } from '../game/attributes';
 import { getLeagueRule } from '../game/league-rules';
 import { seasonOverview, seasonClubId } from '../game/season-overview';
-import { average, calendarLabel, compactMoney, Delta, Empty, MatchRow, Modal, money, Panel, seasonLabel, Money, TeamBadge, teamName } from './Shared';
+import { average, calendarLabel, compactMoney, Delta, Empty, MatchRow, Modal, Panel, seasonLabel, TeamBadge, teamName } from './Shared';
 import StatsNine from './StatsNine';
 import './LockerRoom.css';
 import LeagueLeaders from './LeagueLeaders';
 import ClubDevelopment from './ClubDevelopment';
 import SeasonHonours from './SeasonHonours';
 import SeasonRecordTable from './SeasonRecordTable';
+import Transfers from './Transfers';
 import type { GrowthCause,GrowthReport } from '../game/revision-types';
 
-type Props = {career:Career;busy:boolean;command:(command:GameCommand)=>void};
+type Props = {career:Career;busy:boolean;command:(command:GameCommand,onError?:(message:string)=>void)=>void};
 export function phaseLabel(c:Career) { return c.stage==='retired'?'은퇴':c.stage==='offseason'?'시즌 결산':({preseason:'시즌 준비',first:'전반기',midseason:'중간 정비',second:'후반기',review:'시즌 결산',retired:'은퇴'} as const)[c.systems?.phase || (c.season.week===0?'preseason':'first')]; }
 export function GrowthCard({report}:{report:GrowthReport}) {
   const [page,setPage]=useState(0),ledger=report.growth;
@@ -31,20 +29,6 @@ export function GrowthCard({report}:{report:GrowthReport}) {
   const changes=Object.entries(report.endAttributes).map(([key,value])=>({key:key as AttributeKey,from:report.startAttributes[key as AttributeKey]??value??0,to:value??0,delta:(value??0)-(report.startAttributes[key as AttributeKey]??value??0)}));
   const rows=changes.slice(page*6,page*6+6),pages=Math.max(1,Math.ceil(changes.length/6));
   return <Panel title={report.half==='first'?'전반기 성장 리포트':'시즌 성장 리포트'} eyebrow={`${seasonLabel(report.year)} · R${report.fromRound}–${report.toRound}`} action={<span className="pill">OVR {report.ovrStart} → {report.ovrEnd} <Delta value={report.ovrEnd-report.ovrStart-(report.ovrAdjustment??0)}/>{report.ovrAdjustment?' · 개편 제외':''}</span>} className="growth-panel"><div className="panel-body"><div className="growth-context"><span>출전 <b>{report.stats.minutes}분</b></span><span>평점 <b>{average(report.stats)}</b> · 이전 {average(report.previousStats)}</span><span>몸값 <b>{compactMoney(report.valueStart)} → {compactMoney(report.valueEnd)}</b></span></div><p className="growth-explanation">{report.context}</p><div className="growth-table-wrap"><table className="growth-table"><thead><tr><th>능력치</th><th>시작 → 현재</th><th>변화</th>{causes.map(cause=><th key={cause}>{causeLabels[cause]}</th>)}</tr></thead><tbody>{rows.map(row=><tr key={row.key}><th>{ATTRIBUTE_LABELS[row.key]}</th><td>{Math.round(row.from)} → <b>{Math.round(row.to)}</b></td><td><Delta value={row.delta}/></td>{causes.map(cause=><td key={cause}>{ledger?<Delta value={cause==='aging'?(ledger.byCause.aging?.[row.key]??0)+(report.offseasonAging?.changes[row.key]??0):(ledger.byCause[cause]?.[row.key]??0)}/>:<span className="muted">미집계</span>}</td>)}</tr>)}</tbody></table></div><div className="growth-foot"><p className="muted">{ledger?`원인 기록: R${ledger.trackedFromRound}부터 · 부상 ${ledger.injuredRounds}라운드 · 훈련 환경 ${Math.round(ledger.trainingQuality*100)}%${ledger.legacy?' · 이전 변화 원인 미집계':''}`:'이전 저장의 변화 원인은 미집계입니다. 새 진행부터 실제 변화 원인을 기록합니다.'}</p><div className="pagination"><button aria-label="능력치 이전 페이지" disabled={page===0} onClick={()=>setPage(p=>p-1)}><ChevronLeft size={18}/></button><span>{page+1} / {pages}</span><button aria-label="능력치 다음 페이지" disabled={page+1>=pages} onClick={()=>setPage(p=>p+1)}><ChevronRight size={18}/></button></div></div>{report.offseasonAging&&<p className="aging-note">시즌 시작 전 노화: OVR {report.offseasonAging.ovrStart} → {report.offseasonAging.ovrEnd} · 전 시즌 종료부터 시즌 시작까지의 변화이며 시즌 중 합계와 별도 집계</p>}</div></Panel>;
-}
-function Transfers({career,busy,command,onClose}:Props&{onClose:()=>void}) {
-  const p=career.player,e=career.systems?.economics,active=career.stage==='offseason'||p.clubId==='FA',offers=active?career.offers:[];
-  return <Modal title="계약과 다음 행선지" onClose={onClose} wide>
-    <div className="contract-current"><TeamBadge id={p.clubId}/><div><span className="eyebrow">현재 계약</span><strong>{teamName(p.clubId)}</strong><span>{money(p.wage)}/주 · {e?.contract.role||'역할 미집계'} · {e?.contract.signedDate||e?.contract.signedYear||'—'} → {e?.contract.expiresDate||e?.contract.expiresYear||'—'}</span></div><span className="pill">{p.contractYears}년 남음</span></div>
-    {career.transferDecision&&p.clubId!=='FA'?<div className="notice"><Check size={18}/>다음 시즌 행선지를 확정했습니다. {teamName(p.clubId)}에서 계속합니다.</div>:active?<>
-      <div className="offer-grid">{offers.map(o=><section className="offer" key={o.id}><div className="offer-title"><TeamBadge id={o.clubId}/><span className="pill">{o.type==='renew'?'재계약':o.clubId===expiryReturnClub(career)?'전 소속팀 재계약':'이적 제안'}</span></div><h3>{teamName(o.clubId)} <small className="offer-league">{getLeague(career.systems?.world.pendingMovements?.find(m=>m.clubId===o.clubId)?.toLeagueId??career.systems?.world.clubs[o.clubId]?.leagueId??getClub(o.clubId).leagueId).name} · {getClub(o.clubId).country}</small></h3><p className="muted">{currencyText(o.reason)}</p><dl className="detail-list"><div><dt>주급 변화</dt><dd><Money value={p.wage}/> → <Money value={o.wage}/></dd></div><div><dt>이전 대비</dt><dd>{p.wage>0?<><Delta value={Math.round((o.wage-p.wage)/p.wage*100)}/> %</>:"FA · 신규 급여"}</dd></div><div><dt>계약 / 역할</dt><dd>{o.years}년 · {o.role}</dd></div><div><dt>구단 간 이적료</dt><dd>{o.type==='renew'?'해당 없음':<Money value={o.fee}/>}</dd></div><div><dt>효력</dt><dd>{o.effective==='now'?'즉시 합류':'다음 시즌'}</dd></div></dl><button className="button primary full" disabled={busy} onClick={()=>command({type:'transfer',offerId:o.id})}>제안 수락<ArrowRight size={17}/></button></section>)}</div>
-      {!offers.length&&<Empty title="도착한 제안이 없습니다">현재 구단에 잔류하고 다음 시즌을 준비할 수 있습니다.</Empty>}
-      {p.clubId!=='FA'&&<div className="modal-actions"><button className="button secondary" disabled={busy} onClick={()=>command({type:'stay'})}>현재 구단에 잔류</button></div>}
-    </>:<p className="muted">이적과 재계약은 시즌 종료 후 진행합니다.</p>}
-    {p.clubId!=='FA'&&career.stage!=='retired'&&<div className="release-contract"><p>계약을 해지하면 즉시 FA가 됩니다. 클럽 출전·주급이 중단되고 반 시즌마다 새 제안을 확인할 수 있습니다.</p><button className="button danger" data-testid="release-contract" disabled={busy} onClick={()=>command({type:'releaseContract'})}>직접 계약 해지 · FA 전환</button></div>}
-    {p.clubId==='FA'&&<p className="notice">FA · 무소속입니다. 제안을 수락하거나 창을 닫고 반 시즌씩 진행할 수 있습니다.</p>}
-    <p className="fine-print">주급은 선수 수입이며, 이적료는 구단 간 거래입니다. 전체 계약 이력은 선수 → 계약·몸값에서 확인합니다.</p>
-  </Modal>;
 }
 function NearbyTable({career}:{career:Career}) {
   const [expanded,setExpanded]=useState(false),table=career.season.table;

@@ -3,7 +3,7 @@ import {isSealedCareer} from './game-delta';
 import type {Career,GameCommand} from './types';
 
 export type CareerPatch = {path:(string|number)[];op:'set';value:unknown}|{path:(string|number)[];op:'delete'}|{path:(string|number)[];op:'length';value:number};
-export const LIGHT_COMMANDS=new Set<GameCommand['type']>(['transfer','stay','releaseContract','captainDecision','dismissChoice','upgradeAbilities','changePosition','nationalParticipation','personality','personalitySet','refreshOffers','playSkill','manualAging','attributeLock','attributeLockAll','training','cheatSettings','increaseAttribute']);
+export const LIGHT_COMMANDS=new Set<GameCommand['type']>(['transfer','stay','releaseContract','captainDecision','dismissChoice','upgradeAbilities','changePosition','nationalParticipation','personality','personalitySet','refreshOffers','counterOffer','playSkill','manualAging','attributeLock','attributeLockAll','training','cheatSettings','increaseAttribute']);
 export const LOCAL_DECISIONS=new Set<GameCommand['type']>(['transfer','stay','releaseContract']);
 const forbidden=new Set(['__proto__','prototype','constructor']);
 const receipts=new WeakMap<Career,{previous:WeakRef<Career>;patches:CareerPatch[];signature:string;broad:boolean}>();

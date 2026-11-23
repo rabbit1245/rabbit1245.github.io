@@ -1,6 +1,6 @@
 import {changePosition,upgradeAbilityModel} from './engine';
 import {recordCommandChange} from './command-patches';
-import {releaseContract,setPlaySkill,refreshContractOffers,setPersonality,setPersonalityValues,setNationalParticipation} from './engine';
+import {releaseContract,requestCounterOffer,setPlaySkill,refreshContractOffers,setPersonality,setPersonalityValues,setNationalParticipation} from './engine';
 import type { Career, GameCommand,GameProgress } from './types';
 import { advanceCareerSteps, advanceHalfSteps, dismissChoice, setTraining, acceptTransfer, stayAtClub, startNextSeasonSteps, retireCareer, respondToCaptainOffer,configureCheats,cheatIncreaseAttribute,manuallyAge,setAttributeLock,setAllAttributeLocks,manuallyInjureSteps } from './engine';
 import { finishGameSteps, type GameSteps } from './game-steps';
@@ -19,6 +19,7 @@ export function* commandSteps(career: Career, command: GameCommand, commandId: s
     case 'personality':next=setPersonality(career,command.key,command.value);break;
     case 'personalitySet':next=setPersonalityValues(career,command.values);break;
     case 'refreshOffers':next=refreshContractOffers(career);break;
+    case 'counterOffer':next=requestCounterOffer(career,command.clubId);break;
     case 'releaseContract':next=releaseContract(career);break;
     case 'playSkill':next=setPlaySkill(career,command.key,command.selected);break;
     case 'advance':

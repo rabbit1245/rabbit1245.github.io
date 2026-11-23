@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { CLUBS } from './data';
 import { emptyStats } from './math';
-import { applyContract, awardPositionGroup, createEconomics, createLeadership, beginEconomicSeason, ensureEconomicHistory, getPreviousContractWage, answerCaptainOffer, evaluateAwards, getClubTopScorer, makeContractOffers, payBonus, paySalary, performanceScore, updateLeadership, updateMarketValue } from './career-systems';
+import { applyContract, awardPositionGroup, createEconomics, createLeadership, beginEconomicSeason, ensureEconomicHistory, getPreviousContractWage, answerCaptainOffer, evaluateAwards, getClubTopScorer, makeContractOffers, makeCounterOffer, payBonus, paySalary, performanceScore, updateLeadership, updateMarketValue } from './career-systems';
 import type { Career, MatchRecord, PlayerStats, Position } from './types';
 import type { CompetitorSeason } from './revision-types';
 
@@ -78,6 +78,38 @@ test('contracts are offered only after the full season and obey actual club budg
   for(const club of Object.values(c.systems!.world.clubs))if(club.id!==c.player.clubId)club.budget=1;
   const lowBids=makeContractOffers(c,'offseason').filter(o=>o.type==='transfer');assert.equal(lowBids.length,6);assert.ok(lowBids.every(o=>o.fee<=1),'six low bids must still obey reduced budgets');
   assert.throws(()=>applyContract(c,{...renewal,wage:1_000_000_000}),/예산/);
+});
+
+test('counter offers price the player and remaining contract against the chosen club budget', () => {
+  const career=makeCareer(),economics=career.systems!.economics;
+  const target=career.systems!.world.clubs[clubs[1].id];
+  economics.marketValue=25_000_000;
+  const initial=makeCounterOffer(career,target.id);
+  economics.marketValue=60_000_000;
+  const stronger=makeCounterOffer(career,target.id);
+  assert.ok(stronger.fee>initial.fee&&stronger.wage>initial.wage);
+  assert.equal(stronger.effective,'nextSeason');
+  assert.equal(stronger.clubId,target.id);
+  assert.equal(stronger.source,'counter');
+  economics.contract.expiresYear++;
+  assert.ok(makeCounterOffer(career,target.id).fee>stronger.fee);
+  target.budget=1_000;
+  assert.throws(()=>makeCounterOffer(career,target.id),/예상 이적료/);
+  economics.contract.expiresYear=career.season.year+1;
+  target.wageBudget=1_000_000;
+  const expiring=makeCounterOffer(career,target.id);
+  assert.equal(expiring.fee,0);
+  assert.equal(expiring.wage,Math.floor(target.wageBudget/52*.14));
+  assert.match(expiring.reason,/급여 예산 한도/);
+  assert.throws(()=>makeCounterOffer(career,career.player.clubId),/다른 구단/);
+  career.stage='season';
+  assert.throws(()=>makeCounterOffer(career,target.id),/이적시장/);
+  career.player.clubId='FA';career.player.wage=0;
+  const free=makeCounterOffer(career,target.id);
+  assert.equal(free.effective,'now');
+  assert.equal(free.fee,0);
+  target.wageBudget=1_000;
+  assert.throws(()=>makeCounterOffer(career,target.id),/급여 예산/);
 });
 
 test('an expired expensive legacy contract can renew on the actual affordable wage', () => {

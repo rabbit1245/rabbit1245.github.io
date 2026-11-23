@@ -1,4 +1,16 @@
 .locker-workspace .locker-overview-heading { display:flex; align-items:center; justify-content:space-between; gap:8px 12px; }
+.counter-offer-tools { margin-bottom:10px; }
+.counter-club-search { display:grid; gap:8px; padding:12px; margin-top:8px; border:1px solid var(--border); border-radius:8px; background:var(--warm); }
+.counter-club-search label,.counter-club-search strong { font-weight:650; }
+.counter-club-search input { width:100%; min-width:0; }
+.counter-club-results { list-style:none; margin:0; padding:0; }
+.counter-club-results li { display:grid; grid-template-columns:auto minmax(0,1fr) auto; align-items:center; gap:8px; padding:10px 0; border-top:1px solid var(--border); }
+.counter-club-results li > div { display:grid; gap:3px; overflow-wrap:anywhere; }
+.counter-club-results small { color:var(--muted); }
+.counter-offer-quote { margin-bottom:10px; }
+.offer.counter-offer-card { border-color:var(--accent-border); }
+.counter-offer-card .detail-list dt { flex-shrink:0; }
+.counter-offer-card .detail-list dd { min-width:0; overflow-wrap:anywhere; }
 .locker-workspace .locker-overview-heading h2 { font-size:20px; line-height:1.3; }
 .locker-workspace .locker-season-details { margin-top:2px; }
 .locker-workspace .locker-season-details .panel-head { flex-wrap:wrap; }

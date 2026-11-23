@@ -141,6 +141,7 @@ function individualWageLimit(career: Career, clubId: string): number {
   return club ? Math.max(0, Math.floor(club.wageBudget / 52 * .14)) : 0;
 }
 const CONTRACT_OFFER_MODEL='offseason-v2116';
+const reserveTeam=/(?:\sB|\sII|카스티야)$/;
 /** Old proposals are refreshed once when opened, after the save hash is verified. */
 export function needsContractOfferRefresh(career:Career):boolean{
  return career.stage!=='retired'&&(career.stage==='offseason'||isFreeAgent(career))&&(!career.transferDecision||isFreeAgent(career))&&
@@ -160,18 +161,56 @@ function contractYears(career:Career,role:string,rng:()=>number):number{
  if(p.age>=29)return firstTeam||proven?3:2;
  return 3+Math.floor(rng()*2);
 }
-export function makeContractOffers(career:Career,timing:'midseason'|'offseason'):TransferOffer[]{
- if(!career.systems||(career.stage!=='offseason'&&!isFreeAgent(career))||career.stage==='retired')return[];
- const {world,economics:e}=career.systems,p=career.player,remaining=Math.max(0,e.contract.expiresYear-career.season.year-1);
- const rng=seededRandom(`${career.seed}:offers-v29:${career.season.year}:${isFreeAgent(career)?career.season.week:0}`),reports=new Map(scoutingReports(career).map(r=>[r.clubId,r]));
- const priorWage=isFreeAgent(career)?e.contract.previousWage??0:p.wage,returnClub=expiryReturnClub(career);
- const renewalClub=!isFreeAgent(career)?p.clubId:returnClub;
- const canRenew=!!renewalClub&&!!world.clubs[renewalClub]&&individualWageLimit(career,renewalClub)>=150;
+function contractValuation(career:Career){
+ const p=career.player,{contract}=career.systems!.economics;
+ const remaining=Math.max(0,contract.expiresYear-career.season.year-1);
+ const priorWage=isFreeAgent(career)?contract.previousWage??0:p.wage;
  const decline=marketDeclineEvidence(career),quote=marketQuote(career),fundamental=marketEstimate(career);
  const offerValue=quote+(Math.min(quote,fundamental)-quote)*decline.pressure;
  const justified=offerValue/(52*12)*(p.age<=20?.72:p.age<=23?.88:1)*(1+Math.max(0,avgRating(career.season.playerStats)-6.5)*.08);
  const salaryReference=priorWage*(1-decline.pressure)+Math.max(150,justified)*decline.pressure;
- const affordable=Object.values(world.clubs).filter(x=>x.id!==p.clubId&&!(canRenew&&x.id===returnClub)&&(!isFreeAgent(career)||career.stage==='offseason'||getLeagueRule(x.leagueId).startMonth===getLeagueRule(career.season.leagueId).startMonth)&&!/(?:\sB|\sII|카스티야)$/.test(getClub(x.id).name)&&individualWageLimit(career,x.id)>=150&&x.budget>=0);
+ return {remaining,priorWage,decline,offerValue,justified,salaryReference};
+}
+function quoteContract(valuation:ReturnType<typeof contractValuation>,limit:number,demand:number,renew:boolean,rng:()=>number){
+ const {salaryReference,justified,remaining,offerValue}=valuation;
+ const salaryFloor=salaryReference*(renew?1.04:1.03+rng()*.17+demand*.08);
+ const estimatedWage=Math.round(Math.max(150,justified*(.96+rng()*.2),salaryFloor));
+ const wage=Math.min(limit,estimatedWage);
+ const asking=renew||remaining===0?0:Math.round(offerValue*clamp(.45+remaining*.18+rng()*.12,.45,1.35));
+ return {wage,estimatedWage,asking};
+}
+export function makeCounterOffer(career:Career,clubId:string):TransferOffer{
+ const {systems,stage,player:p,season}=career,freeAgent=isFreeAgent(career);
+ if(!systems||stage==='retired'||stage!=='offseason'&&!freeAgent||career.transferDecision&&!freeAgent)throw Error('현재 이적시장에서 역제안을 보낼 수 없습니다.');
+ if(!Object.hasOwn(systems.world.clubs,clubId)||clubId===p.clubId)throw Error('현재 소속팀과 다른 구단을 선택해 주세요.');
+ const club=systems.world.clubs[clubId],team=getClub(clubId);
+ if(reserveTeam.test(team.name))throw Error('이 구단은 리저브 팀입니다. 1군 구단을 선택해 주세요.');
+ if(freeAgent&&stage==='season'&&getLeagueRule(club.leagueId).startMonth!==getLeagueRule(season.leagueId).startMonth)throw Error('이 구단은 현재 진행 중인 시즌과 개막 시기가 다릅니다. 시즌 종료 후 역제안을 보낼 수 있습니다.');
+ const limit=individualWageLimit(career,clubId);
+ if(limit<150)throw Error(`${team.name}의 급여 예산으로는 새 계약을 제안할 수 없습니다.`);
+ const valuation=contractValuation(career);
+ const demand=scoutingReports(career,clubId)[0]?.need??.25;
+ const rng=seededRandom(`${career.seed}:counter-offer:${season.year}:${season.week}:${clubId}`);
+ const {wage,estimatedWage,asking}=quoteContract(valuation,limit,demand,false,rng);
+ const fee=freeAgent?0:asking;
+ if(fee>club.budget)throw Error(`${team.name}의 이적 예산 ${moneyText(club.budget)}으로는 예상 이적료 ${moneyText(fee)}를 마련할 수 없습니다.`);
+ const role=contractRole(career,clubId),years=contractYears(career,role,rng);
+ const salaryNote=wage<estimatedWage?` 주급은 구단 급여 예산 한도까지 제시했습니다. 평가 주급 ${moneyText(estimatedWage)}.`:'';
+ return {
+  id:`${season.year}:${CONTRACT_OFFER_MODEL}:counter:${clubId}`,source:'counter',clubId,wage,years,role,fee,type:'transfer',
+  effective:stage==='offseason'?'nextSeason':'now',expiresRound:season.totalWeeks,currentWage:p.wage,budgetLimit:club.budget,
+  reason:`계약 평가에 반영한 몸값 ${moneyText(valuation.offerValue)} · 팀 전력 ${club.power.toFixed(1)} · ${role}. 최근 경기력, 잔여 계약, 구단 포지션 경쟁을 반영했습니다.${salaryNote}`,
+ };
+}
+export function makeContractOffers(career:Career,timing:'midseason'|'offseason'):TransferOffer[]{
+ if(!career.systems||(career.stage!=='offseason'&&!isFreeAgent(career))||career.stage==='retired')return[];
+ const {world}=career.systems,p=career.player;
+ const rng=seededRandom(`${career.seed}:offers-v29:${career.season.year}:${isFreeAgent(career)?career.season.week:0}`),reports=new Map(scoutingReports(career).map(r=>[r.clubId,r]));
+ const returnClub=expiryReturnClub(career);
+ const renewalClub=!isFreeAgent(career)?p.clubId:returnClub;
+ const canRenew=!!renewalClub&&!!world.clubs[renewalClub]&&individualWageLimit(career,renewalClub)>=150;
+ const valuation=contractValuation(career),{priorWage,decline,salaryReference}=valuation;
+ const affordable=Object.values(world.clubs).filter(x=>x.id!==p.clubId&&!(canRenew&&x.id===returnClub)&&(!isFreeAgent(career)||career.stage==='offseason'||getLeagueRule(x.leagueId).startMonth===getLeagueRule(career.season.leagueId).startMonth)&&!reserveTeam.test(getClub(x.id).name)&&individualWageLimit(career,x.id)>=150&&x.budget>=0);
  // Protect an established salary unless sustained, observed decline warrants a
  // lower reference. Keep the explicitly explained club-budget fallback.
  const funded=affordable.filter(x=>individualWageLimit(career,x.id)>=salaryReference*1.03);
@@ -193,9 +232,8 @@ export function makeContractOffers(career:Career,timing:'midseason'|'offseason')
  const offer=(id:string,renew:boolean,band?:TransferOffer['band']):TransferOffer=>{
   const club=world.clubs[id],limit=individualWageLimit(career,id);
   const demand=reports.get(id)?.need??.25,role=contractRole(career,id);
-  const salaryFloor=salaryReference*(renew?1.04:1.03+rng()*.17+demand*.08);
-  const wage=Math.round(Math.min(limit,Math.max(150,justified*(.96+rng()*.2),salaryFloor)));
-  const asking=renew||remaining===0?0:Math.round(offerValue*clamp(.45+remaining*.18+rng()*.12,.45,1.35)),fee=Math.min(asking,Math.floor(club.budget*.75));
+  const {wage,asking}=quoteContract(valuation,limit,demand,renew,rng);
+  const fee=Math.min(asking,Math.floor(club.budget*.75));
   const years=contractYears(career,role,rng),labels={similar:'동급 경쟁',lower:'하위 전력 · 핵심 기용',higher:'상위 전력 · 우승 경쟁',wild:'극단적 랜덤 · 도전 제안'};
   return {id:`${career.season.year}:${CONTRACT_OFFER_MODEL}:${renew?'renew':'transfer'}:${id}`,clubId:id,wage,years,role,fee,type:renew?'renew':'transfer',...(band?{band}:{}),expiresRound:career.season.totalWeeks,effective:'nextSeason',currentWage:p.wage,budgetLimit:club.budget,reason:`${band?labels[band]:'재계약'} · 팀 전력 ${club.power.toFixed(1)} · ${role}. 포지션 수요 ${Math.round((reports.get(id)?.need??0)*100)}%. 현재 주급 ${moneyText(p.wage)} → ${moneyText(wage)} · ${years}년. 현재 기량 ${playingAbility(p).toFixed(1)} · 실전 위상 보정 ${careerStanding(career).proven.toFixed(1)}. 역할과 계약 기간은 포지션 경쟁·최근 실적·세계 수상 평가와 나이를 함께 반영합니다.${fee<asking?' 요구 이적료보다 낮은 예산 한도 내 입찰이며 수락 여부는 선수가 결정합니다.':''}${['유망주','로테이션'].includes(role)&&club.power>playingAbility(p)+12?' 즉시 주전 보장 없는 장기 육성·로테이션 계약.':''}${higher.length===0&&band==='higher'?' 현재 수준보다 강한 팀이 없어 실제 최상위 경쟁 구단으로 대체.':''}${lower.length===0&&band==='lower'?' 현재 수준보다 낮은 팀이 없어 가능한 낮은 전력의 실제 비교 구단으로 대체.':''}`};
  };

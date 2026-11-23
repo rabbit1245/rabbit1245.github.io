@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {jsonBlob} from './json-blob';
 import {canonicalBytes} from './canonical-bytes';
 import {createCareer,refreshContractOffers} from './engine';
-import {commandChange} from './command-patches';
+import {applyCareerPatches,commandChange} from './command-patches';
 import {runGameCommand,releaseIdleGameWorker} from './client';
 
 test('encoded JSON chunks preserve long tokens, chunk boundaries, Unicode and every byte',async()=>{
@@ -27,5 +27,17 @@ test('refreshing transfer proposals preserves incremental persistence instead of
   const snapshot=JSON.stringify(c),expected=refreshContractOffers(c),next=await runGameCommand(c,{type:'refreshOffers'});
   assert.equal(constructed,0);assert.equal(JSON.stringify(c),snapshot);assert.deepEqual(next.offers,expected.offers);
   assert.equal(next.systems!.world,c.systems!.world);assert.ok(commandChange(c,next),'the engine receipt must reach saveCareerChange without a structured clone');
+  const quoted=await runGameCommand(next,{type:'counterOffer',clubId:'EN1_01'});
+  const quote=quoted.offers.find(o=>o.source==='counter')!;
+  assert.equal(quote.clubId,'EN1_01');assert.ok(quote.fee>0);
+  assert.equal(quoted.player.clubId,next.player.clubId);
+  assert.equal(quoted.systems!.world,next.systems!.world);
+  const patches=commandChange(next,quoted);
+  assert.ok(patches);
+  assert.deepEqual(applyCareerPatches(next,patches).offers,quoted.offers);
+  const replaced=await runGameCommand(quoted,{type:'counterOffer',clubId:'EN1_02'});
+  assert.deepEqual(replaced.offers.filter(o=>o.source==='counter').map(o=>o.clubId),['EN1_02']);
+  assert.deepEqual(replaced.offers.filter(o=>o.source!=='counter'),next.offers);
+  assert.equal(constructed,0);
  }finally{releaseIdleGameWorker();globalThis.Worker=original;}
 });

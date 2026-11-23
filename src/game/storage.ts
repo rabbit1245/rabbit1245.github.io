@@ -939,6 +939,7 @@ export function validateCareer(value: unknown,ownedJSON=false): Career {
     text(item.role, 'offer.role');
     text(item.reason, 'offer.reason', 4_000);
     assert(['transfer', 'renew'].includes(String(item.type)), '계약 제안 종류가 올바르지 않습니다.');
+    if (item.source !== undefined) choice(item.source, ['counter'], 'offer.source');
     if (item.expiresRound !== undefined) number(item.expiresRound, 'offer.expiresRound', 0, 150, true);
     if (item.effective !== undefined) choice(item.effective, ['now', 'nextSeason'], 'offer.effective');
     for (const key of ['currentWage', 'budgetLimit']) if (item[key] !== undefined) number(item[key], `offer.${key}`, 0, 1e15);

@@ -21,7 +21,8 @@ import { simulateMatch } from './match-engine';
 import { getClubWorldPower, getSeasonClubIds, getWorldClubPlayers, getYouthClubPlayers, processWorldRound, prepareWorldMovements, transitionWorldSeason } from './world';
 import { getLeagueRule } from './league-rules';
 import { archiveNationalSeason, getNationalTotals, processDueNationalWindows } from './national';
-import { applyContract, evaluateAwards, makeContractOffers, payBonus, paySalary, updateLeadership, updateMarketValue, ensureEconomicHistory, beginEconomicSeason, answerCaptainOffer, expireCaptainOffers } from './career-systems';
+import { applyContract, evaluateAwards, makeContractOffers, makeCounterOffer, payBonus, paySalary, updateLeadership, updateMarketValue, ensureEconomicHistory, beginEconomicSeason, answerCaptainOffer, expireCaptainOffers } from './career-systems';
+import { CHEAT_INCREASE_AMOUNTS, DEFAULT_CHEAT_SETTINGS, getCheatSettings } from './cheat-settings';
 import { initializeSystems } from './systems';
 import { fixtureDate, nextCalendarYear, seasonDate, seasonHalfEndDate } from './calendar';
 import { captureSeasonDetails } from './season-details';
@@ -31,7 +32,7 @@ import { finishGameSteps, type GameSteps } from './game-steps';
 import type { Award, AttributeKey, Attributes, Career, CreateOptions, Fixture, GameProgress, Intensity, MatchRecord, Player, PlayerStats, Position, SeasonState, SeasonSummary, Standing, Talent, TransferOffer } from './types';
 import type { PresentationEvent } from './revision-types';
 
-export const ENGINE_VERSION = '2.14.11';
+export const ENGINE_VERSION = '2.14.12';
 export const overall = calculateOverall;
 export { addStats, emptyStats, hashSeed, seededRandom } from './math';
 const TALENT_ORDER: Talent[] = ['D','C','B','A','S','SS','SSS'];
@@ -163,6 +164,7 @@ export function createCareer(options:CreateOptions):Career {
   const player=previewPlayer(options),club=getClub(options.clubId);
   const career: Career={schemaVersion:1,id:'career_'+hashSeed(options.seed+'|career|'+options.name).toString(36),seed:options.seed,revision:0,createdAt:'2026-07-01T00:00:00.000Z',updatedAt:'2026-07-01T00:00:00.000Z',player,season:makeSeason(player,2026,1),history:[],news:[],training:[...(options.training??POSITION_ATTRIBUTES[player.position].slice(0,3))],intensity:options.intensity??'balanced',transfers:[],offers:[],stage:'season',managerTrust:55,careerIncome:0,awards:[],difficulty:options.difficulty,processedCommands:[]};
   initializeSystems(career,false);
+  career.systems!.cheats={...DEFAULT_CHEAT_SETTINGS};
   initializeClubCompetitions(career);
   beginGrowthSeason(career);
   beginAchievementSeason(career);
@@ -221,6 +223,12 @@ export function generateOffers(career:Career):TransferOffer[] {
 export function refreshContractOffers(career:Career):Career{
  if(career.stage==='retired'||career.stage!=='offseason'&&!isFreeAgent(career)||career.transferDecision&&!isFreeAgent(career))throw new Error('현재 계약 제안을 다시 검토할 수 없습니다.');
  const next=editable(career,true);next.offers=generateOffers(next);touch(next);return next;
+}
+export function requestCounterOffer(career:Career,clubId:string):Career{
+ const next=editable(career,true),offer=makeCounterOffer(next,clubId);
+ next.offers=next.offers.filter(o=>o.source!=='counter');
+ next.offers.push(offer);
+ touch(next);return next;
 }
 function finishSeason(career:Career) {
   prepareWorldMovements(career);
@@ -398,11 +406,14 @@ export function setPlaySkill(career:Career,key:AttributeKey,selected:boolean):Ca
  touch(next);return next;
 }
 export function cheatIncreaseAttribute(career:Career,key:AttributeKey,amount:number):Career{
-  if(!career.systems?.cheats?.enabled)throw new Error('설정에서 치트 모드를 켜 주세요.');
+  if(!getCheatSettings(career).enabled)throw new Error('설정에서 치트 모드를 켜 주세요.');
   if(career.stage==='retired')throw new Error('은퇴한 선수의 능력치는 변경할 수 없습니다.');
   const allowed=career.player.position==='GK'?GK_ATTRIBUTES:FIELD_ATTRIBUTES;
-  if(!allowed.includes(key)||![1,5,10].includes(amount))throw new Error('능력치와 증가량을 확인해 주세요.');
-  const next=editable(career,true);increaseAttribute(next,key,amount);next.systems!.cheats!.used=true;updateMarketValue(next,'능력치 직접 조정');touch(next);return next;
+  if(!allowed.includes(key)||!CHEAT_INCREASE_AMOUNTS.some(step=>step===amount))throw new Error('능력치와 증가량을 확인해 주세요.');
+  const next=editable(career,true);
+  increaseAttribute(next,key,amount);
+  next.systems!.cheats={...getCheatSettings(next),used:true};
+  updateMarketValue(next,'능력치 직접 조정');touch(next);return next;
 }
 export function acceptTransfer(career:Career,offerId:string):Career {
   if(career.stage==='retired')throw new Error('은퇴한 선수는 계약을 체결할 수 없습니다.');

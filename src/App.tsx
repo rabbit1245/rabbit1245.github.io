@@ -152,12 +152,12 @@ export default function App() {
     catch (e) { setError(`현재 진행은 저장되었지만 저장 슬롯 목록을 갱신하지 못했습니다. ${errorMessage(e)}`); }
     return true;
   }
-  async function command(value: GameCommand) {
+  async function command(value: GameCommand, onError: (message:string)=>void = setError) {
     if (locked.current || !careerRef.current) return;
     locked.current = true; setBusy(true); setError('');const resume=beginFullTask();
     try { const previous = careerRef.current; const next = await runGameCommand(previous, value,setProgress); const saved=await commit(next,previous);if(value.type==='training'&&saved)navigate('locker');
       if (['advanceHalf','continueHalf','transfer','nextSeason','retire'].includes(value.type) && !reduced) { const matchIds = new Set([...careerMatchLedger(previous).club,...careerMatchLedger(previous).national].map(m => m.id)), eventIds = new Set(previous.systems?.events.map(e => e.id) || []); const matches = [...careerMatchLedger(next).club,...careerMatchLedger(next).national].filter(m => !matchIds.has(m.id)), events = next.systems?.events.filter(e => !eventIds.has(e.id)) || []; if (matches.length || events.some(e => e.importance === 'milestone')) setPresentation({ matches, events }); } if (value.type === 'nextSeason' || value.type === 'retire') navigate(value.type === 'retire' ? 'career' : 'locker'); if (value.type === 'training') setToast('새로운 훈련 계획을 적용했습니다.'); }
-    catch (e) { setError(errorMessage(e)); }
+    catch (e) { onError(errorMessage(e)); }
     finally { resume?.();locked.current = false; setBusy(false); setProgress(null); }
   }
   async function newCareer(options: CreateOptions) {
