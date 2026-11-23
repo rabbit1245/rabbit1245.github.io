@@ -246,7 +246,8 @@ export function simulateMatch(career:Career,fixture:Fixture,options:MatchOptions
   const seed=`${career.seed}:match-v2:${career.season.year}:${fixture.id}`;
   const actionSeed=hashSeed(seed).toString(36);
   const stage=(fixture as Fixture&{stage?:string}).stage;
-  const bigMatch=!!stage&&/^(결승|준결승|4강|8강|16강|final|semifinal|quarterfinal|round16)$/.test(stage)||/(?:^|[|:])(final|semifinal|quarterfinal|round16)(?:[|:]|$)/.test(fixture.id)||home.power>=80&&away.power>=80&&Math.abs(home.power-away.power)<=8;
+  const knockout=!!stage&&/^(결승|준결승|4강|8강|16강|32강|final|semifinal|quarterfinal|round16|round32)$/.test(stage)||/(?:^|[|:])(final|semifinal|quarterfinal|round16|round32)(?:[|:]|$)/.test(fixture.id);
+  const bigMatch=knockout||home.power>=80&&away.power>=80&&Math.abs(home.power-away.power)<=8;
   const rng=seededRandom(seed),selectRng=seededRandom(`${seed}:selection`);
   const p=career.player;
   const suppliedHome=options.homePlayers?.some(row=>row.id===p.id),suppliedAway=options.awayPlayers?.some(row=>row.id===p.id);
@@ -262,10 +263,19 @@ export function simulateMatch(career:Career,fixture:Fixture,options:MatchOptions
     if(!competition.length)competition=peers.filter(row=>group(row.position)===group(p.position));
     const levels=competition.map(row=>row.attributes?playingAbility({...row,attributes:row.attributes,style:''}):row.ovr).sort((a,b)=>b-a);
     const rival=levels[Math.min(p.position==='CB'?1:0,Math.max(0,levels.length-1))]??ownClub.power;
-    const startProbability=clamp(.68+(playingAbility(p)-rival)*.035+(career.managerTrust-50)*.003+(p.form-60)*.002,.03,.99);
+    const ability=playingAbility(p),advantage=ability-rival;
+    const firstChoice=knockout&&p.fitness>=60&&(advantage>=3||advantage>=-1&&(p.form>=65||career.managerTrust>=70));
+    const routineStart=clamp(.68+advantage*.035+(career.managerTrust-50)*.003+(p.form-60)*.002,.03,.99);
+    const startProbability=firstChoice?Math.max(routineStart,advantage>=3?1:.96):routineStart;
     selection.started=selectRng()<startProbability;
-    if(selection.started){const stamina=p.attributes.stamina??p.attributes.concentration??60,edge=Math.max(0,playingAbility(p)-ownClub.power),withdrawal=clamp(.36-edge*.015-Math.max(0,stamina-75)*.006,.10,.45);selection.from=0;selection.to=selectRng()<withdrawal?integer(selectRng,62,84):90;}
-    else if(selectRng()<clamp(.66+(playingAbility(p)-ownClub.power)*.012,.15,.9)){selection.from=integer(selectRng,55,80);selection.to=90;}
+    if(selection.started){
+      const stamina=p.attributes.stamina??p.attributes.concentration??60,edge=Math.max(0,ability-ownClub.power);
+      const withdrawal=firstChoice&&p.fitness>=70?.06:clamp(.36-edge*.015-Math.max(0,stamina-75)*.006,.10,.45);
+      selection.to=selectRng()<withdrawal?integer(selectRng,62,84):90;
+    }else{
+      const substitute=firstChoice&&p.position!=='GK'?.94:clamp(.66+(ability-ownClub.power)*.012,.15,.9);
+      if(selectRng()<substitute){selection.from=integer(selectRng,55,80);selection.to=90;}
+    }
   }
   selection.from=clamp(Math.floor(selection.from),0,90);selection.to=clamp(Math.floor(selection.to),selection.from,90);
   if(!userTeam||(!available&&!options.forceSelection)){selection.from=0;selection.to=0;selection.started=false;}

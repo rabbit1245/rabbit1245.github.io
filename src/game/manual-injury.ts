@@ -1,6 +1,7 @@
 import type {Career,MatchRecord} from './types';
 import {seasonHalfEndDate} from './calendar';
 import {getLeagueRule} from './league-rules';
+const WEEK_MS=7*86_400_000;
 /** Calendar time, shared by every competition. A league round is not a week of international time. */
 export function syncManualInjury(c:Career,date:string):void{
  const rows=c.systems?.manualInjuries;if(!rows?.length)return;
@@ -13,9 +14,42 @@ export function syncManualInjury(c:Career,date:string):void{
   else c.player.injuryWeeks=Math.max(1,c.player.injuryWeeks);
   return;
  }
- if(date<active.end)c.player.injuryWeeks=Math.max(c.player.injuryWeeks,Math.max(1,Math.ceil((Date.parse(active.end)-Date.parse(date))/604800000)));
+ if(date<active.end)c.player.injuryWeeks=Math.max(c.player.injuryWeeks,Math.max(1,Math.ceil((Date.parse(active.end)-Date.parse(date))/WEEK_MS)));
  else {c.player.injuryWeeks=0;active.returned=active.end;}
 }
+
+/** For a recorded match injury, use the same return date in every competition.
+ * Older saves without a dated appearance keep their league-round countdown. */
+export function syncPlayerInjury(c:Career,date:string):boolean{
+ syncManualInjury(c,date);
+ if(c.systems?.manualInjuries?.some(r=>!r.returned&&!r.pendingNextSeason))return true;
+ if(c.player.injuryWeeks<=0)return false;
+ const now=Date.parse(date);
+ if(!Number.isFinite(now))return false;
+ let lastTime=-Infinity,lastWeeks=0;
+ const read=(matches:readonly MatchRecord[])=>{
+  for(const match of matches){
+   if(!match.playerPlayed||!match.date)continue;
+   const time=Date.parse(match.date),weeks=match.effects?.injuryWeeksAfter??0;
+   if(time>lastTime||time===lastTime&&weeks>lastWeeks){lastTime=time;lastWeeks=weeks;}
+  }
+ };
+ const recent=c.season.year-1;
+ read(c.season.matches);
+ for(const h of c.history.slice(-2))if(h.year>=recent)read(h.matches);
+ const cups=c.systems?.clubCompetitions;
+ for(const cup of cups?.current??[])read(cup.matches);
+ for(const cup of cups?.history??[])if(cup.year>=recent)read(cup.matches);
+ const national=c.systems?.national;
+ if(national){
+  read(national.matches);
+  for(const row of national.history)if(row.year>=recent)read(row.matches);
+ }
+ if(!lastWeeks)return false;
+ if(now>=lastTime)c.player.injuryWeeks=Math.max(0,Math.ceil((lastTime+lastWeeks*WEEK_MS-now)/WEEK_MS));
+ return true;
+}
+
 export function activatePendingInjury(c:Career):void{
  const pending=c.systems?.manualInjuries?.find(r=>r.pendingNextSeason&&!r.returned);if(!pending)return;
  const ruleStart=c.season.calendarYear??c.season.year;

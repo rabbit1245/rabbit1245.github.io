@@ -1,5 +1,5 @@
 import {internationalEntries,internationalPlans} from './international-competitions';
-import {syncManualInjury} from './manual-injury';
+import {syncPlayerInjury} from './manual-injury';
 import {evaluateClubAwards} from './club-awards';
 import {CLUBS,getClub,getLeague} from './data';
 import {simulateMatch} from './match-engine';
@@ -148,7 +148,7 @@ export function processClubCompetitions(c:Career,onMatch:(match:MatchRecord)=>vo
    for(const f of pending.filter(f=>f.step===step)){
     const own=c.player.squad==='senior'&&(f.homeId===c.player.clubId||f.awayId===c.player.clubId);
     if(own){const last=[...c.season.matches,...cupMatches(c,c.season.year),...c.systems!.national.matches].filter(x=>x.date&&x.date<schedule.date).sort((a,b)=>a.date!.localeCompare(b.date!)).at(-1);if(last?.date)c.player.fitness=Math.min(100,c.player.fitness+Math.min(18,Math.max(0,(Date.parse(schedule.date)-Date.parse(last.date))/86400000)*5));}
-    if(own)syncManualInjury(c,schedule.date);
+    if(own)syncPlayerInjury(c,schedule.date);
     const teams=[f.homeId,f.awayId].map(id=>({...getClub(id),power:getClubWorldPower(c,id)}));
     const m=simulateMatch(c,f,{home:teams[0],away:teams[1],homePlayers:getWorldClubPlayers(c,f.homeId),awayPlayers:getWorldClubPlayers(c,f.awayId),scope:'club',competitionId:t.id,date:schedule.date,userParticipates:own,detailed:own,recordActionEvents:own,neutralVenue:f.stage==='결승'});
     f.homeGoals=m.homeGoals;f.awayGoals=m.awayGoals;f.date=schedule.date;f.played=true;
