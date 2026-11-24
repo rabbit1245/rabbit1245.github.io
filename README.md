@@ -1,3 +1,9 @@
+## K볼 2.14.13 · 치트 전체 적용과 전체 노화
+
+[K볼 2.14.13 다운로드](https://raw.githubusercontent.com/rabbit1245/rabbit1245.github.io/4a10ff01bf7f98030a200ad7f91f9bd6728eb9a9/Kball.zip)
+
+훈련에서 치트나 수동 노화의 수치를 고르면 수치 버튼 바로 위에 **전체 적용** 또는 **전체 노화**가 나타납니다. 수동 노화에 **−3**을 추가했고, 능력치 화면에서도 치트 전체 적용을 사용할 수 있습니다. [변경 내용과 검수 결과](https://github.com/rabbit1245/rabbit1245.github.io/blob/4a10ff01bf7f98030a200ad7f91f9bd6728eb9a9/PLAY-KBALL.md)
+
 ## K볼 2.14.12 · 이적시장 역제안과 치트 +3
 
 [K볼 2.14.12 다운로드](https://raw.githubusercontent.com/rabbit1245/rabbit1245.github.io/a6c87bf9755e4a524516b6713e86939765452d06/Kball.zip)
