@@ -49,8 +49,9 @@ function growthCeiling(c:Career,key:AttributeKey):number{
  const mastery=aptitude[p.talent]*clamp((120-(p.attributes[key]??0)+4)/12,.35,1.15);
  return (p.attributes[key]??0)<100?Math.max(normal,mastery):mastery;
 }
-export function increaseAttribute(career:Career,key:AttributeKey,amount:number):void{
-  apply(career,key,amount,'cheat');career.player.ovr=overall(career.player);
+export function increaseAttributes(career:Career,keys:readonly AttributeKey[],amount:number):void{
+  for(const key of keys)apply(career,key,amount,'cheat');
+  career.player.ovr=overall(career.player);
   career.player.potential=Math.min(120,Math.max(career.player.potential,career.player.ovr));
 }
 function cappedGain(career:Career,key:AttributeKey,amount:number,cause:'experience'|'development',cap:number):void {
@@ -102,4 +103,7 @@ export function roleGrowthDescription(career:Career):string {
   return `${career.player.position} · ${POSITION_ATTRIBUTES[career.player.position].slice(0,3).join(', ')}`;
 }
 
-export function applyManualAging(career:Career,amount:number,key:AttributeKey):void{apply(career,key,-amount,'aging');career.player.ovr=overall(career.player);}
+export function applyManualAging(career:Career,amount:number,keys:readonly AttributeKey[]):void{
+  for(const key of keys)apply(career,key,-amount,'aging');
+  career.player.ovr=overall(career.player);
+}

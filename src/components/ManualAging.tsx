@@ -1,6 +1,21 @@
 import type {Career,GameCommand} from '../game/types';
-export default function ManualAging({career,busy,amount,onChange}:{career:Career;busy:boolean;amount:1|5|10|null|undefined;onChange:(n:1|5|10|null|undefined)=>void}){
- return <div className="manual-aging" data-testid="manual-aging"><button className="button secondary" aria-expanded={amount!==undefined} disabled={busy||career.stage==='retired'} onClick={()=>onChange(amount===undefined?null:undefined)}>노화</button>{amount!==undefined&&<div className="action-inline manual-aging-options">{([1,5,10] as const).map(n=><button className={`button ${amount===n?'primary':'secondary'}`} aria-pressed={amount===n} key={n} disabled={busy} onClick={()=>onChange(n)}>−{n}</button>)}</div>}</div>;
+import {ATTRIBUTE_ADJUSTMENT_AMOUNTS,type AttributeAdjustmentAmount} from '../game/attributes';
+
+export function AttributeStepControls({aging=false,disabled,amount,onChange,onApplyAll,allDisabled=false}:{
+  aging?:boolean;disabled:boolean;amount:AttributeAdjustmentAmount|null|undefined;
+  onChange:(amount:AttributeAdjustmentAmount|null|undefined)=>void;
+  onApplyAll:(amount:AttributeAdjustmentAmount)=>void;allDisabled?:boolean;
+}){
+  const sign=aging?'−':'+';
+  return <div className="manual-aging" data-testid={aging?'manual-aging':'training-cheat'}>
+    <button type="button" className="button secondary" aria-expanded={amount!==undefined} disabled={disabled} onClick={()=>onChange(amount===undefined?null:undefined)}>{aging?'노화':'치트'}</button>
+    {amount!==undefined&&<div className="attribute-step-options">
+      {amount!==null&&<button type="button" className="button secondary" disabled={disabled||allDisabled} onClick={()=>onApplyAll(amount)}>{aging?'전체 노화':'전체 적용'} {sign}{amount}</button>}
+      <div className="action-inline">{ATTRIBUTE_ADJUSTMENT_AMOUNTS.map(step=>(
+        <button type="button" className={`button ${amount===step?'primary':'secondary'}`} aria-pressed={amount===step} key={step} disabled={disabled} onClick={()=>onChange(step)}>{sign}{step}</button>
+      ))}</div>
+    </div>}
+  </div>;
 }
 export function InjuryControl({career,busy,open,onToggle,command}:{career:Career;busy:boolean;open:boolean;onToggle:()=>void;command:(c:GameCommand)=>void}){
  const active=career.systems?.manualInjuries?.find(r=>!r.returned),available=career.stage==='offseason'||career.season.week===0||career.season.week===career.systems?.halfRound;

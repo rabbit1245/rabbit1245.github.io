@@ -33,6 +33,11 @@ export const GK_ATTRIBUTES: AttributeKey[] = [
   'gkPositioning', 'gkDistribution', 'decisions', 'concentration', 'gkDefensiveOrganization',
 ];
 
+export const ATTRIBUTE_ADJUSTMENT_AMOUNTS=[1,3,5,10] as const;
+export type AttributeAdjustmentAmount=typeof ATTRIBUTE_ADJUSTMENT_AMOUNTS[number];
+export const isAttributeAdjustmentAmount=(amount:number):amount is AttributeAdjustmentAmount=>
+  ATTRIBUTE_ADJUSTMENT_AMOUNTS.some(step=>step===amount);
+
 /** Ordered core attributes. Every field attribute still contributes to the absolute OVR. */
 export const LEGACY_POSITION_ATTRIBUTES: Record<Position, AttributeKey[]> = {
   GK: [...GK_ATTRIBUTES],

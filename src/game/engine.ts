@@ -15,24 +15,24 @@ import {moneyText} from './currency';
 import {syncManualInjury,syncPlayerInjury,recordManualAbsences,activatePendingInjury} from './manual-injury';
 import {initializeClubCompetitions,processClubCompetitions,europeanEntries,cupStats} from './club-competitions';
 import { CLUBS, getClub, getLeague } from './data';
-import { ATTRIBUTE_LABELS, FIELD_ATTRIBUTES, GK_ATTRIBUTES, PLAY_STYLES, POSITION_ATTRIBUTES, POSITION_LABELS, overall as calculateOverall } from './attributes';
+import { ATTRIBUTE_LABELS, FIELD_ATTRIBUTES, GK_ATTRIBUTES, PLAY_STYLES, POSITION_ATTRIBUTES, POSITION_LABELS, isAttributeAdjustmentAmount, overall as calculateOverall, type AttributeAdjustmentAmount } from './attributes';
 import { addStats, clamp, emptyStats, hashSeed, integer, round, seededRandom, sumStats } from './math';
 import { simulateMatch } from './match-engine';
 import { getClubWorldPower, getSeasonClubIds, getWorldClubPlayers, getYouthClubPlayers, processWorldRound, prepareWorldMovements, transitionWorldSeason } from './world';
 import { getLeagueRule } from './league-rules';
 import { archiveNationalSeason, getNationalTotals, processDueNationalWindows } from './national';
 import { applyContract, evaluateAwards, makeContractOffers, makeCounterOffer, payBonus, paySalary, updateLeadership, updateMarketValue, ensureEconomicHistory, beginEconomicSeason, answerCaptainOffer, expireCaptainOffers } from './career-systems';
-import { CHEAT_INCREASE_AMOUNTS, DEFAULT_CHEAT_SETTINGS, getCheatSettings } from './cheat-settings';
+import { canIncreaseAttribute, DEFAULT_CHEAT_SETTINGS, getCheatSettings } from './cheat-settings';
 import { initializeSystems } from './systems';
 import { fixtureDate, nextCalendarYear, seasonDate, seasonHalfEndDate } from './calendar';
 import { captureSeasonDetails } from './season-details';
-import { applyMatchExperience, beginGrowthSeason, ensureGrowthTracking, trainRound,increaseAttribute,applyManualAging } from './growth';
+import { applyMatchExperience, beginGrowthSeason, ensureGrowthTracking, trainRound,increaseAttributes,applyManualAging } from './growth';
 import { TALENT_PROFILES } from './talent';
 import { finishGameSteps, type GameSteps } from './game-steps';
 import type { Award, AttributeKey, Attributes, Career, CreateOptions, Fixture, GameProgress, Intensity, MatchRecord, Player, PlayerStats, Position, SeasonState, SeasonSummary, Standing, Talent, TransferOffer } from './types';
 import type { PresentationEvent } from './revision-types';
 
-export const ENGINE_VERSION = '2.14.12';
+export const ENGINE_VERSION = '2.14.13';
 export const overall = calculateOverall;
 export { addStats, emptyStats, hashSeed, seededRandom } from './math';
 const TALENT_ORDER: Talent[] = ['D','C','B','A','S','SS','SSS'];
@@ -375,12 +375,17 @@ export function setTraining(career:Career,keys:AttributeKey[],intensity:Intensit
   present(next,'growth','다음 시즌 훈련 확정',keys.length?`${keys.length}개 능력치만 성장합니다. 시즌 중에는 이 계획을 유지합니다.`:'훈련 선택 없이 시작합니다. 이번 시즌 능력치는 자동 성장하지 않습니다.');
   touch(next);return next;
 }
-export function manuallyAge(career:Career,amount:1|5|10,key:AttributeKey):Career{
- if(career.stage==='retired'||![1,5,10].includes(amount))throw new Error('현역 선수에게 -1/-5/-10 중 하나를 적용해 주세요.');
- if(!(career.player.position==='GK'?GK_ATTRIBUTES:FIELD_ATTRIBUTES).includes(key))throw new Error('감소할 능력치를 선택해 주세요.');
- const next=editable(career,true),before={...next.player.attributes},ovrBefore=next.player.ovr;
- applyManualAging(next,amount,key);
- (next.systems!.manualAging??=[]).push({playerId:next.player.id,playerName:next.player.name,id:`manual-aging:${next.id}:${next.revision}`,year:next.season.year,round:next.season.week,date:currentDate(next),amount,key,ovrVersion:3,before,after:{...next.player.attributes},ovrBefore,ovrAfter:next.player.ovr});
+export function manuallyAge(career:Career,amount:AttributeAdjustmentAmount,key:AttributeKey|'all'):Career{
+ if(career.stage==='retired'||!isAttributeAdjustmentAmount(amount))throw new Error('현역 선수에게 −1/−3/−5/−10 중 하나를 적용해 주세요.');
+ const allowed=career.player.position==='GK'?GK_ATTRIBUTES:FIELD_ATTRIBUTES;
+ if(key!=='all'&&!allowed.includes(key))throw new Error('감소할 능력치를 선택해 주세요.');
+ const next=editable(career,true),ovrBefore=next.player.ovr;
+ const keys=key==='all'?allowed:[key];
+ const recordedKeys=key==='all'?keys:Object.keys(next.player.attributes) as AttributeKey[];
+ const snapshot=()=>Object.fromEntries(recordedKeys.map(key=>[key,next.player.attributes[key]]));
+ const before=snapshot();
+ applyManualAging(next,amount,keys);
+ (next.systems!.manualAging??=[]).push({playerId:next.player.id,playerName:next.player.name,id:`manual-aging:${next.id}:${next.revision}`,year:next.season.year,round:next.season.week,date:currentDate(next),amount,...(key==='all'?{}:{key}),ovrVersion:3,before,after:snapshot(),ovrBefore,ovrAfter:next.player.ovr});
  updateMarketValue(next,'사용자 수동 노화');touch(next);return next;
 }
 export function configureCheats(career:Career,enabled:boolean,freezeAging:boolean):Career{
@@ -405,13 +410,15 @@ export function setPlaySkill(career:Career,key:AttributeKey,selected:boolean):Ca
  if(!selected&&before>100)updateMarketValue(next,'플레이스킬 초과 숙련 종료');
  touch(next);return next;
 }
-export function cheatIncreaseAttribute(career:Career,key:AttributeKey,amount:number):Career{
+export function cheatIncreaseAttribute(career:Career,key:AttributeKey|'all',amount:number):Career{
   if(!getCheatSettings(career).enabled)throw new Error('설정에서 치트 모드를 켜 주세요.');
   if(career.stage==='retired')throw new Error('은퇴한 선수의 능력치는 변경할 수 없습니다.');
   const allowed=career.player.position==='GK'?GK_ATTRIBUTES:FIELD_ATTRIBUTES;
-  if(!allowed.includes(key)||!CHEAT_INCREASE_AMOUNTS.some(step=>step===amount))throw new Error('능력치와 증가량을 확인해 주세요.');
+  if(!isAttributeAdjustmentAmount(amount)||key!=='all'&&!allowed.includes(key))throw new Error('능력치와 증가량을 확인해 주세요.');
   const next=editable(career,true);
-  increaseAttribute(next,key,amount);
+  const keys=key==='all'?allowed.filter(key=>canIncreaseAttribute(next,key)):[key];
+  if(!keys.length)return career;
+  increaseAttributes(next,keys,amount);
   next.systems!.cheats={...getCheatSettings(next),used:true};
   updateMarketValue(next,'능력치 직접 조정');touch(next);return next;
 }

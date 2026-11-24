@@ -29,6 +29,7 @@
 }
 
 .cheat-attribute-tools { display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin:12px 0; }
+.cheat-attribute-actions { display:grid; justify-items:end; gap:6px; }
 .cheat-attribute-tools label { display:flex; align-items:center; gap:8px; }
 .attribute-grid.cheating { grid-template-columns:repeat(3,minmax(0,1fr)); }
 .attribute-grid.cheating .attribute-row { grid-template-columns:minmax(0,1fr) auto 38px 44px; }
@@ -39,7 +40,9 @@
 @media(max-width:1100px) { .attribute-grid.cheating { grid-template-columns:repeat(2,minmax(0,1fr)); } }
 @media(max-width:650px) { .attribute-grid.cheating { grid-template-columns:1fr; } }
 
-.training-header-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;} .manual-aging{display:flex;} .manual-aging .button{min-height:34px;padding:5px 12px;} .manual-aging-options{margin:12px 0;display:flex;gap:8px;flex-wrap:wrap;} .manual-aging-overall{font-size:20px;margin:12px 0;}
+.training-header-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;} .manual-aging{display:flex;} .manual-aging .button{min-height:34px;padding:5px 12px;}
+.attribute-step-options { display:grid; justify-items:start; gap:6px; min-width:0; }
+ .manual-aging-overall{font-size:20px;margin:12px 0;}
 @media(min-width:1100px){.training-panel>.panel-head{padding-top:6px;padding-bottom:6px;}.training-panel>.panel-body{padding-top:8px;padding-bottom:8px;}}
 
 .skill-cap{font-size:11px;color:#365d2e;margin-left:5px;white-space:nowrap}.offer-league{display:block;font-size:13px;font-weight:500;color:#4e5964;margin-top:5px}.locker-injury{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.injury-options{flex-basis:100%;padding:10px;border:1px solid #d7ded5;border-radius:8px;background:#fff}.release-contract{margin-top:16px;padding-top:14px;border-top:1px solid #d7ded5}.training-name{display:flex;align-items:center;flex-wrap:wrap}

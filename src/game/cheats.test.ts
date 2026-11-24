@@ -2,7 +2,8 @@ import 'fake-indexeddb/auto';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {webcrypto} from 'node:crypto';
-import {createCareer,configureCheats,cheatIncreaseAttribute,advanceCareer,stayAtClub,setTraining,startNextSeason} from './engine';
+import {FIELD_ATTRIBUTES} from './attributes';
+import {createCareer,configureCheats,cheatIncreaseAttribute,advanceCareer,stayAtClub,setTraining,startNextSeason,setAllAttributeLocks,overall} from './engine';
 import {executeCommand} from './commands';
 import {exportCareer,importCareer,validateCareer} from './storage';
 if(!globalThis.crypto?.subtle)Object.defineProperty(globalThis,'crypto',{value:webcrypto});
@@ -28,6 +29,33 @@ test('cheats start enabled and +3 obeys bounds and retains a distinct growth cau
  const off=configureCheats(imported,false,true);assert.equal(off.player.attributes.shooting,100);assert.throws(()=>cheatIncreaseAttribute(off,'shooting',5),/치트/);
  assert.throws(()=>cheatIncreaseAttribute(changed,'gkHandling',1),/능력치/);assert.throws(()=>cheatIncreaseAttribute(changed,'shooting',-1),/증가량/);
  const bad=structuredClone(changed);(bad.systems!.cheats as any).enabled='true';assert.throws(()=>validateCareer(bad),/치트/);
+});
+test('bulk increases honor locks and caps while bulk aging floors abilities and preserves locks',()=>{
+ const c=fresh();
+ Object.assign(c.player.attributes,{shooting:99,finishing:119,heading:0,gkHandling:45});
+ c.player.playSkills=['finishing'];
+ c.systems!.attributeLocks=['passing'];
+ const first={...c.player.attributes};
+ const increased=executeCommand(c,{type:'increaseAttribute',key:'all',amount:3},'increase-all');
+ for(const key of FIELD_ATTRIBUTES){
+  const expected=key==='passing'?first[key]:Math.min(key==='finishing'?120:100,first[key]!+3);
+  assert.equal(increased.player.attributes[key],expected,key);
+ }
+ assert.equal(increased.player.attributes.gkHandling,45);
+ assert.equal(increased.player.ovr,overall(increased.player));
+ assert.deepEqual(c.player.attributes,first);
+ const aged=executeCommand(increased,{type:'manualAging',key:'all',amount:5},'age-all');
+ for(const key of FIELD_ATTRIBUTES)assert.equal(aged.player.attributes[key],Math.max(0,increased.player.attributes[key]!-5),key);
+ assert.equal(aged.player.attributes.gkHandling,45);
+ assert.equal(aged.player.age,c.player.age);
+ assert.equal(aged.player.ovr,overall(aged.player));
+ assert.deepEqual(aged.systems!.attributeLocks,['passing']);
+ assert.equal(aged.systems!.manualAging!.length,1);
+ assert.equal(aged.systems!.manualAging![0].key,undefined);
+ assert.equal(aged.revision,c.revision+2);
+ const locked=setAllAttributeLocks(aged,true);
+ assert.equal(cheatIncreaseAttribute(locked,'all',3),locked);
+ assert.throws(()=>cheatIncreaseAttribute(configureCheats(c,false,false),'all',3),/치트/);
 });
 test('freezing aging stops age and attribute decline while calendar seasons still advance; OFF restores age progression without attribute loss',()=>{
  let closed=advanceCareer(fresh(),120);assert.equal(closed.stage,'offseason');closed=stayAtClub(closed);

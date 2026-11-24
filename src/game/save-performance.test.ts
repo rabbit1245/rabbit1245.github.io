@@ -20,7 +20,15 @@ async function stored(id:string):Promise<BlobCareer>{return new Promise((resolve
 async function replace(record:unknown){return new Promise<void>((resolve,reject)=>{const r=indexedDB.open('kball-careers');r.onerror=()=>reject(r.error);r.onsuccess=()=>{const db=r.result,tx=db.transaction('slots','readwrite');tx.objectStore('slots').put(record);tx.oncomplete=()=>{db.close();resolve();};tx.onabort=()=>reject(tx.error);};});}
 test('light controls durably replay every field without replacing the large snapshot',async()=>{
  let c=fresh('all-controls');await saveCareer(c);const first=await stored(c.id),originalWorld=JSON.stringify(c.systems!.world);
- const controls:GameCommand[]=[{type:'attributeLock',key:'shooting',locked:true},{type:'manualAging',key:'shooting',amount:5},{type:'cheatSettings',enabled:true,freezeAging:true},{type:'increaseAttribute',key:'passing',amount:5},{type:'attributeLockAll',locked:false}];
+ const controls:GameCommand[]=[
+  {type:'attributeLock',key:'shooting',locked:true},
+  {type:'manualAging',key:'shooting',amount:5},
+  {type:'cheatSettings',enabled:true,freezeAging:true},
+  {type:'increaseAttribute',key:'passing',amount:5},
+  {type:'increaseAttribute',key:'all',amount:3},
+  {type:'manualAging',key:'all',amount:3},
+  {type:'attributeLockAll',locked:false},
+ ];
  for(let i=0;i<controls.length;i++){
   const next=step(c,controls[i]);assert.ok(commandChange(c,next),controls[i].type);await saveCareerChange(c,next);c=next;
   const record=await stored(c.id);assert.equal(record.format,'kball-blob-v1');assert.equal(record.hash,first.hash);assert.equal(record.revision,first.revision);assert.equal(record.journal.length,i+1);

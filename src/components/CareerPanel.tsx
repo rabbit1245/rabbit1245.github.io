@@ -62,7 +62,7 @@ function Seasons({career,onMatch}:{career:Career;onMatch:(m:MatchRecord)=>void})
 function SeasonGrowth({season,career}:{season:SeasonSummary;career:Career}) {
 
   const aging=career.systems?.manualAging?.filter(a=>a.year===season.year)??[];
-  return <div className="season-growth-summary"><p>종합 능력 {season.ovrStart} → {season.ovrEnd} · {season.stats.minutes.toLocaleString()}분 출전</p><div className="season-growth-grid">{Object.entries(season.attributeGrowth).map(([key,value])=><div key={key}><span>{ATTRIBUTE_LABELS[key as AttributeKey]??key}</span><strong>{(value??0)>0?'+':''}{Math.round((value??0)*100)/100}</strong></div>)}</div>{aging.length>0&&<details><summary>수동 노화 적용 이력 {aging.length}회</summary>{aging.map(a=><p key={a.id}>{a.date.slice(0,10)} · 전체 능력치 −{a.amount} · 종합 능력 {a.ovrBefore} → {a.ovrAfter}</p>)}</details>}</div>;
+  return <div className="season-growth-summary"><p>종합 능력 {season.ovrStart} → {season.ovrEnd} · {season.stats.minutes.toLocaleString()}분 출전</p><div className="season-growth-grid">{Object.entries(season.attributeGrowth).map(([key,value])=><div key={key}><span>{ATTRIBUTE_LABELS[key as AttributeKey]??key}</span><strong>{(value??0)>0?'+':''}{Math.round((value??0)*100)/100}</strong></div>)}</div>{aging.length>0&&<details><summary>수동 노화 적용 이력 {aging.length}회</summary>{aging.map(a=><p key={a.id}>{a.date.slice(0,10)} · {a.key?ATTRIBUTE_LABELS[a.key]:'전체 능력치'} −{a.amount} · 종합 능력 {a.ovrBefore} → {a.ovrAfter}</p>)}</details>}</div>;
 }
 
 function NationalPanel({career,onMatch}:{career:Career;onMatch:(m:MatchRecord)=>void}) {
