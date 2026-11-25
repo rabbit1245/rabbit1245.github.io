@@ -2,7 +2,7 @@ import {cardRiskMultiplier,expectedDefensiveActivity} from './discipline';
 import {playingAbility,leadershipAbility} from './attributes';
 import {personalityEdge,personality} from './personality';
 import {skillSuccess,openPlaySaveChance,shareShotSupply,cognitiveOpportunity,supportedTechnique,oneOnOneSaveChance} from './ability-contests';
-import {actionAbility as ability,phasePasses,resolvePressing,resolveBallDuels,resolveAirClaims,headerProbability,headerDelivery,aerialQuality,type ActionEmitter} from './match-actions';
+import {actionAbility as ability,phasePasses,resolvePressing,resolveBallDuels,resolveAirClaims,headerProbability,headerDelivery,aerialQuality,fullbackSupport,directFreeKickTaker,directFreeKickTechnique,type ActionEmitter} from './match-actions';
 import { CLUBS, ROSTERS } from './data';
 import { clamp, emptyStats, hashSeed, integer, round, seededRandom } from './math';
 import type { MatchOptions, MatchParticipant, MatchPerformance } from './revision-types';
@@ -359,23 +359,31 @@ export function simulateMatch(career:Career,fixture:Fixture,options:MatchOptions
       return {opportunities,headerChance,clearSpace:cognitiveOpportunity(reading,opposition.power,team.referencePower),contest:FORWARD.has(shooter.position),quality:finishing*.45+a('positioning')*.2+a('composure')*.15+a('anticipation')*.1+a('decisions')*.1};
     });
     const shared=shareShotSupply(shotSupply,team.power);
-    for(const [actorIndex,shooter] of team.actors.entries()){
-      const a=(key:AttributeKey)=>ability(shooter,key),clutch=shooter.user&&bigMatch?personalityEdge(career,'clutch'):0;
-      const opportunities=shared[actorIndex];
-      const shotRng=seededRandom(`${seed}:${shooter.id}:shots`);
-      const creatorRng=seededRandom(`${seed}:${shooter.id}:creators`);
-      const headerRng=seededRandom(`${actionSeed}:${shooter.id}:headers`),headerChance=shotSupply[actorIndex].headerChance;
+    const support=new Map(team.actors.map(actor=>[actor,fullbackSupport(actor,team.referencePower)]));
+    const runs=shared.map((amount,index)=>amount*(1+support.get(team.actors[index])!.run));
+    // Promote viable late runs within the existing team opportunity budget.
+    const total=shared.reduce((sum,amount)=>sum+amount,0);
+    const scale=total/(runs.reduce((sum,amount)=>sum+amount,0)||1);
+    const takerRng=seededRandom(`${seed}:${team.club.id}:direct-free-kick`);
+    for(const [actorIndex,origin] of team.actors.entries()){
+      const opportunities=runs[actorIndex]*scale;
+      const shotRng=seededRandom(`${seed}:${origin.id}:shots`);
+      const creatorRng=seededRandom(`${seed}:${origin.id}:creators`);
+      const headerRng=seededRandom(`${actionSeed}:${origin.id}:headers`),headerChance=shotSupply[actorIndex].headerChance;
       const count=roundedCount(opportunities*(.65+shotRng()*.7),shotRng);
       for(let index=0;index<count;index++){
-        const minute=integer(shotRng,shooter.from+1,Math.max(shooter.from+1,shooter.to));
+        const minute=integer(shotRng,origin.from+1,Math.max(origin.from+1,origin.to));
         const keeper=keeperAt(minute);if(!keeper)continue;
         const k=(key:AttributeKey)=>ability(keeper,key);
         const typeRoll=shotRng();
-        const shotType=typeRoll<.02?'penalty':typeRoll<.11?'setPiece':typeRoll<.11+headerChance?'header':typeRoll<.26+headerChance+shotSupply[actorIndex].clearSpace*.06?'oneOnOne':'open';
-        const header=shotType==='header'?headerDelivery(team,opposition,shooter,keeper,minute,headerRng,emit,recordActions):undefined;
+        // Allocate the same restart slots to direct kicks and deliveries into the area.
+        const shotType=typeRoll<.02?'penalty':typeRoll<.06?'freeKick':typeRoll<.11+headerChance?'header':typeRoll<.26+headerChance+shotSupply[actorIndex].clearSpace*.06?'oneOnOne':'open';
+        const header=shotType==='header'?headerDelivery(team,opposition,origin,keeper,minute,headerRng,emit,recordActions,typeRoll<.11):undefined;
         if(shotType==='header'&&!header?.won)continue;
-        const shotAction:import('./types').MatchAction=header?{kind:'headerShot',phase:header.phase,duelId:header.duelId}:{kind:'shot',shotType:shotType==='setPiece'?'freeKick':shotType==='header'?'open':shotType,bigChance:false};
-        const shotId=emit('shot',shooter,minute,shotType==='penalty'?'페널티킥':shotType==='setPiece'?'프리킥 슈팅':shotType==='header'?'헤더 슈팅':shotType==='oneOnOne'?'일대일 슈팅':'슈팅',recordActions?header?.crossId:undefined,recordActions?shotAction:undefined);
+        const shooter=shotType==='freeKick'?directFreeKickTaker(team,minute,takerRng)??origin:header?.shooter??origin;
+        const a=(key:AttributeKey)=>ability(shooter,key),clutch=shooter.user&&bigMatch?personalityEdge(career,'clutch'):0;
+        const shotAction:import('./types').MatchAction=header?{kind:'headerShot',phase:header.phase,duelId:header.duelId}:{kind:'shot',shotType:shotType==='header'?'open':shotType,bigChance:false};
+        const shotId=emit('shot',shooter,minute,shotType==='penalty'?'페널티킥':shotType==='freeKick'?'프리킥 슈팅':shotType==='header'?'헤더 슈팅':shotType==='oneOnOne'?'일대일 슈팅':'슈팅',recordActions?header?.crossId:undefined,recordActions?shotAction:undefined);
         shooter.stats.shots++;
         // A key pass is an actual final pass before this shot, never an independent estimated count.
         const creatorGate=creatorRng(),creatorPick=creatorRng();
@@ -384,9 +392,9 @@ export function simulateMatch(career:Career,fixture:Fixture,options:MatchOptions
         if(header){
           // A retained cross already identifies the actual last supplier; do not pick another assist source.
           if(header.crosser.stats.passesCompleted>(header.crosser.stats.keyPasses??0))creator=header.crosser;
-        }else if(shotType!=='penalty'&&shotType!=='setPiece'&&creatorGate<supplied){
+        }else if(shotType!=='penalty'&&shotType!=='freeKick'&&creatorGate<supplied){
           const creators=team.actors.filter(actor=>actor.id!==shooter.id&&actor.from<minute&&actor.to>=minute&&actor.stats.passesCompleted>(actor.stats.keyPasses??0));
-          const weights=creators.map(actor=>actor.position==='GK'?.12:actor.creation);
+          const weights=creators.map(actor=>actor.position==='GK'?.12:actor.creation*(1+(support.get(actor)?.delivery??0)));
           let pick=creatorPick*weights.reduce((total,weight)=>total+weight,0);
           for(let i=0;i<creators.length;i++){pick-=weights[i];if(pick<=0){creator=creators[i];break;}}
         }
@@ -398,19 +406,23 @@ export function simulateMatch(career:Career,fixture:Fixture,options:MatchOptions
           if(bigChance){creator.stats.bigChancesCreated=(creator.stats.bigChancesCreated??0)+1;if(shotAction.kind==='shot')shotAction.bigChance=true;if(recordActions)emit('bigChance',creator,minute,'수비를 넘어 동료에게 명확한 득점 기회 공급',shotId,{kind:'bigChance',receiverId:shooter.id,quality:clamp(.3+(q-opposition.power)*.004,.2,.8)});}
         }
         const late=minute>60?Math.min(1,.62+a('stamina')*.0038):1;
-        const shootingQuality=shotType==='header'
+        const freeKickQuality=shotType==='freeKick'?directFreeKickTechnique(shooter):undefined;
+        const shootingQuality=freeKickQuality??(shotType==='header'
           ?supportedTechnique((a('heading')*.445+a('jumping')*.162+a('strength')*.101)/.708,(a('positioning')*.182+a('composure')*.11)/.292,.292)
-          :shotType==='setPiece'||shotType==='penalty'
+          :shotType==='penalty'
             ?supportedTechnique((a('shooting')*.38+a('setPieces')*.42)/.8,a('composure'),.2)
-            :supportedTechnique((a('shooting')*.68+a('setPieces')*.07)/.75,a('composure'),.25);
-        const accuracy=skillSuccess(shotType==='header'?.7635:shotType==='setPiece'||shotType==='penalty'?.6855:.51975,shootingQuality,opposition.power,.037,.01);
+            :supportedTechnique((a('shooting')*.68+a('setPieces')*.07)/.75,a('composure'),.25));
+        const accuracy=shotType==='freeKick'?skillSuccess(.47,shootingQuality,opposition.power,.022,.012)
+          :skillSuccess(shotType==='header'?.7635:shotType==='penalty'?.6855:.51975,shootingQuality,opposition.power,.037,.01);
         const aimingPoint=shotType==='open'&&accuracy>.55?.55+.21*Math.tanh((accuracy-.55)/.21):accuracy;
         const aim=clamp(aimingPoint*late*(1+clutch*.018),.07,.98);
         const onTarget=shotRng()<(shotType==='penalty'?Math.max(.78,aim):aim);
         if(!onTarget)continue;
         shooter.stats.shotsOnTarget++;keeper.stats.shotsFaced=(keeper.stats.shotsFaced??0)+1;
         const keeping=k('gkShotStopping')*.455+k('gkReflexes')*.227+k('gkPositioning')*.152+k('concentration')*.106+k('gkHandling')*.06;
-        const finishing=supportedTechnique(shotType==='header'?a('heading')*.55+a('finishing')*.45:a('finishing'),(a('composure')*.25+a('decisions')*.1)/.35,.35);
+        const finishTechnique=freeKickQuality===undefined?(shotType==='header'?a('heading')*.55+a('finishing')*.45:a('finishing'))
+          :freeKickQuality*.55+clamp(a('finishing'),0,130)*.45;
+        const finishing=supportedTechnique(finishTechnique,(a('composure')*.25+a('decisions')*.1)/.35,.35);
         let saveChance=openPlaySaveChance(keeping,finishing);
         if(shotType==='oneOnOne'){keeper.stats.oneOnOneAttempts=(keeper.stats.oneOnOneAttempts??0)+1;saveChance=oneOnOneSaveChance(k('gkOneOnOnes'),k('gkReflexes'),k('gkPositioning'),k('decisions'),finishing);}
         if(shotType==='penalty'){keeper.stats.penaltiesFaced=(keeper.stats.penaltiesFaced??0)+1;saveChance=.04+k('gkOneOnOnes')*.0023+k('gkReflexes')*.0008+k('gkPositioning')*.0007-a('setPieces')*.0007;}
@@ -423,7 +435,7 @@ export function simulateMatch(career:Career,fixture:Fixture,options:MatchOptions
           emit('save',keeper,minute,shotType==='penalty'?'페널티킥 선방':shotType==='oneOnOne'?'일대일 선방':'선방',shotId);
         }else{
           shooter.stats.goals++;scores[side]++;goalMinutes[side].push(minute);keeper.stats.goalsConceded++;
-          if(shotType==='setPiece')shooter.stats.freeKickGoals=(shooter.stats.freeKickGoals??0)+1;
+          if(shotType==='freeKick')shooter.stats.freeKickGoals=(shooter.stats.freeKickGoals??0)+1;
           if(shotType==='penalty')shooter.stats.penaltyGoals=(shooter.stats.penaltyGoals??0)+1;
           if(shotType==='header')shooter.stats.headerGoals=(shooter.stats.headerGoals??0)+1;
           const goalId=emit('goal',shooter,minute,shotType==='header'?'헤더 득점':'득점',shotId);

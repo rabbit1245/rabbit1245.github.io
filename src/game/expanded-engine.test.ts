@@ -44,6 +44,48 @@ test('free-kick/penalty subsets, real big chances and unique recoveries reconcil
  }
  for(const [key,value]of Object.entries(seen))assert.ok(value>0,`${key} must occur from real actions`);
 });
+test('an on-pitch fullback specialist takes team free kicks and can also receive set-piece deliveries',()=>{
+ const ordinary=fresh('RB',80),{f,options}=setup(ordinary);
+ const specialist={...ordinary,player:{...ordinary.player,attributes:{...ordinary.player.attributes,shooting:120,setPieces:120},
+  playSkills:['shooting','setPieces'] as AttributeKey[],skillMastery:{shooting:20,setPieces:20}}};
+ const totals=[ordinary,specialist].map(input=>{
+  let teamKicks=0,ownKicks=0,ownHeaders=0;
+  for(let i=0;i<320;i++){
+   const from=i%2?0:60,match=simulateMatch({...input,seed:`direct-restart-${i}`},f,{...options,forceSelection:{from,to:90,started:from===0}});
+   for(const event of match.events){
+    if(event.teamId!==input.player.clubId)continue;
+    if(event.action?.kind==='shot'&&event.action.shotType==='freeKick'){
+     teamKicks++;
+     if(event.playerId===input.player.id){ownKicks++;assert.ok(event.minute>from);}
+    }
+    if(event.action?.kind==='headerShot'&&event.action.phase==='setPiece'&&event.playerId===input.player.id){
+     ownHeaders++;
+     const cross=match.events.find(row=>row.id===event.relatedId);
+     assert.ok(cross?.action?.kind==='cross'&&cross.playerId!==input.player.id&&event.minute>from);
+    }
+   }
+  }
+  return {teamKicks,ownKicks,ownHeaders};
+ });
+ assert.ok(totals[0].ownKicks/totals[0].teamKicks<.2,JSON.stringify(totals));
+ assert.ok(totals[1].ownKicks/totals[1].teamKicks>.4,JSON.stringify(totals));
+ assert.ok(totals[1].ownKicks>totals[0].ownKicks*4,JSON.stringify(totals));
+ assert.ok(totals[1].ownHeaders>0);
+});
+test('overlapping fullbacks with the same attributes produce more open-play attempts and assists than defensive fullbacks',()=>{
+ const c=fresh('RB',95),{f,options}=setup(c);
+ const totals=['수비형 풀백','오버래핑 풀백'].map(style=>{
+  let openShots=0,assists=0;
+  for(let i=0;i<420;i++){
+   const m=simulateMatch({...c,seed:`fullback-role-${i}`,player:{...c.player,style}},f,options);
+   openShots+=m.events.filter(e=>e.playerId===c.player.id&&e.action?.kind==='shot'&&['open','oneOnOne'].includes(e.action.shotType)).length;
+   assists+=m.playerStats.assists;
+  }
+  return {openShots,assists};
+ });
+ assert.ok(totals[1].openShots>totals[0].openShots*1.07,JSON.stringify(totals));
+ assert.ok(totals[1].assists>totals[0].assists,JSON.stringify(totals));
+});
 test('five actual 120 specialties above a 100 baseline earn pure 120 and mastered 130',()=>{
  let c=fresh('ST',100);c=configureCheats(c,true,true);
  const selected=POSITION_ATTRIBUTES.ST.slice(0,5);

@@ -1,6 +1,6 @@
 import {playingAbility} from './attributes';
 import {derivedAttribute,specialtyAbility,matchExecutionBonus} from './ability-expansion';
-import {pressureAbility} from './ability-contests';
+import {pressureAbility,supportedTechnique} from './ability-contests';
 import {clamp,integer,seededRandom} from './math';
 import type {MatchPerformance,MatchParticipant} from './revision-types';
 import type {AttributeKey,MatchAction,MatchEvent,Position} from './types';
@@ -10,6 +10,7 @@ export interface ActionTeam {club:{id:string;name:string};actors:ActionActor[];p
 export type ActionEmitter=(type:MatchEvent['type'],actor:ActionActor,minute:number,detail:string,relatedId?:string,action?:MatchAction)=>string;
 const forward=new Set<Position>(['ST','CF','SS','LW','RW']);
 const defenders=new Set<Position>(['CB','LB','RB','LWB','RWB']);
+const fullbacks=new Set<Position>(['LB','RB','LWB','RWB']);
 const duration=(p:ActionActor)=>Math.max(0,p.to-p.from)/90;
 const count=(v:number,rng:()=>number)=>Math.max(0,Math.floor(v+rng()));
 const zone=(p:Position)=>p==='GK'||defenders.has(p)?0:forward.has(p)?2:1;
@@ -40,6 +41,25 @@ export const actionAbility=(p:MatchParticipant&{pressure?:number;style?:string},
  }
  return p.pressure?pressureAbility(value,key,p.pressure):value;
 };
+const matchTechnique=(actor:ActionActor,key:AttributeKey)=>clamp(actionAbility(actor,key),0,130);
+export function fullbackSupport(actor:ActionActor,reference:number){
+ if(!fullbacks.has(actor.position))return {run:0,delivery:0};
+ const a=(key:AttributeKey)=>matchTechnique(actor,key);
+ const arrival=a('offTheBall')*.45+a('speed')*.25+a('stamina')*.2+a('decisions')*.1;
+ const finish=a('finishing')*.6+a('shooting')*.4;
+ const service=a('crossing')*.5+a('passing')*.3+a('decisions')*.2;
+ const role=/오버래핑|언더래핑|왕복형|크로스 전문가|볼 운반형/.test(actor.style)?1.25:/수비형|대인 수비/.test(actor.style)?.6:1;
+ const baseline=Math.max(62,reference-4);
+ return {
+  run:(.05+.48*clamp((finish*.6+arrival*.4-baseline)/31,0,1))*role,
+  delivery:(.04+.34*clamp((service-baseline)/31,0,1))*role,
+ };
+}
+
+export function directFreeKickTechnique(actor:ActionActor):number{
+ const shooting=matchTechnique(actor,'shooting'),setPieces=matchTechnique(actor,'setPieces');
+ return supportedTechnique(setPieces*.6+shooting*.4,matchTechnique(actor,'composure'),.2);
+}
 
 /** Only a bounded number of attacking phase transitions are expanded; ordinary passes keep the existing fast aggregate. */
 export function phasePasses(actor:ActionActor,team:ActionTeam,opposition:ActionTeam,seed:string,emit:ActionEmitter,detailed:boolean,passFactor:number,endurance:number,ordinarySuccess:number,record=true){
@@ -109,13 +129,27 @@ export function resolveBallDuels(teams:ActionTeam[],seed:string,emit:ActionEmitt
  }
 }
 
+function weightedActor(players:ActionActor[],weights:number[],rng:()=>number):ActionActor|undefined{
+ let pick=rng()*weights.reduce((a,b)=>a+b,0);
+ for(let i=0;i<players.length;i++){
+  pick-=weights[i];
+  if(pick<=0)return players[i];
+ }
+ return players.at(-1);
+}
+export function directFreeKickTaker(team:ActionTeam,minute:number,rng:()=>number):ActionActor|undefined{
+ const players=outfield(active(team,minute));
+ if(!players.length)return;
+ const techniques=players.map(directFreeKickTechnique),best=Math.max(...techniques);
+ return weightedActor(players,techniques.map(value=>Math.exp(Math.max(-36,value-best)*.11)),rng);
+}
 function supplier(team:ActionTeam,minute:number,rng:()=>number,exclude?:string,setPiece=false){
   const players=active(team,minute).filter(p=>p.id!==exclude&&p.position!=='GK');
   if(!players.length)return active(team,minute).find(p=>p.id!==exclude);
   // Supply is an opportunity, not a permanent highest-stat taker. Reuse the engine's
   // existing positional creation rate so a skilled CB does not take every teammate's cross.
   const weights=players.map(p=>{let rating=suppliers.get(p);if(!rating){const role=['LB','RB','LWB','RWB','LW','RW','LM','RM'].includes(p.position)?10:0,creation=Math.max(.1,p.creation);rating={cross:(actionAbility(p,'crossing')+role)**2*creation,setPiece:actionAbility(p,'setPieces')**2*creation};suppliers.set(p,rating);}return setPiece?rating.setPiece:rating.cross;});
-  let pick=rng()*weights.reduce((a,b)=>a+b,0);for(let i=0;i<players.length;i++){pick-=weights[i];if(pick<=0)return players[i];}return players.at(-1);
+  return weightedActor(players,weights,rng);
 }
 export function resolveAirClaims(teams:ActionTeam[],seed:string,emit:ActionEmitter,record=true){
   for(let side=0;side<2;side++)for(const keeper of teams[side].actors.filter(p=>p.position==='GK'&&p.minutes>0)){
@@ -142,8 +176,21 @@ export function headerProbability(actor:ActionActor,team:ActionTeam){
   const service=wide.length?wide.reduce((n,p)=>n+actionAbility(p,'crossing'),0)/wide.length:team.power;
   return clamp(base*clamp(.35+quality/100+(quality-other)*.015,.25,2.5)*(.75+service*.0035),.005,.65);
 }
-export function headerDelivery(team:ActionTeam,opposition:ActionTeam,shooter:ActionActor,keeper:ActionActor,minute:number,rng:()=>number,emit:ActionEmitter,record=true):{won:boolean;crossId:string;duelId:string;phase:'open'|'setPiece';crosser:ActionActor;delivery?:'corner'|'freeKick'}|undefined{
-  const phase=shooter.position==='CB'||rng()<.35?'setPiece':'open',crosser=supplier(team,minute,rng,shooter.id,phase==='setPiece');if(!crosser)return;
+export function headerDelivery(team:ActionTeam,opposition:ActionTeam,origin:ActionActor,keeper:ActionActor,minute:number,rng:()=>number,emit:ActionEmitter,record=true,fromRestart=false):{won:boolean;crossId:string;duelId:string;phase:'open'|'setPiece';crosser:ActionActor;shooter:ActionActor;delivery?:'corner'|'freeKick'}|undefined{
+  const phase=fromRestart||origin.position==='CB'||rng()<.35?'setPiece':'open';
+  const crosser=supplier(team,minute,rng,phase==='open'?origin.id:undefined,phase==='setPiece');
+  if(!crosser)return;
+  let shooter=origin;
+  if(phase==='setPiece'){
+    const targets=outfield(active(team,minute)).filter(actor=>actor.id!==crosser.id);
+    const receiver=weightedActor(targets,targets.map(actor=>{
+      const quality=clamp(aerialQuality(actor),0,130)*.75+matchTechnique(actor,'offTheBall')*.25;
+      const role=actor.position==='CB'?1.5:actor.position==='ST'||actor.position==='CF'?1.3:fullbacks.has(actor.position)?.8:1;
+      return role*(.25+(quality/75)**3);
+    }),rng);
+    if(!receiver)return;
+    shooter=receiver;
+  }
   const delivery=phase==='setPiece'?(rng()<.6?'corner':'freeKick'):undefined;
   const setPieceId=record&&delivery?emit('setPiece',crosser,minute,'세트피스 크로스 공급',undefined,{kind:'setPiece',delivery}):undefined;
   const crossId=record?emit('cross',crosser,minute,'공중볼 경합 지점으로 크로스',setPieceId,{kind:'cross',keeperId:keeper.id,claimable:false,phase}):'';keeper.stats.crossesFaced=(keeper.stats.crossesFaced??0)+1;
@@ -152,5 +199,5 @@ export function headerDelivery(team:ActionTeam,opposition:ActionTeam,shooter:Act
   shooter.stats.aerialAttempts=(shooter.stats.aerialAttempts??0)+1;defender.stats.aerialAttempts=(defender.stats.aerialAttempts??0)+1;
   const won=rng()<clamp(.5+(aerialQuality(shooter)-aerialQuality(defender))*.009,.05,.93),winner=won?shooter:defender;winner.stats.aerialWon=(winner.stats.aerialWon??0)+1;
   const duelId=record?emit('aerial',winner,minute,won?'공중 경합 후 헤더 기회 확보':'크로스를 공중볼 경합으로 차단',crossId,{kind:'headerDuel',attackerId:shooter.id,defenderId:defender.id,winnerId:winner.id}):'';
-  return {won,crossId,duelId,phase,crosser,delivery};
+  return {won,crossId,duelId,phase,crosser,shooter,delivery};
 }
