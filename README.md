@@ -1,3 +1,9 @@
+## K볼 2.14.15 · 풀백의 공격 가담과 세트피스
+
+[K볼 2.14.15 다운로드](https://raw.githubusercontent.com/rabbit1245/rabbit1245.github.io/a9839d631700cda1174610a02f37eeebc4dee9f6/Kball.zip)
+
+풀백과 윙백의 오버래핑, 침투, 슈팅 능력에 따라 공격 기회를 배정합니다. 직접 프리킥은 출전 선수의 킥 능력을 보고 배정하며, 코너킥과 크로스형 프리킥에는 풀백도 헤더를 받으러 들어갑니다. [변경 내용과 검수 결과](https://github.com/rabbit1245/rabbit1245.github.io/blob/a9839d631700cda1174610a02f37eeebc4dee9f6/PLAY-KBALL.md)
+
 ## K볼 2.14.14 · 대회별 성적과 출전 기록
 
 [K볼 2.14.14 다운로드](https://raw.githubusercontent.com/rabbit1245/rabbit1245.github.io/06c2ccdd2e43dd7a5491d33758a4d2aaa60a86ee/Kball.zip)
