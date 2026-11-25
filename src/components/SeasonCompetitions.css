@@ -5,6 +5,8 @@
 .season-competitions .competition-item { display:flex; flex-wrap:wrap; align-items:baseline; gap:2px 8px; min-width:0; }
 .season-competitions .competition-item strong { font-size:17px; line-height:1.3; overflow-wrap:anywhere; }
 .season-competitions .competition-item > span { color:var(--muted); font-size:15px; line-height:1.3; }
+.competition-detail-list { list-style:none; padding:0; margin:0 0 8px; }
+.competition-detail-list li { padding:8px 0; border-bottom:1px solid var(--border); overflow-wrap:anywhere; }
 .nav-captain-offer { display:inline-block; font-size:15px; padding:1px 5px; margin-left:5px; border-radius:4px; color:var(--teal-dark); background:var(--teal-soft); }
 @media(max-width:899px) { .season-competitions { grid-template-columns:minmax(0,1fr); } }
 @media(max-width:599px) { .season-competitions .competition-scope { flex-direction:column; gap:3px; } .nav-captain-offer { font-size:15px; margin-left:0; } }

@@ -1,15 +1,15 @@
 import {seasonOVRChange} from '../game/ability-expansion';
 import type { Career } from '../game/types';
-import { getSeasonCompetitions } from '../game/season-competitions';
+import type { CompetitionParticipation } from '../game/season-competitions';
 import { TALENT_PROFILES } from '../game/talent';
 import { compactMoney, Delta, money, TeamBadge, teamName } from './Shared';
 
-export default function PlayerStrip({career}: {career: Career}) {
+export default function PlayerStrip({career,competitions}: {career: Career;competitions:CompetitionParticipation[]}) {
   const p = career.player, economics = career.systems?.economics, role = career.systems?.leadership.clubRole;
-  const rows = getSeasonCompetitions(career).filter(row => row.scope === 'national');
-  const national = rows.find(row => row.status === 'called') ?? rows.find(row => row.competitionId) ?? rows[0];
-  const status = national.status === 'called' ? '소집' : national.status === 'played' ? '이번 시즌 출전'
-    : national.status === 'completed' ? '시즌 기록' : national.statusLabel;
+  const rows = competitions.filter(row => row.scope === 'national');
+  const national = rows.find(row => row.status === 'called') ?? rows.find(row => row.nationalPhase === 'finals')
+    ?? rows.find(row => row.nationalPhase === 'qualifying') ?? rows[0];
+  const status=national.status==='injured'?'부상 제외':national.statusLabel;
   return <section className="player-strip" data-testid="player-strip" aria-label="선수 요약">
     <div className="strip-identity"><TeamBadge id={p.clubId}/><div>
       <strong>{p.name}{role && role !== 'none' && <span className="armband">{role === 'captain' ? 'C' : 'VC'}</span>}

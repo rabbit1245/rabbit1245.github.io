@@ -115,7 +115,7 @@ function Retirement({career}:{career:Career}) {
       {!!h.positionChanges.length&&<div>{h.positionChanges.map((line,i)=><p key={i}>포지션 변경: {line}</p>)}</div>}{!!h.playSkills.length&&<p>플레이스타일: {h.playSkills.join(' / ')}</p>}
       <p>유니폼 판매: {h.shirtSales}</p><p>팀 수상: {h.teamAwards.join(' / ')||'없음'}</p>
       {!!h.awardResults.length&&<p>개인상 평가 결과: {h.awardResults.join(' / ')}</p>}
-      <ul>{h.results.map((r,i)=><li key={i}>{r}</li>)}</ul><p>개인 수상: {h.personal.map(retirementAwardName).join(' / ')||'없음'}</p>
+      <h4>대회별 팀 성적과 출전</h4><ul data-testid="retirement-competition-results">{h.results.map((r,i)=><li key={i}>{r}</li>)}</ul><p>개인 수상: {h.personal.map(retirementAwardName).join(' / ')||'없음'}</p>
       <DeferredDetails summary="시즌 통합 세부 스탯 · 개수와 성공률">{()=>stats(h.stats,h.matches)}</DeferredDetails>
       <h4>결승 기록</h4>{!h.finals.length&&<p>결승 진출 기록 없음</p>}{h.finals.map((f,i)=><div className="retirement-final" key={i}>
         <p><b>{f.competition} · {f.result}</b></p>{f.aggregate&&<p>{f.aggregate}</p>}

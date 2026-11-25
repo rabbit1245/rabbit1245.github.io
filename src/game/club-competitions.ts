@@ -16,7 +16,36 @@ const shuffled=(c:Career,ids:string[],salt:string)=>{const rng=seededRandom(`${c
 export function cupLedger(c:Career,year?:number):ClubTournament[]{const s=c.systems?.clubCompetitions;return [...(s?.history??[]),...(s?.current??[])].filter(t=>year===undefined||t.year===year);}
 export function cupMatches(c:Career,year?:number):MatchRecord[]{return [...new Map(cupLedger(c,year).flatMap(t=>t.matches).map(m=>[m.fixtureId,m])).values()];}
 export function cupStats(c:Career,year?:number){return sumStats(cupMatches(c,year).map(m=>m.playerStats));}
-export function tournamentResult(t:ClubTournament,id:string){if(!t.entrants.includes(id))return '참가 자격 없음';if(t.id.startsWith('PLAYOFF:'))return t.winnerId===id?'승강 결정전 승리':'승강 결정전 패배';if(t.winnerId===id)return '우승';if(t.byes.includes(id)&&t.stage==='녹아웃 플레이오프')return '16강 직행';if(t.phase==='league')return `리그 페이즈 ${t.table.findIndex(r=>r.clubId===id)+1}위`;if(t.active.includes(id)||t.byes.includes(id))return `${t.stage} 진출`;const last=t.fixtures.filter(f=>f.played&&(f.homeId===id||f.awayId===id)).at(-1);return last?`${last.stage} 탈락`:'경기 대기';}
+export function clubPhaseTable(t:ClubTournament,id:string) {
+ const asian=t.id.startsWith('AFC_ELITE:');
+ const groups=t.groups??(asian?[t.entrants.slice(0,12),t.entrants.slice(12)]:undefined);
+ const index=groups?.findIndex(group=>group.includes(id))??-1;
+ const group=index>=0?groups?.[index]:undefined;
+ const label=t.groups&&group?`조별리그 ${index+1}조`:asian&&group?`${index===0?'동부':'서부'} 리그 페이즈`:'리그 페이즈';
+ return {label,table:group?t.table.filter(row=>group.includes(row.clubId)):t.table};
+}
+export function tournamentResult(t:ClubTournament,id:string) {
+ if(!t.entrants.includes(id))return '참가 자격 없음';
+ if(t.id.startsWith('PLAYOFF:'))return t.winnerId?t.winnerId===id?'승강 결정전 승리':'승강 결정전 패배':'승강 결정전 대기';
+ if(t.winnerId===id)return '우승';
+ const fixtures=t.fixtures.filter(f=>f.homeId===id||f.awayId===id);
+ const phase=clubPhaseTable(t,id),rank=phase.table.findIndex(row=>row.clubId===id&&row.played>0)+1;
+ if(t.phase==='league')return rank?`${phase.label} 현재 ${rank}위`:`${phase.label} 대기`;
+ if(t.byes.includes(id)&&t.stage==='녹아웃 플레이오프')return '16강 직행';
+ const last=fixtures.filter(f=>f.played).sort((a,b)=>a.step-b.step||a.leg-b.leg).at(-1);
+ if(t.active.includes(id)||t.byes.includes(id)){
+  if(last?.stage===t.stage&&fixtures.some(f=>f.stage===t.stage&&!f.played))return `${t.stage} 진행 중`;
+  return `${t.stage} ${t.step===0?'대기':'진출'}`;
+ }
+ if(last?.stage==='결승') {
+  const winner=t.winnerId??last.winnerId;
+  return winner?winner===id?'우승':'준우승':'결승 결과 미보존';
+ }
+ if(last&&(last.stage==='리그 페이즈'||last.stage.startsWith('조별리그'))){
+  return rank?`${phase.label} ${rank}위 탈락`:`${phase.label} 탈락 · 순위 미보존`;
+ }
+ return last?`${last.stage} 탈락`:'경기 대기';
+}
 function rankedCountries(c:Career){return new Map(EUROPEAN_COUNTRIES.map(country=>{
  const top=Object.values(c.systems!.world.competitions).filter(x=>getLeague(x.leagueId).country===country&&getLeague(x.leagueId).tier===1).flatMap(x=>x.table);
  const completed=top.some(r=>r.played>0);const ids=top.sort((a,b)=>completed?b.points-a.points||(b.goalsFor-b.goalsAgainst)-(a.goalsFor-a.goalsAgainst):getClubWorldPower(c,b.clubId)-getClubWorldPower(c,a.clubId)).map(r=>r.clubId).filter(id=>!reserve(id));

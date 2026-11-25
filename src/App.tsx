@@ -18,6 +18,7 @@ import Creation from './components/Creation';
 import LockerRoom, { phaseLabel } from './components/LockerRoom';
 import PlayerPanel, { type PlayerView } from './components/PlayerPanel';
 import SeasonCompetitions from './components/SeasonCompetitions';
+import {getSeasonCompetitions} from './game/season-competitions';
 import CareerPanel, { type CareerView } from './components/CareerPanel';
 import PlayerStrip from './components/PlayerStrip';
 import StatsNine from './components/StatsNine';
@@ -228,8 +229,9 @@ export default function App() {
     } catch(error) {setError(errorMessage(error));}
   }
   function changeReduced(value:boolean){setReduced(value);try{localStorage.setItem('kball-reduced-motion',String(value));}catch{/* Active for this session. */}}
-  const strip=useMemo(()=>career?<PlayerStrip career={career}/>:null,[career]);
-  const competitions=useMemo(()=>career?<SeasonCompetitions career={career} onMatch={setSelectedMatch}/>:null,[career]);
+  const competitionRows=useMemo(()=>career?getSeasonCompetitions(career):[],[career]);
+  const strip=useMemo(()=>career?<PlayerStrip career={career} competitions={competitionRows}/>:null,[career,competitionRows]);
+  const competitions=useMemo(()=>career?<SeasonCompetitions career={career} rows={competitionRows} onMatch={setSelectedMatch}/>:null,[career,competitionRows]);
   const storageNotice=storageProgress?<LoadingNotice key={storageProgress.startedAt} progress={storageProgress}/>:null;
   return <div className={reduced?'reduce-motion':''}>
     <input ref={fileRef} type="file" hidden accept=".json,.kball-recovery,application/json,application/octet-stream" aria-label="K볼 저장 파일 가져오기" onChange={importFile}/>

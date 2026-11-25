@@ -1,14 +1,17 @@
 import {cupLedger,tournamentResult} from './club-competitions';
 import {nationalSquadFor} from './national';
 import {nationalAvailable,nationalParticipationReason,nationalParticipation,nationalParticipationNotice} from './national-participation';
-import { getClub } from './data';
+import { getClub,getLeague,LEAGUES,INTERNATIONAL_LEAGUES } from './data';
+import { recordedEmployment } from './employment';
+import { getNationalCompetitionResult,nationalMatchPhase,type NationalCompetitionPhase } from './national-competition-results';
 import { seasonDate,seasonHalfEndDate } from './calendar';
 import { normalizeNationality } from './national-data';
-import type { Career,MatchRecord } from './types';
+import type { Career,MatchRecord,Standing } from './types';
 import type { NationalState } from './revision-types';
 
 export interface CompetitionParticipation {
   id:string;
+  year:number;
   scope:'club'|'national';
   /** Missing only when no current-season national participation is known. */
   competitionId?:string;
@@ -20,6 +23,9 @@ export interface CompetitionParticipation {
   statusLabel:string;
   apps:number;
   minutes:number;
+  teamGames?:number;
+  standing?:Pick<Standing,'won'|'drawn'|'lost'|'points'>;
+  nationalPhase?:NationalCompetitionPhase;
   reason:string;
 }
 
@@ -31,12 +37,13 @@ export function nationalCompetitionName(id?:string):string {
 const nationalTeamName=(id:string)=>{const [,country,squad]=id.split(':');return `${country} ${squad==='U20'?'U20':'성인 대표팀'}`;};
 const squadOf=(match:MatchRecord):'U20'|'senior'=>match.playerClubId.endsWith(':U20')?'U20':'senior';
 const played=(match:MatchRecord)=>match.playerPlayed&&match.playerStats.apps>0;
+const leagues=new Set([...LEAGUES,...INTERNATIONAL_LEAGUES].map(row=>row.id));
 
-function currentNationalMatches(career:Career):MatchRecord[] {
+function nationalMatches(career:Career):MatchRecord[] {
   const national=career.systems?.national;if(!national)return [];
   const unique=new Map<string,MatchRecord>();
   for(const match of[...national.history.flatMap(row=>row.matches),...national.matches]){
-    if(match.seasonYear!==career.season.year||!match.playerClubId.startsWith('NAT:')||![match.homeId,match.awayId].includes(match.playerClubId))continue;
+    if(!match.playerClubId.startsWith('NAT:')||![match.homeId,match.awayId].includes(match.playerClubId))continue;
     const key=match.fixtureId||match.id,previous=unique.get(key);
     // Duplicate archived/current copies are the same appearance, never another match.
     if(!previous||!played(previous)&&played(match))unique.set(key,match);
@@ -57,15 +64,69 @@ function currentCallup(career:Career,national:NationalState,matches:MatchRecord[
   return Boolean(career.systems?.events.some(event=>event.year===career.season.year&&event.type==='national'&&event.id.startsWith('national:callup:')&&event.id.endsWith(`:${national.squad}`)&&event.title.includes('발탁')));
 }
 
-function clubParticipation(career:Career):CompetitionParticipation {
-  const season=career.season,summary=career.history.find(row=>row.year===season.year);
-  // Offseason signing already changes player.clubId, but not the season just completed.
-  const teamId=season.matches[0]?.playerClubId??summary?.clubId??career.player.clubId;
-  const squad=summary?.squad??(season.competitionName.includes('U19')?'youth':career.player.squad);
-  const name=squad==='youth'&&!season.competitionName.includes('U19')?`${season.competitionName} · U19 시뮬레이션`:season.competitionName;
-  const ended=career.stage!=='season'||season.completed;
-  const stats=season.playerStats;
-  return {id:`club:${season.year}:${season.leagueId}:${teamId}:${squad}`,scope:'club',competitionId:season.leagueId,name,teamId,teamName:getClub(teamId).name,squad,status:ended?'completed':stats.apps>0?'played':'registered',statusLabel:ended?'시즌 종료':stats.apps>0?'출전 중':season.week===0?'시작 전 · 등록':'등록 · 출전 경쟁',apps:stats.apps,minutes:stats.minutes,reason:squad==='youth'?'현재 소속의 U19 경기입니다. 성인 정규리그 출전과 구분합니다.':stats.apps?'실제 현재 시즌 소속과 출전 기록입니다.':'현재 시즌 소속 대회입니다. 실제 선발과 출전은 실력·신뢰·상태에 따라 결정됩니다.'};
+function clubParticipations(career:Career,year:number):CompetitionParticipation[] {
+  const current=year===career.season.year,summary=career.history.find(row=>row.year===year),season=career.season;
+  if(!current&&!summary)return [];
+  const leagueId=summary?.leagueId??season.leagueId,leagueName=summary?.competitionName??season.competitionName;
+  const squad=summary?.squad??(leagueName.includes('U19')?'youth':career.player.squad);
+  const matches=summary?.matches??season.matches,completed=summary?.completed??season.completed;
+  const retired=current&&career.stage==='retired'&&!completed;
+  const groups=new Map<string,{teamId:string;leagueId:string;matches:MatchRecord[]}>();
+  function group(teamId:string,id:string) {
+    const key=`${id}:${teamId}`;
+    const row=groups.get(key)??{teamId,leagueId:id,matches:[]};
+    groups.set(key,row);
+    return row;
+  }
+  for(const period of recordedEmployment(career,year))if(period.clubId!=='FA')group(period.clubId,period.leagueId);
+  for(const match of new Map(matches.map(m=>[m.fixtureId||m.id,m])).values()){
+    if(match.playerClubId!=='FA')group(match.playerClubId,match.competitionId&&leagues.has(match.competitionId)?match.competitionId:leagueId).matches.push(match);
+  }
+  // The archived club represents the played season even after an offseason signing.
+  const teamId=summary?.clubId??(career.stage==='offseason'?matches[0]?.playerClubId:undefined)??career.player.clubId;
+  if(teamId!=='FA')group(teamId,leagueId);
+  const rows:CompetitionParticipation[]=[];
+  for(const entry of groups.values()){
+    const id=entry.teamId,stored=summary?.details?.employmentStandings?.find(row=>row.clubId===id&&row.leagueId===entry.leagueId);
+    const primary=entry.leagueId===leagueId;
+    const youthTable=career.systems?.youthLeagueSchedules?.[entry.leagueId]?.table;
+    const table=primary?(summary?.details?.table??(current?season.table:undefined))
+      :current?(squad==='youth'?youthTable:career.systems?.world.competitions[entry.leagueId]?.table):undefined;
+    const tableIndex=table?.findIndex(row=>row.clubId===id)??-1;
+    const standing=stored??table?.[tableIndex];
+    const rank=stored?.rank??(primary&&summary?.clubId===id?summary.rank:tableIndex+1);
+    const knownRank=rank>0&&(completed||standing?.played||retired&&entry.matches.length);
+    const atDeparture=stored?.atDeparture||current&&!primary&&squad==='youth'&&!!youthTable;
+    const statusLabel=knownRank?`${atDeparture?'이적 당시':completed?'최종':retired?'은퇴 시점':'현재'} ${rank}위`
+      :completed?'최종 순위 미보존':retired?'은퇴 시점 · 순위 미보존':standing?.played||entry.matches.length?'순위 미보존':'시작 전 · 등록';
+    const stats=groups.size===1?summary?.stats??season.playerStats:undefined;
+    const name=primary?leagueName:getLeague(entry.leagueId).name;
+    const apps=stats?.apps??entry.matches.reduce((sum,m)=>sum+m.playerStats.apps,0);
+    rows.push({
+      id:`club:${year}:${entry.leagueId}:${id}`,year,scope:'club',competitionId:entry.leagueId,
+      name:squad==='youth'&&!name.includes('U19')?`${name} · U19 시뮬레이션`:name,teamId:id,teamName:getClub(id).name,squad,
+      status:completed||retired?'completed':apps?'played':'registered',statusLabel,apps,
+      minutes:stats?.minutes??entry.matches.reduce((sum,m)=>sum+m.playerStats.minutes,0),
+      teamGames:standing?.played,standing,reason:squad==='youth'?'U19 리그':'정규리그',
+    });
+  }
+  const leagueTeams=[...groups.values()].map(row=>row.teamId);
+  if(squad==='senior')for(const cup of cupLedger(career,year)){
+    const teams=new Set([...leagueTeams,...cup.matches.map(match=>match.playerClubId)]);
+    for(const id of teams){
+      if(!cup.entrants.includes(id))continue;
+      const games=[...new Map(cup.matches.filter(match=>match.playerClubId===id).map(match=>[match.fixtureId||match.id,match])).values()];
+      const apps=games.reduce((sum,m)=>sum+m.playerStats.apps,0),result=tournamentResult(cup,id);
+      rows.push({
+        id:`cup:${cup.id}:${id}`,year,scope:'club',competitionId:cup.id,name:cup.name,teamId:id,teamName:getClub(id).name,squad,
+        apps,minutes:games.reduce((sum,m)=>sum+m.playerStats.minutes,0),
+        teamGames:cup.fixtures.filter(f=>f.played&&(f.homeId===id||f.awayId===id)).length,
+        status:cup.phase==='completed'||result.includes('탈락')?'completed':apps?'played':'registered',
+        statusLabel:result,reason:`${cup.basis} · ${cup.rules}`,
+      });
+    }
+  }
+  return rows.length?rows:[{id:`club:none:${year}`,year,scope:'club',name:'FA · 무소속',teamId:'FA',teamName:'FA · 무소속',squad,status:'unselected',statusLabel:'클럽 미등록',apps:0,minutes:0,reason:'해당 시즌 클럽 소속 기록이 없습니다.'}];
 }
 
 function nationalEmpty(career:Career):CompetitionParticipation {
@@ -79,45 +140,80 @@ function nationalEmpty(career:Career):CompetitionParticipation {
   else if(nationalParticipationNotice(career)){status='unselected';statusLabel='다음 소집 대기';reason=nationalParticipationNotice(career)!;}
   else if(national&&national.squad!==ageSquad){status='unselected';statusLabel='새 연령대 소집 대기';reason='현재 연령에 맞는 대표팀의 새 소집에서 실력·소속·출전 성과를 다시 평가합니다.';}
   else if(national?.status==='called'){status='unselected';statusLabel='다음 소집 대기';reason='이전 소집 상태만 남아 있습니다. 현재 시즌의 새 소집이나 출전은 아직 확인되지 않았습니다.';}
-  return {id:`national:none:${career.season.year}`,scope:'national',name:'참여 대회 없음',teamId,teamName:nationalTeamName(teamId),squad:ageSquad,status,statusLabel,apps:0,minutes:0,reason};
+  return {id:`national:none:${career.season.year}`,year:career.season.year,scope:'national',name:'참여 대회 없음',teamId,teamName:nationalTeamName(teamId),squad:ageSquad,status,statusLabel,apps:0,minutes:0,reason};
 }
 
-/** Actual season membership and national selection, never predicted cup eligibility. */
+type NationalGroup={year:number;teamId:string;squad:NationalState['squad'];competitionId?:string;phase:NationalCompetitionPhase;matches:MatchRecord[];called:boolean};
+const editionKey=(id:string|undefined,squad:NationalState['squad'])=>`${squad}|${id??'unrecorded'}`;
+const phaseNames={qualifying:'예선',finals:'본선',friendly:'친선',unrecorded:''};
+
+function nationalParticipations(career:Career,years:Set<number>):CompetitionParticipation[] {
+  const n=career.systems?.national;
+  if(!n)return [];
+  const own=nationalMatches(career),groups=new Map<string,NationalGroup>();
+  function group(year:number,teamId:string,squad:NationalState['squad'],id:string|undefined,phase:NationalCompetitionPhase) {
+    const key=`${year}|${teamId}|${editionKey(id,squad)}|${phase}`;
+    const row=groups.get(key)??{year,teamId,squad,competitionId:id,phase,matches:[],called:false};
+    groups.set(key,row);
+    return row;
+  }
+  for(const match of own)if(years.has(match.seasonYear)){
+    group(match.seasonYear,match.playerClubId,squadOf(match),match.competitionId,nationalMatchPhase(match)).matches.push(match);
+  }
+  const year=career.season.year;
+  if(years.has(year)&&n.phase!=='eliminated'&&currentCallup(career,n,own.filter(match=>match.seasonYear===year))){
+    const date=(n.processedThrough??seasonDate(career.season)).slice(0,4);
+    const id=n.phase==='friendlies'?`FRIENDLIES:${date}`:n.competitionId;
+    const teamId=`NAT:${n.country}:${n.squad}`;
+    const phase=n.phase==='friendlies'?'friendly':n.phase==='finals'?'finals':'qualifying';
+    group(year,teamId,n.squad,id,phase).called=true;
+  }
+  const participating=[...groups.values()].filter(row=>row.called||row.matches.some(match=>played(match)||match.nationalSelection?.called));
+  if(!participating.length)return [];
+  const editions=new Map(participating.map(row=>[editionKey(row.competitionId,row.squad),new Map<string,MatchRecord>()]));
+  for(const ledger of [own,n.teamResults??[]])for(const match of ledger){
+    const squad=match.homeId.endsWith(':U20')?'U20':'senior';
+    const records=editions.get(editionKey(match.competitionId,squad));
+    const id=match.fixtureId||match.id;
+    if(records&&!records.has(id))records.set(id,match);
+  }
+  const editionMatches=new Map([...editions].map(([key,matches])=>[key,[...matches.values()]]));
+  return participating.map(row=>{
+    const {competitionId:id,teamId,squad,phase}=row;
+    const archive=n.history.find(h=>h.competitionId===id&&h.squad===squad&&h.year===row.year);
+    const regularName=archive?.competitionName||(id===n.competitionId?n.competitionName:nationalCompetitionName(id));
+    const name=phase==='friendly'&&id?.startsWith('FRIENDLIES:')?nationalCompetitionName(id)
+      :phaseNames[phase]?`${regularName} · ${phaseNames[phase]}`:regularName;
+    const matches=row.matches.filter(played);
+    const apps=matches.reduce((sum,m)=>sum+m.playerStats.apps,0);
+    const related=editionMatches.get(editionKey(id,squad))??[];
+    const outcome=getNationalCompetitionResult(career,{id,teamId,squad,phase,year:row.year},related,archive);
+    const teamGames=related.filter(match=>match.seasonYear===row.year&&nationalMatchPhase(match)===phase&&(match.homeId===teamId||match.awayId===teamId)).length;
+    const injured=row.year===year&&id===n.competitionId&&squad===n.squad&&n.status==='injured';
+    const waiting=row.called&&!teamGames;
+    return {
+      id:`national:${row.year}:${teamId}:${id??'unrecorded'}:${phase}`,year:row.year,scope:'national',competitionId:id,name,teamId,teamName:nationalTeamName(teamId),squad,
+      status:waiting?'called':outcome.complete?'completed':injured?'injured':row.called?'called':'played',
+      statusLabel:waiting?'소집 · 출전 대기':outcome.label,
+      nationalPhase:phase,apps,minutes:matches.reduce((sum,m)=>sum+m.playerStats.minutes,0),teamGames,
+      reason:row.called||injured?n.reason:'대표팀 경기 원장 기준',
+    } satisfies CompetitionParticipation;
+  });
+}
+
+export function competitionGamesLabel(row:CompetitionParticipation):string {
+  return `내 출전 ${row.apps}경기${row.teamGames===undefined?'':` · 팀 ${row.teamGames}경기`}`;
+}
+
+/** Read saved competition results as of the requested season without rewriting records. */
+export function getCompetitionSeasons(career:Career,years:readonly number[]):Map<number,CompetitionParticipation[]> {
+  const result=new Map(years.map(year=>[year,clubParticipations(career,year)]));
+  for(const row of nationalParticipations(career,new Set(years)))result.get(row.year)?.push(row);
+  const current=result.get(career.season.year);
+  if(current&&!current.some(row=>row.scope==='national'))current.push(nationalEmpty(career));
+  return result;
+}
+
 export function getSeasonCompetitions(career:Career):CompetitionParticipation[] {
-  const rows=[clubParticipation(career)],national=career.systems?.national,club=rows[0];
-  if(career.player.clubId==='FA'&&!career.season.playerStats.apps){club.name='FA · 무소속';club.teamId='FA';club.teamName='FA · 무소속';club.statusLabel='클럽 미등록';club.reason='계약 없이 반 시즌씩 진행 중이며 클럽 경기에 출전하지 않습니다.';}
-  if(club.squad==='senior')for(const t of cupLedger(career,career.season.year).filter(t=>t.entrants.includes(club.teamId))){
-    const apps=t.matches.reduce((n,m)=>n+m.playerStats.apps,0),minutes=t.matches.reduce((n,m)=>n+m.playerStats.minutes,0),result=tournamentResult(t,club.teamId);
-    rows.push({id:t.id,scope:'club',competitionId:t.id,name:t.name,teamId:club.teamId,teamName:club.teamName,squad:'senior',apps,minutes,status:t.phase==='completed'||result.includes('탈락')?'completed':apps?'played':'registered',statusLabel:result,reason:`${t.basis} · ${t.rules}`});
-  }
-  if(!national)return [...rows,nationalEmpty(career)];
-  const matches=currentNationalMatches(career),called=currentCallup(career,national,matches);
-  const groups=new Map<string,{teamId:string;squad:'U20'|'senior';competitionId?:string;matches:MatchRecord[];called:boolean}>();
-  for(const match of matches.filter(played)){
-    const id=match.competitionId,key=`${match.playerClubId}|${id??'unrecorded'}`;
-    const group=groups.get(key)??{teamId:match.playerClubId,squad:squadOf(match),competitionId:id,matches:[],called:false};
-    group.matches.push(match);groups.set(key,group);
-  }
-  if(called){
-    const year=(national.processedThrough??seasonDate(career.season)).slice(0,4);
-    const id=national.phase==='friendlies'?`FRIENDLIES:${year}`:national.competitionId;
-    const teamId=`NAT:${national.country}:${national.squad}`,key=`${teamId}|${id}`;
-    const group=groups.get(key)??{teamId,squad:national.squad,competitionId:id,matches:[],called:false};group.called=true;groups.set(key,group);
-  }
-  for(const group of groups.values()){
-    const id=group.competitionId,known=national.history.find(row=>row.competitionId===id&&row.squad===group.squad&&row.year===career.season.year);
-    let name=known?.competitionName||(id===national.competitionId?national.competitionName:nationalCompetitionName(id));
-    const qualifying=group.matches.some(match=>match.fixtureId.includes('|qualifying|'));
-    const finals=group.matches.some(match=>/\|(group|round32|round16|quarterfinal|semifinal|final|thirdPlace)\|/.test(match.fixtureId));
-    if(!id?.startsWith('FRIENDLIES:')){
-      if(qualifying||finals)name+=` · ${qualifying&&finals?'예선·본선':finals?'본선':'예선'}`;
-      else if(group.called)name+=` · ${national.phase==='finals'?'본선 소집':'소집'}`;
-    }
-    const apps=group.matches.reduce((sum,match)=>sum+match.playerStats.apps,0),minutes=group.matches.reduce((sum,match)=>sum+match.playerStats.minutes,0);
-    const ended=career.stage!=='season'||career.season.completed;
-    const injured=national.status==='injured'&&id===national.competitionId&&group.squad===national.squad;
-    const status:CompetitionParticipation['status']=ended?'completed':injured?'injured':group.called?'called':'played';
-    rows.push({id:`national:${career.season.year}:${group.teamId}:${id??'unrecorded'}`,scope:'national',competitionId:id,name,teamId:group.teamId,teamName:nationalTeamName(group.teamId),squad:group.squad,status,statusLabel:ended?'시즌 기록':injured?'출전 기록 · 부상 제외':group.called?apps?'소집 · 출전 중':'소집 · 출전 대기':'이번 시즌 출전',apps,minutes,reason:group.called||injured?national.reason:'이번 시즌 실제 국가대표 출전 원장에서 확인한 대회입니다.'});
-  }
-  return rows.some(row=>row.scope==='national')?rows:[...rows,nationalEmpty(career)];
+  return getCompetitionSeasons(career,[career.season.year]).get(career.season.year)!;
 }

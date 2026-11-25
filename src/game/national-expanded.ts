@@ -9,10 +9,23 @@ type Adapter={play:(c:Career,t:Contest,h:string,a:string,s:Stage,date:string,lab
 const nation=(id:string)=>id.split(':')[1];
 const won=(m:MatchRecord)=>m.shootout?.winnerId??(m.homeGoals>m.awayGoals?m.homeId:m.awayGoals>m.homeGoals?m.awayId:undefined);
 const ledger=(c:Career)=>[...new Map([...c.systems!.national.history.flatMap(h=>h.matches),...c.systems!.national.matches,...c.systems!.national.teamResults??[]].map(m=>[m.fixtureId,m])).values()];
-function ranked(ids:string[],matches:MatchRecord[]){
+export function nationalGroupTable(ids:string[],matches:readonly MatchRecord[]){
  const table=new Map(ids.map(id=>[id,{id,p:0,g:0,f:0,played:0}]));
  for(const m of matches){const h=table.get(nation(m.homeId)),a=table.get(nation(m.awayId));if(!h||!a)continue;h.played++;a.played++;h.g+=m.homeGoals-m.awayGoals;a.g+=m.awayGoals-m.homeGoals;h.f+=m.homeGoals;a.f+=m.awayGoals;if(m.homeGoals===m.awayGoals){h.p++;a.p++;}else(m.homeGoals>m.awayGoals?h:a).p+=3;}
  return [...table.values()].sort((a,b)=>b.p-a.p||b.g-a.g||b.f-a.f||a.id.localeCompare(b.id));
+}
+type NationalGroupTable=ReturnType<typeof nationalGroupTable>;
+export function nationalQualifiers(tables:NationalGroupTable[],size:number){
+ return tables.flatMap(table=>table.map((r,rank)=>({...r,rank})))
+  .sort((a,b)=>a.rank-b.rank||b.p/Math.max(1,b.played)-a.p/Math.max(1,a.played)||b.g-a.g||b.f-a.f||a.id.localeCompare(b.id))
+  .slice(0,size).map(row=>row.id);
+}
+export function nationalKnockoutTeams(tables:NationalGroupTable[],size:number){
+ const bracketSize=size===48?32:size===24?16:size>=10?8:4;
+ const advancing=tables.flatMap(table=>table.map((row,rank)=>({...row,rank})))
+  .sort((a,b)=>a.rank-b.rank||b.p-a.p||b.g-a.g||b.f-a.f||a.id.localeCompare(b.id))
+  .slice(0,bracketSize).map(row=>row.id);
+ return advancing.slice(0,2**Math.floor(Math.log2(advancing.length)));
 }
 function groups(c:Career,ids:string[],size:number,salt:string,power:Adapter['power']){
  const count=Math.ceil(ids.length/size),out=Array.from({length:count},()=>[] as string[]),rng=seededRandom(`${c.seed}|national-groups|${salt}`);
@@ -24,7 +37,7 @@ function pairs(ids:string[],round:number,legs=1):[string,string][]{
  for(let r=0;r<round%days;r++)teams.splice(1,0,teams.pop()!);
  const result:[string,string][]=[];for(let i=0;i<n/2;i++){let pair:[string,string]=[teams[i],teams[n-1-i]];if((round+i)%2)pair.reverse();if(Math.floor(round/days)%2)pair.reverse();if(pair.every(Boolean))result.push(pair);}return result;
 }
-function fieldSize(id:string,count:number){const kind=id.split(':')[0];return Math.min(count,kind==='WC'?48:kind==='UEFA'||kind==='AFC'||kind==='CAF'||kind==='U20WC'?24:kind==='CONCACAF'?16:kind==='CONMEBOL'?10:8);}
+export function nationalFinalFieldSize(id:string,count:number){const kind=id.split(':')[0];return Math.min(count,kind==='WC'?48:kind==='UEFA'||kind==='AFC'||kind==='CAF'||kind==='U20WC'?24:kind==='CONCACAF'?16:kind==='CONMEBOL'?10:8);}
 export function advanceNationalWindow(c:Career,w:InternationalWindow,through:string,t:Contest,a:Adapter){
  const records=ledger(c),byFixture=new Map(records.map(m=>[m.fixtureId,m]));
  const n=c.systems!.national,prefix=w.date.slice(0,7),callup=`callup:${prefix}:${n.squad}`;
@@ -41,7 +54,7 @@ export function advanceNationalWindow(c:Career,w:InternationalWindow,through:str
  };
  const key=`${n.squad}|${t.id}`;n.qualifyingDraws??={};
  const draw=n.qualifyingDraws[key]??(n.qualifyingDraws[key]={groups:groups(c,t.countries,4,`${key}:qualifying`,a.power),legs:c.season.index===1&&t.year===Number(c.createdAt.slice(0,4))?1:2});
- const size=fieldSize(t.id,t.countries.length),rounds=3*draw.legs;
+ const size=nationalFinalFieldSize(t.id,t.countries.length),rounds=3*draw.legs;
  const played=records.filter(m=>m.competitionId===t.id&&m.homeId.endsWith(`:${n.squad}`)&&m.fixtureId.includes('|qualifying|q:'));
  const completeRounds=Array.from({length:rounds},(_,r)=>r).filter(r=>draw.groups.every((g,gi)=>pairs(g,r,draw.legs).every((_,i)=>lookup('qualifying',`q:${gi}:${r}:${i}`))));
  const finalYear=w.year===t.year&&w.month===6;
@@ -52,8 +65,8 @@ export function advanceNationalWindow(c:Career,w:InternationalWindow,through:str
   due(h,v,'qualifying',`${prefix}-${String(day).padStart(2,'0')}`,`q:${gi}:${r}:${i}`);
  }
  const complete=draw.groups.every((g,gi)=>Array.from({length:rounds},(_,r)=>pairs(g,r,draw.legs).every((_,i)=>lookup('qualifying',`q:${gi}:${r}:${i}`))).every(Boolean));
- const tables=draw.groups.map((g,gi)=>ranked(g,records.filter(m=>m.competitionId===t.id&&m.fixtureId.includes(`|qualifying|q:${gi}:`))));
- const qualified=tables.flatMap(table=>table.map((r,i)=>({...r,rank:i}))).sort((x,y)=>x.rank-y.rank||y.p/Math.max(1,y.played)-x.p/Math.max(1,x.played)||y.g-x.g||y.f-x.f||x.id.localeCompare(y.id)).slice(0,size).map(r=>r.id);
+ const tables=draw.groups.map((g,gi)=>nationalGroupTable(g,records.filter(m=>m.competitionId===t.id&&m.fixtureId.includes(`|qualifying|q:${gi}:`))));
+ const qualified=nationalQualifiers(tables,size);
  const own=tables.find(rows=>rows.some(r=>r.id===n.country));n.rank=(own?.findIndex(r=>r.id===n.country)??-1)+1;n.points=own?.find(r=>r.id===n.country)?.p??0;n.qualified=complete&&qualified.includes(n.country);
  if(!finalYear){
   n.phase=complete?'friendlies':'qualifying';
@@ -70,11 +83,10 @@ export function advanceNationalWindow(c:Career,w:InternationalWindow,through:str
   for(let r=0;r<groupRounds;r++)for(const [gi,g]of finals.groups.entries())for(const [i,[h,v]]of pairs(g,r).entries())due(h,v,'group',`${t.year}-06-${String(start+r*4).padStart(2,'0')}`,`g:${gi}:${r}:${i}`);
   const groupDone=finals.groups.every((g,gi)=>Array.from({length:groupRounds},(_,r)=>pairs(g,r).every((_,i)=>lookup('group',`g:${gi}:${r}:${i}`))).every(Boolean));
   if(groupDone){
-   const bracketSize=size===48?32:size===24?16:size>=10?8:4;
-   const rows=finals.groups.flatMap((g,gi)=>ranked(g,records.filter(m=>m.competitionId===t.id&&m.fixtureId.includes(`|group|g:${gi}:`))).map((r,rank)=>({...r,rank})));
-   let active=rows.sort((x,y)=>x.rank-y.rank||y.p-x.p||y.g-x.g||y.f-x.f||x.id.localeCompare(y.id)).slice(0,Math.min(bracketSize,rows.length)).map(r=>r.id);
+   const tables=finals.groups.map((g,gi)=>nationalGroupTable(g,records.filter(m=>m.competitionId===t.id&&m.fixtureId.includes(`|group|g:${gi}:`))));
+   let active=nationalKnockoutTeams(tables,size);
    // Knockout pairs have distinct group opponents where possible; all advancing sides earned group points.
-   const slots=2**Math.floor(Math.log2(active.length));active=active.slice(0,slots);let count=slots,index=0;
+   let count=active.length,index=0;
    while(count>=2){
     const stage:Stage=count===2?'final':count===4?'semifinal':count===8?'quarterfinal':count===16?'round16':'round32';
     const date=new Date(Date.UTC(t.year,5,start+(groupRounds-1)*4+5+index*5)).toISOString().slice(0,10),games:MatchRecord[]=[];
