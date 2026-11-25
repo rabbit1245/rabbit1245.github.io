@@ -1,3 +1,9 @@
+## K볼 2.14.14 · 대회별 성적과 출전 기록
+
+[K볼 2.14.14 다운로드](https://raw.githubusercontent.com/rabbit1245/rabbit1245.github.io/06c2ccdd2e43dd7a5491d33758a4d2aaa60a86ee/Kball.zip)
+
+라커룸 상단에 대회별 내 출전과 팀 경기 수, 탈락 라운드, 리그 페이즈와 조별리그 순위를 표시합니다. 대표팀 예선·본선·친선과 각 시즌 대회 기록을 은퇴 결산과 커리어 TXT에서도 볼 수 있습니다. [변경 내용과 검수 결과](https://github.com/rabbit1245/rabbit1245.github.io/blob/06c2ccdd2e43dd7a5491d33758a4d2aaa60a86ee/PLAY-KBALL.md)
+
 ## K볼 2.14.13 · 치트 전체 적용과 전체 노화
 
 [K볼 2.14.13 다운로드](https://raw.githubusercontent.com/rabbit1245/rabbit1245.github.io/4a10ff01bf7f98030a200ad7f91f9bd6728eb9a9/Kball.zip)
