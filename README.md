@@ -1,3 +1,9 @@
+## K볼 2.14.16 · 대회별 카드와 경기 평점
+
+[K볼 2.14.16 다운로드](https://raw.githubusercontent.com/rabbit1245/rabbit1245.github.io/46ad93a9441863e3e14eba0ec7f72562402b8a1d/Kball.zip)
+
+이번 시즌 기록과 은퇴 기록에 경고·퇴장 횟수를 표시합니다. 새 경기는 포지션별 경기 기여와 실제 출전 시간의 경기 상황을 반영해 평점을 계산합니다. [변경 내용과 검수 결과](https://github.com/rabbit1245/rabbit1245.github.io/blob/46ad93a9441863e3e14eba0ec7f72562402b8a1d/PLAY-KBALL.md)
+
 ## K볼 2.14.15 · 풀백의 공격 가담과 세트피스
 
 [K볼 2.14.15 다운로드](https://raw.githubusercontent.com/rabbit1245/rabbit1245.github.io/a9839d631700cda1174610a02f37eeebc4dee9f6/Kball.zip)
