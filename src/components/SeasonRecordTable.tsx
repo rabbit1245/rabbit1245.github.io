@@ -25,6 +25,8 @@ function RecordRow({ label, stats, keeper, className }: {
     <td>{stats.minutes}</td>
     <td>{keeper ? stats.saves : stats.goals}</td>
     <td>{keeper ? stats.cleanSheets : stats.assists}</td>
+    <td>{stats.yellowCards}</td>
+    <td>{stats.redCards}</td>
     <td>{average(stats)}</td>
   </tr>;
 }
@@ -42,7 +44,7 @@ export default function SeasonRecordTable({ combined, national, club, nationalCo
       <col className="season-summary-scope" />
       <col />
       <col className="season-summary-minutes" />
-      <col span={2} />
+      <col span={4} />
       <col className="season-summary-rating" />
     </colgroup>
     <thead>
@@ -52,6 +54,8 @@ export default function SeasonRecordTable({ combined, national, club, nationalCo
         <th scope="col">분</th>
         <th scope="col">{keeper ? '선방' : '골'}</th>
         <th scope="col">{keeper ? '무실점' : '도움'}</th>
+        <th scope="col">경고</th>
+        <th scope="col">퇴장</th>
         <th scope="col">평점</th>
       </tr>
     </thead>
@@ -77,7 +81,7 @@ export default function SeasonRecordTable({ combined, national, club, nationalCo
         <tbody id={id} hidden={!expanded[scope]} data-testid={`season-${scope}-competitions`}>
           {expanded[scope] && (competitions.length
             ? competitions.map(row => <RecordRow key={row.id} label={row.name} stats={row.stats} keeper={keeper} className="season-competition-record" />)
-            : <tr className="season-competition-empty"><td colSpan={6}>이번 시즌 {label} 출전 기록이 없습니다.</td></tr>)}
+            : <tr className="season-competition-empty"><td colSpan={8}>이번 시즌 {label} 출전 기록이 없습니다.</td></tr>)}
         </tbody>
       </Fragment>;
     })}

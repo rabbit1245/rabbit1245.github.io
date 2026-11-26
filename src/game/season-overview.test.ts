@@ -43,6 +43,8 @@ test('competition rows reconcile this season across league changes, cups and nat
     position:'CAM',talent:'S',style:PLAY_STYLES.CAM[0],clubId:'KR1_01',squad:'senior',difficulty:'realistic',seed:'competition-breakdown'});
   const league = match('legacy-league');
   const otherLeague = {...match('other-league'), competitionId:'KR2', playerClubId:'KR2_01'};
+  league.playerStats.yellowCards = 1;
+  otherLeague.playerStats.redCards = 1;
   c.season.matches = [league, otherLeague];
   c.season.playerStats = sumStats(c.season.matches.map(row => row.playerStats));
 
@@ -52,6 +54,7 @@ test('competition rows reconcile this season across league changes, cups and nat
   });
   const cupMatch = {...match('domestic'), competitionId:'CUP:KOR:2026'};
   const internationalClubMatch = {...match('continental'), competitionId:'AFC_ELITE:2026'};
+  cupMatch.playerStats.yellowCards = 1;
   c.systems!.clubCompetitions = {version:1, year:2026,
     current:[
       cup('CUP:KOR:2026','코리아컵',2026,[cupMatch]),
@@ -70,6 +73,8 @@ test('competition rows reconcile this season across league changes, cups and nat
   const friendly = international('FRIENDLIES:2027','friendly');
   const youth = international('FRIENDLIES:2027','friendly','U20');
   const bench = {...international('AFC:2027','qualifying'), playerPlayed:false, playerStats:emptyStats()};
+  qualifying.playerStats.yellowCards = 1;
+  final.playerStats.redCards = 1;
   const n = c.systems!.national;
   n.matches = [{...qualifying,id:'duplicate'},final,friendly,youth,bench,{...international('WC:2022','final'),seasonYear:2025}];
   n.history = [{year:2026,squad:'senior',competitionId:'WC:2026',competitionName:'2026 FIFA 월드컵',
@@ -86,4 +91,5 @@ test('competition rows reconcile this season across league changes, cups and nat
   assert.deepEqual(sumStats(view.nationalCompetitions.map(row => row.stats)),view.national);
   assert.deepEqual(sumStats(view.clubCompetitions.map(row => row.stats)),view.club);
   assert.equal(view.combined.apps,8);
+  assert.deepEqual([view.combined.yellowCards,view.combined.redCards],[3,2]);
 });

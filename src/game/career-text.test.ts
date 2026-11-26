@@ -100,5 +100,32 @@ test('national elimination rounds and third-place results are explicit even with
  const c=fresh(),own='NAT:대한민국:senior',away='NAT:일본:senior';
  const m=match(c,'NAT|senior|WC:2026|quarterfinal|quarter',{scope:'national',competitionId:'WC:2026',homeId:own,awayId:away,playerClubId:own,homeGoals:0,awayGoals:1});
  c.systems!.national.matches=[m];assert.ok(careerSeasonRecords(c)[0].results.some(r=>r.includes('8강 탈락')));
- m.fixtureId='NAT|senior|WC:2026|thirdPlace|third';m.homeGoals=2;assert.ok(careerSeasonRecords(c)[0].results.some(r=>r.endsWith('3위')));
+ m.fixtureId='NAT|senior|WC:2026|thirdPlace|third';m.homeGoals=2;assert.ok(careerSeasonRecords(c)[0].results.some(r=>r.includes('3위 · 경고')));
+});
+
+test('retirement counts league, cup and national cards using the same appearance ledger as the season',()=>{
+ const c=fresh(),league=match(c,'league'),domestic=match(c,'cup',{competitionId:'TEST-CUP'});
+ const own='NAT:대한민국:senior',away='NAT:일본:senior';
+ const national=match(c,'NAT|senior|WC:2026|group|g:0:0:0',{scope:'national',competitionId:'WC:2026',
+  homeId:own,awayId:away,playerClubId:own});
+ league.playerStats.yellowCards=1;domestic.playerStats.redCards=1;national.playerStats.yellowCards=1;
+ c.season.matches=[league];c.season.playerStats={...league.playerStats};
+ c.systems!.clubCompetitions!.current=[cup(c,[domestic,structuredClone(domestic)])];
+ const n=c.systems!.national;n.matches=[national];
+ const absent={...national,playerPlayed:false,playerStats:emptyStats()};
+ n.history=[{year:c.season.year,squad:'senior',competitionId:'WC:2026',competitionName:'2026 FIFA 월드컵',
+  result:'본선',qualified:true,stats:absent.playerStats,matches:[absent]}];
+ c.stage='retired';c.retiredYear=c.season.year;
+ const before=JSON.stringify(c);
+ const report=careerSeasonRecords(c)[0];
+ assert.deepEqual([report.stats.yellowCards,report.stats.redCards],[2,1]);
+ assert.deepEqual([careerRecordTotals(c).all.yellowCards,careerRecordTotals(c).all.redCards],[2,1]);
+ assert.match(report.results.find(row=>row.startsWith(c.season.competitionName))!,/경고 1회 · 퇴장 0회/);
+ assert.match(report.results.find(row=>row.startsWith('검증 컵'))!,/경고 0회 · 퇴장 1회/);
+ assert.match(report.results.find(row=>row.includes('월드컵 · 본선'))!,/경고 1회 · 퇴장 0회/);
+ const text=buildCareerText(c);
+ assert.match(text,/\[통산 총합\].*경고 2회 · 퇴장 1회/);
+ assert.match(text,/클럽 기록:.*경고 1회 · 퇴장 1회/);
+ assert.match(text,/국가대표 기록:.*경고 1회 · 퇴장 0회/);
+ assert.equal(JSON.stringify(c),before);
 });

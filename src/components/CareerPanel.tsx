@@ -11,7 +11,7 @@ import type { Career, GameCommand, MatchRecord, PlayerStats, SeasonSummary } fro
 import { sumStats } from '../game/math';
 import { nationalMatchLedger, newestMatchFirst } from '../game/season-overview';
 import { ATTRIBUTE_LABELS,POSITION_LABELS } from '../game/attributes';
-import {careerRecordTotals,careerSeasonRecords,careerStatsLines,careerMatchLedger} from '../game/career-text';
+import {careerCardsLabel,careerRecordTotals,careerSeasonRecords,careerStatsLines,careerMatchLedger} from '../game/career-text';
 import type { AttributeKey } from '../game/types';
 import { average, calendarLabel, clubTotal, compactMoney, Empty, MatchRow, Metric, Money, money, nationalTotal, Panel, TeamBadge, teamName, visibleAwards } from './Shared';
 import StatsNine from './StatsNine';
@@ -106,6 +106,7 @@ function Retirement({career}:{career:Career}) {
     <h3>통산 총합 스탯</h3><div className="metric-row">
       <Metric label="출전" value={totals.all.apps} note={`클럽 ${totals.club.apps} · 국대 ${totals.national.apps}`}/>
       <Metric label="득점" value={totals.all.goals}/><Metric label="도움" value={totals.all.assists}/><Metric label="평균 평점" value={average(totals.all)}/>
+      <Metric label="경고" value={`${totals.all.yellowCards}회`}/><Metric label="퇴장" value={`${totals.all.redCards}회`}/>
     </div><DeferredDetails summary="통산 세부 스탯 · 개수와 성공률" className="retirement-record-section">{()=>stats(totals.all,[...ledger.club,...ledger.national])}</DeferredDetails>
     <h3>팀 수상</h3>{teamAwards.length?<ul>{teamAwards.map((award,i)=><li key={i}>{award}</li>)}</ul>:<p>기록된 팀 수상 없음</p>}
     <h3>연도별 기록</h3>{[...seasons].reverse().map(h=><DeferredDetails className="retirement-record-section" key={h.year} testId={`retirement-season-${h.year}`} summary={`${h.year}시즌 · ${h.clubName} · ${h.status}`}>{()=> <>
@@ -115,7 +116,9 @@ function Retirement({career}:{career:Career}) {
       {!!h.positionChanges.length&&<div>{h.positionChanges.map((line,i)=><p key={i}>포지션 변경: {line}</p>)}</div>}{!!h.playSkills.length&&<p>플레이스타일: {h.playSkills.join(' / ')}</p>}
       <p>유니폼 판매: {h.shirtSales}</p><p>팀 수상: {h.teamAwards.join(' / ')||'없음'}</p>
       {!!h.awardResults.length&&<p>개인상 평가 결과: {h.awardResults.join(' / ')}</p>}
-      <h4>대회별 팀 성적과 출전</h4><ul data-testid="retirement-competition-results">{h.results.map((r,i)=><li key={i}>{r}</li>)}</ul><p>개인 수상: {h.personal.map(retirementAwardName).join(' / ')||'없음'}</p>
+      <h4>대회별 팀 성적과 출전</h4>
+      <p>시즌 통합 {careerCardsLabel(h.stats)}</p>
+      <ul data-testid="retirement-competition-results">{h.results.map((r,i)=><li key={i}>{r}</li>)}</ul><p>개인 수상: {h.personal.map(retirementAwardName).join(' / ')||'없음'}</p>
       <DeferredDetails summary="시즌 통합 세부 스탯 · 개수와 성공률">{()=>stats(h.stats,h.matches)}</DeferredDetails>
       <h4>결승 기록</h4>{!h.finals.length&&<p>결승 진출 기록 없음</p>}{h.finals.map((f,i)=><div className="retirement-final" key={i}>
         <p><b>{f.competition} · {f.result}</b></p>{f.aggregate&&<p>{f.aggregate}</p>}

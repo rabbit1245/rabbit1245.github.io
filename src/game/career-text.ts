@@ -7,7 +7,7 @@ import {employmentLines,recordedEmployment} from './employment';
 import {playSkillsForYear,retirementPlaySkillNames} from './play-skills';
 import {moneyText,currencyText} from './currency';
 import {cupMatches,cupStats,cupLedger} from './club-competitions';
-import {competitionGamesLabel,getCompetitionSeasons} from './season-competitions';
+import {competitionGamesLabel,getCompetitionSeasons,nationalMatchLedger} from './season-competitions';
 import {POSITION_LABELS} from './attributes';
 import {getClub} from './data';
 import {ALL_STATS,emptyStats,sumStats} from './math';
@@ -33,20 +33,23 @@ const name=(id:string)=>{
 };
 const unique=(matches:MatchRecord[])=>[...new Map(matches.map(m=>[m.fixtureId||m.id,m])).values()];
 const average=(s:PlayerStats)=>s.ratingCount?(s.ratingSum/s.ratingCount).toFixed(2):'미집계';
-const summary=(s:PlayerStats)=>`${s.apps}경기 · ${s.minutes}분 · ${s.goals}골 · ${s.assists}도움 · 평균 평점 ${average(s)}`;
+export function careerCardsLabel(stats:Pick<PlayerStats,'yellowCards'|'redCards'>):string {
+ return `경고 ${stats.yellowCards??0}회 · 퇴장 ${stats.redCards??0}회`;
+}
+const summary=(s:PlayerStats)=>`${s.apps}경기 · ${s.minutes}분 · ${s.goals}골 · ${s.assists}도움 · 평균 평점 ${average(s)} · ${careerCardsLabel(s)}`;
 const roleText=(role:string)=>role==='captain'?'주장':role==='vice'?'부주장':role==='match'?'임시 주장':'해당 없음';
 
 /** Gameplay keeps its complete source ledger; the retirement report only prints finals. */
 export function careerMatchLedger(c:Career){
  return {
   club:unique([...c.history.flatMap(h=>h.matches),...c.season.matches,...cupMatches(c)]),
-  national:unique([...(c.systems?.national.history.flatMap(h=>h.matches)??[]),...(c.systems?.national.matches??[])]),
+  national:nationalMatchLedger(c),
  };
 }
 export function careerRecordYears(c:Career){return [...new Set([...c.history.map(h=>h.year),c.season.year])].sort((a,b)=>a-b);}
 export function careerRecordTotals(c:Career){
  const club=sumStats([cupStats(c),...c.history.map(h=>h.stats),...(!c.history.some(h=>h.year===c.season.year)?[c.season.playerStats]:[])]);
- const national=sumStats(careerMatchLedger(c).national.map(m=>m.playerStats));
+ const national=sumStats(nationalMatchLedger(c).map(m=>m.playerStats));
  return {club,national,all:sumStats([club,national])};
 }
 /** Unknown historical counters stay unknown; rates never manufacture missing denominators. */
@@ -164,7 +167,7 @@ export function careerSeasonRecords(c:Career){
   const results=(competitions.get(year)??[]).flatMap(row=>{
    if(row.teamId==='FA')return ['FA · 클럽 리그 미참가'];
    if(row.scope==='national'&&!row.nationalPhase)return [];
-   const label=`${row.name} · ${row.teamName} · ${competitionGamesLabel(row)} · ${row.statusLabel}`;
+   const label=`${row.name} · ${row.teamName} · ${competitionGamesLabel(row)} · ${row.statusLabel} · ${careerCardsLabel(row)}`;
    const standing=row.standing;
    return [standing?`${label} · ${standing.won}승 ${standing.drawn}무 ${standing.lost}패 · 승점 ${standing.points}점`:label];
   });

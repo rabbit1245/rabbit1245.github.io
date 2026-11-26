@@ -3,6 +3,7 @@ import {playingAbility,leadershipAbility} from './attributes';
 import {personalityEdge,personality} from './personality';
 import {skillSuccess,openPlaySaveChance,shareShotSupply,cognitiveOpportunity,supportedTechnique,oneOnOneSaveChance} from './ability-contests';
 import {actionAbility as ability,phasePasses,resolvePressing,resolveBallDuels,resolveAirClaims,headerProbability,headerDelivery,aerialQuality,fullbackSupport,directFreeKickTaker,directFreeKickTechnique,type ActionEmitter} from './match-actions';
+import { matchRating } from './match-rating';
 import { CLUBS, ROSTERS } from './data';
 import { clamp, emptyStats, hashSeed, integer, round, seededRandom } from './math';
 import type { MatchOptions, MatchParticipant, MatchPerformance } from './revision-types';
@@ -21,6 +22,12 @@ const CREATION_ROLE:Record<Position,number>={GK:.03,CB:.2,LB:.85,RB:.85,LWB:1.1,
 const duration=(p:Actor)=>Math.max(0,p.to-p.from)/90;
 const roundedCount=(mean:number,rng:()=>number)=>Math.max(0,Math.floor(mean+rng()));
 const group=(p:Position)=>p==='GK'?0:DEFENCE.has(p)?1:MIDFIELD.has(p)?2:3;
+function goalsDuring(minutes:readonly number[],actor:Actor):number {
+  if(actor.from===0&&actor.to===90)return minutes.length;
+  let count=0;
+  for(const minute of minutes)if(minute>actor.from&&minute<=actor.to)count++;
+  return count;
+}
 const styleFactor=(p:Actor,kind:'shot'|'pass'|'dribble'|'tackle'|'aerial'|'sweep')=>{
   if(!p.style)return 1;
   if(kind==='shot'){
@@ -446,15 +453,9 @@ export function simulateMatch(career:Career,fixture:Fixture,options:MatchOptions
   }
   for(let side=0;side<2;side++)for(const actor of teams[side].actors){
     const s=actor.stats;
-    if(actor.position==='GK'&&actor.minutes>=60&&s.goalsConceded===0)s.cleanSheets=1;
-    // Every field role can contribute to prevention. Credit an actual >=60-minute
-    // clean spell, including substitutions; this does not add a rating bonus.
-    if(actor.position!=='GK'&&actor.minutes>=60&&!goalMinutes[1-side].some(minute=>minute>actor.from&&minute<=actor.to))s.cleanSheets=1;
-    const isGK=actor.position==='GK';
-    const contribution=isGK?s.saves*.20+(s.oneOnOneSaves??0)*.12+(s.penaltiesSaved??0)*.65+s.cleanSheets*.45-s.goalsConceded*.38+(s.crossesCaught??0)*.035+(s.sweepingSuccesses??0)*.04:
-      s.goals*.95+s.assists*.65+Math.max(0,(s.keyPasses??0)-s.assists-Math.max(0,(s.bigChancesCreated??0)-(s.bigChanceAssists??0)))*.07+Math.max(0,(s.bigChancesCreated??0)-(s.bigChanceAssists??0))*.11+(s.pressureRecoveries??0)*.075+Math.max(0,(s.pressingSuccesses??0)-(s.pressureRecoveries??0))*.03+s.tackles*(FORWARD.has(actor.position)?.12:.075)+s.interceptions*(FORWARD.has(actor.position)?.11:.065)+(s.dribblesCompleted??0)*.055+(s.aerialWon??0)*.025+s.shotsOnTarget*.055-(s.passes-s.passesCompleted)*.018-((s.dribbleAttempts??0)-(s.dribblesCompleted??0))*.035;
-    const resultBonus=scores[side]>scores[1-side]?.22:scores[side]<scores[1-side]?-.16:.02;
-    actor.rating=round(clamp(6.05+contribution+resultBonus-s.yellowCards*.15-s.redCards*1.7+(rng()-.5)*.18,3,10),1);
+    const goalsFor=goalsDuring(goalMinutes[side],actor),goalsAgainst=goalsDuring(goalMinutes[1-side],actor);
+    if(actor.minutes>=60&&(actor.position==='GK'?s.goalsConceded:goalsAgainst)===0)s.cleanSheets=1;
+    actor.rating=matchRating(actor.position,s,goalsFor,goalsAgainst,(rng()-.5)*.18);
     s.ratingSum=actor.rating;s.ratingCount=s.apps;
   }
   const allActors=teams.flatMap(t=>t.actors).filter(actor=>actor.minutes>0);

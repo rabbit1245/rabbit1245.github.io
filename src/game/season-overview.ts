@@ -1,8 +1,10 @@
 import { cupLedger, cupMatches } from './club-competitions';
 import { INTERNATIONAL_LEAGUES, LEAGUES } from './data';
-import { nationalCompetitionName } from './season-competitions';
+import { nationalCompetitionName, nationalMatchLedger } from './season-competitions';
 import type { Career, MatchRecord, PlayerStats } from './types';
 import { sumStats } from './math';
+
+export { nationalMatchLedger } from './season-competitions';
 
 type CompetitionLabel = { id: string; name: string };
 export type SeasonCompetitionRecord = CompetitionLabel & { stats: PlayerStats };
@@ -40,18 +42,6 @@ function nationalCompetitionRecords(career: Career, matches: MatchRecord[]): Sea
     if (stage && !friendly) parts.push(stage);
     if (squad === 'U20' && !/U-?20/.test(name)) parts.push('U20');
     return { id: `${competitionId ?? 'unrecorded'}|${squad}|${friendly ? 'friendly' : stage}`, name: parts.join(' · ') };
-  });
-}
-
-/** A match can be retained in both the current national window and its archive. */
-export function nationalMatchLedger(career: Career): MatchRecord[] {
-  const national = career.systems?.national;
-  const seen = new Set<string>();
-  return [...(national?.history.flatMap(row => row.matches) ?? []), ...(national?.matches ?? [])].filter(match => {
-    const key = match.fixtureId || match.id;
-    if (seen.has(key)) return false;
-    seen.add(key);
-    return true;
   });
 }
 

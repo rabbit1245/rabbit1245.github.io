@@ -796,10 +796,12 @@ input,select { font-size:17px; min-height:38px; padding:7px 10px; border-radius:
 .locker-core { display:grid; grid-template-columns:minmax(0,1.1fr) minmax(0,1fr); gap:10px; align-items:start; }
 .locker-records { display:grid; gap:10px; }
 .season-summary { width:100%; border-collapse:collapse; table-layout:fixed; font-variant-numeric:tabular-nums; }
-.season-summary-scope { width:38%; }
-.season-summary th,.season-summary td { padding:6px 12px; text-align:right; font-size:17px; line-height:1.3; border-bottom:1px solid var(--border); }
-.season-summary thead th { font-size:15px; color:var(--muted); font-weight:500; background:var(--warm); }
+.season-summary-scope { width:29%; }
+.season-summary-minutes,.season-summary-rating { width:13%; }
+.season-summary th,.season-summary td { padding:6px 6px; text-align:right; font-size:17px; line-height:1.3; border-bottom:1px solid var(--border); }
+.season-summary thead th { font-size:14px; color:var(--muted); font-weight:500; background:var(--warm); }
 .season-summary th:first-child { text-align:left; }
+.season-summary th:last-child,.season-summary td:last-child { padding-inline-end:10px; }
 .season-summary th:has(.season-summary-group) { padding-block:4px; }
 .season-summary td { white-space:nowrap; }
 .season-summary-total { background:var(--warm); }
@@ -1048,10 +1050,11 @@ input,select { font-size:17px; min-height:38px; padding:7px 10px; border-radius:
   .stat-detail,.stats-nine.compact .stat-detail { grid-template-columns:minmax(0,1fr); gap:4px; }
   .stat-detail > strong,.stats-nine.compact .stat-detail > strong { white-space:normal; }
   .stat-detail > div { grid-column:auto; }
-  .season-summary-scope { width:35%; }
+  .season-summary-scope { width:25%; }
   .season-summary-minutes,.season-summary-rating { width:15%; }
-  .season-summary th,.season-summary td { padding:7px 3px; font-size:14px; }
+  .season-summary th,.season-summary td { padding:7px 2px; font-size:14px; }
   .season-summary thead th { font-size:13px; }
+  .season-summary th:last-child,.season-summary td:last-child { padding-inline-end:5px; }
   .season-summary-group { gap:1px 3px; }
   .season-summary .season-competition-record th { padding-inline-start:12px; font-size:14px; }
   .season-summary .season-competition-empty td { padding-inline-start:12px; }
